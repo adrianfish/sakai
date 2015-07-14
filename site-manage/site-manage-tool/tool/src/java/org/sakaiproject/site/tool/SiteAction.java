@@ -2678,6 +2678,10 @@ public class SiteAction extends PagedResourceActionII {
 			List publicChangeableSiteTypes = (List) state
 					.getAttribute(STATE_PUBLIC_CHANGEABLE_SITE_TYPES);
 
+			org.sakaiproject.authz.api.AuthzGroupService authzGroupService = AuthzGroupService.getInstance();
+			context.put("authAllowed", authzGroupService.isAllowedAuth());
+			context.put("anonAllowed", authzGroupService.isAllowedAnon());
+
 			if (site != null) {
 				// editing existing site
 				context.put("site", site);
