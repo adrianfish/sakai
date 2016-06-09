@@ -6749,6 +6749,20 @@ public class SimplePageBean {
 		setErrMessage(messageLocator.getMessage("simplepage.comment-permissions-error"));
 		return "failure";
 	}
+
+	public void addCommonsSection(String ab) {
+		addBefore = ab; // used by appendItem
+		if(canEditPage()) {
+			SimplePageItem item = appendItem("", messageLocator.getMessage("simplepage.commons-section"), SimplePageItem.COMMONS);
+			item.setDescription(messageLocator.getMessage("simplepage.commons-section"));
+			update(item);
+			
+			// Must clear the cache so that the new item appears on the page
+			itemsCache.remove(getCurrentPage().getPageId());
+		}else {
+			setErrMessage(messageLocator.getMessage("simplepage.permissions-general"));
+		}
+	}
 	
 	public void addStudentContentSection(String ab) {
 		addBefore = ab; // used by appebdItem

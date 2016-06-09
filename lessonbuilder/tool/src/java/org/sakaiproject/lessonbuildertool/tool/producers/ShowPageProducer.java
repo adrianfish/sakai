@@ -453,7 +453,9 @@ public class ShowPageProducer implements ViewComponentProducer, DefaultView, Nav
 		}else if(params.addTool == GeneralViewParameters.STUDENT_PAGE) {
 		    simplePageBean.createStudentPage(params.studentItemId);
 			canEditPage = simplePageBean.canEditPage();
-		}
+		}else if(params.addTool == GeneralViewParameters.COMMONS) {
+			simplePageBean.addCommonsSection(addBefore);
+        }
 
 
 		// Find the MSIE version, if we're running it.
@@ -3637,6 +3639,12 @@ public class ShowPageProducer implements ViewComponentProducer, DefaultView, Nav
 		    UIOutput.make(tofill, "student-li");
 		    UIInternalLink.make(tofill, "add-comments", messageLocator.getMessage("simplepage.comments"), eParams).
 			decorate(new UITooltipDecorator(messageLocator.getMessage("simplepage.comments.tooltip")));
+
+		    eParams = new GeneralViewParameters(VIEW_ID);
+		    eParams.addTool = GeneralViewParameters.COMMONS;
+		    UIOutput.make(tofill, "commons-li");
+		    UIInternalLink.make(tofill, "add-commons", messageLocator.getMessage("simplepage.commons"), eParams).
+			decorate(new UITooltipDecorator(messageLocator.getMessage("simplepage.commons.tooltip")));
 			
 		    eParams = new GeneralViewParameters(VIEW_ID);
 		    eParams.addTool = GeneralViewParameters.STUDENT_CONTENT;
