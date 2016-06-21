@@ -2257,6 +2257,8 @@ public class ShowPageProducer implements ViewComponentProducer, DefaultView, Nav
 					    UICommand.make(form, "add-comment", "#{simplePageBean.addComment}");
 					}
 				
+				} else if (i.getType() == SimplePageItem.COMMONS) {
+					UIOutput.make(tableRow, "commonsDiv");
 				}else if (i.getType() == SimplePageItem.PEEREVAL){
 					
 					String owner=currentPage.getOwner();

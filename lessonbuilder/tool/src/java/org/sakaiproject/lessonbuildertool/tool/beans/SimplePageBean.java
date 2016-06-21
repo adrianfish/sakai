@@ -6751,15 +6751,16 @@ public class SimplePageBean {
 	}
 
 	public void addCommonsSection(String ab) {
+
 		addBefore = ab; // used by appendItem
-		if(canEditPage()) {
+		if (canEditPage()) {
 			SimplePageItem item = appendItem("", messageLocator.getMessage("simplepage.commons-section"), SimplePageItem.COMMONS);
 			item.setDescription(messageLocator.getMessage("simplepage.commons-section"));
 			update(item);
 			
 			// Must clear the cache so that the new item appears on the page
 			itemsCache.remove(getCurrentPage().getPageId());
-		}else {
+		} else {
 			setErrMessage(messageLocator.getMessage("simplepage.permissions-general"));
 		}
 	}
