@@ -15,6 +15,21 @@
             ${sakai_html_head_js}
         #end ## END of IF ( ${bufferedResponse} && ${responseHead} )
 
+        <div id="snap-poll">
+            <div id="snap-poll-question">How's it going?</div>
+            <div id="snap-poll-options">
+                <span class="snap-poll-option fa fa-2x fa-frown-o" data-option="1"></span>
+                <span class="snap-poll-option fa fa-2x fa-meh-o" data-option="2"></span>
+                <span class="snap-poll-option fa fa-2x fa-smile-o" data-option="3"></span>
+            </div>
+            <div id="snap-poll-comment-title">Tell us why you feel that way</div>
+            <textarea id="snap-poll-comment-box"></textarea>
+            <div id="snap-poll-buttons">
+                <button id="snap-poll-send" disabled="true">Send</button>
+                <button id="snap-poll-ignore">Ignore</button>
+            </div>
+        </div>
+
         <div #if( ${roleSwitchState} ) class="Mrphs-portalWrapper swapped-view" #else class="Mrphs-portalWrapper"#end>
 
             ## Skip Nav
