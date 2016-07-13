@@ -27,9 +27,16 @@
         var context = snapPoll.data('context');
         var comment = commentBox.val();
         var siteId = portal.siteId;
-        var userId = portal.user.id;
 
-        console.log('option: ' + option + '. comment: '  + comment + '. tool: ' + tool + '. context: ' + context + '. siteId: ' + siteId + '. userId: ' + userId);
+        var url = '/direct/snap-poll/submitResponse?option=' + option + '&siteId=' + siteId
+                    + '&tool=' + tool + '&context=' + context + '&comment=' + comment;
+
+        $.ajax({url: url, cache: false, method: 'POST'})
+            .done(function (data, textStatus, jqXHR) {
+            }).fail(function (jqXHR, textStatus, errorThrown) {
+            });
+
+        console.log(url);
 
         reset();
     });

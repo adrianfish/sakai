@@ -1,7 +1,7 @@
 (function ($) {
 
     if (sakai && sakai.showSnapPoll) {
-        $('.itemlink').click(function (e) {
+        $(".itemlink[type='page']").click(function (e) {
 
             e.preventDefault();
             var href = this.getAttribute('href');
