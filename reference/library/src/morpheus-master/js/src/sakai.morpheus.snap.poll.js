@@ -22,16 +22,16 @@
 
     $('#snap-poll-send').click(function (e) {
 
-        var option = $('.snap-poll-option.fa-3x').data('option');
+        var response = $('.snap-poll-option.fa-3x').data('option');
         var tool = snapPoll.data('tool');
         var context = snapPoll.data('context');
-        var comment = commentBox.val();
+        var reason = commentBox.val();
         var siteId = portal.siteId;
 
-        var url = '/direct/snap-poll/submitResponse?option=' + option + '&siteId=' + siteId
-                    + '&tool=' + tool + '&context=' + context + '&comment=' + comment;
+        var url = '/direct/snap-poll/submitResponse';
+        var data = { response: response, siteId: siteId, tool: tool, context: context, reason: reason };
 
-        $.ajax({url: url, cache: false, method: 'POST'})
+        $.ajax({url: url, cache: false, method: 'POST', data: data})
             .done(function (data, textStatus, jqXHR) {
             }).fail(function (jqXHR, textStatus, errorThrown) {
             });

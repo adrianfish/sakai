@@ -6,7 +6,11 @@
                                 http://www.springframework.org/schema/beans/spring-beans.xsd">
 
 	<bean parent="org.sakaiproject.entitybroker.entityprovider.AbstractEntityProvider" 
-		    class="org.sakaiproject.snappoll.tool.entityprovider.SnapPollEntityProvider">
+		    class="org.sakaiproject.snappoll.tool.entityprovider.SnapPollEntityProvider"
+            init-method="init">
+
+        <property name="serverConfigurationService"><ref bean="org.sakaiproject.component.api.ServerConfigurationService"/></property>
+        <property name="sqlService"><ref bean="org.sakaiproject.db.api.SqlService"/></property>
 	</bean>
 	
 </beans>
