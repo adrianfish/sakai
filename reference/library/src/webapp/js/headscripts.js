@@ -820,6 +820,8 @@ sakai.showSnapPoll = function (tool, context, callback) {
                 jQuery('#snap-poll').attr('data-context', context).attr('data-tool', tool).fadeIn();
                 jQuery('#snap-poll-send').click(function (e) { callback(); });
                 jQuery('#snap-poll-ignore').click(function (e) { callback(); });
+            } else {
+                callback();
             }
         });
 };
