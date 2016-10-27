@@ -21,7 +21,7 @@ body.is-logged-out{
 		@include display-flex( flex );
 		@include justify-content( center );
 		overflow: hidden;
-		padding: 0 1em;
+		padding: 0.5em 1em 0.5em;
 		text-align: center;
 		min-width: $tool-menu-width;
 		@include flex-shrink( 0 );
@@ -270,7 +270,7 @@ body.is-logged-out{
 		input[type="text"],input[type="password"],input[type="email"]{
 			margin: 0 1em 0 0;
 			padding: 0.25em;
-			border: 0px none;
+			border: 1px solid $tool-border-color;
 			@media #{$phone}{
 				width: 40%;
 				margin-right: 0.6em;

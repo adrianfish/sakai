@@ -1,6 +1,12 @@
 $logo: 'images/lancaster_logo.png';
-$logo-height: 119px;
-$logo-width: 380px;
+$logo-width: 150px;
+$logo-height: 47px;
+$background-color: #000000;
 $background-color-secondary: #FFFFFF;
+$sites-nav-background: #FFFFFF;
 $top-header-background: #FFFFFF;
-$topNav-text-color: #000000 !important;
+$topNav-text-color: #000000;
+$tool-border-color: #000000;
+$sites-nav-menu-item-selected-background: #B31522;
+$sites-nav-submenu-selected-background: $sites-nav-menu-item-selected-background;
+$sites-nav-submenu-item-selected-background: $sites-nav-menu-item-selected-background;
