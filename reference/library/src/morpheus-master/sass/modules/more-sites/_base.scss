@@ -215,11 +215,13 @@ ul.otherSitesCategorList{
 	li{
 		display: inline-block;
 		border: 1px solid darken( $background-color, 30% );
-		background: darken( $background-color, 5% );
+        background: $sites-nav-menu-item-selected-background;
+        color: #FFFFFF;
 		@include border-radius( 4px );
 		margin: 0.3em;
 		padding: 0.1em 0.5em 0.1em 0.5em;
 		a{
+            color: #FFFFFF;
 			@extend .userNav_link;
 			font-weight: 700;
 			&.toolMenus{
@@ -290,7 +292,7 @@ ul#otherSiteTools{
 		display: block;
 
 		a{
-			color: $text-color;
+			color: #FFFFFF;
 			text-decoration: none;
 		}
 
@@ -308,14 +310,19 @@ ul.favoriteSiteList{
 	list-style: none;
 	padding: 0 0 0 0;
 	> li{
+        color: #FFFFFF;
 		display: block;
 		border: 1px solid $tool-border-color;
+        background: $sites-nav-menu-item-selected-background;
 		@include border-radius( 4px );
 		width: 305px;
 		white-space: nowrap;
 		overflow: hidden;
 		margin: 0.3em;
 		padding: 0.3em 0.5em 0.3em 0.5em;
+        a{
+            color: #FFFFFF;
+        }
 	}
 }
 
@@ -386,11 +393,12 @@ ul.favoriteSiteList{
 .organizeFavoritesList{
 	list-style: none;
 	padding: 0 0 0 0;
+    color: #FFFFFF;
 	.fav-drag-handle{
 		display: inline-block;
 		position: relative;
 		right: -4px;
-		color: $tool-border-color;
+		color: #FFFFFF;
 		cursor: move; /* fallback if grab cursor is unsupported */
 		cursor: grab;
 		cursor: -moz-grab;

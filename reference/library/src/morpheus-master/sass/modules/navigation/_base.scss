@@ -140,7 +140,7 @@ body.is-logged-out{
 	}
 	.#{$namespace}userNav__submenuitem--fullname-and-id{
 		padding-top: 1em;
-		color: $text-color;
+		color: $topNav-text-color;
 		display: inline-block;
 		margin-bottom: 5px;
 		width: 10em;
@@ -271,6 +271,7 @@ body.is-logged-out{
 			margin: 0 1em 0 0;
 			padding: 0.25em;
 			border: 1px solid $tool-border-color;
+            color: black;
 			@media #{$phone}{
 				width: 40%;
 				margin-right: 0.6em;
