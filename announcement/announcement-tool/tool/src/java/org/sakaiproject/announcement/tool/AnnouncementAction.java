@@ -26,6 +26,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -257,16 +258,21 @@ public class AnnouncementAction extends PagedResourceActionII
 
    private ServerConfigurationService serverConfigurationService;
 
+   private CommonsManagerWrapper commonsManagerWrapper;
+
+   private boolean commonsAvailable = false;
+
    private RuleBasedCollator collator_ini = (RuleBasedCollator)Collator.getInstance();
 
    private Collator collator = Collator.getInstance();
    
    private static final String DEFAULT_TEMPLATE="announcement/chef_announcements";
 
-
     public AnnouncementAction() {
         super();
         aliasService = ComponentManager.get(AliasService.class);
+        commonsManagerWrapper = new CommonsManagerWrapper(ComponentManager.get("org.sakaiproject.commons.api.CommonsManager"));
+        commonsAvailable = !commonsManagerWrapper.isNull();
         userDirectoryService = ComponentManager.get(UserDirectoryService.class);
 		serverConfigurationService = ComponentManager.get(ServerConfigurationService.class);
     }
@@ -2047,6 +2053,8 @@ public class AnnouncementAction extends PagedResourceActionII
 		// to get the content Type Image Service
 		context.put("contentTypeImageService", ContentTypeImageService.getInstance());
 		context.put("dateFormat", getDateFormatString());
+		context.put("allowPostToCommons",
+						serverConfigurationService.getBoolean("announcement.allowPostToCommons", true));
 
 		final String channelId = state.getChannelId();
 
@@ -2165,7 +2173,7 @@ public class AnnouncementAction extends PagedResourceActionII
 				notification = serverConfigurationService.getString("announcement.default.notification", "n");
 			}
 			context.put("noti", notification);
- 
+			context.put("commonsAvailable", commonsAvailable);
 		}
 		// if this is an existing one
 		else if (state.getStatus().equals("goToReviseAnnouncement"))
@@ -2220,6 +2228,9 @@ public class AnnouncementAction extends PagedResourceActionII
 			}
 
 			context.put(AnnouncementService.RETRACT_DATE, retractDate);
+
+			context.put("commonsAvailable", commonsAvailable);
+			context.put("postToCommonsChecked", edit.getProperties().getProperty("commonsPostId") != null);
 
 			context.put(SPECIFY_DATES, specify);
 			context.put(HIDDEN, edit.getHeader().getDraft());
@@ -2876,6 +2887,9 @@ public class AnnouncementAction extends PagedResourceActionII
 				addAlert(sstate, rb.getString("java.alert.baddates"));
 			}
 		}
+
+		state.setPostToCommons(params.getString("postToCommons") != null);
+
 		// set hidden property just in case saved
 		state.setTempHidden(params.getBoolean(HIDDEN));
 
@@ -2963,6 +2977,10 @@ public class AnnouncementAction extends PagedResourceActionII
 		final Time tempReleaseDate = state.getTempReleaseDate();
 		final Time tempRetractDate = state.getTempRetractDate();
 		final Boolean tempHidden = state.getTempHidden();
+
+		final boolean postToCommons
+				= serverConfigurationService.getBoolean("announcement.allowPostToCommons", true)
+													&& state.getPostToCommons();
 		
 		// announce to public?
 		final String announceTo = state.getTempAnnounceTo();
@@ -3015,6 +3033,7 @@ public class AnnouncementAction extends PagedResourceActionII
 				}
 
 				msg.setBody(body);
+
 				AnnouncementMessageHeaderEdit header = msg.getAnnouncementHeaderEdit();
 				String oSubject = header.getSubject();
 				header.setSubject(subject);
@@ -3215,7 +3234,48 @@ public class AnnouncementAction extends PagedResourceActionII
 				else {
 					msg.getPropertiesEdit().addPropertyToList("noti_history", now.toStringLocalFull()+"_"+notiLevel);
 				}
-				
+
+				if (commonsAvailable) {
+					String commonsPostId = msg.getPropertiesEdit().getProperty("commonsPostId");
+
+					if (postToCommons && !tempHidden) {
+						StringBuilder sb = new StringBuilder();
+						sb.append("<h4>").append(header.getSubject()).append("</h4>")
+							.append("<div>").append(body).append("</div>");
+
+						CommonsPostWrapper commonsPost = null;
+						if (commonsPostId != null) {
+							commonsPost = commonsManagerWrapper.getPost(commonsPostId);
+							if (commonsPost.isNull()) {
+								// The post may have been deleted in the Commons tool.
+								commonsPost = new CommonsPostWrapper();
+							} else {
+								commonsPost.setModifiedDate(new Date().getTime());
+							}
+						} else {
+							commonsPost = new CommonsPostWrapper();
+						}
+						commonsPost.setContent(sb.toString());
+						commonsPost.setCreatorId(header.getFrom().getId());
+						commonsPost.setSiteId(channel.getContext());
+						commonsPost.setEmbedder("SITE");
+						commonsPost.setCommonsId(channel.getContext());
+						if (releaseDate != null) {
+							commonsPost.setReleaseDate(releaseDate.getTime());
+						}
+						CommonsPostWrapper savedCommonsPost = commonsManagerWrapper.savePost(commonsPost);
+						if (commonsPostId == null) {
+							msg.getPropertiesEdit().addProperty("commonsPostId", savedCommonsPost.getId());
+						}
+					} else {
+						if (commonsPostId != null) {
+							if (commonsManagerWrapper.deletePost(commonsPostId)) {
+								msg.getPropertiesEdit().removeProperty("commonsPostId");
+							}
+						}
+					}
+				}
+
 				channel.commitMessage(msg, noti, "org.sakaiproject.announcement.impl.SiteEmailNotificationAnnc");
 
 				if (!state.getIsNewAnnouncement())
@@ -3258,6 +3318,7 @@ public class AnnouncementAction extends PagedResourceActionII
 			state.setMessageReference("");
 			state.setTempAnnounceTo(null);
 			state.setTempAnnounceToGroups(null);
+			state.setPostToCommons(false);
 			state.setCurrentSortedBy(getCurrentOrder());
 			//state.setCurrentSortAsc(Boolean.TRUE.booleanValue());
 			sstate.setAttribute(STATE_CURRENT_SORTED_BY, getCurrentOrder());
@@ -3347,6 +3408,11 @@ public class AnnouncementAction extends PagedResourceActionII
 					//AnnouncementMessageEdit edit = channel.editAnnouncementMessage(message.getId());
 					//channel.removeMessage(edit); 
 					channel.removeAnnouncementMessage(message.getId());
+
+                    String commonsPostId = message.getProperties().getProperty("commonsPostId");
+                    if (commonsPostId != null) {
+                        commonsManagerWrapper.deletePost(commonsPostId);
+                    }
 
 					// make sure auto-updates are enabled
 					enableObservers(sstate);
@@ -4442,7 +4508,6 @@ public class AnnouncementAction extends PagedResourceActionII
 		{
 			m_securityService = (SecurityService) ComponentManager.get("org.sakaiproject.authz.api.SecurityService");
 		}
-
 
 		// retrieve the state from state object
 		AnnouncementActionState annState = (AnnouncementActionState) getState(portlet, rundata, AnnouncementActionState.class);
