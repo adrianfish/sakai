@@ -655,4 +655,9 @@ $PBJQ(document).ready(function($){
     dhtml_view_sites();
   });
 
+  $PBJQ('.moresites-header').click(function (e) {
+    $(this).next().toggle();
+  });
+
+  $PBJQ('.otherSitesCategorList').slice(0,2).show();
 });

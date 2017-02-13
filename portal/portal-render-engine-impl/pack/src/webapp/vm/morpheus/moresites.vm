@@ -51,7 +51,7 @@
 
 
                     #macro( displaySite $site )
-                        <li class="fav-sites-entry #if (${site.isCurrentSite})is-selected #end #if (${site.isMyWorkspace})my-workspace #end">
+                        <li data-site-id="${site.siteId}" class="fav-sites-entry #if (${site.isCurrentSite})is-selected #end #if (${site.isMyWorkspace})my-workspace #end">
                             #if (!${site.isMyWorkspace})
                             	<a class="site-favorite-btn" data-site-id="${site.siteId}" href="javascript:void(0);"></a>
                             #end
@@ -75,11 +75,13 @@
                         #foreach( $termKey in $tabsSites.tabsMoreSortedTermList )
                             #if ($tabsSites.tabsMoreTermsLeftPane.get($termKey).size() > 0)
                                 <div class="fav-sites-term">
+                                    <div class="moresites-header">
                                     #if ( !$termKey || $termKey == "" )
                                         <h3 class="favorites-term-header">${rloader.sit_notermkey}</h3>
                                     #else
                                         <h3 class="favorites-term-header">$termKey</h3>
                                     #end
+                                    </div>
 
                                     <ul class="otherSitesCategorList favoriteSiteList">
                                         #foreach( $site in $tabsSites.tabsMoreTermsLeftPane.get($termKey))
