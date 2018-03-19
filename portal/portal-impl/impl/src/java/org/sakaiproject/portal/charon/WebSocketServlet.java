@@ -1,9 +1,9 @@
 /**********************************************************************************
- * $URL: https://source.sakaiproject.org/svn/portal/branches/portal-2.9.x/portal-tool/tool/src/java/org/sakaiproject/portal/tool/ToolPortal.java $
- * $Id: ToolPortal.java 110562 2012-07-19 23:00:20Z ottenhoff@longsight.com $
+ * $URL$
+ * $Id$
  ***********************************************************************************
  *
- * Copyright (c) 2006, 2007, 2008 The Sakai Foundation
+ * Copyright (c) 2005, 2006, 2007, 2008 The Sakai Foundation
  *
  * Licensed under the Educational Community License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,11 +18,10 @@
  * limitations under the License.
  *
  **********************************************************************************/
+package org.sakaiproject.portal.charon;
 
-package org.sakaiproject.portal.chat.loader;
-
-import java.io.IOException;
-
+import javax.servlet.ServletConfig;
+import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -30,17 +29,31 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.sakaiproject.component.cover.ComponentManager;
 import org.sakaiproject.portal.api.PushRegistry;
-import org.sakaiproject.portal.chat.PortalChatEndpoint;
 
-public class PortalChatLoader extends HttpServlet {
+import javax.websocket.server.ServerContainer;
+import javax.websocket.server.ServerEndpointConfig;
 
-    public void init() throws ServletException {
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
+public class WebSocketServlet extends HttpServlet {
+
+	private static final long serialVersionUID = 2645929710236293079L;
+
+	public void init(ServletConfig config) throws ServletException {
 
         PushRegistry pushRegistry = (PushRegistry) ComponentManager.get("pushRegistry");
-        pushRegistry.addEndpoint("/chat", PortalChatEndpoint.class);
-    }
 
-	protected void doGet(HttpServletRequest req, HttpServletResponse res)
-        throws ServletException, IOException {
+        ServerContainer serverContainer
+            = (ServerContainer) config.getServletContext().getAttribute("javax.websocket.server.ServerContainer");
+
+        try {
+            for (ServerEndpointConfig endpoint : pushRegistry.getEndpoints()) {
+                log.debug("Setting up endpoint: " + endpoint.getPath());
+                serverContainer.addEndpoint(endpoint);
+            }
+        } catch (Exception e) {
+            throw new ServletException(e);
+        }
 	}
 }

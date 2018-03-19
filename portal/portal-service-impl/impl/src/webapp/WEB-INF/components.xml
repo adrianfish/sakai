@@ -72,5 +72,7 @@
 		<property name="simplePageToolDao" ref="org.sakaiproject.lessonbuildertool.model.SimplePageToolDao" />
 		<property name="siteService" ref="org.sakaiproject.site.api.SiteService" />
 		<property name="sqlService" ref="org.sakaiproject.db.api.SqlService" />
-	</bean>
+    </bean>
+
+    <bean id="pushRegistry" class="org.sakaiproject.portal.service.PushRegistryImpl" />
 </beans>

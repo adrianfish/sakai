@@ -66,6 +66,12 @@
 		<servlet-name>sakai.portal.charon</servlet-name>
 		<servlet-class>org.sakaiproject.portal.charon.SkinnableCharonPortal</servlet-class>
 		<load-on-startup>1</load-on-startup>
+    </servlet>
+
+	<servlet>
+		<servlet-name>sakai.portal.websocket</servlet-name>
+		<servlet-class>org.sakaiproject.portal.charon.WebSocketServlet</servlet-class>
+		<load-on-startup>5</load-on-startup>
 	</servlet>
 
 	<servlet-mapping>
