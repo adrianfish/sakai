@@ -158,6 +158,7 @@ public class PollListManagerImpl implements PollListManager,EntityTransferrer {
 				}
             }
             dao.save(t);
+            System.out.println("POLLID AFTER SAVE:" + t.getPollId());
 
         } catch (DataAccessException e) {
             log.error("Hibernate could not save: " + e.toString(), e);

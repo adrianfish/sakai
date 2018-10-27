@@ -23,6 +23,7 @@ package org.sakaiproject.poll.logic;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.TimeZone;
 
 import org.sakaiproject.event.api.LearningResourceStoreService.LRS_Actor;
@@ -188,7 +189,7 @@ public interface ExternalLogic {
 	 * @param siteTitle
 	 * 	The title of the site that owns the option's poll
 	 */
-	public void notifyDeletedOption(List<String> userEids, String siteTitle, String pollQuestion);
+	public void notifyDeletedOption(Set<String> userEids, String siteTitle, String pollQuestion);
 	
 	
 	

@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+
+  <head>
+    <title>Polls: Add/edit a poll</title>
+    <link href="/library/skin/tool_base.css" type="text/css" rel="stylesheet" media="all" />
+    <link href="/library/skin/morpheus-default/tool.css" type="text/css" rel="stylesheet" media="all" />
+    <script src="/library/js/headscripts.js"></script>
+	  <script>includeLatestJQuery('polls');</script>
+	  <link href="/library/webjars/jquery-ui/1.12.1/jquery-ui.min.css" rel="stylesheet" type="text/css" />
+    <meta th:remove="tag" th:utext="${sakaiHtmlHead}"></meta>
+  </head>
+
+  <body>
+	  <div class="portletBody">
+      <p>
+      <strong th:text="#{delete_confirm}"></strong>
+      </p>
+      <div>
+        <div class="alertMessage" th:text="#{delete_option_message(${option.text})}">delete_option_message</div>
+      </div>
+		
+      <form action="#" th:action="@{/deleteoption}" method="POST">
+
+        <input type="hidden" name="optionId" th:value="${option.optionId}" />
+			
+        <p th:text="#{delete_option_has_votes}" class="instructions">delete_option_has_votes</p>
+        
+        <span rsf:id="handle-votes"></span>
+        <input value="do-nothing" type="radio" name="handleVotes" checked="checked" />
+        <span th:text="#{handle_delete_option_do_nothing_label}">handle_delete_option_do_nothing_label</span>
+        <br />
+        <input value="return-votes" type="radio" name="handleVotes" />
+        <span th:text="#{handle_delete_option_return_votes_label}">handle_delete_option_return_votes_label</span>				
+			
+        <p class="act">
+          <input type="submit" th:value="#{poll_remove_title}" class="active" />
+          <input type="submit" th:value="#{new_poll_cancel}" />
+        </p>
+      </form>
+	  </div>
+  </body>
+</html>

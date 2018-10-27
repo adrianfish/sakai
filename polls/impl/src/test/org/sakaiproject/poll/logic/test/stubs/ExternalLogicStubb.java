@@ -25,6 +25,7 @@ package org.sakaiproject.poll.logic.test.stubs;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.TimeZone;
 
 import org.sakaiproject.poll.logic.ExternalLogic;
@@ -166,7 +167,7 @@ public class ExternalLogicStubb implements ExternalLogic {
 		return false;
 	}
 
-	public void notifyDeletedOption(List<String> userEids, String siteTitle,
+	public void notifyDeletedOption(Set<String> userEids, String siteTitle,
 			String pollQuestion) {
 		// TODO Auto-generated method stub
 		

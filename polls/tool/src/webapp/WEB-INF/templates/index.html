@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+  <head>
+    <title>Polls</title>
+    <link href="/library/skin/tool_base.css" type="text/css" rel="stylesheet" media="all" />
+    <link href="/library/skin/morpheus-default/tool.css" type="text/css" rel="stylesheet" media="all" />
+    <script src="/library/js/headscripts.js"></script>
+	  <script>includeLatestJQuery('polls');</script>
+    <script>includeWebjarLibrary('jquery.tablesorter');</script>
+    <script src="../js/polls.js"></script>
+    <meta th:remove="tag" th:utext="${sakaiHtmlHead}"></meta>
+  </head>
+
+  <body>
+    <div class="portletBody">
+      <div id="menu" th:insert="fragments/menus :: main(${active})" />
+      <h3 th:text="#{poll_list_title}">poll_list_title</h3>
+
+      <div th:if="${not hasPolls}" class="instruction" id="no-polls" th:text="#{poll_list_empty}">poll_list_empty</div>
+
+      <div th:text="#{poll_list_remove_confirm}" id="poll_list_remove_confirm"></div>
+      <div th:text="#{poll_list_reset_confirm}" id="poll_list_reset_confirm"></div>
+
+      <script type="text/javascript">
+        $(document).ready(function () {
+
+          $('#remove-all').change(function () {
+
+            var isChecked = $(this).is(':checked');
+            $('.checkbox-cell input').prop('checked', isChecked);
+            $('#delete-polls').prop('disabled', !isChecked);
+            $('#reset-polls-votes').prop('disabled', !isChecked);
+          });
+
+          $('.checkbox-cell input').change(function () {
+
+            var someChecked = $('.checkbox-cell input:checked').length;
+            $('#delete-polls').prop('disabled', !someChecked);
+            $('#reset-polls-votes').prop('disabled', !someChecked);
+
+            if (!someChecked) {
+                $('#remove-all').prop('checked', false);
+            }
+          });
+
+          $('#delete-polls').click(function () {
+
+             var removeMessage = $('#poll_list_remove_confirm').text();
+             return confirm(removeMessage);
+          });
+
+          $('#reset-polls-votes').click(function () {
+
+            var resetMessage = $('#poll_list_reset_confirm').text();
+            return confirm(resetMessage);
+          });
+        });
+      </script>
+
+      <form th:if="${hasPolls}" action="#" th:action="@{/index}" method="POST">
+
+        <table id="sortableTable" class="listHier lines nolines table table-responsive table-bordered table-striped table-hover" border="0" cellspacing="0">
+          <caption class="skip"><span class="skip" rsf:id="msg=poll_list_summary"></span></caption>
+          <thead>
+            <tr> 
+              <th><a th:text="#{poll_question_title}" title="#{poll_question_title_tooltip}" href="#">poll_question_title</a></th>
+              <th><a th:text="#{poll_open_title}" title="#{poll_open_title_tooltip" href="#">poll_open_title</a></th>
+              <th><a th:text="#{poll_close_title}" title="#{poll_close_title_tooltip}" href="#">poll_close_title</a></th>
+              <th><label th:text="#{poll_result_title}">poll_result_title</label></th> 
+              <th>
+                <input type="checkbox" id="remove-all" title="Select to remove"/>
+                <label for="remove-all" th:text="#{poll_select_title_all}">poll_select_title_all</label>
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr th:each="poll : ${votablePolls}"> 
+              <td>
+                <a th:href="@{/poll(pollId=${poll.pollId})}" th:text="${poll.text}">poll.text</a>
+                <div class="itemAction"><a th:href="@{/add(pollId=${poll.pollId})}" th:text="#{action_revise_poll}">action_revise_poll</a></div>
+              </td>
+              <div th:replace="fragments/common :: poll-row"></div>
+            </tr>
+            <tr th:each="poll : ${nonVotablePolls}">
+              <td>
+                <span th:text="${poll.text}">poll.text</span>
+                <div class="itemAction"><a th:href="@{/add(pollId=${poll.pollId})}" th:text="#{action_revise_poll}">action_revise_poll</a></div>
+              </td>
+              <div th:replace="fragments/common :: poll-row"></div>
+            </tr>
+          </tbody>
+        </table>
+
+        <p class="act">
+          <input type="submit" id="delete-polls" th:value="#{poll_list_delete}" accesskey="s" name="delete" disabled />
+          <input type="submit" id="reset-polls-votes" th:value="#{poll_list_reset}" accesskey="r" name="reset" disabled />
+        </p>
+      </form>
+    </div>
+  </body>
+</html>

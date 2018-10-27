@@ -710,6 +710,7 @@ public class PollsEntityProvider extends AbstractEntityProvider implements
 	@EntityCustomAction(action = "vote-create", viewKey = EntityView.VIEW_NEW)
 	public String createVoteEntity(EntityReference ref,
 			Map<String, Object> params) {
+        System.out.println("vote-create");
 		String userId = userDirectoryService.getCurrentUser().getId();
 		Vote vote = new Vote();
 		copyParamsToObject(params, vote);

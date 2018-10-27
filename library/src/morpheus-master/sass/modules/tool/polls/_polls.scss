@@ -1,8 +1,23 @@
 .#{$namespace}sakai-poll{
-	.pollEditorSmall{
-		max-width: 60em;;
-	    padding-bottom: 1em;
+  .pollEditorSmall{
+    max-width: 60em;
+	  padding-bottom: 1em;
+    #poll-instructions {
+	 		@media #{$phone}{
+        display: none;
+      }
+    }
+    #poll-mobile-instructions {
+      display: none;
+	 		@media #{$phone}{
+        display: block;
+      }
+    }
 	}
+
+  #errors {
+    display: none;
+  }
 
 	/*skinned sortable header - sort icons*/
 	thead{

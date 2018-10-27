@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+  <head>
+    <title>Poll</title>
+    <link href="/library/skin/tool_base.css" type="text/css" rel="stylesheet" media="all" />
+    <link href="/library/skin/morpheus-default/tool.css" type="text/css" rel="stylesheet" media="all" />
+    <script src="/library/js/headscripts.js"></script>
+	  <script>includeLatestJQuery('polls');</script>
+    <script type="module" src="/polls-tool/js/polls-poll.js"></script>
+    <meta th:remove="tag" th:utext="${sakaiHtmlHead}"></meta>
+  </head>
+
+  <body>
+    <div class="portletBody">
+      <div id="menu" th:insert="fragments/menus :: main(${active})" />
+        <polls-poll th:attr="doneurl=@{/index},pollid=${pollId}"></polls-poll>
+    </div>
+  </body>
+</html>

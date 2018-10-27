@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+  <head>
+    <title>Polls: Permissions</title>
+    <link href="/library/skin/tool_base.css" type="text/css" rel="stylesheet" media="all" />
+    <link href="/library/skin/morpheus-default/tool.css" type="text/css" rel="stylesheet" media="all" />
+    <script src="/library/js/headscripts.js"></script>
+    <script type="text/javascript">includeLatestJQuery('polls');</script>
+    <script type="text/javascript">includeWebjarLibrary('jquery.tablesorter');</script>
+    <script type="module" src="/webcomponents/js/sakai-tool-permissions.js"></script>
+    <meta th:remove="tag" th:utext="${sakaiHtmlHead}"></meta>
+  </head>
+
+  <body>
+    <div class="portletBody">
+      <div id="menu" th:insert="fragments/menus :: main(${active})" />
+      <h3>Permissions</h3>
+      <sakai-tool-permissions tool="poll"></sakai-tool-permissions>
+    </div>
+  </body>
+</html>

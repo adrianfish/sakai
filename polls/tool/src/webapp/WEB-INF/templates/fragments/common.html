@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <title>Sakai Polls Tool</title>
+    <script src="/library/js/headscripts.js"></script>
+    <script type="module" src="/polls-tool/js/poll.js"></script>
+	  <script>includeLatestJQuery('polls');</script>
+</head>
+
+<body>
+  <div th:fragment="poll-row">
+    <td th:text="${{poll.voteOpen}}">poll.voteOpen</td>
+    <td th:text="${{poll.voteClose}}">poll.voteClose</td>
+    <td><a th:href="@{/results(pollId=${poll.pollId})}" th:text="#{results_title}">results_title</a></td>
+    <td class="checkbox-cell">
+      <label id="check-2" class="skip" th:text="#{delete_poll_tooltip(${poll.text})}">Label for element</label>
+      <input title="Select to remove" type="checkbox" id="delete-${poll.pollId}" name="pollIds" th:value="${poll.pollId}" /> 
+    </td>
+  </div>
+</body>
+</html>

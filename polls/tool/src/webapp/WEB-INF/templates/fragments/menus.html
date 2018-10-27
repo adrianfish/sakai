@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+  <body>
+    <div th:fragment="main (active)">
+      <ul class="navIntraTool actionToolBar">
+        <li class="firstToolBarItem" role="presentation">
+          <span th:class="${(active == 'index') ? 'current' : ''}">
+            <a href="#" th:href="@{/index}" th:text="#{poll_list_title}">poll_list_title</a>
+          </span>
+        </li>
+        <li role="presentation">
+          <span th:class="${(active == 'add') ? 'current' : ''}">
+            <a href="#" th:href="@{/add}" th:text="#{action_add_poll}">action_add_poll</a>
+          </span>
+        </li>
+        <li role="presentation">
+          <span th:class="${(active == 'permissions') ? 'current' : ''}">
+            <a href="#" th:href="@{/permissions}" th:text="#{action_set_permissions}">action_set_permissions</a>
+          </span>
+        </li>
+      </ul>
+    </div>
+  </body>
+</html>

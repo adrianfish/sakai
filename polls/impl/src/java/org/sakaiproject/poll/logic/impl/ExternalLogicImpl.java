@@ -207,8 +207,7 @@ public class ExternalLogicImpl implements ExternalLogic {
 	}
 
 	public void registerFunction(String function) {
-		functionManager.registerFunction(function);
-		
+		functionManager.registerFunction(function, true);
 	}
 
 	public TimeZone getLocalTimeZone() {
@@ -372,7 +371,7 @@ public class ExternalLogicImpl implements ExternalLogic {
 		return false;
 	}
 
-	public void notifyDeletedOption(List<String> userEids, String siteTitle, String pollQuestion) {
+	public void notifyDeletedOption(Set<String> userEids, String siteTitle, String pollQuestion) {
 		if (siteTitle == null)
 			throw new IllegalArgumentException("Site title cannot be null");
 		else if (pollQuestion == null)

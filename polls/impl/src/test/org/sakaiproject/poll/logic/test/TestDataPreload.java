@@ -102,7 +102,7 @@ public class TestDataPreload {
 		poll1.setCreationDate(new Date());
 		poll1.setVoteOpen(new Date());
 		poll1.setVoteClose(new Date());
-		poll1.setDescription("this is some text");
+		poll1.setDetails("this is some text");
 		poll1.setText("something");
 		poll1.setOwner(USER_UPDATE);
 		dao.save(poll1);

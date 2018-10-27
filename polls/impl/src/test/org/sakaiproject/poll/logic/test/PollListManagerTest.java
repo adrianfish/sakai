@@ -112,7 +112,7 @@ public class PollListManagerTest extends AbstractTransactionalJUnit4SpringContex
 		poll1.setCreationDate(new Date());
 		poll1.setVoteOpen(new Date());
 		poll1.setVoteClose(new Date());
-		poll1.setDescription("this is some text");
+		poll1.setDetails("this is some text");
 		poll1.setText("something");
 		poll1.setOwner(TestDataPreload.USER_UPDATE);
 		
@@ -182,7 +182,7 @@ public class PollListManagerTest extends AbstractTransactionalJUnit4SpringContex
 		poll1.setCreationDate(new Date());
 		poll1.setVoteOpen(new Date());
 		poll1.setVoteClose(new Date());
-		poll1.setDescription("this is some text");
+		poll1.setDetails("this is some text");
 		poll1.setText("something");
 		poll1.setOwner(TestDataPreload.USER_UPDATE);
 		poll1.setSiteId(TestDataPreload.LOCATION1_ID);

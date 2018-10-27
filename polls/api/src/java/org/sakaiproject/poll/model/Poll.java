@@ -23,12 +23,12 @@ package org.sakaiproject.poll.model;
 
 import java.text.DateFormat;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Stack;
+
 
 import lombok.AccessLevel;
 import lombok.extern.slf4j.Slf4j;
@@ -46,14 +46,12 @@ import org.sakaiproject.entity.api.ResourceProperties;
 @Data
 public class Poll implements Entity  {
 
-    private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
-
     private Long pollId;
     private String owner;
     private String siteId;
     private Date creationDate;
     private String text;
-    private String description;
+    private String details;
     private int minOptions = 1;
     private int maxOptions = 1;
     private Date voteOpen;
@@ -71,7 +69,7 @@ public class Poll implements Entity  {
     public Poll() {
         //set the defaults
         this.text = "";
-        this.description = "";
+        this.details = "";
         this.minOptions = 1;
         this.maxOptions = 1;
         this.limitVoting = true;
@@ -83,38 +81,8 @@ public class Poll implements Entity  {
         this.voteClose = cal.getTime();
         this.displayResult = "open";
 
-		this.options = new ArrayList<Option>();
-		this.votes = new ArrayList<Vote>();
-    }
-
-    public void setVoteOpenStr(String value) {
-        try {
-            Date parsedDate = DATE_FORMAT.parse(value);
-            if (parsedDate != null) {
-                voteOpen = parsedDate;
-            }
-        } catch (ParseException e) {
-            log.error(e.getMessage(), e);
-        }
-    }
-
-    public String getVoteOpenStr() {
-        return DATE_FORMAT.format(voteOpen);
-    }
-
-    public void setVoteCloseStr(String value) {
-		try {
-            Date parsedDate = DATE_FORMAT.parse(value);
-            if (parsedDate != null) {
-                voteClose = parsedDate;
-            }
-        } catch (ParseException e) {
-            log.error(e.getMessage(), e);
-        }
-    }
-
-    public String getVoteCloseStr() {
-        return DATE_FORMAT.format(voteClose);
+		this.options = new ArrayList<>();
+		this.votes = new ArrayList<>();
     }
 
     /**
@@ -129,13 +97,6 @@ public class Poll implements Entity  {
     public void addOption(Option option) {
         this.options.add(option);
 
-    }
-
-    public void setDetails(String value){
-        this.description = value;
-    }
-    public String getDetails(){
-        return this.description;
     }
 
     /*
@@ -224,7 +185,7 @@ public class Poll implements Entity  {
         poll.setAttribute(MIN_OPTIONS, (new Integer(getMinOptions()).toString()));
         poll.setAttribute(MAX_OPTIONS, (new Integer(getMaxOptions()).toString()));
 
-        if (description != null) poll.setAttribute(DESCRIPTION, description);
+        if (details != null) poll.setAttribute(DESCRIPTION, details);
 
         DateFormat dformat  = getDateFormatForXML();
         poll.setAttribute(VOTE_OPEN, dformat.format(this.voteOpen));

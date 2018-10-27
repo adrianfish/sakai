@@ -26,6 +26,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.time.Instant;
 
 import lombok.extern.slf4j.Slf4j;
 import lombok.Setter;
@@ -190,7 +191,6 @@ public class PollVoteManagerImpl implements PollVoteManager {
 				log.debug("Poll is closed for voting");
 				pollBeforeClose=false;
 			}
-
 		} 
 
 		if (poll.getVoteOpen()!=null) {

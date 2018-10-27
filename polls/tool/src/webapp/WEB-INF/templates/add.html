@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+
+  <head>
+    <title>Polls: Add/edit a poll</title>
+    <link href="/library/skin/tool_base.css" type="text/css" rel="stylesheet" media="all" />
+    <link href="/library/skin/morpheus-default/tool.css" type="text/css" rel="stylesheet" media="all" />
+    <script src="/library/js/headscripts.js"></script>
+	  <script>includeLatestJQuery('polls');</script>
+	  <link href="/library/webjars/jquery-ui/1.12.1/jquery-ui.min.css" rel="stylesheet" type="text/css" />
+	  <script src="/library/js/lang-datepicker/lang-datepicker.js"></script>
+    <script type="module" src="/webcomponents/js/sakai-date-picker.js"></script>
+    <meta th:remove="tag" th:utext="${sakaiHtmlHead}"></meta>
+  </head>
+
+  <body>
+    <div class="portletBody container-fluid">
+      <div id="menu" th:insert="fragments/menus :: main(${active})" />
+      <h3 th:text="#{new_poll_title}">new_poll_title</h3>
+      <div id="message-for"><span>Message for user here</span></div>
+      <form action="#" th:action="@{/add}" th:object="${poll}" id="add-poll-form" method="POST">
+        <input type="hidden" th:field="*{pollId}" />
+        <div class="form-group row"> 
+	        <label for="pollName" class="col-md-4 col-lg-2 form-control-label">
+		        <span class="reqStarInline">*</span>
+            <span th:text="#{new_poll_question_label}">new_poll_question_label</span>
+	        </label>
+	        <div class="col-md-2">
+		        <!--input type="text" th:field="*{question}" size="50" id="pollName" /-->
+		        <input type="text" th:field="*{text}" size="50" id="pollName" />
+	        </div>
+        </div>
+
+        <div class="pollEditorSmall">
+          <div id="poll-instructions">
+            <textarea th:field="*{details}" id="details" rows="10" cols="80"></textarea>
+          </div>
+        </div>
+
+        <div class="form-group row">
+	        <label for="opendate" class="col-md-4 col-lg-2 form-control-label">
+		        <span class="reqStarInline">*</span>
+            <span th:text="#{new_poll_open_label}">new_poll_open_label</span>
+	        </label>
+	        <div class="col-md-4">
+            <sakai-date-picker inputId="opendate" th:attr="initialValue=${voteOpen}" name="voteOpen"></sakai-date-picker>
+	        </div>
+        </div>			
+
+        <div class="form-group row">
+	        <label for="closedate" class="col-md-4 col-lg-2 form-control-label">
+		        <span class="reqStarInline">*</span>
+            <span	th:text="#{new_poll_close_label}">new_poll_close_label</span>
+	        </label>
+	        <div class="col-md-4">
+            <sakai-date-picker inputId="closedate" th:attr="initialValue=${voteClose}" name="voteClose"></sakai-date-picker>
+	        </div>
+        </div>
+
+        <div th:unless="${#lists.isEmpty(poll.options)}">
+          <p>
+            <strong>Answer Options:</strong>
+            <br />
+            <a th:text="#{new_poll_option_add}" th:href="@{/addoption(pollId=${poll.pollId})}">new_poll_option_add</a>
+          </p>
+
+          <table class="listHier lines">
+            <thead>
+              <tr>
+                <th th:text="#{add_option}">add_option</th>
+                <th th:text="#{add_actions}">add_actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr th:each="option : ${poll.options}">
+                <td th:utext="${option.text}"></td>
+                <td>
+                  <p>&nbsp;
+                    <a th:href="@{/addoption(optionId=${option.optionId},pollId=${poll.pollId})}" th:text="#{new_poll_option_edit}">new_poll_option_edit</a>&nbsp;&nbsp;
+                    <a th:href="@{/deleteoption(optionId=${option.optionId})}" th:text="#{new_poll_option_delete}">new_poll_option_delete</a>
+                  </p>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <p><strong th:text="#{new_poll_limits}">new_poll_limits</strong></p>
+        <div class="form-group row">
+	        <label for="min-votes-selection" class="col-md-4 col-lg-2 form-control-label">
+		        <span class="reqStarInline">*</span>
+            <span th:text="#{new_poll_min_limits}">new_poll_min_limits</span>
+	        </label>
+	        <div class="col-md-4">
+            <select th:field="*{minOptions}" id="min-votes">
+              <option value="0">0</option>
+              <option value="1" selected>1</option>
+              <option value="2">2</option>
+              <option value="3">3</option>
+              <option value="4">4</option>
+              <option value="5">5</option>
+              <option value="6">6</option>
+              <option value="7">7</option>
+              <option value="8">8</option>
+              <option value="9">9</option>
+              <option value="10">10</option>
+              <option value="11">11</option>
+              <option value="12">12</option>
+              <option value="13">13</option>
+              <option value="14">14</option>
+              <option value="15">15</option>
+            </select>
+	        </div>
+        </div>		
+
+        <div class="form-group row">
+          <label for="max-votes-selection" class="col-md-4 col-lg-2 form-control-label">
+            <span class="reqStarInline">*</span>
+            <span th:text="#{new_poll_max_limits}">new_poll_max_limits</span>
+          </label>
+          <div class="col-md-4">
+            <select th:field="*{maxOptions}" id="max-votes">
+              <option value="1" selected>1</option>
+              <option value="2">2</option>
+              <option value="3">3</option>
+              <option value="4">4</option>
+              <option value="5">5</option>
+              <option value="6">6</option>
+              <option value="7">7</option>
+              <option value="8">8</option>
+              <option value="9">9</option>
+              <option value="10">10</option>
+              <option value="11">11</option>
+              <option value="12">12</option>
+              <option value="13">13</option>
+              <option value="14">14</option>
+              <option value="15">15</option>
+            </select>
+          </div>
+        </div>
+
+        <p><strong th:text="#{new_poll_access_label}">new_poll_access_label</strong></p>
+        <div>
+          <input type="checkbox" th:field="*{isPublic}" id="access-public" />
+          <label th:text="#{new_poll_access_public}" for="access-public">new_poll_access_public</label>
+        </div>
+
+        <p><strong th:text="#{new_poll_results_label}">new_poll_results_label</strong><br /></p>
+
+        <input type="radio" th:field="*{displayResult}" name="release-select-selection" value="open" id="release-open" />
+        <label for="release-open" th:text="#{new_poll_open}">new_poll_open</label>
+        <br />
+        <input type="radio" th:field="*{displayResult}" name="release-select-selection" value="afterVoting" id="release-voting" />
+        <label for="release-voting" th:text="#{new_poll_aftervoting}">new_poll_aftervoting</label>
+        <br />
+        <input type="radio" th:field="*{displayResult}" name="release-select-selection" value="afterClosing" id="release-closing" />
+        <label for="release-closing" th:text="#{new_poll_afterClosing}">new_poll_afterClosing</label>
+        <br />
+        <input type="radio" th:field="*{displayResult}" name="release-select-selection" value="never" id="release-never" />
+        <label for="release-never" th:text="#{new_poll_never}">new_poll_never</label>
+
+        <p class="act">
+          <button type="submit" name="action" value="saveandadd" th:text="#{new_poll_saveoption}" class="active"></button>
+          <button type="submit" name="action" value="save" th:text="#{new_poll_submit}"></button>
+          <button type="submit" name="action" value="cancel" th:text="#{new_poll_cancel}"></button>
+        </p>
+      </form>
+    </div>
+    <script type="text/javascript">
+      sakai.editor.editors.ckeditor.launch('details');
+    </script>
+  </body>
+</html>

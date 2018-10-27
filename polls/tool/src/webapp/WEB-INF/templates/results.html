@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+  <head>
+    <title>Polls: Results</title>
+    <link href="/library/skin/tool_base.css" type="text/css" rel="stylesheet" media="all" />
+    <link href="/library/skin/morpheus-default/tool.css" type="text/css" rel="stylesheet" media="all" />
+    <script src="/library/js/headscripts.js"></script>
+    <script type="text/javascript">includeLatestJQuery('polls');</script>
+    <script type="text/javascript">includeWebjarLibrary('jquery.tablesorter');</script>
+    <script src="/library/js/jquery/cookie/jquery.cookie.js"></script>
+    <meta th:remove="tag" th:utext="${sakaiHtmlHead}"></meta>
+  </head>
+
+  <body>
+    <div class="portletBody">
+      <h3 th:text="#{poll_result_title}">poll_result_title</h3>
+      <p th:text="${poll.text}">poll.text</p>
+      <p th:text="${numVotes}">numVotes</p>
+      <table id="sortableTable" class="listHier lines nolines" border="0" cellspacing="0">
+        <caption class="skip"><span class="skip" th:text="#{results_summary}">results_summary</span></caption>
+        <thead>
+          <tr>
+            <th style="display:none"><a th:title="#{results_answers_numbering_tooltip}" href="#" rsf:id="answers-count">Number</a></th>
+            <th width="15px">
+              <div th:title="#{results_answers_default_tooltip}" class="reset-order">
+                <a href="#" id="reset-order-link"><span th:text="#{results_answers_reset_ordering}">results_answers_reset_ordering</span></a>
+              </div>
+            </th>
+            <th><a th:title="#{results_answers_title_tooltip}" href="#" th:text="#{results_answers_title}">results_answers_title</a></th>
+            <th><a th:title="#{results_answers_votes_tooltip}" href="#" th:text="#{results_answers_votes}">results_answers_votes</a></th>
+            <th><a href="#" th:title="#{results_answers_percent_tooltip}">%</a></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr th:each="cv : ${collatedVotes}"> 
+            <td style="display:none" rsf:id="answer-count">1</td>
+            <td></td>
+            <td th:utext="${cv.optionText}">option.text</td>
+            <td valign="middle" th:text="${cv.votes}">cv.votes</td>
+            <td valign="middle" th:text="${cv.percentage}">cv.percentage</td>
+          </tr>
+          <tfoot>
+            <tr>
+              <td style="display:none"></td>
+              <td></td>
+              <td><strong th:text="#{results_answers_total}">results_answers_total</strong></td>
+              <td><strong th:text="${votesTotal}">votesTotal</strong></td>
+              <td><strong th:text="${totalPercent}">totalPercent</strong></td>
+            </tr> 
+          </tfoot>
+        </tbody>
+      </table>
+
+      <div th:if="${chartEnabled}">
+        <div id="chart-selector">
+          <label for="chart-type" th:text="#{results_chart_type}">results_chart_type</label>
+          <select id="chart-type-selection" rsf:id="chart-type">
+            <option value="bar">Bar</option>
+            <option value="pie">Pie</option>
+          </select>
+          <a rsf:id="results-refresh" class="icon refresh">Refresh</a>
+        </div>
+        <img id="poll-chart-bar" rsf:id="poll-chart-bar" alt="Bar Chart" />
+        <img id="poll-chart-pie" rsf:id="poll-chart-pie" alt="Pie Chart" />
+      </div>
+
+      <form th:action="@{/index}" method="GET">
+        <p class="act">
+          <input type="submit" accesskey="x" th:value="#{results_cancel}" class="active"/>
+        </p>
+      </form>
+    </div>
+    <script src="/polls-tool/js/results.js"></script>
+  </body>
+</html>

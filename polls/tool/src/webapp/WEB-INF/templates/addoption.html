@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+
+  <head>
+    <title>Polls: Add/edit a poll</title>
+    <link href="/library/skin/tool_base.css" type="text/css" rel="stylesheet" media="all" />
+    <link href="/library/skin/morpheus-default/tool.css" type="text/css" rel="stylesheet" media="all" />
+    <script src="/library/js/headscripts.js"></script>
+	  <script>includeLatestJQuery('polls');</script>
+	  <link href="/library/webjars/jquery-ui/1.12.1/jquery-ui.min.css" rel="stylesheet" type="text/css" />
+    <meta th:remove="tag" th:utext="${sakaiHtmlHead}"></meta>
+  </head>
+
+  <body>
+    <div class="portletBody">
+      <div id="menu" th:insert="fragments/menus :: main(${active})" />
+      <h3 th:text="#{new_option_title}">new_option_title</h3>
+      <p><span th:text="#{poll_question_title}">poll_question_title</span>: <span th:text="${poll.text}">pollText</span></p>
+
+      <div id="errors">
+        <div class="alertMessage">We Have Errors!</div>
+      </div>
+  
+      <form action="#" th:action="@{/addoption}" th:object="${option}" method="POST">
+
+        <input type="hidden" th:field="*{optionId}" />
+        <input type="hidden" th:field="*{pollId}" />
+        <input type="hidden" th:field="*{uuid}" />
+
+        <label class="label" rsf:id="msg=new_poll_option" for="optText:1:input">Option:</label>
+
+        <div class="pollEditorSmall">
+          <div id="poll-instructions">
+            <textarea id="text" th:field="*{text}" cols="50" rows="3"></textarea>
+          </div>
+        </div>
+
+        <p class="act">
+          <button type="submit" name="action" value="justsave" th:text="#{new_poll_submit}" class="active"></button>
+          <button type="submit" name="action" value="saveandadd" th:text="#{new_poll_saveoption}"></button>
+          <button type="submit" name="action" value="cancel" th:text="#{new_poll_cancel}"></button>
+        </p>
+      </form>
+    </div>
+    <script type="text/javascript">
+      sakai.editor.editors.ckeditor.launch('text');
+    </script>
+  </body>
+</html>
