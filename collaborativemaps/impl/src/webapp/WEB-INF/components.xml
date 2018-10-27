@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:context="http://www.springframework.org/schema/context"
+    xmlns:jpa="http://www.springframework.org/schema/data/jpa"
+    xmlns:tx="http://www.springframework.org/schema/tx"
+    xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+    http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+    http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd
+    http://www.springframework.org/schema/data/jpa
+    http://www.springframework.org/schema/data/jpa/spring-jpa.xsd">
+
+    <context:component-scan base-package="org.sakaiproject.collaborativemaps" />
+    <!--jpa:repositories base-package="org.sakaiproject" /-->
+    <tx:annotation-driven transaction-manager="org.sakaiproject.springframework.orm.hibernate.GlobalTransactionManager"/>
+
+    <bean id="org.sakaiproject.collaborativemaps.api.persistence.CollaborativeMapRepository"
+          class="org.sakaiproject.collaborativemaps.impl.persistence.CollaborativeMapRepositoryImpl">
+        <property name="sessionFactory" ref="org.sakaiproject.springframework.orm.hibernate.GlobalSessionFactory"/>
+    </bean>
+
+	<bean id="org.sakaiproject.springframework.orm.hibernate.impl.AdditionalHibernateMappings.collaborativemaps"
+          class="org.sakaiproject.springframework.orm.hibernate.impl.AdditionalHibernateMappingsImpl">
+        <property name="annotatedClasses">
+            <list>
+                <value>org.sakaiproject.collaborativemaps.api.model.CollaborativeMap</value>
+                <!--
+                <value>org.sakaiproject.collaborativemaps.api.model.CollaborativeMapMarker</value>
+                <value>org.sakaiproject.collaborativemaps.api.model.CollaborativeMapConnection</value>
+                <value>org.sakaiproject.collaborativemaps.api.model.CollaborativeMapColour</value>
+                -->
+            </list>
+        </property>
+    </bean>
+</beans>

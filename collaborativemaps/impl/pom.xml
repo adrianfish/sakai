@@ -1,0 +1,46 @@
+<?xml version="1.0"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    
+    <modelVersion>4.0.0</modelVersion>
+    
+    <name>COLLABORATIVE MAPS IMPL</name>
+    <artifactId>collaborativemaps-impl</artifactId>
+    <groupId>org.sakaiproject.collaborativemaps</groupId>
+    
+    <parent>
+        <artifactId>collaborativemaps</artifactId>
+        <groupId>org.sakaiproject.collaborativemaps</groupId>
+        <version>19-SNAPSHOT</version>
+    </parent>
+    
+    <packaging>sakai-component</packaging>
+    
+    <dependencies>
+        <dependency>
+            <groupId>org.sakaiproject.kernel</groupId>
+            <artifactId>sakai-kernel-private</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.sakaiproject.collaborativemaps</groupId>
+            <artifactId>collaborativemaps-api</artifactId>
+            <version>${project.version}</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-orm</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.data</groupId>
+            <artifactId>spring-data-jpa</artifactId>
+        </dependency>
+	    <dependency>
+            <groupId>org.springframework.data</groupId>
+            <artifactId>spring-data-rest-core</artifactId>
+	    </dependency>
+    </dependencies>
+</project>
