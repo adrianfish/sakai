@@ -17,6 +17,7 @@ package org.sakaiproject.gradebookng.business;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
@@ -63,6 +64,8 @@ import org.sakaiproject.gradebookng.business.util.EventHelper;
 import org.sakaiproject.gradebookng.business.util.FormatHelper;
 import org.sakaiproject.gradebookng.business.util.GbStopWatch;
 import org.sakaiproject.gradebookng.tool.model.GradebookUiSettings;
+import org.sakaiproject.section.api.SectionManager;
+import org.sakaiproject.section.api.coursemanagement.EnrollmentRecord;
 import org.sakaiproject.service.gradebook.shared.AssessmentNotFoundException;
 import org.sakaiproject.service.gradebook.shared.Assignment;
 import org.sakaiproject.service.gradebook.shared.CategoryDefinition;
@@ -132,6 +135,9 @@ public class GradebookNgBusinessService {
 
 	@Setter
 	private GradebookExternalAssessmentService gradebookExternalAssessmentService;
+
+	@Setter
+	private SectionManager sectionManager;
 
 	@Setter
 	private SecurityService securityService;
@@ -955,6 +961,19 @@ public class GradebookNgBusinessService {
 	 */
 	public List<GbUser> getGbUsersForUiSettings(List<String> userUuids, GradebookUiSettings settings, Site site) {
 
+		Map<String, List<String>> userSections = new HashMap<>();
+		for (CourseSection cs : sectionManager.getSections(site.getId())) {
+			for (EnrollmentRecord er : sectionManager.getSectionEnrollments(cs.getUuid())) {
+				String userId = er.getUser().getUserUid();
+				List<String> sections = userSections.get(userId);
+				if (sections == null) {
+					userSections.put(userId, new ArrayList<>(Arrays.asList(cs.getTitle())));
+				} else {
+				    sections.add(cs.getTitle());
+				}
+			}
+		}
+
 		List<User> users = getUsers(userUuids);
 		List<GbUser> gbUsers = new ArrayList<>(users.size());
 		if (settings.getStudentSortOrder() != null) {
@@ -974,8 +993,9 @@ public class GradebookNgBusinessService {
 				Collections.sort(users, comp);
 			}
 		}
+
 		for (User u : users) {
-			gbUsers.add(new GbUser(u, getStudentNumber(u, site)));
+			gbUsers.add(new GbUser(u, getStudentNumber(u, site)).setSections(userSections.get(u.getId())));
 		}
 
 		return gbUsers;
@@ -2456,6 +2476,15 @@ public class GradebookNgBusinessService {
 		}
 
 		return getCandidateDetailProvider().getInstitutionalNumericId(u, site).orElse("");
+	}
+
+	/**
+	 * Are there any sections in the current site?
+	 */
+	public boolean isSectionsVisible() {
+
+		final Optional<Site> site = getCurrentSite();
+		return site.isPresent() && !sectionManager.getSections(site.get().getId()).isEmpty();
 	}
 
 	/**

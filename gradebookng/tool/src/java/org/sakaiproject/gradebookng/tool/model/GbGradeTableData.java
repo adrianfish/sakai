@@ -30,6 +30,10 @@ import org.sakaiproject.service.gradebook.shared.GradebookInformation;
 import org.sakaiproject.service.gradebook.shared.SortType;
 import org.sakaiproject.tool.gradebook.Gradebook;
 
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+
+@EqualsAndHashCode @Getter
 public class GbGradeTableData {
 	private List<Assignment> assignments;
 	private List<GbStudentGradeInfo> grades;
@@ -42,6 +46,7 @@ public class GbGradeTableData {
 	private boolean isUserAbleToEditAssessments;
 	private Map<String, Double> courseGradeMap;
 	private boolean isStudentNumberVisible;
+	private boolean isSectionsVisible;
 
 	public GbGradeTableData(final GradebookNgBusinessService businessService,
 			final GradebookUiSettings settings) {
@@ -85,6 +90,7 @@ public class GbGradeTableData {
 		courseGradeMap = gradebook.getSelectedGradeMapping().getGradeMap();
 
 		isStudentNumberVisible = businessService.isStudentNumberVisible();
+		isSectionsVisible = businessService.isSectionsVisible();
 	}
 
 	public List<Assignment> getAssignments() {
