@@ -24,6 +24,9 @@ import java.io.Serializable;
 import java.util.Comparator;
 import java.util.Date;
 
+import lombok.Getter;
+import lombok.Setter;
+
 import org.azeckoski.reflectutils.annotations.ReflectIgnoreClassFields;
 import org.sakaiproject.authz.api.Member;
 import org.sakaiproject.authz.api.Role;
@@ -40,6 +43,7 @@ import org.sakaiproject.entitybroker.entityprovider.annotations.EntityTitle;
  * @author Aaron Zeckoski (azeckoski @ gmail.com)
  */
 @ReflectIgnoreClassFields({"role"})
+@Getter @Setter
 public class EntityMember implements Member {
     public final static long serialVersionUID = 1l;
 
@@ -180,62 +184,12 @@ public class EntityMember implements Member {
         return togo;
     }
 
-    @EntityId
-    public String getId() {
-        return id;
-    }
-
-    @EntityOwner
-    public String getUserId() {
-        return userId;
-    }
-
-    public void setUserId(String userId) {
-        this.userId = userId;
-    }
-
-    public String getLocationReference() {
-        return locationReference;
-    }
-
-    public void setLocationReference(String locationReference) {
-        this.locationReference = locationReference;
-    }
-
-    public String getMemberRole() {
-        return memberRole;
-    }
-
-    public void setMemberRole(String memberRole) {
-        this.memberRole = memberRole;
-    }
-
     public String getUserEid() {
         return userEid == null ? getUserId() : userEid;
     }
 
-    public boolean isProvided() {
-        return provided;
-    }
-
-    public void setProvided(boolean provided) {
-        this.provided = provided;
-    }
-
-    public boolean isActive() {
-        return active;
-    }
-
     public String getUserDisplayName() {
         return userDisplayName == null ? getUserEid() : userDisplayName;
-    }
-
-    public String getUserFirstName() {
-        return userFirstName;
-    }
-
-    public String getUserLastName() {
-        return userLastName;
     }
 
     public String getUserSortName() {
@@ -244,11 +198,6 @@ public class EntityMember implements Member {
 
     public String getUserEmail() {
         return userEmail == null ? getUserEid() : userEmail;
-    }
-
-    // TODO
-    public Date getLastLoginTime() {
-        return lastLoginTime;
     }
 
     /* (non-Javadoc)
@@ -269,13 +218,6 @@ public class EntityMember implements Member {
             return member.getUserDisplayId();
         }
         throw new UnsupportedOperationException();
-    }
-
-    /* (non-Javadoc)
-     * @see org.sakaiproject.authz.api.Member#setActive(boolean)
-     */
-    public void setActive(boolean active) {
-        this.active = active;
     }
 
     /* (non-Javadoc)

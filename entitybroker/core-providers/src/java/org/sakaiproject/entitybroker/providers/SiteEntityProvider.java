@@ -99,7 +99,6 @@ RESTful, ActionsExecutable, Redirectable, RequestStorable, DepthLimitable {
 
     @Getter
     private int maxDepth = 7;
-
     private SiteService siteService;
     private AuthzGroupService authzGroupService;
     private FunctionManager functionManager;

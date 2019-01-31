@@ -26,7 +26,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.sakaiproject.entitybroker.entityprovider.annotations.EntityDateCreated;
+import lombok.Getter;
+import lombok.Setter;
+
 import org.sakaiproject.entitybroker.entityprovider.annotations.EntityFieldRequired;
 import org.sakaiproject.entitybroker.entityprovider.annotations.EntityId;
 import org.sakaiproject.entitybroker.entityprovider.annotations.EntityLastModified;
@@ -41,11 +43,13 @@ import org.sakaiproject.tool.api.ToolSession;
  * @author Aaron Zeckoski (azeckoski @ gmail.com)
  */
 @SuppressWarnings("unchecked")
+@Getter @Setter
 public class EntitySession implements Session {
 
    @EntityId
    private String id;
    private long creationTime;
+   @EntityLastModified
    private long lastAccessedTime;
    private int maxInactiveInterval;
    private String userEid;
@@ -53,16 +57,13 @@ public class EntitySession implements Session {
    private String userId;
    private boolean active = true;
 
+   @Setter
+   public Map<String, Object> attributes;
+
    private long currentTime = System.currentTimeMillis();
    public long getCurrentTime() {
       currentTime = System.currentTimeMillis();
       return currentTime;
-   }
-
-   public Map<String, Object> attributes;
-
-   public void setAttributes(Map<String, Object> attributes) {
-      this.attributes = attributes;
    }
 
    public Map<String, Object> getAttributes() {
@@ -100,24 +101,6 @@ public class EntitySession implements Session {
       this.active = true;
       // now we would normally do attributes but for now we are not doing those
       // TODO figure out attributes security
-   }
-
-   @EntityId
-   public String getId() {
-      return id;
-   }
-
-   public void setId(String id) {
-      this.id = id;
-   }
-
-   @EntityDateCreated
-   public long getCreationTime() {
-      return creationTime;
-   }
-
-   public void setCreationTime(long creationTime) {
-      this.creationTime = creationTime;
    }
 
    @EntityLastModified

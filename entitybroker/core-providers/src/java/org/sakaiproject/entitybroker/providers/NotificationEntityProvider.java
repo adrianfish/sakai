@@ -21,6 +21,7 @@ package org.sakaiproject.entitybroker.providers;
 
 import java.util.Map;
 
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
 import org.sakaiproject.entitybroker.EntityView;
@@ -45,6 +46,7 @@ import org.sakaiproject.user.api.UserNotDefinedException;
  * @author Aaron Zeckoski (azeckoski @ gmail.com) (azeckoski @ unicon.net)
  */
 @Slf4j
+@Setter
 public class NotificationEntityProvider extends AbstractEntityProvider implements ActionsExecutable, Describeable {
 
     /**
@@ -180,17 +182,4 @@ public class NotificationEntityProvider extends AbstractEntityProvider implement
         }
         return userEId;
     }
-
-    public void setEventTrackingService(EventTrackingService eventTrackingService) {
-        this.eventTrackingService = eventTrackingService;
-    }
-
-    public void setNotificationService(NotificationService notificationService) {
-        this.notificationService = notificationService;
-    }
-
-    public void setUserDirectoryService(UserDirectoryService userDirectoryService) {
-        this.userDirectoryService = userDirectoryService;
-    }
-
 }

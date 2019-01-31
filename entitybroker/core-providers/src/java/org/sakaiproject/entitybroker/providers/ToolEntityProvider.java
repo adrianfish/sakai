@@ -43,6 +43,8 @@ import org.sakaiproject.entitybroker.util.AbstractEntityProvider;
 import org.sakaiproject.tool.api.Tool;
 import org.sakaiproject.tool.api.ToolManager;
 
+import lombok.Setter;
+
 /**
  * ToolEntityProvider
  *
@@ -50,11 +52,13 @@ import org.sakaiproject.tool.api.ToolManager;
  * Created on Sep 4, 2013
  * 
  */
+@Setter
 public class ToolEntityProvider extends AbstractEntityProvider implements CoreEntityProvider, 
         Outputable, Resolvable, Describeable, ActionsExecutable, CollectionResolvable {
 
     public final static String ENTITY_PREFIX = "tool";
 
+    @Setter
     private ToolManager toolManager;
 
     /* (non-Javadoc)
@@ -198,10 +202,6 @@ public class ToolEntityProvider extends AbstractEntityProvider implements CoreEn
 
         Collections.sort(publicToolIds);
         return new ActionReturn(publicToolIds);
-    }
-
-    public void setToolManager(ToolManager toolManager) {
-        this.toolManager = toolManager;
     }
 
     private Tool getTool(String id) {

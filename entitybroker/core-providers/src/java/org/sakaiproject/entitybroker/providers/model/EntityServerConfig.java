@@ -22,18 +22,21 @@ package org.sakaiproject.entitybroker.providers.model;
 
 import org.sakaiproject.entitybroker.entityprovider.annotations.EntityId;
 
+import lombok.Getter;
+import lombok.Setter;
 
 /**
  * This entity represents a Sakai server configuration object
  * 
  * @author Aaron Zeckoski (azeckoski @ gmail.com)
  */
+@Getter @Setter
 public class EntityServerConfig {
 
    @EntityId
    private String name;
    private Object value;
-   private String type = "java.lang.String"; // default
+   private String type = "java.lang.String";
 
    public EntityServerConfig() {}
    
@@ -46,30 +49,4 @@ public class EntityServerConfig {
       this(name, value);
       this.type = type;
    }
-
-   @EntityId
-   public String getName() {
-      return name;
-   }
-   
-   public void setName(String name) {
-      this.name = name;
-   }
-   
-   public Object getValue() {
-      return value;
-   }
-   
-   public void setValue(Object value) {
-      this.value = value;
-   }
-   
-   public String getType() {
-      return type;
-   }
-   
-   public void setType(String type) {
-      this.type = type;
-   }
-
 }

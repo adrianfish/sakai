@@ -27,6 +27,8 @@ import java.util.Vector;
 
 import javax.servlet.http.HttpServletRequest;
 
+import lombok.Getter;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
 import org.sakaiproject.authz.api.AuthzGroupService;
@@ -69,6 +71,8 @@ import org.sakaiproject.util.IdPwEvidence;
  * @author Aaron Zeckoski (azeckoski @ gmail.com)
  */
 @Slf4j
+@Getter
+@Setter
 public class SessionEntityProvider extends AbstractEntityProvider implements CoreEntityProvider, CRUDable, CollectionResolvable, 
       Inputable, Outputable, RequestAware, Describeable, RedirectDefinable, ActionsExecutable {
 
@@ -78,54 +82,16 @@ public class SessionEntityProvider extends AbstractEntityProvider implements Cor
    protected static final String SU_WS_BECOME_USER = "su.ws.become";
 
    public AuthenticationManager authenticationManager;
-   public void setAuthenticationManager(AuthenticationManager authenticationManager) {
-      this.authenticationManager = authenticationManager;
-   }
-
    public SessionManager sessionManager;
-   public void setSessionManager(SessionManager sessionManager) {
-      this.sessionManager = sessionManager;
-   }
-
    public UserDirectoryService userDirectoryService;
-   public void setUserDirectoryService(UserDirectoryService userDirectoryService) {
-      this.userDirectoryService = userDirectoryService;
-   }
-
    public SecurityService securityService;
-   public SecurityService getSecurityService() {
-	  return securityService;
-   }
-
-   public void setSecurityService(SecurityService securityService) {
-	  this.securityService = securityService;
-   }
-
    public AuthzGroupService authzGroupService;
-
-   public AuthzGroupService getAuthzGroupService() {
-	  return authzGroupService;
-   }
-
-   public void setAuthzGroupService(AuthzGroupService authzGroupService) {
-      this.authzGroupService = authzGroupService;
-   }
-
    public EventTrackingService eventTrackingService;
-
-   public EventTrackingService getEventTrackingService() {
-	  return eventTrackingService;
-   }
-
-   public void setEventTrackingService(EventTrackingService eventTrackingService) {
-	  this.eventTrackingService = eventTrackingService;
-   }
 
    public static String PREFIX = "session";
    public String getEntityPrefix() {
       return PREFIX;
    }
-
 
    public TemplateMap[] defineURLMappings() {
 	   // see javadoc for this method for notes on special mappings

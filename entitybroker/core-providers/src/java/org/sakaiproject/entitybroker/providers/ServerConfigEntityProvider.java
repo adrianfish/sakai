@@ -51,6 +51,7 @@ import org.sakaiproject.entitybroker.entityprovider.search.Search;
 import org.sakaiproject.entitybroker.providers.model.EntityServerConfig;
 import org.sakaiproject.entitybroker.util.AbstractEntityProvider;
 
+import lombok.Setter;
 
 /**
  * This provides access to the server configuration as entities,
@@ -79,15 +80,11 @@ public class ServerConfigEntityProvider extends AbstractEntityProvider implement
             "display.users.present"
     };
 
+    @Setter
     private ServerConfigurationService serverConfigurationService;
-    public void setServerConfigurationService(ServerConfigurationService serverConfigurationService) {
-        this.serverConfigurationService = serverConfigurationService;
-    }
 
+    @Setter
     private ClusterService clusterService;
-    public void setClusterService(ClusterService clusterService) {
-        this.clusterService = clusterService;
-    }
 
     public static String PREFIX = "server-config";
     public String getEntityPrefix() {

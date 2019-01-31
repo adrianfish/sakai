@@ -38,6 +38,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
 import org.sakaiproject.api.privacy.PrivacyManager;
@@ -80,51 +81,18 @@ import org.sakaiproject.userauditservice.api.UserAuditService;
  * @author Aaron Zeckoski (azeckoski @ gmail.com)
  */
 @Slf4j
+@Setter
 public class MembershipEntityProvider extends AbstractEntityProvider implements CoreEntityProvider,
 RESTful, ActionsExecutable {
 
     private SiteService siteService;
     private AuthzGroupService authzGroupService;
-
-    public void setAuthzGroupService(AuthzGroupService authzGroupService) {
-		this.authzGroupService = authzGroupService;
-	}
-
-	public void setSiteService(SiteService siteService) {
-        this.siteService = siteService;
-    }
-
     private UserEntityProvider userEntityProvider;
-
-    public void setUserEntityProvider(UserEntityProvider userEntityProvider) {
-        this.userEntityProvider = userEntityProvider;
-    }
-
     private EmailService emailService;
-
-    public void setEmailService(EmailService emailService) {
-        this.emailService = emailService;
-    }
-    
     private PrivacyManager privacyManager;
-    public void setPrivacyManager(PrivacyManager privacyManager){
-    	this.privacyManager = privacyManager;
-    }
-    
     private SecurityService securityService;
-    public void setSecurityService(SecurityService securityService){
-    	this.securityService = securityService;
-    }
-
-    private static UserDirectoryService userDirectoryService;
-    public void setUserDirectoryService(UserDirectoryService userDirectoryService) {
-        this.userDirectoryService = userDirectoryService;
-    }
-
-    private static UserAuditRegistration userAuditRegistration;
-    public void setUserAuditRegistration(UserAuditRegistration userAuditRegistration) {
-        this.userAuditRegistration = userAuditRegistration;
-    }
+    private UserDirectoryService userDirectoryService;
+    private UserAuditRegistration userAuditRegistration;
 
     public static String PREFIX = "membership";
 

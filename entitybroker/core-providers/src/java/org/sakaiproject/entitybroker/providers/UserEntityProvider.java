@@ -26,6 +26,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
 import org.azeckoski.reflectutils.FieldUtils;
@@ -65,33 +66,15 @@ import org.sakaiproject.user.api.UserPermissionException;
  * @author Aaron Zeckoski (azeckoski @ gmail.com)
  */
 @Slf4j
+@Setter
 public class UserEntityProvider extends AbstractEntityProvider implements CoreEntityProvider, RESTful, Describeable {
 
     private static final String ID_PREFIX = "id=";
 
     private UserDirectoryService userDirectoryService;
-    public void setUserDirectoryService(UserDirectoryService userDirectoryService) {
-        this.userDirectoryService = userDirectoryService;
-    }
-
     private SiteService siteService;
-    public void setSiteService(SiteService siteService) {
-        this.siteService = siteService;
-    }
-
-
     private DeveloperHelperService developerHelperService;
-    public void setDeveloperHelperService(
-            DeveloperHelperService developerHelperService) {
-        this.developerHelperService = developerHelperService;
-    }
-
     private ServerConfigurationService serverConfigurationService;
-    public void setServerConfigurationService(
-            ServerConfigurationService serverConfigurationService) {
-        this.serverConfigurationService = serverConfigurationService;
-    }
-
 
     public static String PREFIX = "user";
     public String getEntityPrefix() {

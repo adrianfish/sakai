@@ -49,6 +49,9 @@ import org.sakaiproject.user.api.User;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+import lombok.Getter;
+import lombok.Setter;
+
 /**
  * This is needed to allow RESTful access to the group data
  * 
@@ -56,34 +59,41 @@ import org.w3c.dom.Element;
  */
 @SuppressWarnings("unchecked")
 @ReflectIgnoreClassFields({"createdBy","modifiedBy","containingSite","members","properties","propertiesEdit","roles"})
+@Getter @Setter
 public class EntityGroup implements Group {
 
     private static final long serialVersionUID = 7526472295622776147L;
 
     @EntityId
     private String id;
+
     @EntityFieldRequired
     private String siteId;
+
     @EntityFieldRequired
+    @EntityTitle
     private String title;
+
+    @EntitySummary
     private String description;
+
     private String joinerRole;
     private String maintainRole;
     private String providerGroupId;
+
+    /* the id of the owner of this group (will match the created by user id)*/
+    @EntityOwner
     private String owner;
+
     private long lastModified;
     private String[] userRoles;
-
     public Map<String, String> props;
+
     public Map<String, String> getProps() {
         if (props == null) {
             props = new HashMap<String, String>();
         }
         return props;
-    }
-
-    public void setProps(Map<String, String> props) {
-        this.props = props;
     }
 
     public void setProperty(String key, String value) {
@@ -141,36 +151,6 @@ public class EntityGroup implements Group {
         }
     }
 
-
-    @EntityId
-    public String getId() {
-        return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
-    }
-    
-    public String getSiteId() {
-        return siteId;
-    }
-
-    public void setSiteId(String siteId) {
-        this.siteId = siteId;
-    }
-
-    /**
-     * @return the id of the owner of this group (will match the created by user id)
-     */
-    @EntityOwner
-    public String getOwner() {
-        return owner;
-    }
-
-    public void setOwner(String owner) {
-        this.owner = owner;
-    }
-
     /**
      * Special method
      * @return the owner data for the current site owner
@@ -199,48 +179,6 @@ public class EntityGroup implements Group {
     
     public void setLastModified(long lastModified) {
         throw new UnsupportedOperationException("Cannot set the last modified time manually");
-    }
-
-    @EntityTitle
-    public String getTitle() {
-        return title;
-    }
-
-    public void setTitle(String title) {
-        this.title = title;
-    }
-
-    @EntitySummary
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
-    public String getJoinerRole() {
-        return joinerRole;
-    }
-
-    public void setJoinerRole(String joinerRole) {
-        this.joinerRole = joinerRole;
-    }
-
-    public String getMaintainRole() {
-        return maintainRole;
-    }
-
-    public void setMaintainRole(String maintainRole) {
-        this.maintainRole = maintainRole;
-    }
-
-    public String getProviderGroupId() {
-        return providerGroupId;
-    }
-
-    public void setProviderGroupId(String providerGroupId) {
-        this.providerGroupId = providerGroupId;
     }
 
     public String[] getUserRoles() {

@@ -20,11 +20,15 @@
 
 package org.sakaiproject.entitybroker.providers.model;
 
+import lombok.Getter;
+import lombok.Setter;
+
 /**
  * Represents an owner of something
  * 
  * @author Aaron Zeckoski (azeckoski @ gmail.com)
  */
+@Getter @Setter
 public class Owner {
 
     private String userId;
@@ -39,29 +43,4 @@ public class Owner {
         this.userDisplayName = displayName;
         this.userEntityURL = "/direct/user/" + userId;
     }
-
-    public String getUserId() {
-        return userId;
-    }
-
-    public void setUserId(String userId) {
-        this.userId = userId;
-    }
-
-    public String getUserDisplayName() {
-        return userDisplayName;
-    }
-
-    public void setUserDisplayName(String userDisplayName) {
-        this.userDisplayName = userDisplayName;
-    }
-
-    public String getUserEntityURL() {
-        return userEntityURL;
-    }
-
-    public void setUserEntityURL(String userEntityURL) {
-        this.userEntityURL = userEntityURL;
-    }
-
 }
