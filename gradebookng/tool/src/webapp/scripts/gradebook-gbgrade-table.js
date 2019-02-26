@@ -3115,7 +3115,7 @@ GbGradeTable.setupStudentNumberColumn = function() {
           return student.studentNumber || "";
         }),
         editor: false,
-        width: 140,
+        width: studentNumberColumnWidth,
     });
 };
 
@@ -3163,7 +3163,7 @@ GbGradeTable.setupSectionsColumn = function () {
         return student.sections || "";
       }),
       editor: false,
-      width: 140,
+      width: sectionsColumnWidth,
     });
 };
 
