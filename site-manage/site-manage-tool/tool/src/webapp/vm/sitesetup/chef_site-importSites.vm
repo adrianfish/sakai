@@ -77,9 +77,11 @@
 											#set($toolTitle = $t.getTitle())
 										#end
 									#end
-									#if($toolId == "sakai.iframe.site")
-										#set($toolTitle = $siteInfoToolTitle)
-									#end
+								#end
+								#if($toolId == "sakai.iframe.site")
+									#set($toolTitle = $siteInfoToolTitle)
+								#end
+<<<<<<< HEAD
 								
 									#set($alternateToolTitles = $!alternateToolTitlesMap.get($toolId))
 								
@@ -97,6 +99,10 @@
     									#end
 									</h5>
 								</td>
+=======
+								</h5>
+							</td>
+>>>>>>> 3880d64b5d... SAK-40339 Added site import options for tools. (#6885)
 								#set ($siteCount=0)
 								#foreach($site in $importSites.keys())
 									#set ($siteCount=$siteCount + 1)
@@ -118,8 +124,33 @@
     										#end
 										
 											#if ($toolFound)
-												<input type="checkbox" id="toolSite$toolCount$siteCount" name="$toolId" value="$site.Id" #if($!selectedSites.contains($site.Id))checked="checked"#end />
+												<input type="checkbox" id="toolSite$toolCount$siteCount"
+													class="siteimport-tool-checkbox" name="$toolId" value="$site.Id"
+													#if ($importOptions.get(${toolId}).isPresent())
+													data-options-id="${toolCount}-${siteCount}-options"
+													#end
+													#if ($!selectedSites.contains($site.Id))
+													checked="checked"
+													#end />
 												<label  class="skip" for="toolSite$toolCount$siteCount">$tlang.getString('import.choose.label1')  $toolTitle $tlang.getString('import.choose.label2') $validator.escapeHtml($site.getTitle())</label>
+                                                #if ($importOptions.get(${toolId}).isPresent())
+                                                <a id="toolSite${toolCount}${siteCount}-options-link" style="display: none;" href="javascript:;" class="siteimport-options-link" data-options-id="${toolCount}-${siteCount}-options" title="$tlang.getString('import.options.title')">
+                                                    <span title="$tlang.getString('import.options.title')">$tlang.getString('import.options.title').toLowerCase()</span>
+                                                </a>
+                                                <div id="${toolCount}-${siteCount}-options" class="siteimport-options" style="display: none;">
+                                                    #foreach ($option in $importOptions.get(${toolId}).get())
+                                                    #set ($optionPropKey = "import.options." + ${option})
+                                                    #set ($optionPropHelpKey = $optionPropKey + ".help")
+                                                    <div>
+                                                        <label>
+                                                            <input type="checkbox" class="siteimport-option" name="import-option-${option}-tool-${toolId}" value="true"/>
+                                                            $tlang.getString(${optionPropKey})
+                                                        </label>
+                                                        <span class="import-option-help fa fa-question-circle" data-toggle="popover" data-content="$tlang.getString(${optionPropHelpKey})"/>
+                                                    </div>
+													#end
+                                                </div>
+                                                #end
 											#else
 												<input type="checkbox" id="toolSite$toolCount$siteCount"  name="$toolId" value="$site.Id" disabled="disabled" />
 											#end

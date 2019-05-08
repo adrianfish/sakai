@@ -89,7 +89,6 @@ import org.sakaiproject.component.cover.ServerConfigurationService;
 import org.sakaiproject.entity.api.Entity;
 import org.sakaiproject.entity.api.EntityProducer;
 import org.sakaiproject.entity.api.EntityTransferrer;
-import org.sakaiproject.entity.api.EntityTransferrerRefMigrator;
 import org.sakaiproject.entity.api.HttpAccess;
 import org.sakaiproject.entity.api.Reference;
 import org.sakaiproject.entity.api.ResourceProperties;
@@ -141,7 +140,7 @@ import org.sakaiproject.util.RequestFilter;
  */
 @Slf4j
 public class LessonBuilderEntityProducer extends AbstractEntityProvider
-    implements EntityProducer, EntityTransferrer, EntityTransferrerRefMigrator, Serializable, 
+    implements EntityProducer, EntityTransferrer, Serializable,
 	       CoreEntityProvider, AutoRegisterEntityProvider, Statisticable, InputTranslatable, Createable, ToolApi  {
    private static final String ARCHIVE_VERSION = "2.4"; // in case new features are added in future exports
    private static final String VERSION_ATTR = "version";
@@ -1322,20 +1321,11 @@ public class LessonBuilderEntityProducer extends AbstractEntityProvider
       return true;
    }
    
-	public void transferCopyEntities(String fromContext, String toContext, List ids)
-	{
-	    transferCopyEntitiesImpl(fromContext, toContext, ids, false);
-	}
-
-	public void transferCopyEntities(String fromContext, String toContext, List ids, boolean cleanup) {
-	    transferCopyEntitiesImpl(fromContext, toContext, ids, cleanup);
-	}    
-
-	public Map<String, String> transferCopyEntitiesRefMigrator(String fromContext, String toContext, List<String> ids) {
+	public Map<String, String> transferCopyEntities(String fromContext, String toContext, List<String> ids, List<String> options) {
 	    return transferCopyEntitiesImpl(fromContext, toContext, ids, false);
 	}
 
-	public Map<String, String> transferCopyEntitiesRefMigrator(String fromContext, String toContext, List<String> ids, boolean cleanup) {
+	public Map<String, String> transferCopyEntities(String fromContext, String toContext, List<String> ids, List<String> options, boolean cleanup) {
 	    return transferCopyEntitiesImpl(fromContext, toContext, ids, cleanup);
 	}
    

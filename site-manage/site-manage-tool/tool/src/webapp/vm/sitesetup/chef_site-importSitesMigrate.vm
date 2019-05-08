@@ -85,8 +85,35 @@
 									#end
 								
 									#if ($toolFound)
-										<input type="checkbox" id="toolSite$toolCount$siteCount" name="$toolId" value="$site.Id" #if($!selectedSites.contains($site.Id))checked="checked"#end />
-										<label  class="skip" for="toolSite$toolCount$siteCount">$tlang.getString('import.choose.label1')  $toolTitle $tlang.getString('import.choose.label2') $validator.escapeHtml($site.getTitle())</label>
+										<input type="checkbox" id="toolSite$toolCount$siteCount"
+											class="siteimport-tool-checkbox" name="$toolId" value="$site.Id"
+											#if ($importOptions.get(${toolId}).isPresent())
+											data-options-id="${toolCount}-${siteCount}-options"
+											#end
+											#if ($!selectedSites.contains($site.Id))
+											checked="checked"
+											#end />
+										<label	class="skip" for="toolSite$toolCount$siteCount">
+											$tlang.getString('import.choose.label1') $toolTitle $tlang.getString('import.choose.label2') $validator.escapeHtml($site.getTitle())
+										</label>
+										#if ($importOptions.get(${toolId}).isPresent())
+										<a id="toolSite${toolCount}${siteCount}-options-link" style="display: none;" href="javascript:;" class="siteimport-options-link" data-options-id="${toolCount}-${siteCount}-options" title="$tlang.getString('import.options.title')">
+											<span title="$tlang.getString('import.options.help')">$tlang.getString('import.options.title').toLowerCase()</span>
+										</a>
+										<div id="${toolCount}-${siteCount}-options" class="siteimport-options">
+											#foreach ($option in $importOptions.get(${toolId}).get())
+											#set ($optionPropKey = "import.options." + ${option})
+											#set ($optionPropHelpKey = $optionPropKey + ".help")
+											<div>
+												<label>
+													<input type="checkbox" class="siteimport-option" name="import-option-${option}-tool-${toolId}" title="$tlang.getString(${optionPropHelpKey})" value="true"/>
+													$tlang.getString(${optionPropKey})
+												</label>
+												<span class="import-option-help fa fa-question-circle" data-toggle="popover" data-content="$tlang.getString(${optionPropHelpKey})"/>
+											</div>
+											#end
+										</div>
+										#end
 										#if ($toolId.indexOf("sakai.rwiki") != -1) $tlang.getString("sitinfimp.wikinote") #end
 									#else
 										<input type="checkbox" id="toolSite$toolCount$siteCount"  name="$toolId" value="$site.Id" disabled="disabled" />

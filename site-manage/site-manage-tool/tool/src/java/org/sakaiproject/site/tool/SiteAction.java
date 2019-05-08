@@ -38,6 +38,7 @@ import java.util.ListIterator;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Properties;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -3003,7 +3004,10 @@ public class SiteAction extends PagedResourceActionII {
 			
 			// list of all tools that participate in the archive/merge process that are in the site selected to import from
 			List<Site> importSites = new ArrayList<Site>(((Hashtable) state.getAttribute(STATE_IMPORT_SITES)).keySet());
-			List<String> allImportableToolIdsInOriginalSites = getToolsInSitesAvailableForImport(importSites);
+
+			Map<String, Optional<List<String>>> importableToolsWithOptions = getToolsInSitesAvailableForImport(importSites);
+
+			List<String> allImportableToolIdsInOriginalSites = new ArrayList<String>(importableToolsWithOptions.keySet());
 			
 			context.put("existingSite", Boolean.valueOf(existingSite));
 			
@@ -3086,6 +3090,7 @@ public class SiteAction extends PagedResourceActionII {
 			context.put("importSites", state.getAttribute(STATE_IMPORT_SITES));
 			context.put("importSitesTools", state
 					.getAttribute(STATE_IMPORT_SITE_TOOL));
+			context.put("importOptions", importableToolsWithOptions);
 			context.put("check_home", state
 					.getAttribute(STATE_TOOL_HOME_SELECTED));
 			context.put("importSupportedTools", allImportableToolIdsInOriginalSites);
@@ -3136,7 +3141,8 @@ public class SiteAction extends PagedResourceActionII {
 			
 			// list of all tools that participate in the archive/merge process that are in the site selected to import from
 			List<Site> importSites = new ArrayList<Site>(((Hashtable) state.getAttribute(STATE_IMPORT_SITES)).keySet());
-			List<String> allImportableToolIdsInOriginalSites = getToolsInSitesAvailableForImport(importSites);
+			Map<String, Optional<List<String>>> importableToolsWithOptions = getToolsInSitesAvailableForImport(importSites);
+			List<String> allImportableToolIdsInOriginalSites = new ArrayList<String>(importableToolsWithOptions.keySet());
 			
 			//sort the list of all tools by title and extract into a list of toolIds
 			//we then use this as the basis for sorting the other toolId lists
@@ -3149,7 +3155,7 @@ public class SiteAction extends PagedResourceActionII {
 			});
 				
 			final List<String> sortedToolIds = new ArrayList<String>();
-			for(MyTool m: allTools) {
+			for (MyTool m: allTools) {
 				sortedToolIds.add(m.getId());
 			}
 			
@@ -3177,7 +3183,7 @@ public class SiteAction extends PagedResourceActionII {
 			//helper var to hold the list we use for the selectedTools context variable, as we use it for the alternate toolnames too
 			List<String> selectedTools = new ArrayList<>();
 			
-			if(addMissingTools) {
+			if (addMissingTools) {
 				
                 selectedTools = allImportableToolIdsInOriginalSites;
 				
@@ -3221,6 +3227,7 @@ public class SiteAction extends PagedResourceActionII {
 			context.put("addMissingTools", addMissingTools);
 
 			context.put("importSites", state.getAttribute(STATE_IMPORT_SITES));
+			context.put("importOptions", importableToolsWithOptions);
 			context.put("importSitesTools", state
 					.getAttribute(STATE_IMPORT_SITE_TOOL));
 			context.put("check_home", state
@@ -5238,38 +5245,31 @@ public class SiteAction extends PagedResourceActionII {
 	/**
 	 * get the selected tool ids from import sites
 	 */
-	private boolean select_import_tools(ParameterParser params,
-			SessionState state) {
+	private boolean select_import_tools(ParameterParser params, SessionState state) {
+
 		// has the user selected any tool for importing?
 		boolean anyToolSelected = false;
 
 		Map<String, List<String>> importTools = new HashMap<>();
-
-		// the tools for current site
-		List<String> currentSiteTools = originalToolIds((List<String>) state.getAttribute(STATE_TOOL_REGISTRATION_SELECTED_LIST), state); // String
 		
 		//all importable tools. 
 		//depnding on the config, either one could be selected, which is valid
-		List<String> allImportableTools = new ArrayList<String>(importTools());
-		
-		if(siteManageService.isAddMissingToolsOnImportEnabled()) {
-			if (allImportableTools != null) {
-				for (int i = 0; i < allImportableTools.size(); i++) {
-					// just verify a valid tool was chosen
-					String toolId = (String) allImportableTools.get(i);
-					if (params.getStrings(toolId) != null) {
-						importTools.put(toolId, new ArrayList(Arrays.asList(params.getStrings(toolId))));
-						if (!anyToolSelected) {
-							anyToolSelected = true;
-						}
+		if (siteManageService.isAddMissingToolsOnImportEnabled()) {
+			for (String toolId : getImportableTools().keySet()) {
+				// just verify a valid tool was chosen
+				if (params.getStrings(toolId) != null) {
+					importTools.put(toolId, new ArrayList(Arrays.asList(params.getStrings(toolId))));
+					if (!anyToolSelected) {
+						anyToolSelected = true;
 					}
 				}
 			}
 		} else {
+			// the tools for current site
+			List<String> currentSiteTools = getOriginalToolIds((List<String>) state.getAttribute(STATE_TOOL_REGISTRATION_SELECTED_LIST), state);
 			if (currentSiteTools != null) {
-				for (int i = 0; i < currentSiteTools.size(); i++) {
+				for (String toolId : currentSiteTools) {
 					// any tools chosen from import sites?
-					String toolId = (String) currentSiteTools.get(i);
 					if (params.getStrings(toolId) != null) {
 						importTools.put(toolId, new ArrayList(Arrays.asList(params.getStrings(toolId))));
 						if (!anyToolSelected) {
@@ -6693,13 +6693,12 @@ private Map<String,List> getTools(SessionState state, String type, Site site) {
 	 * parameters
 	 */
 	public void doContinue(RunData data) {
+
 		// Put current form data in state and continue to the next template,
 		// make any permanent changes
-		SessionState state = ((JetspeedRunData) data)
-				.getPortletSessionState(((JetspeedRunData) data).getJs_peid());
+		SessionState state = ((JetspeedRunData) data).getPortletSessionState(((JetspeedRunData) data).getJs_peid());
 		ParameterParser params = data.getParameters();
-		int index = Integer.valueOf(params.getString("templateIndex"))
-				.intValue();
+		int index = Integer.valueOf(params.getString("templateIndex")).intValue();
 
 		// Let actionForTemplate know to make any permanent changes before
 		// continuing to the next template
@@ -6855,7 +6854,7 @@ private Map<String,List> getTools(SessionState state, String type, Site site) {
 				if (state.getAttribute(STATE_TEMPLATE_SITE_COPY_CONTENT) != null)
 				{
 					// create based on template: skip add features, and copying all the contents from the tools in template site
-					siteManageService.importToolContent(templateSite.getId(), site, true);
+					siteManageService.importToolContent(templateSite.getId(), site, null, true);
 					try {
 					    site = SiteService.getSite(site.getId());
 					} catch (Exception ee) {
@@ -7773,7 +7772,7 @@ private Map<String,List> getTools(SessionState state, String type, Site site) {
 	 * @param state The session state.
 	 * @return A filtered list of tool IDs.
 	 */
-	List<String> originalToolIds(List<String>toolIds, SessionState state) {
+	List<String> getOriginalToolIds(List<String>toolIds, SessionState state) {
 		Set<String>rv = new LinkedHashSet<>();
 
 		for (String toolId: toolIds) {
@@ -9510,9 +9509,11 @@ private Map<String,List> getTools(SessionState state, String type, Site site) {
 						Map<String, List<String>> importTools = (Map<String, List<String>>) state.getAttribute(STATE_IMPORT_SITE_TOOL);
 
 						//list of existing tools in the destination site
-						List<String> existingTools = originalToolIds((List<String>) state.getAttribute(STATE_TOOL_REGISTRATION_SELECTED_LIST), state);
+						List<String> existingTools = getOriginalToolIds((List<String>) state.getAttribute(STATE_TOOL_REGISTRATION_SELECTED_LIST), state);
 
-						boolean importTaskStarted = siteManageService.importToolsIntoSiteThread(existingSite, existingTools, importTools, false);
+						Map<String, List<String>> toolOptions = getToolOptionsFromParams(params);
+
+						boolean importTaskStarted = siteManageService.importToolsIntoSiteThread(existingSite, existingTools, importTools, toolOptions, false);
 						if (importTaskStarted) {
 							// ***** import tools here
 							state.setAttribute(IMPORT_QUEUED, rb.get("importQueued"));
@@ -9551,10 +9552,12 @@ private Map<String,List> getTools(SessionState state, String type, Site site) {
 						Map<String, List<String>> importTools = (Map<String, List<String>>) state.getAttribute(STATE_IMPORT_SITE_TOOL);
 
 						//list of existing tools in the destination site
-						List<String> existingTools = originalToolIds((List<String>) state.getAttribute(STATE_TOOL_REGISTRATION_SELECTED_LIST), state);
+						List<String> existingTools = getOriginalToolIds((List<String>) state.getAttribute(STATE_TOOL_REGISTRATION_SELECTED_LIST), state);
 
+						Map<String, List<String>> toolOptions = getToolOptionsFromParams(params);
 
-						boolean importTaskStarted = siteManageService.importToolsIntoSiteThread(existingSite, existingTools, importTools, true);
+						boolean importTaskStarted = siteManageService.importToolsIntoSiteThread(existingSite, existingTools, importTools, toolOptions, true);
+
 						if (importTaskStarted) {
 							// ***** import tools here
 							state.setAttribute(IMPORT_QUEUED, rb.get("importQueued"));
@@ -11344,7 +11347,7 @@ private Map<String,List> getTools(SessionState state, String type, Site site) {
 		site = refreshSiteObject(site);
 
 		// import
-		siteManageService.importToolsIntoSite(site, chosenList, importTools, false);
+		siteManageService.importToolsIntoSite(site, chosenList, importTools, null, false);
 		
 		// SAK-22384 add LaTeX (MathJax) support
 		if (MathJaxEnabler.prepareMathJaxToolSettingsForSave(site, state))
@@ -13310,32 +13313,28 @@ private Map<String,List> getTools(SessionState state, String type, Site site) {
 	}
 
 	/**
-	 * @return Get a list of all tools that support the import (transfer copy)
+	 * @return Get a map of all tools that support the import (transfer copy)
 	 *         option
 	 */
-	protected Set importTools() {
-		HashSet rv = new HashSet();
+	protected Map<String, Optional<List<String>>> getImportableTools() {
+
+		Map<String, Optional<List<String>>> rv = new HashMap<>();
 
 		// offer to all EntityProducers
-		for (Iterator i = EntityManager.getEntityProducers().iterator(); i
-				.hasNext();) {
-			EntityProducer ep = (EntityProducer) i.next();
+		for (EntityProducer ep : EntityManager.getEntityProducers()) {
 			if (ep instanceof EntityTransferrer) {
 				EntityTransferrer et = (EntityTransferrer) ep;
-
 				String[] tools = et.myToolIds();
 				if (tools != null) {
-					for (int t = 0; t < tools.length; t++) {
-						rv.add(tools[t]);
-					}
+					Arrays.stream(tools).forEach(t -> rv.put(t, et.getTransferOptions() ));
 				}
 			}
 		}
 
-		if (ServerConfigurationService.getBoolean("site-manage.importoption.siteinfo", true)){
-			rv.add(SiteManageConstants.SITE_INFO_TOOL_ID);
+		if (ServerConfigurationService.getBoolean("site-manage.importoption.siteinfo", true)) {
+			rv.put(SiteManageConstants.SITE_INFO_TOOL_ID, Optional.empty());
 		}
-		
+
 		return rv;
 	}
 
@@ -15323,21 +15322,20 @@ private Map<String,List> getTools(SessionState state, String type, Site site) {
 	 * @return a list of toolIds that are in the sites that are available for import
 	 * 
 	 */
-	private List<String> getToolsInSitesAvailableForImport(List<Site> sites) {
-		List<String> allImportToolIds = new ArrayList<String>(importTools());
+	private Map<String, Optional<List<String>>> getToolsInSitesAvailableForImport(List<Site> sites) {
+
+		Map<String, Optional<List<String>>> allImportTools = getImportableTools();
 		
-		List<String> importToolsInSites = new ArrayList<String>(); 
+		Map<String, Optional<List<String>>> importToolsInSites = new HashMap<String, Optional<List<String>>>();
 		
-		for(Site site: sites) {
-			for(String toolId: allImportToolIds) {
-				if(site.getToolForCommonId(toolId) != null) {
-					
+		for (Site site: sites) {
+			for (String toolId: allImportTools.keySet()) {
+				if (site.getToolForCommonId(toolId) != null) {
 					//check the tool has content. 
 					//this caters for the case where we only selected one site for import, this means the tool won't show in the list at all.
-					if(hasContent(toolId, site.getId())) {
-						importToolsInSites.add(toolId);
+					if (hasContent(toolId, site.getId())) {
+						importToolsInSites.put(toolId, allImportTools.get(toolId));
 					}
-					
 				}
 			}
 		}
@@ -15426,14 +15424,11 @@ private Map<String,List> getTools(SessionState state, String type, Site site) {
 	 */
 	private boolean hasContent(String toolId, String siteId) {
 
-		for (Object o : EntityManager.getEntityProducers()) {
-			EntityProducer ep = (EntityProducer) o;
-
+		for (EntityProducer ep : EntityManager.getEntityProducers()) {
 			if (ep instanceof EntityTransferrer) {
 				EntityTransferrer et = (EntityTransferrer) ep;
 
 				if (ArrayUtils.contains(et.myToolIds(), toolId)) {
-
 					if (ep instanceof ContentExistsAware) {
 						ContentExistsAware cea = (ContentExistsAware) ep;
 						log.debug("Checking tool content for site:" + siteId + ", tool: " + et.myToolIds());
@@ -15442,7 +15437,7 @@ private Map<String,List> getTools(SessionState state, String type, Site site) {
 				}
 			}
 		}
-		return true; //backwards compatibility
+		return true;
 	}
 
 	/**
@@ -15469,5 +15464,23 @@ private Map<String,List> getTools(SessionState state, String type, Site site) {
 		}
 
 		return true;
+	}
+
+	private Map<String, List<String>> getToolOptionsFromParams(ParameterParser params) {
+
+		Map<String, List<String>> toolOptions = new HashMap<>();
+		for (Iterator<String> iter = params.getNames(); iter.hasNext();) {
+			String name = iter.next();
+			if (name.startsWith("import-option-")) {
+				String option = name.substring(14, name.indexOf("-tool-"));
+				String toolId = name.substring(name.indexOf("-tool-") + 6);
+				if (toolOptions.get(toolId) == null) {
+					toolOptions.put(toolId, new ArrayList<>());
+				}
+				toolOptions.get(toolId).add(option);
+			}
+		}
+
+		return toolOptions;
 	}
 }

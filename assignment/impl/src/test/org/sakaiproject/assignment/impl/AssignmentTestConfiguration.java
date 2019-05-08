@@ -45,6 +45,7 @@ import org.sakaiproject.event.api.EventTrackingService;
 import org.sakaiproject.event.api.LearningResourceStoreService;
 import org.sakaiproject.hibernate.AssignableUUIDGenerator;
 import org.sakaiproject.service.gradebook.shared.GradebookExternalAssessmentService;
+import org.sakaiproject.service.gradebook.shared.GradebookFrameworkService;
 import org.sakaiproject.service.gradebook.shared.GradebookService;
 import org.sakaiproject.site.api.SiteService;
 import org.sakaiproject.springframework.orm.hibernate.AdditionalHibernateMappings;
@@ -193,6 +194,11 @@ public class AssignmentTestConfiguration {
     @Bean(name = "org_sakaiproject_service_gradebook_GradebookExternalAssessmentService")
     public GradebookExternalAssessmentService gradebookExternalAssessmentService() {
         return mock(GradebookExternalAssessmentService.class);
+    }
+
+    @Bean(name = "org.sakaiproject.service.gradebook.GradebookFrameworkService")
+    public GradebookFrameworkService gradebookFrameworkService() {
+        return mock(GradebookFrameworkService.class);
     }
 
     @Bean(name = "org.sakaiproject.service.gradebook.GradebookService")
