@@ -4128,7 +4128,7 @@ public class AssignmentServiceImpl implements AssignmentService, EntityTransferr
                 toCategoryDefinition.setName(fromCategoryDefinition.getName());
                 toCategoryDefinition.setAssignmentList(
                     Arrays.asList(new org.sakaiproject.service.gradebook.shared.Assignment[] { gbAssignment }));
-                toCategoryDefinition.setExtraCredit(fromCategoryDefinition.getExtraCredit());
+                toCategoryDefinition.setExtraCredit(fromCategoryDefinition.isExtraCredit());
                 toCategoryDefinition.setWeight(fromCategoryDefinition.getWeight());
                 toCategoryDefinition.setDropHighest(fromCategoryDefinition.getDropHighest());
                 toCategoryDefinition.setDropLowest(fromCategoryDefinition.getDropLowest());
