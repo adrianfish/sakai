@@ -9728,7 +9728,7 @@ private Map<String,List> getTools(SessionState state, String type, Site site) {
 								SiteService.save(site);
 
 								// import tool content
-								siteManageService.importToolContent(oldSiteId, site, false);
+								siteManageService.importToolContent(oldSiteId, site, null, false);
 								
 								String transferScoringData = params.getString("selectScoringData");
 								if(transferScoringData != null && transferScoringData.equals("transferScoringData")) {
