@@ -145,6 +145,8 @@ public class GradebookNgEntityProducer implements EntityProducer, EntityTransfer
 		final List<Assignment> assignments = this.gradebookService.getAssignments(fromContext);
 
 		this.gradebookService.transferGradebook(gradebookInformation, assignments, toContext);
+
+        return null;
 	}
 
 	/**
