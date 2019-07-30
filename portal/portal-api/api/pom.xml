@@ -44,6 +44,10 @@
             <artifactId>commons-api</artifactId>
         </dependency>
         <dependency>
+            <groupId>org.sakaiproject</groupId>
+            <artifactId>sakai-chat-api</artifactId>
+        </dependency>
+        <dependency>
             <groupId>javax.portlet</groupId>
             <artifactId>portlet-api</artifactId>
         </dependency>

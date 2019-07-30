@@ -56,6 +56,11 @@
                 <version>${project.version}</version>
             </dependency>
             <dependency>
+                <groupId>org.sakaiproject</groupId>
+                <artifactId>sakai-chat-api</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
                 <groupId>jtidy</groupId>
                 <artifactId>jtidy</artifactId>
                 <version>r938</version>

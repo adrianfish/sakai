@@ -101,6 +101,8 @@
     var toolName = "Announcements";
     if ("assignments" === tool) {
       toolName = "Assignments";
+    } else if ("chat" === tool) {
+      toolName = "Chat";
     } else if ("commons" === tool) {
       toolName = "Commons";
     } else if ("lessonbuilder" === tool) {
@@ -154,6 +156,9 @@
     var messageTemplate = i18n.announcement;
     if ("assignments" === bunch.type) {
       faClass = 'fa-file-text';
+    } else if ("chat" === bunch.type) {
+      faClass = 'icon-sakai--sakai-chat';
+      messageTemplate = i18n.chatMessageCreated;
     } else if ("commons" === bunch.type) {
       faClass = 'fa-bank';
       messageTemplate = i18n.academicCommentCreated;
@@ -344,6 +349,7 @@
               var allBunches = [];
               createBunches(data.alerts, "annc").forEach(alerts => allBunches.push({ type: "announcements", alerts: alerts }));
               createBunches(data.alerts, "asn").forEach(alerts => allBunches.push({ type: "assignments", alerts: alerts }));
+              createBunches(data.alerts, "chat").forEach(alerts => allBunches.push({ type: "chat", alerts: alerts }));
               createBunches(data.alerts, "commons").forEach(alerts => allBunches.push({ type: "commons", alerts: alerts }));
               createBunches(data.alerts, "lessonbuilder").forEach(alerts => allBunches.push({ type: "lessonbuilder", alerts: alerts }));
 
