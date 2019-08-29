@@ -46,8 +46,8 @@
 			<version>4.0.3</version>
 		</dependency>
 		<!-- At the moment we're unpacking the webjars, so we don't want them bundled into the WAR
-		     but we still need them as dependencies so the plugin unpacks them, that's why they
-		     have a scope of runtime -->
+			 but we still need them as dependencies so the plugin unpacks them, that's why they
+			 have a scope of runtime -->
 		<dependency>
 			<groupId>org.webjars</groupId>
 			<artifactId>codemirror</artifactId>
@@ -185,12 +185,12 @@
 			<version>4.0.0</version>
 			<scope>runtime</scope>
 		</dependency>
-        <dependency>
-            <groupId>org.webjars</groupId>
-            <artifactId>select2</artifactId>
-            <version>4.0.8</version>
-            <scope>runtime</scope>
-        </dependency>
+		<dependency>
+			<groupId>org.webjars</groupId>
+			<artifactId>select2</artifactId>
+			<version>4.0.8</version>
+			<scope>runtime</scope>
+		</dependency>
 		<dependency>
 			<groupId>org.webjars</groupId>
 			<artifactId>fullcalendar</artifactId>
@@ -203,7 +203,7 @@
 			<version>1.10.19</version>
 			<scope>runtime</scope>
 		</dependency>
-  		<dependency>
+		<dependency>
 			<groupId>org.webjars</groupId>
 			<artifactId>bootstrap-multiselect</artifactId>
 			<version>0.9.15</version>
@@ -353,72 +353,72 @@
 								</configuration>
 							</execution>
 						</executions>
-                    </plugin>
+					</plugin>
 
-                    <plugin>
-                        <groupId>com.samaxes.maven</groupId>
-                        <artifactId>minify-maven-plugin</artifactId>
-                        <version>1.7.6</version>
-                        <executions>
-                            <execution>
-                                <id>default-minify</id>
-                                <configuration>
-                                    <charset>UTF-8</charset>
-                                    <webappSourceDir>${basedir}/src/${sakai.skin.source}</webappSourceDir>
-                                    <jsSourceDir>js/src/</jsSourceDir>
-                                    <jsIncludes>*.js</jsIncludes>
-                                    <jsTargetDir>skin/${sakai.skin.target}/js</jsTargetDir>
-                                    <jsFinalFile>morpheus.scripts.js</jsFinalFile>
-                                    <jsEngine>CLOSURE</jsEngine>
-                                </configuration>
-                                <goals><goal>minify</goal></goals>
-                            </execution>
-                            <execution>
-                                <id>elfinder-minify</id>
-                                <configuration>
-                                    <charset>UTF-8</charset>
-                                    <webappSourceDir>${basedir}/src/webapp</webappSourceDir>
-                                    <jsSourceDir>editor/elfinder/sakai/js/src/</jsSourceDir>
-                                    <jsSourceFiles>
-										<jsSourceFile>sakai.js</jsSourceFile>
-										<jsSourceFile>query.js</jsSourceFile>
-										<jsSourceFile>tools.js</jsSourceFile>
-										<jsSourceFile>ui.js</jsSourceFile>
-										<jsSourceFile>resizer.js</jsSourceFile>
-										<jsSourceFile>options.js</jsSourceFile>
-										<jsSourceFile>editors.js</jsSourceFile>
-										<jsSourceFile>confirm.js</jsSourceFile>
-										<jsSourceFile>i18n.js</jsSourceFile>
-										<jsSourceFile>init.js</jsSourceFile>
-                                    </jsSourceFiles>
-                                    <jsTargetDir>editor/elfinder/sakai/js</jsTargetDir>
-                                    <jsFinalFile>sakai-elfinder.js</jsFinalFile>
-                                    <jsEngine>CLOSURE</jsEngine>
-                                </configuration>
-                                <goals><goal>minify</goal></goals>
-                            </execution>
-                        </executions>
-                    </plugin>
+					<plugin>
+						<groupId>com.github.blutorange</groupId>
+						<artifactId>closure-compiler-maven-plugin</artifactId>
+						<version>2.9.0</version>
+						<executions>
+							<execution>
+								<id>default-minify</id>
+								<configuration>
+									<charset>UTF-8</charset>
+									<baseSourceDir>${basedir}/src/${sakai.skin.source}</baseSourceDir>
+									<sourceDir>js/src/</sourceDir>
+									<includes>*.js</includes>
+									<targetDir>skin/${sakai.skin.target}/js</targetDir>
+									<outputFilename>morpheus.scripts.min.js</outputFilename>
+									<closureLanguageOut>ECMASCRIPT5</closureLanguageOut>
+								</configuration>
+								<goals><goal>minify</goal></goals>
+							</execution>
+							<execution>
+								<id>elfinder-minify</id>
+								<configuration>
+									<charset>UTF-8</charset>
+									<baseSourceDir>${basedir}/src/webapp</baseSourceDir>
+									<sourceDir>editor/elfinder/sakai/js/src/</sourceDir>
+									<includes>
+										<include>sakai.js</include>
+										<include>query.js</include>
+										<include>tools.js</include>
+										<include>ui.js</include>
+										<include>resizer.js</include>
+										<include>options.js</include>
+										<include>editors.js</include>
+										<include>confirm.js</include>
+										<include>i18n.js</include>
+										<include>init.js</include>
+									</includes>
+									<targetDir>editor/elfinder/sakai/js</targetDir>
+									<outputFilename>sakai-elfinder.min.js</outputFilename>
+									<closureLanguageOut>ECMASCRIPT5</closureLanguageOut>
+								</configuration>
+								<goals><goal>minify</goal></goals>
+							</execution>
+						</executions>
+					</plugin>
 
 					<plugin>
 					   <groupId>com.github.warmuuh</groupId>
 					   <artifactId>libsass-maven-plugin</artifactId>
 					   <version>0.2.10-libsass_3.5.3</version>
 					   <executions>
-					       <execution>
-					           <phase>process-resources</phase>
-					           <goals>
-					               <goal>compile</goal>
-					           </goals>
-					       </execution>
+						   <execution>
+							   <phase>process-resources</phase>
+							   <goals>
+								   <goal>compile</goal>
+							   </goals>
+						   </execution>
 					   </executions>
 					   <configuration>
-					       <outputStyle>${sakai.skin.outputSyle}</outputStyle>
-					       <imgPath>${basedir}/src/${sakai.skin.source}/images/</imgPath>
-					       <inputPath>${basedir}/src/${sakai.skin.source}/sass/</inputPath>
-					       <outputPath>${basedir}/src/webapp/skin/${sakai.skin.target}</outputPath>
-					       <includePath>${basedir}/src/${sakai.skin.source}/bootstrap-sass-${bootstrap-version}/assets/stylesheets/${path.separator}${basedir}/src/${sakai.skin.source}/font-awesome-sass-${font-awesome-version}/assets/stylesheets/</includePath>
-					       <sourceMapOutputPath>${basedir}/src/webapp/skin/${sakai.skin.target}</sourceMapOutputPath>
+						   <outputStyle>${sakai.skin.outputSyle}</outputStyle>
+						   <imgPath>${basedir}/src/${sakai.skin.source}/images/</imgPath>
+						   <inputPath>${basedir}/src/${sakai.skin.source}/sass/</inputPath>
+						   <outputPath>${basedir}/src/webapp/skin/${sakai.skin.target}</outputPath>
+						   <includePath>${basedir}/src/${sakai.skin.source}/bootstrap-sass-${bootstrap-version}/assets/stylesheets/${path.separator}${basedir}/src/${sakai.skin.source}/font-awesome-sass-${font-awesome-version}/assets/stylesheets/</includePath>
+						   <sourceMapOutputPath>${basedir}/src/webapp/skin/${sakai.skin.target}</sourceMapOutputPath>
 					   </configuration>
 					</plugin>
 					<plugin>
