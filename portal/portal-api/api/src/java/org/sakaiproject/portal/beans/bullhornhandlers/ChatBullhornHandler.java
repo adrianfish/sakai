@@ -101,7 +101,7 @@ public class ChatBullhornHandler extends AbstractBullhornHandler {
 
         ChatChannel channel = chatManager.getChatChannel(channelId);
 
-        String url = channel.getUrl();
+        String url = chatManager.getUrlForChannel(channelId);
         String title = channel.getTitle();
 
         List<BullhornData> bhEvents = new ArrayList<>();

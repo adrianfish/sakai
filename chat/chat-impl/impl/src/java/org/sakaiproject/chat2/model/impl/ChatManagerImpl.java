@@ -1265,7 +1265,12 @@ public class ChatManagerImpl extends HibernateDaoSupport implements ChatManager,
 		
 		return timeZone;
 	}
-    
+
+	public String getUrlForChannel(String channelId) {
+
+		ChatChannel channel = getChatChannel(channelId);
+		return "/portal/site/" + channel.getContext() + "/tool/" + channel.getPlacement();
+	}
 
     /**
      * JGroups message listener.

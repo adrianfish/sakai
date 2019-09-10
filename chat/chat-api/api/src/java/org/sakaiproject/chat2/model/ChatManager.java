@@ -299,6 +299,6 @@ public interface ChatManager extends EntitySummary {
     * @return
     */
    public String getUserTimeZone();
-   
-   
+
+   public String getUrlForChannel(String channelId);
 }
