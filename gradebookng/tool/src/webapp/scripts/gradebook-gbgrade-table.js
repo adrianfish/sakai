@@ -6,18 +6,29 @@ let hiddenItems = JSON.parse(sessionStorage.getItem(GB_HIDDEN_ITEMS_KEY));
 
 GbGradeTable._onReadyCallbacks = [];
 
-var addHiddenGbItemsCallback = function () {
+GbGradeTable.addHiddenGbItemsCallback = function () {
 
   GbGradeTable._onReadyCallbacks.push(function () {
 
+    // This should uncheck the hidden columns in the view columns menu, and will
+    // hide the columns themselves. That's the idea, anyway.
+    let me = new MouseEvent("click");
+    me.suppressUpdateViewPreferences = true;
     hiddenItems.forEach(i => {
-      $(".gb-filter :input:checked[value='" + i + "']").trigger("click", [true]);
+
+      //$(".gb-filter :input:checked[value='" + i + "']").trigger("click", [true]);
+      let el = document.querySelector(".gb-filter input[value='" + i + "']:checked");
+      if (el) {
+        el.dispatchEvent(me);
+      }
     });
   });
 };
 
+
+
 if (hiddenItems == null) {
-  // No hidden items in session storage. Try and get it from server.
+  // No hidden items in storage. Get it from the server and update storage.
   console.debug("NO hidden items found in session storage. Trying server ...");
 
   getViewPreferences("gradebook").then(hiddenItemsString => {
@@ -25,13 +36,27 @@ if (hiddenItems == null) {
     if (hiddenItemsString) {
       hiddenItems = JSON.parse(hiddenItemsString);
       sessionStorage.setItem(GB_HIDDEN_ITEMS_KEY, hiddenItemsString);
-      addHiddenGbItemsCallback();
+      GbGradeTable.addHiddenGbItemsCallback();
     }
   });
 } else {
   console.debug("Hidden items found in session storage.");
-  addHiddenGbItemsCallback();
+  GbGradeTable.addHiddenGbItemsCallback();
 }
+
+GbGradeTable.updateViewPreferences = function () {
+
+  console.debug("Updating view preferences ...");
+
+  let hiddenItems = [];
+  document.querySelectorAll(".gb-filter input:not(:checked)").forEach(el => {
+    hiddenItems.push(el.value);
+  });
+  let hiddenItemsString = JSON.stringify(hiddenItems);
+  sessionStorage.setItem(GB_HIDDEN_ITEMS_KEY, JSON.stringify(hiddenItems));
+  console.log(hiddenItemsString);
+  updateViewPreferences("gradebook", hiddenItemsString, {debug: true});
+};
 
 var sakaiReminder = new SakaiReminder();
 
@@ -1779,7 +1804,7 @@ GbGradeTable.setupToggleGradeItems = function() {
     updateCategoryFilterState($input);
   };
 
-  function handleGradeFilter(event, type, suppressRedraw) {
+  function handleGradeFilter(event, type, suppressRedraw, suppressUpdateViewPreferences) {
 
     var $input = $(event.target);
     var $label = $input.closest("label");
@@ -1789,24 +1814,19 @@ GbGradeTable.setupToggleGradeItems = function() {
 
     var column = (type === "assignment") ? GbGradeTable.colModelForAssignment(id) : GbGradeTable.colModelForCategoryScore(id);
 
-    let hiddenItems = JSON.parse(sessionStorage.getItem(GB_HIDDEN_ITEMS_KEY)) || [];
-
     if ($input.is(":checked")) {
       $filter.removeClass("off");
       column.hidden = false;
-      hiddenItems.splice(hiddenItems.findIndex(i => i == id), 1);
     } else {
       $filter.addClass("off");
       column.hidden = true;
-      if (!hiddenItems.includes(id)) {
-        hiddenItems.push(id);
-      }
     }
 
-    var hiddenItemsString = JSON.stringify(hiddenItems);
-    sessionStorage.setItem(GB_HIDDEN_ITEMS_KEY, hiddenItemsString);
-
-    updateViewPreferences("gradebook", hiddenItemsString);
+    if (event.originalEvent && event.originalEvent.detail && event.originalEvent.detail.suppressUpdateViewPreferences) {
+      console.info("View preferences will NOT be updated");
+    } else {
+      GbGradeTable.updateViewPreferences();
+    }
 
     updateCategoryFilterState($input);
 
@@ -1815,23 +1835,30 @@ GbGradeTable.setupToggleGradeItems = function() {
     }
   };
 
-
   function handleGradeItemFilterStateChange(event, suppressRedraw) {
     handleGradeFilter(event, "assignment", suppressRedraw);
   };
-
 
   function handleCategoryScoreFilterStateChange(event, suppressRedraw) {
     handleGradeFilter(event, "category", suppressRedraw);
   }
 
   function handleShowAll() {
-    $panel.find(".gb-item-filter :input:not(:checked), .gb-item-category-score-filter :input:not(:checked)").trigger("click");
+
+    let me = new MouseEvent("click");
+    me.suppressUpdateViewPreferences = true;
+    document.querySelectorAll(".gb-item-filter input:not(:checked), .gb-item-category-score-filter input:not(:checked)").forEach(el => el.dispatchEvent(me));
+    setTimeout(() => GbGradeTable.updateViewPreferences());
   };
 
 
   function handleHideAll() {
-    $panel.find(".gb-item-filter :input:checked, .gb-item-category-score-filter :input:checked").trigger("click");
+
+    let me = new MouseEvent("click");
+    me.suppressUpdateViewPreferences = true;
+    document.querySelectorAll(".gb-item-filter input:checked, .gb-item-category-score-filter input:checked").forEach(el => el.dispatchEvent(me));
+    setTimeout(() => GbGradeTable.updateViewPreferences());
+    //$panel.find(".gb-item-filter :input:checked, .gb-item-category-score-filter :input:checked").trigger("click");
   };
 
 
@@ -2012,8 +2039,11 @@ GbGradeTable.setupToggleGradeItems = function() {
   $panel.find(".gb-item-category-filter :input").on("change", handleCategoryFilterStateChange);
   $panel.find(".gb-item-filter :input").on("change", handleGradeItemFilterStateChange);
   $panel.find(".gb-item-category-score-filter :input").on("change", handleCategoryScoreFilterStateChange);
+  $panel.find(".gb-filter input").on("click", e => e.target.dispatchEvent(new CustomEvent("change", {detail: {suppressUpdateViewPreferences: e.originalEvent.suppressUpdateViewPreferences}})));
 
-  $panel.find(":input:not(:checked)").trigger("change", [SUPPRESS_TABLE_REDRAW]);
+  //$panel.find(":input:not(:checked)").trigger("change", [SUPPRESS_TABLE_REDRAW]);
+  let ce = new CustomEvent("change", {detail: {suppressUpdateViewPreferences: true}});
+  document.querySelectorAll("input:not(:checked)").forEach(el => el.dispatchEvent(ce));
 
   // setup hidden visual cue clicky
   $(GbGradeTable.instance.rootElement).on("click", ".gb-hidden-column-visual-cue", function(event) {
