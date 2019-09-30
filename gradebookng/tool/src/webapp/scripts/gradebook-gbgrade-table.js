@@ -6,8 +6,6 @@ var addHiddenGbItemsCallback = function (hiddenItems) {
 
   GbGradeTable._onReadyCallbacks.push(function () {
 
-    console.log(hiddenItems);
-
     hiddenItems.forEach(i => {
 
       $(".gb-filter :input:checked[value='" + i + "']")
@@ -20,9 +18,9 @@ var addHiddenGbItemsCallback = function (hiddenItems) {
 const gbHiddenItems = JSON.parse(sessionStorage.getItem(GB_HIDDEN_ITEMS_KEY));
 if (gbHiddenItems == null) {
   // No hidden items in session storage. Try and get it from server.
-  console.debug("NO hidden items found in session storage. Trying server ...");
+  console.debug("NO hidden items found in session storage. Pulling from server ...");
 
-  getViewPreferences("gradebook", {debug: true}).then(hiddenItemsString => {
+  getViewPreferences("gradebook").then(hiddenItemsString => {
 
     if (hiddenItemsString) {
       sessionStorage.setItem(GB_HIDDEN_ITEMS_KEY, hiddenItemsString);
@@ -38,7 +36,7 @@ GbGradeTable.updateViewPreferences = function () {
 
   setTimeout(() => {
 
-    console.info("Updating view preferences ...");
+    console.debug("Updating view preferences ...");
 
     let hiddenItems = [];
     document.querySelectorAll(".gb-filter input:not(:checked)").forEach(el => {
@@ -46,7 +44,7 @@ GbGradeTable.updateViewPreferences = function () {
     });
     let hiddenItemsString = JSON.stringify(hiddenItems);
     sessionStorage.setItem(GB_HIDDEN_ITEMS_KEY, hiddenItemsString);
-    updateViewPreferences("gradebook", hiddenItemsString, {debug: true});
+    updateViewPreferences("gradebook", hiddenItemsString);
   });
 };
 
@@ -1822,7 +1820,7 @@ GbGradeTable.setupToggleGradeItems = function() {
 
     if (event.target.dataset.suppressUpdateViewPreferences) {
       delete event.target.dataset.suppressUpdateViewPreferences;
-      console.info("View preferences will NOT be updated");
+      console.debug("View preferences will NOT be updated now but may be later, in one operation.");
     } else {
       GbGradeTable.updateViewPreferences();
     }
@@ -1849,6 +1847,7 @@ GbGradeTable.setupToggleGradeItems = function() {
     $panel.find(".gb-item-filter :input:not(:checked), .gb-item-category-score-filter :input:not(:checked)")
         .attr("data-suppress-update-view-preferences", "true")
         .trigger("click");
+
     GbGradeTable.updateViewPreferences();
   };
 
@@ -1858,6 +1857,7 @@ GbGradeTable.setupToggleGradeItems = function() {
     $panel.find(".gb-item-filter :input:checked, .gb-item-category-score-filter :input:checked")
         .attr("data-suppress-update-view-preferences", "true")
         .trigger("click");
+
     GbGradeTable.updateViewPreferences();
   };
 
@@ -1865,8 +1865,6 @@ GbGradeTable.setupToggleGradeItems = function() {
   function handleShowOnlyThisCategory($filter) {
     var $input = $filter.find(":input");
     var $label = $filter.find("label");
-
-    console.log("showthiscat");
 
     $panel.find(".gb-item-category-filter :input:checked:not([value='"+$input.val()+"'])")
       .attr("data-suppress-update-view-preferences", "true")
@@ -1882,6 +1880,8 @@ GbGradeTable.setupToggleGradeItems = function() {
         .attr("data-suppress-update-view-preferences", "true")
         .trigger("click");
     }
+
+    GbGradeTable.updateViewPreferences();
   };
 
 
@@ -2080,14 +2080,20 @@ GbGradeTable.setupToggleGradeItems = function() {
     $.each(columnsAfter, function(i, column) {
       if (!done && column.hidden) {
         if (column.type == "assignment") {
-          $panel.find(".gb-item-filter :input[value='"+column.assignmentId+"']").trigger("click", [SUPPRESS_TABLE_REDRAW]);
+          $panel.find(".gb-item-filter :input[value='"+column.assignmentId+"']")
+            .attr("data-suppress-update-view-preferences", "true")
+            .trigger("click", [SUPPRESS_TABLE_REDRAW]);
         } else {
-          $panel.find(".gb-item-category-score-filter :input[value='"+column.categoryName+"']").trigger("click", [SUPPRESS_TABLE_REDRAW]);
+          $panel.find(".gb-item-category-score-filter :input[value='"+column.categoryName+"']")
+            .attr("data-suppress-update-view-preferences", "true")
+            .trigger("click", [SUPPRESS_TABLE_REDRAW]);
         }
       } else {
         done = true;
       }
     });
+
+    GbGradeTable.updateViewPreferences();
 
     $(this).remove();
     GbGradeTable.redrawTable(true);
