@@ -47,6 +47,7 @@ import java.util.Stack;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.JWTCreator;
 import com.auth0.jwt.algorithms.Algorithm;
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
@@ -61,6 +62,7 @@ import org.sakaiproject.entity.api.Entity;
 import org.sakaiproject.entity.api.EntityManager;
 import org.sakaiproject.entity.api.EntityProducer;
 import org.sakaiproject.entity.api.EntityTransferrer;
+import org.sakaiproject.entity.api.HardDeleteAware;
 import org.sakaiproject.entity.api.HttpAccess;
 import org.sakaiproject.entity.api.Reference;
 import org.sakaiproject.entity.api.ResourceProperties;
@@ -77,6 +79,7 @@ import org.sakaiproject.tool.api.SessionManager;
 import org.sakaiproject.tool.api.ToolManager;
 import org.sakaiproject.user.api.UserDirectoryService;
 import org.sakaiproject.util.ResourceLoader;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.Link;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.hateoas.Resource;
@@ -97,7 +100,8 @@ import org.w3c.dom.Element;
  * Implementation of {@link RubricsService}
  */
 @Slf4j
-public class RubricsServiceImpl implements RubricsService, EntityProducer, EntityTransferrer {
+@Getter @Setter
+public class RubricsServiceImpl implements RubricsService, EntityProducer, EntityTransferrer, HardDeleteAware {
 
     protected static ResourceLoader rb = new ResourceLoader("org.sakaiproject.rubrics.bundle.Messages");
 
@@ -120,40 +124,20 @@ public class RubricsServiceImpl implements RubricsService, EntityProducer, Entit
     private static final String JWT_CUSTOM_CLAIM_CONTEXT_ID = "contextId";
     private static final String JWT_CUSTOM_CLAIM_CONTEXT_TYPE = "contextType";
 
-    @Getter
-    @Setter
     private ToolManager toolManager;
-
-    @Getter @Setter
     private SessionManager sessionManager;
-
-    @Getter @Setter
     private UserDirectoryService userDirectoryService;
-
-    @Getter @Setter
     private SecurityService securityService;
-
-    @Getter @Setter
     private EventTrackingService eventTrackingService;
-
-    @Getter @Setter
     private ServerConfigurationService serverConfigurationService;
-
-    @Getter @Setter
     private SiteService siteService;
-
-    @Getter @Setter
     private FunctionManager functionManager;
-
-    @Getter @Setter
     private AuthzGroupService authzGroupService;
-
-    @Getter @Setter
     private EntityManager entityManager;
-
-    @Getter @Setter
     private MemoryService memoryService;
 
+    @Getter(AccessLevel.NONE)
+    @Setter(AccessLevel.NONE)
     private Cache<String, Boolean> hasAssociatedRubricCache;
 
     public void init() {
@@ -1221,6 +1205,9 @@ public class RubricsServiceImpl implements RubricsService, EntityProducer, Entit
         return "rubric";
     }
 
+    public void hardDelete(String siteId) {
+    }
+
     protected Collection<Resource<ToolItemRubricAssociation>> getRubricAssociationByRubric(String rubricId, String toSite) throws Exception {
         TypeReferences.ResourcesType<Resource<ToolItemRubricAssociation>> resourceParameterizedTypeReference = new TypeReferences.ResourcesType<Resource<ToolItemRubricAssociation>>() {};
 
@@ -1239,4 +1226,16 @@ public class RubricsServiceImpl implements RubricsService, EntityProducer, Entit
         return associationResources.getContent();
     }
 
+    /*
+    private boolean deleteRubricsBySite(String siteId) {
+
+        URI apiBaseUrl = new URI(serverConfigurationService.getServerUrl() + RBCS_SERVICE_URL_PREFIX + "/rubric/delete-by-site?" + siteId);
+        HttpURLConnecion conn = (HttpURLConnection) apiBaseUrl.openConnection();
+        conn.setRequestMethod("DELETE");
+
+        conn.setRequestProperty("Authorization", String.format("Bearer %s", generateJsonWebToken(RubricsConstants.RBCS_TOOL, toContext)));
+
+        conn.connect();
+    }
+    */
 }

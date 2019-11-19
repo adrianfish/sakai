@@ -32,6 +32,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.data.rest.core.annotation.RepositoryRestResource;
 import org.springframework.data.rest.core.annotation.RestResource;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.stereotype.Repository;
 
 @RepositoryRestResource(collectionResourceRel = "rubrics", path = "rubrics")
 public interface RubricRepository extends MetadataRepository<Rubric, Long> {
@@ -47,6 +48,13 @@ public interface RubricRepository extends MetadataRepository<Rubric, Long> {
     @Override
     @PreAuthorize("canWrite(#id, 'Rubric')")
     void delete(Long id);
+
+    /*
+    @RestResource(path = "delete-by-site", rel = "delete-by-site")
+    @PreAuthorize("hasRole('EDITOR')")
+    //@Query("delete from Rubric r where r.metadata.ownerId = :siteId")
+    void deleteByMetadataOwnerId(String siteId);
+    */
 
     @RestResource(path = "shared-only", rel = "shared-only")
     @PreAuthorize("hasRole('ROLE_EDITOR')")
