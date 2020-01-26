@@ -2505,6 +2505,11 @@ extends VelocityPortletStateAction
 			// build the context to display the list view
 			buildListContext(portlet, context, runData, state);
 		}
+		else if (stateName.equals("fullcalender"))
+		{
+			// build the context for the basic step of adding simple text
+            context.put("message", "fullcalendar");
+		}
 		else if (stateName.equals(STATE_SET_FREQUENCY))
 		{
 			buildFrequencyContext(portlet, context, runData, state);
@@ -5336,8 +5341,17 @@ extends VelocityPortletStateAction
 		sstate.setAttribute(STATE_MONTH, Integer.valueOf(b.getMonth()));
 		sstate.setAttribute(STATE_DAY, Integer.valueOf(b.getDay()));
 	}	 // doToday
-	
-	
+
+	public void doFullCalendar(RunData data, Context context) {
+
+        System.out.println("doFullCalendar");
+
+		CalendarActionState state = (CalendarActionState)getState(context, data, CalendarActionState.class);
+		String peid = ((JetspeedRunData)data).getJs_peid();
+		SessionState sstate = ((JetspeedRunData)data).getPortletSessionState(peid);
+		state.setState("fullcalender");
+	}
+
 	/**
 	 * Action doCustomDate is requested when the user specifies a start/end date
 	 * to filter the list view.
@@ -7645,6 +7659,8 @@ extends VelocityPortletStateAction
 		MenuEntry customize = new MenuEntry(customizeCalendarPage.getButtonText(), null, allow_modify_calendar_properties, MenuItem.CHECKED_NA, customizeCalendarPage.getButtonHandlerID());
 		customize.setIsCurrent(status.equals(STATE_CUSTOMIZE_CALENDAR));
 		bar.add(customize);
+
+        bar.add(new MenuEntry("Full Calendar", "doFullCalendar"));
 		
 		// add permissions, if allowed
 		//SAK-21684 don't show in myworkspace site unless super user.
@@ -8044,7 +8060,6 @@ extends VelocityPortletStateAction
 		{
 			opaqueUrlDao = (OpaqueUrlDao) ComponentManager.get(OpaqueUrlDao.class);
 		}
-
 
 		// retrieve the state from state object
 		CalendarActionState calState = (CalendarActionState)getState( portlet, rundata, CalendarActionState.class );

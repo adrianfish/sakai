@@ -42,5 +42,7 @@ calendar Portlet
         #parse("/vm/calendar/chef_calendar-opaqueUrlClean.vm")
 #elseif ($message=='opaqueUrlExisting')
         #parse("/vm/calendar/chef_calendar-opaqueUrlExisting.vm")
+#elseif ($message=='fullcalendar')
+        #parse("/vm/calendar/chef_calendar-fullcalendar.vm")
 #end
 

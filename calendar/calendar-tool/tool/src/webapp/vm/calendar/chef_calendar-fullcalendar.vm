@@ -1,0 +1,12 @@
+<link href="/library/webjars/fullcalendar/4.3.1/core/main.min.css" rel="stylesheet" />
+<link href="/library/webjars/fullcalendar/4.3.1/daygrid/main.min.css" rel="stylesheet" />
+<link href="/library/webjars/fullcalendar/4.3.1/timegrid/main.min.css" rel="stylesheet" />
+<div class="portletBody">
+    #if($menu)#toolbar($menu)#end
+    <sakai-calendar></sakai-calendar>
+</div>
+<script src="/library/webjars/fullcalendar/4.3.1/core/main.min.js"></script>
+<script src="/library/webjars/fullcalendar/4.3.1/daygrid/main.min.js"></script>
+<script src="/library/webjars/fullcalendar/4.3.1/timegrid/main.min.js"></script>
+<script src="/library/webjars/fullcalendar/4.3.1/interaction/main.min.js"></script>
+<script type="module" src="/webcomponents/sakai-calendar.js"></script>
