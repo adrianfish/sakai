@@ -34,6 +34,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import javax.faces.application.FacesMessage;
 import javax.faces.context.FacesContext;
@@ -110,12 +111,9 @@ import org.sakaiproject.util.FormattedText;
  * <p>Organization: Sakai Project</p>
  */
 @Slf4j
-public class ItemAddListener
-    implements ActionListener {
+public class ItemAddListener implements ActionListener {
 
   private static final TagService tagService= (TagService) ComponentManager.get( TagService.class );
-    //private static ContextUtil cu;
-  //private String scalename; // used for multiple choice Survey
   private boolean error = false;
   private boolean isPendingOrPool = false;
   private boolean isEditPendingAssessmentFlow = true;
@@ -130,7 +128,7 @@ public class ItemAddListener
    */
   public void processAction(ActionEvent ae) throws AbortProcessingException {
 
-	log.debug("ItemAdd LISTENER.");
+    log.debug("ItemAdd LISTENER.");
 
     AssessmentSettingsBean assessmentSettings = (AssessmentSettingsBean) ContextUtil.lookupBean("assessmentSettings");
     AssessmentBean assessmentBean = (AssessmentBean) ContextUtil.lookupBean("assessmentBean");
@@ -1659,7 +1657,7 @@ public class ItemAddListener
 	      // an entry in sam_itemtext_t (ItemText choiceText).  Then for each 
 	      // choicetext, we loop through all variables and formulas to create the 
 	      // answer objects.
-	      List<CalculatedQuestionAnswerIfc> list = new ArrayList<CalculatedQuestionAnswerIfc>();
+	      List<CalculatedQuestionAnswerIfc> list = new ArrayList<>();
 	      list.addAll(calcBean.getFormulas().values());
 	      list.addAll(calcBean.getVariables().values());
 	      
@@ -1890,20 +1888,24 @@ public class ItemAddListener
   }
 
   private void preparePublishedTextForMC(ItemFacade item, ItemBean bean, ItemService delegate) {
-		Set textSet = item.getItemTextSet();
-		ItemTextIfc text = null;
-		HashSet newTextSet = new HashSet();
+		Set<ItemTextIfc> textSet = item.getItemTextSet();
+		Set<ItemTextIfc> newTextSet = new HashSet<>();
 		item.setItemTextSet(newTextSet);
-		Iterator iter = textSet.iterator();		
-		while (iter.hasNext()) {
-			text = (ItemTextIfc) iter.next();
+        for (ItemTextIfc text : textSet) {
 			text.setText(bean.getItemText());
 			text.setItem(item.getData());
-			List newAnswerList = bean.getMultipleChoiceAnswers();
-			Set answerSet = new HashSet();
-			Iterator newAnswerIter = newAnswerList.iterator();
-			while (newAnswerIter.hasNext()) {
-				AnswerBean answerBean = (AnswerBean) newAnswerIter.next();
+			List<AnswerBean> newAnswerList = bean.getMultipleChoiceAnswers();
+            List<Long> newAnswerIds = newAnswerList.stream().map(na -> na.getId()).collect(Collectors.toList());
+
+			Set<AnswerIfc> currentAnswerList = text.getAnswerSet();
+            List<AnswerIfc> removedAnswers
+                = currentAnswerList.stream().filter(ca -> !newAnswerIds.contains(ca.getId())).collect(Collectors.toList());
+
+            // Now delete the removed answers
+            removedAnswers.forEach(ra -> delegate.deleteAnswer((PublishedAnswer) ra));
+                
+			Set<AnswerIfc> answerSet = new HashSet<>();
+			for (AnswerBean answerBean : newAnswerList) {
 				String oneAnswer = stripPtags(answerBean.getText());
 				String oneLabel = answerBean.getLabel();
 				AnswerIfc answer = null;

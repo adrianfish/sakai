@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.sakaiproject.tool.assessment.data.dao.assessment.PublishedAnswer;
 import org.sakaiproject.tool.assessment.osid.shared.impl.IdImpl;
 import org.sakaiproject.tool.assessment.integration.helper.ifc.TagServiceHelper;
 
@@ -106,4 +107,6 @@ public interface ItemFacadeQueriesAPI
   public Boolean itemExists(Long itemId);
 
   public void removeItemAttachment(Long itemAttachmentId);
+
+  public void deleteAnswer(PublishedAnswer pa);
 }

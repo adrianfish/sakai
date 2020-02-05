@@ -35,16 +35,7 @@ import org.sakaiproject.rubrics.logic.RubricsConstants;
 import org.sakaiproject.rubrics.logic.RubricsService;
 import org.sakaiproject.tags.api.Tag;
 import org.sakaiproject.tags.api.TagService;
-import org.sakaiproject.tool.assessment.data.dao.assessment.Answer;
-import org.sakaiproject.tool.assessment.data.dao.assessment.AnswerFeedback;
-import org.sakaiproject.tool.assessment.data.dao.assessment.FavoriteColChoices;
-import org.sakaiproject.tool.assessment.data.dao.assessment.ItemAttachment;
-import org.sakaiproject.tool.assessment.data.dao.assessment.ItemData;
-import org.sakaiproject.tool.assessment.data.dao.assessment.ItemFeedback;
-import org.sakaiproject.tool.assessment.data.dao.assessment.ItemMetaData;
-import org.sakaiproject.tool.assessment.data.dao.assessment.ItemTag;
-import org.sakaiproject.tool.assessment.data.dao.assessment.ItemText;
-import org.sakaiproject.tool.assessment.data.dao.assessment.ItemTextAttachment;
+import org.sakaiproject.tool.assessment.data.dao.assessment.*;
 import org.sakaiproject.tool.assessment.data.ifc.assessment.ItemAttachmentIfc;
 import org.sakaiproject.tool.assessment.data.ifc.assessment.ItemDataIfc;
 import org.sakaiproject.tool.assessment.data.ifc.assessment.ItemTagIfc;
@@ -429,8 +420,20 @@ public class ItemService
   {
     try
     {
-      PersistenceService.getInstance().getItemFacadeQueries().
-      deleteSet(elemId, isText);
+      PersistenceService.getInstance().getItemFacadeQueries().deleteSet(elemId, isText);
+    }
+    catch(Exception e)
+    {
+      log.error(e.getMessage(), e);
+      throw new RuntimeException(e);
+    }
+  }
+
+  public void deleteAnswer(PublishedAnswer pa) {
+
+    try
+    {
+      PersistenceService.getInstance().getItemFacadeQueries().deleteAnswer(pa);
     }
     catch(Exception e)
     {
@@ -531,5 +534,4 @@ public class ItemService
       }
     }
   }
-
 }
