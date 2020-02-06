@@ -604,16 +604,19 @@ public class ItemFacadeQueries extends HibernateDaoSupport implements ItemFacade
 		}
 	}
 
-	public void deleteAnswer(PublishedAnswer pa) {
+	public void deleteAnswer(Long id) {
 
       try {
-          List feedbacks = getHibernateTemplate().findByCriteria(DetachedCriteria.forClass(PublishedAnswerFeedback.class).add(Restrictions.eq("answer.id", pa.getId())));
-          getHibernateTemplate().deleteAll(feedbacks);
-          //getHibernateTemplate().deleteAll(answers);
-          //getHibernateTemplate().flush();
-          getHibernateTemplate().delete(getHibernateTemplate().merge(pa));
+          PublishedAnswer a = (PublishedAnswer) currentSession().get(PublishedAnswer.class, id);
+          if (a != null) {
+              ItemTextIfc it = a.getItemText();
+              currentSession().refresh(it);
+              it.getAnswerSet().remove(a);
+              currentSession().update(it);
+              currentSession().flush();
+          }
       } catch (Exception e) {
-          log.error("Failed to delete published answer with id {}", pa.getId(), e);
+          log.error("Failed to delete published answer with id {}", id, e);
       }
     }
 

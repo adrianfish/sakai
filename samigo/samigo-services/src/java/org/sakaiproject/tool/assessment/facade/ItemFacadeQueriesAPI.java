@@ -108,5 +108,5 @@ public interface ItemFacadeQueriesAPI
 
   public void removeItemAttachment(Long itemAttachmentId);
 
-  public void deleteAnswer(PublishedAnswer pa);
+  public void deleteAnswer(Long id);
 }

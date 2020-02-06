@@ -429,14 +429,11 @@ public class ItemService
     }
   }
 
-  public void deleteAnswer(PublishedAnswer pa) {
+  public void deleteAnswer(Long id) {
 
-    try
-    {
-      PersistenceService.getInstance().getItemFacadeQueries().deleteAnswer(pa);
-    }
-    catch(Exception e)
-    {
+    try {
+      PersistenceService.getInstance().getItemFacadeQueries().deleteAnswer(id);
+    } catch(Exception e) {
       log.error(e.getMessage(), e);
       throw new RuntimeException(e);
     }

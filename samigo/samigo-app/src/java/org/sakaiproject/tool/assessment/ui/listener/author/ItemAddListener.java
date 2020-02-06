@@ -1888,49 +1888,73 @@ public class ItemAddListener implements ActionListener {
   }
 
   private void preparePublishedTextForMC(ItemFacade item, ItemBean bean, ItemService delegate) {
-		Set<ItemTextIfc> textSet = item.getItemTextSet();
-		Set<ItemTextIfc> newTextSet = new HashSet<>();
-		item.setItemTextSet(newTextSet);
-        for (ItemTextIfc text : textSet) {
-			text.setText(bean.getItemText());
-			text.setItem(item.getData());
-			List<AnswerBean> newAnswerList = bean.getMultipleChoiceAnswers();
-            List<Long> newAnswerIds = newAnswerList.stream().map(na -> na.getId()).collect(Collectors.toList());
 
-			Set<AnswerIfc> currentAnswerList = text.getAnswerSet();
-            List<AnswerIfc> removedAnswers
-                = currentAnswerList.stream().filter(ca -> !newAnswerIds.contains(ca.getId())).collect(Collectors.toList());
+    final Set<ItemTextIfc> textSet = item.getItemTextSet();
+    Set<ItemTextIfc> newTextSet = new HashSet<>();
+    item.setItemTextSet(newTextSet);
+    final List<AnswerBean> newAnswerList = bean.getMultipleChoiceAnswers();
+    final Map<Long, AnswerBean> newAnswerMap
+        = newAnswerList.stream().collect(Collectors.toMap(a -> getSequence(), a -> a));
+    final List<Long> newAnswerIds = newAnswerList.stream().map(na -> na.getId()).collect(Collectors.toList());
+    for (ItemTextIfc itemText : textSet) {
+      itemText.setText(bean.getItemText());
+      itemText.setItem(item.getData());
 
-            // Now delete the removed answers
-            removedAnswers.forEach(ra -> delegate.deleteAnswer((PublishedAnswer) ra));
-                
-			Set<AnswerIfc> answerSet = new HashSet<>();
-			for (AnswerBean answerBean : newAnswerList) {
-				String oneAnswer = stripPtags(answerBean.getText());
-				String oneLabel = answerBean.getLabel();
-				AnswerIfc answer = null;
-				if (isCorrectChoice(bean, answerBean.getLabel().trim())) {
-					answer = new PublishedAnswer(text, oneAnswer,
-						answerBean.getSequence(), oneLabel, Boolean.TRUE, null,
-						Double.valueOf(bean.getItemScore()), Double.valueOf(100d), Double.valueOf(bean.getItemDiscount()));
-				}
-				else {
-					answer = new PublishedAnswer(text, oneAnswer,
-							answerBean.getSequence(), oneLabel, Boolean.FALSE, null,
-							Double.valueOf(bean.getItemScore()), Double.valueOf(answerBean.getPartialCredit()), Double.valueOf(bean.getItemDiscount()));
-				}
-				HashSet answerFeedbackSet = new HashSet();
-				PublishedAnswerFeedback fb
-					= new PublishedAnswerFeedback(answer, AnswerFeedbackIfc.GENERAL_FEEDBACK, stripPtags(answerBean.getFeedback()));
-				fb.setId(answerBean.getAnswerFeedbackId());
-				answerFeedbackSet.add(fb);
-				answer.setAnswerFeedbackSet(answerFeedbackSet);
-				answer.setId(answerBean.getId());
-				answerSet.add(answer);
-			}
-			text.setAnswerSet(answerSet);
-			newTextSet.add(text);
-		}
+      Set<AnswerIfc> currentAnswerList = itemText.getAnswerSet();
+      List<AnswerIfc> removedAnswers
+        = currentAnswerList.stream().filter(ca -> !newAnswerIds.contains(ca.getId())).collect(Collectors.toList());
+
+      // Now delete the removed answers
+      removedAnswers.forEach(ra -> delegate.deleteAnswer(ra.getId()));
+          
+      //Set<AnswerIfc> answerSet = new HashSet<>();
+      for (AnswerBean answerBean : newAnswerList) {
+        //String oneAnswer = stripPtags(answerBean.getText());
+        String oneLabel = answerBean.getLabel();
+        //AnswerIfc answer = null;
+        // Look up the existing answer for this bean
+        Optional<AnswerIfc> matchingAnswerOp
+            = currentAnswerList.stream().filter(ca -> ca.getId().equals(answerBean.getId())).findFirst();
+
+        if (matchingAnswerOp.isPresent()) {
+          matchingAnswer.setText(answerBean.getText());
+          matchingAnswer.setLabel(oneLabel);
+          matchingAnswer.setSequence(answerBean.getSequence());
+          matchingAnswer.setScore(Double.valueOf(bean.getItemScore()));
+          matchingAnswer.setDiscount(Double.valueOf(bean.getItemDiscount()));
+          if (isCorrectChoice(bean, answerBean.getLabel().trim())) {
+            matchingAnswer.setIsCorrect(Boolean.TRUE);
+            matchingAnswer.setPartialCredit(Double.valueOf(100d));
+            /*
+            answer = new PublishedAnswer(itemText, oneAnswer,
+                answerBean.getSequence(), oneLabel, Boolean.TRUE, null,
+                Double.valueOf(bean.getItemScore()), Double.valueOf(100d), Double.valueOf(bean.getItemDiscount()));
+            */
+          }
+          else {
+            matchingAnswer.setIsCorrect(Boolean.FALSE);
+            matchingAnswer.setPartialCredit(Double.valueOf(answerBean.getPartialCredit()));
+            /*
+            answer = new PublishedAnswer(itemText, oneAnswer,
+                    answerBean.getSequence(), oneLabel, Boolean.FALSE, null,
+                    Double.valueOf(bean.getItemScore()), Double.valueOf(answerBean.getPartialCredit()), Double.valueOf(bean.getItemDiscount()));
+            */
+          }
+        }
+        /*
+        HashSet answerFeedbackSet = new HashSet();
+        PublishedAnswerFeedback fb
+            = new PublishedAnswerFeedback(answer, AnswerFeedbackIfc.GENERAL_FEEDBACK, stripPtags(answerBean.getFeedback()));
+        fb.setId(answerBean.getAnswerFeedbackId());
+        answerFeedbackSet.add(fb);
+        answer.setAnswerFeedbackSet(answerFeedbackSet);
+        answer.setId(answerBean.getId());
+        answerSet.add(answer);
+        */
+      }
+      //text.setAnswerSet(answerSet);
+      newTextSet.add(itemText);
+    }
   }
   
   private void preparePublishedTextForCalculatedQueston(ItemFacade item, ItemBean bean, ItemService delegate) {
