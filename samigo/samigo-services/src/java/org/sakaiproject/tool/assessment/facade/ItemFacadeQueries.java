@@ -35,11 +35,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.hibernate.Query;
 import org.hibernate.criterion.DetachedCriteria;
 import org.hibernate.criterion.Restrictions;
-import org.sakaiproject.tool.assessment.data.dao.assessment.ItemAttachment;
-import org.sakaiproject.tool.assessment.data.dao.assessment.ItemData;
-import org.sakaiproject.tool.assessment.data.dao.assessment.ItemMetaData;
-import org.sakaiproject.tool.assessment.data.dao.assessment.PublishedAnswer;
-import org.sakaiproject.tool.assessment.data.dao.assessment.PublishedAnswerFeedback;
+import org.sakaiproject.tool.assessment.data.dao.assessment.*;
 import org.sakaiproject.tool.assessment.data.dao.shared.TypeD;
 import org.sakaiproject.tool.assessment.data.ifc.assessment.AnswerIfc;
 import org.sakaiproject.tool.assessment.data.ifc.assessment.AssessmentIfc;
@@ -607,13 +603,14 @@ public class ItemFacadeQueries extends HibernateDaoSupport implements ItemFacade
 	public void deleteAnswer(Long id) {
 
       try {
-          PublishedAnswer a = (PublishedAnswer) currentSession().get(PublishedAnswer.class, id);
+          PublishedAnswer a = (PublishedAnswer) currentSession().load(PublishedAnswer.class, id);
           if (a != null) {
-              ItemTextIfc it = a.getItemText();
-              currentSession().refresh(it);
+              PublishedItemText it = (PublishedItemText) a.getItemText();
+              //currentSession().refresh(it);
               it.getAnswerSet().remove(a);
               currentSession().update(it);
-              currentSession().flush();
+              //currentSession().flush();
+              int x = 10;
           }
       } catch (Exception e) {
           log.error("Failed to delete published answer with id {}", id, e);

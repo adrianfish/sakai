@@ -1888,72 +1888,85 @@ public class ItemAddListener implements ActionListener {
   }
 
   private void preparePublishedTextForMC(ItemFacade item, ItemBean bean, ItemService delegate) {
-
-    final Set<ItemTextIfc> textSet = item.getItemTextSet();
-    Set<ItemTextIfc> newTextSet = new HashSet<>();
-    item.setItemTextSet(newTextSet);
-    final List<AnswerBean> newAnswerList = bean.getMultipleChoiceAnswers();
-    final Map<Long, AnswerBean> newAnswerMap
-        = newAnswerList.stream().collect(Collectors.toMap(a -> getSequence(), a -> a));
-    final List<Long> newAnswerIds = newAnswerList.stream().map(na -> na.getId()).collect(Collectors.toList());
-    for (ItemTextIfc itemText : textSet) {
-      itemText.setText(bean.getItemText());
-      itemText.setItem(item.getData());
-
-      Set<AnswerIfc> currentAnswerList = itemText.getAnswerSet();
-      List<AnswerIfc> removedAnswers
-        = currentAnswerList.stream().filter(ca -> !newAnswerIds.contains(ca.getId())).collect(Collectors.toList());
-
-      // Now delete the removed answers
-      removedAnswers.forEach(ra -> delegate.deleteAnswer(ra.getId()));
-          
-      //Set<AnswerIfc> answerSet = new HashSet<>();
-      for (AnswerBean answerBean : newAnswerList) {
-        //String oneAnswer = stripPtags(answerBean.getText());
-        String oneLabel = answerBean.getLabel();
-        //AnswerIfc answer = null;
-        // Look up the existing answer for this bean
-        Optional<AnswerIfc> matchingAnswerOp
-            = currentAnswerList.stream().filter(ca -> ca.getId().equals(answerBean.getId())).findFirst();
-
-        if (matchingAnswerOp.isPresent()) {
-          matchingAnswer.setText(answerBean.getText());
-          matchingAnswer.setLabel(oneLabel);
-          matchingAnswer.setSequence(answerBean.getSequence());
-          matchingAnswer.setScore(Double.valueOf(bean.getItemScore()));
-          matchingAnswer.setDiscount(Double.valueOf(bean.getItemDiscount()));
-          if (isCorrectChoice(bean, answerBean.getLabel().trim())) {
-            matchingAnswer.setIsCorrect(Boolean.TRUE);
-            matchingAnswer.setPartialCredit(Double.valueOf(100d));
-            /*
-            answer = new PublishedAnswer(itemText, oneAnswer,
-                answerBean.getSequence(), oneLabel, Boolean.TRUE, null,
-                Double.valueOf(bean.getItemScore()), Double.valueOf(100d), Double.valueOf(bean.getItemDiscount()));
-            */
-          }
-          else {
-            matchingAnswer.setIsCorrect(Boolean.FALSE);
-            matchingAnswer.setPartialCredit(Double.valueOf(answerBean.getPartialCredit()));
-            /*
-            answer = new PublishedAnswer(itemText, oneAnswer,
-                    answerBean.getSequence(), oneLabel, Boolean.FALSE, null,
-                    Double.valueOf(bean.getItemScore()), Double.valueOf(answerBean.getPartialCredit()), Double.valueOf(bean.getItemDiscount()));
-            */
-          }
+    
+    Set answerSet = null;
+    Set textSet = item.getItemTextSet();
+    ItemTextIfc text = null;
+    Iterator iter = textSet.iterator();
+    while (iter.hasNext()) {
+        text = (ItemTextIfc) iter.next();
+        text.setText(bean.getItemText());
+        List newAnswerList = bean.getMultipleChoiceAnswers();
+        Map newAnswerMap = new HashMap();
+        Iterator newAnswerIter = newAnswerList.iterator();
+        while (newAnswerIter.hasNext()) {
+            AnswerBean answerBean = (AnswerBean) newAnswerIter.next();
+            newAnswerMap.put(answerBean.getSequence(), answerBean);
         }
-        /*
-        HashSet answerFeedbackSet = new HashSet();
-        PublishedAnswerFeedback fb
-            = new PublishedAnswerFeedback(answer, AnswerFeedbackIfc.GENERAL_FEEDBACK, stripPtags(answerBean.getFeedback()));
-        fb.setId(answerBean.getAnswerFeedbackId());
-        answerFeedbackSet.add(fb);
-        answer.setAnswerFeedbackSet(answerFeedbackSet);
-        answer.setId(answerBean.getId());
-        answerSet.add(answer);
-        */
-      }
-      //text.setAnswerSet(answerSet);
-      newTextSet.add(itemText);
+        
+        int newAnswersSize = newAnswerList.size();
+        int i = 0;
+        HashSet toBeRemovedSet = new HashSet();
+        AnswerBean answerBean = null;
+        answerSet = text.getAnswerSet();
+        Iterator answerIter = answerSet.iterator();
+        while (answerIter.hasNext()) {
+            AnswerIfc answer = (AnswerIfc) answerIter.next();
+            answer.setDiscount(Double.valueOf(bean.getItemDiscount()));
+            i = answer.getSequence().intValue();
+            if (i <= newAnswersSize) {				
+                answer.setScore(Double.valueOf(bean.getItemScore()));
+                answerBean = (AnswerBean) newAnswerMap.get(Long.valueOf(String.valueOf(i)));
+                String oneAnswer = stripPtags(answerBean.getText());
+                answer.setPartialCredit(Double.valueOf(answerBean.getPartialCredit()));
+                String oneLabel = answerBean.getLabel();
+                log.debug("oneAnswer = " + oneAnswer);
+                log.debug("oneLabel = " + oneLabel);
+                answer.setText(oneAnswer);
+                answer.setLabel(oneLabel);
+                if (isCorrectChoice(bean, oneLabel.trim())) {
+                    answer.setIsCorrect(Boolean.TRUE);
+                }
+                else {
+                    answer.setIsCorrect(Boolean.FALSE);
+                }
+                Set answerFeedbackSet = answer.getAnswerFeedbackSet();
+                Iterator answerFeedbackIter = answerFeedbackSet.iterator();
+                while (answerFeedbackIter.hasNext()) {
+                    AnswerFeedbackIfc answerFeedback = (AnswerFeedbackIfc) answerFeedbackIter.next();
+                    answerFeedback.setText(stripPtags(answerBean.getFeedback()));
+                }
+            } else {
+                delegate.deleteAnswer(answer.getId());
+                toBeRemovedSet.add(answer);
+            }
+        }
+        if (answerSet.size() < newAnswersSize) {
+            for (int j = answerSet.size() + 1; j < newAnswersSize + 1; j++) {
+                answerBean = (AnswerBean) newAnswerMap.get(Long.valueOf(String.valueOf(j)));
+                String oneAnswer = stripPtags(answerBean.getText());
+                String oneLabel = answerBean.getLabel();
+                AnswerIfc answer = null;
+                if (isCorrectChoice(bean, answerBean.getLabel().trim())) {
+                    answer = new PublishedAnswer(text, oneAnswer,
+                        Long.valueOf(j), oneLabel, Boolean.TRUE, null,
+                        Double.valueOf(bean.getItemScore()), Double.valueOf(100d), Double.valueOf(bean.getItemDiscount()));
+                }
+                else {
+                    answer = new PublishedAnswer(text, oneAnswer,
+                            Long.valueOf(j), oneLabel, Boolean.FALSE, null,
+                            Double.valueOf(bean.getItemScore()), Double.valueOf(answerBean.getPartialCredit()), Double.valueOf(bean.getItemDiscount()));
+                }
+                HashSet answerFeedbackSet = new HashSet();
+                answerFeedbackSet.add(new PublishedAnswerFeedback(answer,
+                                                         AnswerFeedbackIfc.GENERAL_FEEDBACK,
+                                                         stripPtags(answerBean.getFeedback())));
+                answer.setAnswerFeedbackSet(answerFeedbackSet);
+                answerSet.add(answer);
+            }
+        }
+        answerSet.removeAll(toBeRemovedSet);
+        //delegate.deleteSet(toBeRemovedSet);
     }
   }
   
