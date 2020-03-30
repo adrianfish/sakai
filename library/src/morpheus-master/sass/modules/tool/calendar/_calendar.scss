@@ -662,3 +662,7 @@
 	&.icon-calendar-workshop						{	@extend .fa-group}
 	&.icon-calendar-attachment						{	@extend .fa-paperclip}
 }
+
+.fc-bg {
+  z-index: 5;
+}

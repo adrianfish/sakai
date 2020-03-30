@@ -1,12 +1,12 @@
-import {SakaiElement} from "./sakai-element.js";
-import {html} from "./assets/lit-element/lit-element.js";
+import { SakaiElement } from "./sakai-element.js?version=050b4370";
+import { html } from "./assets/lit-element/lit-element.js?version=050b4370";
+import { render } from "./assets/lit-html/lit-html.js?version=050b4370";
 
 class SakaiCalendar extends SakaiElement {
 
   static get properties() {
 
-    return {
-    };
+    return {};
   }
 
   constructor() {
@@ -24,12 +24,20 @@ class SakaiCalendar extends SakaiElement {
       selectable: true,
       aspectRatio: 1.8,
       scrollTime: '00:00', // undo default 6am scrollTime
-      header: {
-        left: 'today prev,next',
-        center: 'title',
-        right: 'resourceTimelineDay,resourceTimelineThreeDays,timeGridWeek,dayGridMonth'
+      datesRender: info => {
+
+        const fgElements = this.querySelectorAll(`.fc-day-grid .fc-content-skeleton .fc-day-top`);
+        fgElements.forEach(fgEl => {
+
+          const createEl = html`
+            <a href="#" onclick="console.log('bollocks')" title="Create a new event here"><i class="fa fa-plus"></i></a>
+          `;
+          const span = document.createElement("span");
+          render(createEl, span);
+          fgEl.append(span);
+        });
       },
-      defaultView: 'resourceTimelineDay',
+      navLinks: true,
       views: {
         resourceTimelineThreeDays: {
           type: 'resourceTimeline',
@@ -48,49 +56,47 @@ class SakaiCalendar extends SakaiElement {
         events: function (event, successCallback, failureCallback) {
           var start_date = moment(event.start).format('YYYY-MM-DD');
           var end_date = moment(event.end).format('YYYY-MM-DD');
-          fetch(`/direct/calendar/site/${portal.siteId}.json`, {cache: "no-cache", credentials: "same-origin"})
-            .then(res => res.json())
-            .then(data => {
+          fetch(`/direct/calendar/site/${portal.siteId}.json`, { cache: "no-cache", credentials: "same-origin" }).then(res => res.json()).then(data => {
 
-              var events = [];
-              data['calendar_collection'].forEach(e => {
-                var startTime = e['firstTime']['time'];
-                var startDate = new Date(startTime);
-                var endTime = e['firstTime']['time'] + e['duration'] ;
-                var endDate = new Date();
-                endDate.setTime(endTime);
-                events.push({
-                  title: e['title'],
-                  description: e['description'],
-                  descriptionFormatted: e['descriptionFormatted'],
-                  start: startDate,
-                  site_name: e['siteName'],
-                  type: e['type'],
-                  //icon: e['eventIcon'],
-                  icon:"icon-calendar-exam",
-                  event_id: e['eventId'],
-                  attachments: e['attachments'] || [],
-                  eventReference: e['eventReference'],
-                  end: endDate
-                });
+            var events = [];
+            data['calendar_collection'].forEach(e => {
+              var startTime = e['firstTime']['time'];
+              var startDate = new Date(startTime);
+              var endTime = e['firstTime']['time'] + e['duration'];
+              var endDate = new Date();
+              endDate.setTime(endTime);
+              events.push({
+                title: e['title'],
+                description: e['description'],
+                descriptionFormatted: e['descriptionFormatted'],
+                start: startDate,
+                site_name: e['siteName'],
+                type: e['type'],
+                //icon: e['eventIcon'],
+                icon: "icon-calendar-exam",
+                event_id: e['eventId'],
+                attachments: e['attachments'] || [],
+                eventReference: e['eventReference'],
+                end: endDate
               });
-              successCallback(events);
             });
+            successCallback(events);
+          });
         },
         color: '#D4DFEE',
         textColor: '#0064cd'
       }],
-      eventSourceSuccess: function(content, xhr) {
+      eventSourceSuccess: function (content, xhr) {
         return content.eventArray;
       },
-      eventClick: (eventClick) => {
+      eventClick: eventClick => {
 
         //to adjust startdate and enddate as per user's locale
         var startDate = new Date().toLocaleString();
         var endDate = new Date(eventClick.event.end).toLocaleString();
         this.querySelector("#startTime").innerText = moment(eventClick.event.start).format('LLLL');
         this.querySelector("#endTime").innerText = moment(eventClick.event.end).format('LLLL');
-        this.querySelector("#event-type-icon").setAttribute("class","icon " + eventClick.event.extendedProps.icon);
+        this.querySelector("#event-type-icon").setAttribute("class", "icon " + eventClick.event.extendedProps.icon);
         this.querySelector("#event-type").innerText = eventClick.event.extendedProps.type;
         this.querySelector("#event-description").innerHTML = eventClick.event.extendedProps.descriptionFormatted;
         this.querySelector("#site-name").innerText = eventClick.event.extendedProps.site_name;
@@ -100,7 +106,7 @@ class SakaiCalendar extends SakaiElement {
           eventClick.event.extendedProps.attachments.forEach(a => {
 
             var filename = a.url.split('/');
-            filename = filename[filename.length-1];
+            filename = filename[filename.length - 1];
             attachments += `
               <li class="eventAttachmentItem">
                 <a href="${a.url}" target="_blank">
@@ -112,9 +118,9 @@ class SakaiCalendar extends SakaiElement {
           attachments += '</ul>';
           this.querySelector("#event-attachments").innerHTML = attachments;
           this.querySelector("#eventAttachmentsDiv").style.display = "block";
-        } else {
-          //$('#eventAttachmentsDiv').hide();
-        }
+        } else {}
+        //$('#eventAttachmentsDiv').hide();
+
         //var more_info = moreInfoUrl + eventClick.event.extendedProps.eventReference + '&panel=Main&sakai_action=doDescription&sakai.state.reset=true';
         //var fullDetailsText = msg('simplepage.calendar-more-info');
         //when Full Details is clicked, event in the Calendar tool is shown.
@@ -124,6 +130,31 @@ class SakaiCalendar extends SakaiElement {
       }
     });
     calendar.render();
+  }
+  
+  renderModalTemplate() {
+
+    return html`
+      <div class="modal" tabindex="-1" role="dialog">
+        <div class="modal-dialog" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title">Modal title</h5>
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+            <div class="modal-body">
+              <p>Modal body text goes here.</p>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-primary">Save changes</button>
+              <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
   }
 
   render() {
@@ -149,6 +180,7 @@ class SakaiCalendar extends SakaiElement {
           <br/>
         </div>
       </div>
+      ${this.renderModalTemplate()}
     `;
   }
 }
