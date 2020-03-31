@@ -1,6 +1,6 @@
-import { SakaiElement } from "./sakai-element.js?version=050b4370";
-import { html } from "./assets/lit-element/lit-element.js?version=050b4370";
-import { render } from "./assets/lit-html/lit-html.js?version=050b4370";
+import { SakaiElement } from "./sakai-element.js";
+import { html } from "./assets/lit-element/lit-element.js";
+import { render } from "./assets/lit-html/lit-html.js";
 
 class SakaiCalendar extends SakaiElement {
 
@@ -13,6 +13,10 @@ class SakaiCalendar extends SakaiElement {
 
     super();
     this.divId = `calendar-${Math.floor(Math.random() * Math.floor(1000))}`;
+  }
+
+  addNewEvent(e) {
+    console.log(e.target.dataset.date);
   }
 
   firstUpdated(changedProperties) {
@@ -30,7 +34,7 @@ class SakaiCalendar extends SakaiElement {
         fgElements.forEach(fgEl => {
 
           const createEl = html`
-            <a href="#" onclick="console.log('bollocks')" title="Create a new event here"><i class="fa fa-plus"></i></a>
+            <a href="#" @click=${this.addNewEvent} title="Create a new event here"><i class="fa fa-plus" data-date="${fgEl.dataset.date}"></i></a>
           `;
           const span = document.createElement("span");
           render(createEl, span);
@@ -131,7 +135,7 @@ class SakaiCalendar extends SakaiElement {
     });
     calendar.render();
   }
-  
+
   renderModalTemplate() {
 
     return html`
