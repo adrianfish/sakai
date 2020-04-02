@@ -300,7 +300,13 @@
 			<groupId>org.webjars</groupId>
 			<artifactId>viewerjs</artifactId>
 			<version>0.5.8</version>
-		</dependency>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/org.webjars.npm/flatpickr -->
+        <dependency>
+            <groupId>org.webjars.npm</groupId>
+            <artifactId>flatpickr</artifactId>
+            <version>4.1.4</version>
+        </dependency>
 	</dependencies>
 	<profiles>
 		<profile>

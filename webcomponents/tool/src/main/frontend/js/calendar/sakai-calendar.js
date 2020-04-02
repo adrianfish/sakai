@@ -1,6 +1,8 @@
-import { SakaiElement } from "./sakai-element.js";
-import { html } from "./assets/lit-element/lit-element.js";
-import { render } from "./assets/lit-html/lit-html.js";
+import { SakaiElement } from "../sakai-element.js?version=76c54fa6";
+import { html } from "../assets/lit-element/lit-element.js?version=76c54fa6";
+import { render } from "../assets/lit-html/lit-html.js?version=76c54fa6";
+import  "./sakai-calendar-create-event.js?version=76c54fa6";
+import "../assets/@lion/dialog/lion-dialog.js?version=76c54fa6";
 
 class SakaiCalendar extends SakaiElement {
 
@@ -16,30 +18,42 @@ class SakaiCalendar extends SakaiElement {
   }
 
   addNewEvent(e) {
-    console.log(e.target.dataset.date);
+
+    document.getElementById("cheese").__toggle();
+
+    /*
+    fgElements.forEach(fgEl => {
+
+          const createEl = html`
+            <lion-dialog>
+              <a slot="invoker" href="#" @click=${this.addNewEvent} title="Create a new event here"><i class="fa fa-plus" data-date="${fgEl.dataset.date}"></i></a>
+              <sakai-calendar-create-event slot="content" date="${fgEl.dataset.date}" />
+            </lion-dialog>
+          `;
+            //<a href="#" @click=${this.addNewEvent} title="Create a new event here"><i class="fa fa-plus" data-date="${fgEl.dataset.date}"></i></a>
+          const span = document.createElement("span");
+          render(createEl, span);
+          fgEl.append(span);
+        });
+        */
   }
 
   firstUpdated(changedProperties) {
 
     var el = this.querySelector(`#${this.divId}`);
     var calendar = new FullCalendar.Calendar(el, {
-      plugins: ['interaction', 'dayGrid', 'timeGrid'],
+      customButtons: { addevent: { text: 'Add', click: () => this.addNewEvent() } },
+      plugins: ['interaction', 'dayGrid', 'timeGrid', 'bootstrap'],
+      themeSystem: "bootstrap",
+      bootstrapFontAwesome: {addevent: "fa-plus"},
       editable: true, // enable draggable events
       selectable: true,
       aspectRatio: 1.8,
       scrollTime: '00:00', // undo default 6am scrollTime
-      datesRender: info => {
-
-        const fgElements = this.querySelectorAll(`.fc-day-grid .fc-content-skeleton .fc-day-top`);
-        fgElements.forEach(fgEl => {
-
-          const createEl = html`
-            <a href="#" @click=${this.addNewEvent} title="Create a new event here"><i class="fa fa-plus" data-date="${fgEl.dataset.date}"></i></a>
-          `;
-          const span = document.createElement("span");
-          render(createEl, span);
-          fgEl.append(span);
-        });
+      header: {
+        left: 'dayGridMonth,timeGridWeek,timeGridDay',
+        center: 'title',
+        right: 'prev,next today addevent',
       },
       navLinks: true,
       views: {
@@ -51,11 +65,6 @@ class SakaiCalendar extends SakaiElement {
       },
       defaultView: 'dayGridMonth',
       displayEventTime: false,
-      header: {
-        left: 'prev,next today',
-        center: 'title',
-        right: 'dayGridMonth,timeGridWeek,timeGridDay'
-      },
       eventSources: [{
         events: function (event, successCallback, failureCallback) {
           var start_date = moment(event.start).format('YYYY-MM-DD');
@@ -164,6 +173,9 @@ class SakaiCalendar extends SakaiElement {
   render() {
 
     return html`
+      <lion-dialog id="cheese">
+        <sakai-calendar-create-event slot="content" />
+      </lion-dialog>
       <div id="${this.divId}"></điv>
       <div id="calendarEventDialog" style="display:none;">
         <div id="eventInfo">

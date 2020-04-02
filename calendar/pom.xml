@@ -16,7 +16,6 @@
 
     <modules>
         <module>calendar-api/api</module>
-        <module>calendar-bundles</module>
         <module>calendar-hbm</module>
         <module>calendar-impl/impl</module>
         <module>calendar-summary-tool/tool</module>

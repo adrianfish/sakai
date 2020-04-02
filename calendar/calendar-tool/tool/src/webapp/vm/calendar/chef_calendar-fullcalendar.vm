@@ -1,12 +1,19 @@
 <link href="/library/webjars/fullcalendar/4.3.1/core/main.min.css" rel="stylesheet" />
 <link href="/library/webjars/fullcalendar/4.3.1/daygrid/main.min.css" rel="stylesheet" />
 <link href="/library/webjars/fullcalendar/4.3.1/timegrid/main.min.css" rel="stylesheet" />
+<link href='/library/webjars/fullcalendar/4.3.1/bootstrap/main.css' rel='stylesheet' />
+<link href="/library/webjars/flatpickr/4.1.4/dist/flatpickr.min.css" rel="stylesheet" />
 <div class="portletBody">
     #if($menu)#toolbar($menu)#end
-    <sakai-calendar></sakai-calendar>
+    <div id="fullcalender-wrapper">
+        <sakai-calendar></sakai-calendar>
+    </div>
 </div>
 <script src="/library/webjars/fullcalendar/4.3.1/core/main.min.js"></script>
 <script src="/library/webjars/fullcalendar/4.3.1/daygrid/main.min.js"></script>
 <script src="/library/webjars/fullcalendar/4.3.1/timegrid/main.min.js"></script>
 <script src="/library/webjars/fullcalendar/4.3.1/interaction/main.min.js"></script>
-<script type="module" src="/webcomponents/sakai-calendar.js"></script>
+<script src="/library/webjars/fullcalendar/4.3.1/bootstrap/main.js"></script>
+<script src="/library/webjars/flatpickr/4.1.4/dist/flatpickr.min.js"></script>
+<script src="/webcomponents/dist/ckeditor.js"></script>
+<script type="module" src="/webcomponents/calendar/sakai-calendar.js"></script>

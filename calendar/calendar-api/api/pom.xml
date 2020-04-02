@@ -29,4 +29,16 @@
             <artifactId>sakai-component-manager</artifactId>
         </dependency>
     </dependencies>
+
+    <build>
+        <resources>
+            <resource>
+                <directory>${basedir}/src/resources</directory>
+                <includes>
+                    <include>**/*.properties</include>
+                    <include>**/*.metaprops</include>
+                </includes>
+            </resource>
+        </resources>
+    </build>
 </project>
