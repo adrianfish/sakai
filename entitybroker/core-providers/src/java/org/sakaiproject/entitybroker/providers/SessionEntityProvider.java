@@ -208,6 +208,7 @@ public class SessionEntityProvider extends AbstractEntityProvider implements Cor
                throw new IllegalArgumentException("A session entity cannot be created without providing the username and password, " 
                      + "the username must be provided as '_username' and the password as '_password' in the POST");
             }
+
             // now we auth
             try {
                 Evidence evidence = new IdPwEvidence(username, password, req.getRemoteAddr());

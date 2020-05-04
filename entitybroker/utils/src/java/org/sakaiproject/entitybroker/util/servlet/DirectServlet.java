@@ -27,11 +27,18 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import java.util.Arrays;
+import java.util.List;
+
 import lombok.extern.slf4j.Slf4j;
 
+import org.sakaiproject.component.api.ServerConfigurationService;
+import org.sakaiproject.component.cover.ComponentManager;
 import org.sakaiproject.entitybroker.entityprovider.extension.Formats;
 import org.sakaiproject.entitybroker.exception.EntityException;
 import org.sakaiproject.entitybroker.providers.EntityRequestHandler;
+
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * This is the core abstract DirectServlet class which is meant to extended,
@@ -83,6 +90,8 @@ public abstract class DirectServlet extends HttpServlet {
      */
     protected abstract void handleUserLogin(HttpServletRequest req, HttpServletResponse res, String path);
 
+    private List<String> allowedOrigins;
+
 
     /**
      * Default constructor
@@ -102,6 +111,10 @@ public abstract class DirectServlet extends HttpServlet {
     @Override
     public void init() throws ServletException {
         super.init();
+        ServerConfigurationService serverConfigurationService
+            = (ServerConfigurationService) ComponentManager.get(ServerConfigurationService.class.getName());
+        allowedOrigins = serverConfigurationService.getStringList("webservices.allowed-origins"
+                                                , Arrays.asList(new String[] {"http://localhost:8100"}));
         initialize();
     }
 
@@ -147,6 +160,26 @@ public abstract class DirectServlet extends HttpServlet {
      */
     protected void handleRequest(HttpServletRequest req, HttpServletResponse res)
             throws ServletException, IOException {
+
+        if (!allowedOrigins.isEmpty()) {
+            String origin = req.getHeader("origin");
+            if (StringUtils.isNotEmpty(origin) && allowedOrigins.contains(origin)) {
+                // Authorize (allow) all domains to consume the content
+                res.addHeader("Access-Control-Allow-Origin", origin);
+                res.addHeader("Access-Control-Allow-Methods","GET, OPTIONS, HEAD, PUT, POST");
+                res.addHeader("Access-Control-Allow-Credentials", "true");
+
+                // For HTTP OPTIONS verb/method reply with ACCEPTED status code -- per CORS handshake
+                if (req.getMethod().equals("OPTIONS")) {
+                    res.setStatus(HttpServletResponse.SC_ACCEPTED);
+                    return;
+                }
+            } else if (req.getMethod().equals("OPTIONS")) {
+                res.setStatus(HttpServletResponse.SC_OK);
+                return;
+            }
+        }
+
         // catch the login helper posts
         // Note that with wrapped requests, URLUtils.getSafePathInfo may return null
         // so we use the request URI
