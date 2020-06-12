@@ -31,7 +31,6 @@ export class SakaiOptionsMenu extends LitElement {
     };
   }
 
-
   constructor() {
 
     super();
@@ -80,7 +79,7 @@ export class SakaiOptionsMenu extends LitElement {
   render() {
 
     return html`
-      <a id="invoker" href="javascript:;" @click=${this._toggle} title="${this.invokerTooltip}"><sakai-icon type="menu" size="${this.invokerSize}" /></a>
+      <a id="invoker" href="javascript:;" @click=${this._toggle} aria-haspopup="true" title="${this.invokerTooltip}"><sakai-icon type="menu" size="${this.invokerSize}" /></a>
       <slot name="content"></slot>
     `;
   }

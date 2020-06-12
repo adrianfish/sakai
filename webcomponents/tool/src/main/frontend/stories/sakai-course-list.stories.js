@@ -1,18 +1,31 @@
 import { html } from 'lit-html';
 import fetchMock from "fetch-mock";
-import { withCssResources } from '@storybook/addon-cssresources';
 import { withA11y } from "@storybook/addon-a11y";
+import { withCssResources } from '@storybook/addon-cssresources';
 
-import '../js/sakai-course-card.js';
+import '../js/sakai-course-list.js';
 
 // Mockup the i18n strings
-const i18n = `
+const coursecardI18n = `
 options_menu_tooltip=Click to see options for this course
 select_tools_to_display=Select tools to display:
 favourite_this_course=Favourite this course?
 assignments_tooltip=Click to view your assignments for this course
 gradebook_tooltip=Click to view the gradebook for this course
 forums_tooltip=Click to view the forums for this course
+visit=Visit
+`;
+
+const courselistI18n = `
+view_all_sites=View All Sites
+favourites=Favourites
+all_projects=All Projects
+all_courses=All Courses
+new_activity=New Activity
+title_a_to_z=Title: A-Z
+title_z_to_a=Title: Z-A
+code_a_to_z=Code: A-Z
+code_z_to_a=Code: Z-A
 `;
 
 // Mockup the toolname mapping properties
@@ -23,17 +36,17 @@ forums=Forums
 `;
 
 export default {
-  title: 'Sakai Course Card',
+  title: 'Sakai Course List',
   decorators: [withCssResources, withA11y, (storyFn) => {
     parent.portal = {locale: "en-GB"};
     const baseUrl = "/sakai-ws/rest/i18n/getI18nProperties?locale=en-GB&resourceclass=org.sakaiproject.i18n.InternationalizedMessages&resourcebundle=";
-    const i18nUrl = `${baseUrl}coursecard`;
-    const toolnameMappingsUrl = `${baseUrl}toolname-mappings`;
+    const coursecardI18nUrl = `${baseUrl}coursecard`;
+    const courselistI18nUrl = `${baseUrl}courselist`;
     fetchMock
-      .get(i18nUrl, i18n, {overwriteRoutes: true})
-      .get(toolnameMappingsUrl, toolnameMappings, {overwriteRoutes: true})
-      .get("/direct/site/addfavourite?siteId=xyz", 200, {overwriteRoutes: true})
-      .get("/direct/site/removefavourite?siteId=xyz", 200, {overwriteRoutes: true})
+      .get(coursecardI18nUrl, coursecardI18n, {overwriteRoutes: true})
+      .get(courselistI18nUrl, courselistI18n, {overwriteRoutes: true})
+      .get(/addfavourite/, 200, {overwriteRoutes: true})
+      .get(/removefavourite/, 200, {overwriteRoutes: true})
       .get("*", 500, {overwriteRoutes: true});
     return storyFn();
   }],
@@ -99,52 +112,36 @@ export default {
   },
 };
 
-export const BasicDisplay = () => {
+export const WithData = () => {
 
-  return html`
-    <sakai-course-card />
-  `;
-};
-
-export const WithImage = () => {
-
-  const courseData = {
-    id: "xyz",
-    title: "Marine Biology 101",
-    code: "MB 101",
-    alerts: ["gradebook", "forums"],
-    favourite: false,
-    image: "https://static.wixstatic.com/media/e441d1_6c7bdbdb1ef84fc6bfc09f8365b77e67~mv2.png"
-  };
-
-  return html`
-    <sakai-course-card course-data=${JSON.stringify(courseData)} tool-urls='{"assignments": "http://www.gmail.com"}'>
-  `;
-};
-
-export const TwoWithData = () => {
-
-  const courseData1 = {
-    id: "xyz",
+  const courseData = [{
+    id: "bio",
     title: "Biogeochemical Oceanography",
     code: "BCO 104",
+    url: "http://www.facebook.com",
     alerts: ["forums"],
     favourite: false,
-  };
-
-  const courseData2 = {
-    id: "xyz",
-    title: "Marine Biology 101",
-    code: "MB 101",
-    alerts: ["gradebook", "forums"],
+    course: true,
+  },
+  {
+    id: "fre",
+    title: "French 101",
+    code: "LING",
+    url: "http://www.ebay.co.uk",
+    alerts: ["assignments", "forums"],
+    favourite: true,
+    course: true,
+  },
+  {
+    id: "footsoc",
+    title: "Football Society",
+    code: "FOOTSOC",
+    url: "http://www.open.ac.uk",
     favourite: false,
-    image: "https://static.wixstatic.com/media/e441d1_6c7bdbdb1ef84fc6bfc09f8365b77e67~mv2.png"
-  };
+    project: true,
+  }];
 
   return html`
-    <sakai-course-card course-data=${JSON.stringify(courseData1)}></sakai-course-card>
-    <br />
-    <br />
-    <sakai-course-card course-data=${JSON.stringify(courseData2)} tool-urls='{"assignments": "http://www.gmail.com"}'></sakai-course-card>
+    <sakai-course-list course-data="${JSON.stringify(courseData)}">
   `;
 };
