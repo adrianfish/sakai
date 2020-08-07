@@ -85,6 +85,7 @@ import org.sakaiproject.gradebookng.tool.model.GradebookUiSettings;
 import org.sakaiproject.rubrics.logic.RubricsConstants;
 import org.sakaiproject.rubrics.logic.RubricsService;
 import org.sakaiproject.section.api.SectionManager;
+import org.sakaiproject.section.api.coursemanagement.EnrollmentRecord;
 import org.sakaiproject.service.gradebook.shared.AssessmentNotFoundException;
 import org.sakaiproject.service.gradebook.shared.Assignment;
 import org.sakaiproject.service.gradebook.shared.CategoryDefinition;
@@ -1075,6 +1076,17 @@ public class GradebookNgBusinessService {
 	private Map<String, List<String>> getUserSections(String siteId) {
 
 		final Map<String, List<String>> userSections = new HashMap<>();
+		for (CourseSection cs : sectionManager.getSections(siteId)) {
+			for (EnrollmentRecord er : sectionManager.getSectionEnrollments(cs.getUuid())) {
+				String userId = er.getUser().getUserUid();
+				List<String> sections = userSections.get(userId);
+                if (sections == null) {
+					userSections.put(userId, new ArrayList<>(Arrays.asList(cs.getTitle())));
+				} else {
+					sections.add(cs.getTitle());
+				}
+			}
+		}
 
 		String[] sectionIds = null;
 
@@ -1163,7 +1175,7 @@ public class GradebookNgBusinessService {
 
 		for (User u : users) {
 			gbUsers.add(new GbUser(u, getStudentNumber(u, site))
-							.setSections(userSections.getOrDefault(u.getEid(), Collections.emptyList())));
+							.setSections(userSections.getOrDefault(u.getId(), Collections.emptyList())));
 		}
 
 		return gbUsers;
