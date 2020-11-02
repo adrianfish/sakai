@@ -23,12 +23,10 @@ package org.sakaiproject.tool.assessment.ui.bean.evaluation;
 
 import java.io.Serializable;
 
-import javax.faces.bean.ManagedBean;
-import javax.faces.bean.SessionScoped;
+import javax.inject.Named;
 
 /* For evaluation: Evaluation Result backing bean. */
-@ManagedBean(name="evaluationresult")
-@SessionScoped
+@Named(value = "evaluationresult")
 public class EvaluationResultBean implements Serializable {
   private String assessmentId;
 

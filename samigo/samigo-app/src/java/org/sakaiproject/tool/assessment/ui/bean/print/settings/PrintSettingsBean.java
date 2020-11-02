@@ -17,12 +17,10 @@ package org.sakaiproject.tool.assessment.ui.bean.print.settings;
 
 import java.io.Serializable;
 
-import javax.faces.bean.ManagedBean;
-import javax.faces.bean.SessionScoped;
+import javax.inject.Named;
 
 /* Print settings bean. */
-@ManagedBean(name="printSettings")
-@SessionScoped
+@Named(value = "printSettings")
 public class PrintSettingsBean implements Serializable {
 
 	private static final long serialVersionUID = 1L;

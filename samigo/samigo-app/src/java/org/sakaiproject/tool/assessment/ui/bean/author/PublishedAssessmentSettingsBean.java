@@ -37,11 +37,10 @@ import java.util.TreeMap;
 import java.util.stream.Collectors;
 
 import javax.annotation.Resource;
-import javax.faces.bean.ManagedBean;
-import javax.faces.bean.SessionScoped;
 import javax.faces.context.ExternalContext;
 import javax.faces.context.FacesContext;
 import javax.faces.model.SelectItem;
+import javax.inject.Named;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -101,8 +100,7 @@ import org.springframework.web.context.WebApplicationContext;
 
 /* For author: Assessment Settings backing bean.*/
 @Slf4j
-@ManagedBean(name="publishedSettings")
-@SessionScoped
+@Named(value = "publishedSettings")
 public class PublishedAssessmentSettingsBean implements Serializable {
 
   private static final IntegrationContextFactory integrationContextFactory =

@@ -18,17 +18,15 @@ package org.sakaiproject.tool.assessment.ui.bean.author;
 import java.io.Serializable;
 import java.util.ArrayList;
 
-import javax.faces.bean.ManagedBean;
-import javax.faces.bean.SessionScoped;
 import javax.faces.model.SelectItem;
+import javax.inject.Named;
 
 import lombok.extern.slf4j.Slf4j;
 import org.sakaiproject.util.ResourceLoader;
 
 /* For publish/republish notification backing bean. */
 @Slf4j
-@ManagedBean(name="publishRepublishNotification")
-@SessionScoped
+@Named(value = "publishRepublishNotification")
 public class PublishRepublishNotificationBean implements Serializable {
 
 	private static final ResourceLoader res = new ResourceLoader("org.sakaiproject.tool.assessment.bundle.AssessmentSettingsMessages");

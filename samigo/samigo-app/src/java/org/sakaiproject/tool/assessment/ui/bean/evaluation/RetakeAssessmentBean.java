@@ -24,8 +24,7 @@ package org.sakaiproject.tool.assessment.ui.bean.evaluation;
 import java.io.Serializable;
 import java.util.Map;
 
-import javax.faces.bean.ManagedBean;
-import javax.faces.bean.SessionScoped;
+import javax.inject.Named;
 
 import lombok.extern.slf4j.Slf4j;
 import org.sakaiproject.tool.assessment.data.dao.grading.StudentGradingSummaryData;
@@ -36,8 +35,7 @@ import org.sakaiproject.tool.assessment.ui.listener.util.ContextUtil;
 
 /* For evaluation: Retake Assessment backing bean. */
 @Slf4j
-@ManagedBean(name="retakeAssessment")
-@SessionScoped
+@Named(value = "retakeAssessment")
 public class RetakeAssessmentBean implements Serializable {
 
 	private Long publishedAssessmentId;

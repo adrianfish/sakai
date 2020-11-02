@@ -23,12 +23,10 @@ package org.sakaiproject.tool.assessment.ui.bean.author;
 
 import java.io.Serializable;
 
-import javax.faces.bean.ManagedBean;
-import javax.faces.bean.SessionScoped;
+import javax.inject.Named;
 
 /* For author: Delete Confirm backing bean. */
-@ManagedBean(name="deleteconfirm")
-@SessionScoped
+@Named(value = "deleteconfirm")
 public class DeleteConfirmBean implements Serializable {
 
 	private static final long serialVersionUID = 1028400984124650211L;

@@ -25,8 +25,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.faces.bean.ManagedBean;
-import javax.faces.bean.SessionScoped;
+import javax.inject.Named;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -35,8 +34,7 @@ import org.sakaiproject.tool.assessment.ui.listener.select.SelectActionListener;
 import org.sakaiproject.tool.assessment.ui.listener.delivery.BeginDeliveryActionListener;
 
 @Slf4j
-@ManagedBean(name="backingbean")
-@SessionScoped
+@Named(value = "backingbean")
 public class BackingBean implements Serializable {
 
 	private static final long serialVersionUID = -1137408628089300518L;

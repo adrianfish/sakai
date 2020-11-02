@@ -24,15 +24,13 @@ package org.sakaiproject.tool.assessment.ui.bean.author;
 import java.io.Serializable;
 import java.util.ArrayList;
 
-import javax.faces.bean.ManagedBean;
-import javax.faces.bean.SessionScoped;
+import javax.inject.Named;
 
 import lombok.extern.slf4j.Slf4j;
 
 /* For author: Published Assessment backing bean. */
 @Slf4j
-@ManagedBean(name="publishedassessment")
-@SessionScoped
+@Named(value = "publishedassessment")
 public class PublishedAssessmentBean implements Serializable
 {
 

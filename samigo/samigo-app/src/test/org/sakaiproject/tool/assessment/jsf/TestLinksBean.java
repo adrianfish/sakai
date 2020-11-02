@@ -24,10 +24,8 @@ import java.io.Serializable;
 import java.util.ArrayList;
 
 import javax.faces.bean.ManagedBean;
-import javax.faces.bean.SessionScoped;
 
 @ManagedBean(name="testlinks")
-@SessionScoped
 public class TestLinksBean implements Serializable {
   public TestLinksBean()
   {

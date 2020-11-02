@@ -31,11 +31,10 @@ import java.util.Iterator;
 import java.util.List;
 
 import javax.faces.application.FacesMessage;
-import javax.faces.bean.ManagedBean;
 import javax.faces.bean.ManagedProperty;
-import javax.faces.bean.SessionScoped;
 import javax.faces.context.FacesContext;
 import javax.faces.event.ValueChangeEvent;
+import javax.inject.Named;
 
 import org.sakaiproject.component.cover.ComponentManager;
 import org.sakaiproject.component.cover.ServerConfigurationService;
@@ -70,8 +69,7 @@ import lombok.extern.slf4j.Slf4j;
  * <p>Bean for QTI Import Data</p>
  */
 @Slf4j
-@ManagedBean(name="xmlImport")
-@SessionScoped
+@Named(value = "xmlImport")
 public class XMLImportBean implements Serializable {
 	  /** Use serialVersionUID for interoperability. */
 	  private final static long serialVersionUID = 418920360211039758L;

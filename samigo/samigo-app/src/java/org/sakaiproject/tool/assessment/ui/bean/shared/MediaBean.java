@@ -24,12 +24,10 @@ package org.sakaiproject.tool.assessment.ui.bean.shared;
 
 import java.io.Serializable;
 
-import javax.faces.bean.ManagedBean;
-import javax.faces.bean.SessionScoped;
+import javax.inject.Named;
 
 /* For media: Media bean. */
-@ManagedBean(name="mediaBean")
-@SessionScoped
+@Named(value = "mediaBean")
 public class MediaBean implements Serializable {
 
 	private static final long serialVersionUID = 3080542880089498490L;

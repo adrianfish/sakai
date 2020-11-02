@@ -37,10 +37,9 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import javax.faces.application.FacesMessage;
-import javax.faces.bean.ManagedBean;
-import javax.faces.bean.SessionScoped;
 import javax.faces.context.ExternalContext;
 import javax.faces.context.FacesContext;
+import javax.inject.Named;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 
@@ -111,8 +110,7 @@ import lombok.extern.slf4j.Slf4j;
 
 /* For delivery: Delivery backing bean */
 @Slf4j
-@ManagedBean(name="delivery")
-@SessionScoped
+@Named(value = "delivery")
 public class DeliveryBean implements Serializable {
 
   //SAM-2517
@@ -1274,6 +1272,8 @@ public class DeliveryBean implements Serializable {
   }
 
   public String validate() {
+
+    System.out.println("VALIDATE");
     try {
       String results = "takeAssessment";
 

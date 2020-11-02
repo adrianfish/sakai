@@ -35,8 +35,11 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import javax.faces.bean.ManagedBean;
-import javax.faces.bean.SessionScoped;
+import javax.enterprise.context.Initialized;
+import javax.enterprise.context.RequestScoped;
+import javax.enterprise.event.Observes;
+import javax.inject.Named;
+import javax.servlet.ServletRequest;
 
 import lombok.extern.slf4j.Slf4j;
 import lombok.Data;
@@ -59,9 +62,8 @@ import org.sakaiproject.tool.assessment.services.assessment.PublishedAssessmentS
 import org.sakaiproject.tool.assessment.ui.listener.author.AuthorActionListener;
 import org.sakaiproject.util.api.FormattedText;
 
-
-@ManagedBean(name = "restoreAssessmentsBean", eager = true)
-@SessionScoped
+//@Named(value = "restoreAssessmentsBean", eager = true)
+@Named(value = "restoreAssessmentsBean")
 @Data
 @Slf4j
 public class RestoreAssessmentsBean implements Serializable {
@@ -70,6 +72,9 @@ public class RestoreAssessmentsBean implements Serializable {
     private static final boolean integrated = IntegrationContextFactory.getInstance().isIntegrated();
 
     List<DataAssessment> deletedAssessmentList;
+
+    public void init(@Observes @Initialized(RequestScoped.class) ServletRequest request) {
+    }
 
     public void init() {
         log.debug("RestoreAssessmentsBean: init()");

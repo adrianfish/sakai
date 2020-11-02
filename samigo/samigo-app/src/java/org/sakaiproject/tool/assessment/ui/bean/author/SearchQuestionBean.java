@@ -30,9 +30,8 @@ import java.util.List;
 import java.util.Set;
 
 import javax.faces.application.FacesMessage;
-import javax.faces.bean.ManagedBean;
-import javax.faces.bean.SessionScoped;
 import javax.faces.context.FacesContext;
+import javax.inject.Named;
 
 import net.htmlparser.jericho.Source;
 import lombok.extern.slf4j.Slf4j;
@@ -58,8 +57,7 @@ import org.sakaiproject.tool.assessment.ui.listener.util.ContextUtil;
 
 /* For author: Search Questions backing bean. */
 @Slf4j
-@ManagedBean(name="searchQuestionBean")
-@SessionScoped
+@Named(value = "searchQuestionBean")
 public class SearchQuestionBean   implements Serializable {
 
     private String selectedSection;

@@ -25,10 +25,8 @@ import java.util.Date;
 import java.util.HashMap;
 
 import javax.faces.bean.ManagedBean;
-import javax.faces.bean.SessionScoped;
 
 @ManagedBean(name="subbean")
-@SessionScoped
 public class SubBackingBean implements Serializable {
   private String title;
   private String name;

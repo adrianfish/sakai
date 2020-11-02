@@ -24,15 +24,13 @@ package org.sakaiproject.tool.assessment.ui.bean.qti;
 
 import java.io.Serializable;
 
-import javax.faces.bean.ManagedBean;
-import javax.faces.bean.SessionScoped;
+import javax.inject.Named;
 
 /**
  * <p>Bean for QTI XML or XML fragments and descriptive information. </p>
  * <p>Used to maintain information or to dump XML to client.</p>
  */
-@ManagedBean(name="xml")
-@SessionScoped
+@Named(value = "xml")
 public class XMLDisplay implements Serializable {
 
 	private static final long serialVersionUID = 40775142933316177L;

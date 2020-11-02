@@ -30,8 +30,7 @@ import java.util.Map.Entry;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.faces.bean.ManagedBean;
-import javax.faces.bean.SessionScoped;
+import javax.inject.Named;
 import javax.faces.model.SelectItem;
 
 import org.sakaiproject.tool.assessment.data.dao.assessment.PublishedSectionData;
@@ -40,8 +39,7 @@ import org.sakaiproject.tool.assessment.data.ifc.assessment.SectionDataIfc;
 import org.sakaiproject.tool.assessment.ui.listener.util.ContextUtil;
 
 /* For evaluation: Histogram Scores backing bean. */
-@ManagedBean(name="histogramScores")
-@SessionScoped
+@Named(value = "histogramScores")
 public class HistogramScoresBean implements Serializable {
   private String assessmentName;
 

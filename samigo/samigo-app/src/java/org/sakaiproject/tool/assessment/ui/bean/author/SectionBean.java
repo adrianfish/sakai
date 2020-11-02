@@ -33,12 +33,11 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import javax.faces.bean.ManagedBean;
-import javax.faces.bean.SessionScoped;
 import javax.faces.context.ExternalContext;
 import javax.faces.context.FacesContext;
 import javax.faces.event.ValueChangeEvent;
 import javax.faces.model.SelectItem;
+import javax.inject.Named;
 
 import org.apache.commons.lang3.StringUtils;
 import org.sakaiproject.component.cover.ComponentManager;
@@ -69,8 +68,7 @@ import lombok.extern.slf4j.Slf4j;
 
 /* For author: Section backing bean. */
 @Slf4j
-@ManagedBean(name="sectionBean")
-@SessionScoped
+@Named(value = "sectionBean")
 public class SectionBean implements Serializable {
 
 /** Use serialVersionUID for interoperability. */

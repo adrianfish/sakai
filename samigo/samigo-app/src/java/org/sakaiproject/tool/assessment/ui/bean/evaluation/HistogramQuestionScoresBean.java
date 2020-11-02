@@ -28,16 +28,14 @@ import java.util.Collection;
 import java.util.Set;
 import java.util.TreeSet;
 
-import javax.faces.bean.ManagedBean;
-import javax.faces.bean.SessionScoped;
+import javax.inject.Named;
 
 import lombok.extern.slf4j.Slf4j;
 import org.sakaiproject.tool.assessment.ui.bean.util.Validator;
 
 /* For evaluation: Histogram Question Scores backing bean. */
 @Slf4j
-@ManagedBean(name="histogramquestionscores")
-@SessionScoped
+@Named(value = "histogramquestionscores")
 public class HistogramQuestionScoresBean implements Serializable {
   private String assessmentName;
   private String title;

@@ -26,10 +26,9 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
-import javax.faces.bean.ManagedBean;
 import javax.faces.bean.ManagedProperty;
-import javax.faces.bean.SessionScoped;
 import javax.faces.model.SelectItem;
+import javax.inject.Named;
 
 import org.sakaiproject.component.cover.ServerConfigurationService;
 import org.sakaiproject.tool.assessment.data.ifc.shared.TypeIfc;
@@ -45,8 +44,7 @@ import org.sakaiproject.util.ResourceLoader;
  * Also developers could add an administrative configuration later.</p>
  *
  */
-@ManagedBean(name="itemConfig")
-@SessionScoped
+@Named(value = "itemConfig")
 public class ItemConfigBean implements Serializable {
 
 	private static final long serialVersionUID = 5017545754149103817L;

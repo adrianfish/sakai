@@ -26,8 +26,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import javax.faces.bean.ManagedBean;
-import javax.faces.bean.SessionScoped;
+import javax.inject.Named;
 
 import org.apache.commons.lang3.StringUtils;
 import org.sakaiproject.authz.cover.SecurityService;
@@ -42,8 +41,7 @@ import lombok.extern.slf4j.Slf4j;
 
 /* For authorization */
 @Slf4j
-@ManagedBean(name="authorization")
-@SessionScoped
+@Named(value = "authorization")
 public class AuthorizationBean implements Serializable {
 
 	private static final long serialVersionUID = -2782949557257727817L;

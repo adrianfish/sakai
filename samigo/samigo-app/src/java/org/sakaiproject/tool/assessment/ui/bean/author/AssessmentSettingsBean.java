@@ -32,11 +32,10 @@ import java.util.TreeMap;
 
 import javax.annotation.Resource;
 import javax.faces.application.FacesMessage;
-import javax.faces.bean.ManagedBean;
-import javax.faces.bean.SessionScoped;
 import javax.faces.context.ExternalContext;
 import javax.faces.context.FacesContext;
 import javax.faces.model.SelectItem;
+import javax.inject.Named;
 
 import org.apache.commons.lang3.StringUtils;
 import org.sakaiproject.content.api.ContentResource;
@@ -99,8 +98,7 @@ import org.sakaiproject.tool.assessment.util.ExtendedTimeValidator;
  * For author: Assessment Settings backing bean.
  */
 @Slf4j
-@ManagedBean(name="assessmentSettings")
-@SessionScoped
+@Named(value="assessmentSettings")
 public class AssessmentSettingsBean implements Serializable {
     private static final IntegrationContextFactory integrationContextFactory =
       IntegrationContextFactory.getInstance();

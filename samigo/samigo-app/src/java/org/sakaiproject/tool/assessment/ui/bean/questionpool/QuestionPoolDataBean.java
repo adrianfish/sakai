@@ -31,8 +31,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import javax.faces.bean.ManagedBean;
-import javax.faces.bean.SessionScoped;
+import javax.inject.Named;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -42,8 +41,7 @@ import org.sakaiproject.util.api.FormattedText;
 
 /* For questionpool: Question Pool Data backing bean. */
 @Slf4j
-@ManagedBean(name="questionpooldata")
-@SessionScoped
+@Named(value = "questionpooldata")
 public class QuestionPoolDataBean implements Serializable {
 
   /** Use serialVersionUID for interoperability. */

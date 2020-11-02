@@ -46,12 +46,11 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import javax.faces.application.FacesMessage;
-import javax.faces.bean.ManagedBean;
-import javax.faces.bean.SessionScoped;
 import javax.faces.context.ExternalContext;
 import javax.faces.context.FacesContext;
 import javax.faces.event.ValueChangeEvent;
 import javax.faces.model.SelectItem;
+import javax.inject.Named;
 import javax.servlet.ServletContext;
 
 import lombok.Getter;
@@ -108,8 +107,7 @@ import org.sakaiproject.util.api.FormattedText;
 
 /* For author: Item Author backing bean. */
 @Slf4j
-@ManagedBean(name="itemauthor")
-@SessionScoped
+@Named(value = "itemauthor")
 public class ItemAuthorBean implements Serializable {
 
   /** Use serialVersionUID for interoperability. */

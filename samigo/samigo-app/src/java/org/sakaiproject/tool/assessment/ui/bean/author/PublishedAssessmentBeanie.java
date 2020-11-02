@@ -25,9 +25,8 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.faces.bean.ManagedBean;
-import javax.faces.bean.SessionScoped;
 import javax.faces.model.SelectItem;
+import javax.inject.Named;
 
 import org.sakaiproject.tool.assessment.data.ifc.assessment.SectionDataIfc;
 import org.sakaiproject.tool.assessment.data.ifc.shared.TypeIfc;
@@ -39,8 +38,7 @@ import lombok.extern.slf4j.Slf4j;
 
 /* For author: Published Assessment backing bean. */
 @Slf4j
-@ManagedBean(name="publishedAssessmentBean")
-@SessionScoped
+@Named(value = "publishedAssessmentBean")
 public class PublishedAssessmentBeanie implements Serializable {
 
   /** Use serialVersionUID for interoperability. */

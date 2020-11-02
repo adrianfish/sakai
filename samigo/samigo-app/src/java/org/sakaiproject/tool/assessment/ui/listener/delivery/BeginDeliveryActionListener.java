@@ -157,7 +157,7 @@ public class BeginDeliveryActionListener implements ActionListener
     
     // reset DeliveryBean before begin
     ResetDeliveryListener reset = new ResetDeliveryListener();
-    reset.processAction(null);
+    //reset.processAction(null);
 
     // reset timer before begin
     /*

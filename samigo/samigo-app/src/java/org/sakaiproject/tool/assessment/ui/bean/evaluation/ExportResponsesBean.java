@@ -34,10 +34,9 @@ import java.util.List;
 import java.util.Map;
 
 import javax.annotation.Resource;
-import javax.faces.bean.ManagedBean;
-import javax.faces.bean.SessionScoped;
 import javax.faces.context.FacesContext;
 import javax.faces.event.ActionEvent;
+import javax.inject.Named;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -68,8 +67,7 @@ import org.springframework.web.context.WebApplicationContext;
 
 /* For evaluation: Export Responses backing bean. */
 @Slf4j
-@ManagedBean(name="exportResponses")
-@SessionScoped
+@Named(value = "exportResponses")
 public class ExportResponsesBean implements Serializable, PhaseAware {
 
 	private static final long serialVersionUID = 2854656853283125977L;

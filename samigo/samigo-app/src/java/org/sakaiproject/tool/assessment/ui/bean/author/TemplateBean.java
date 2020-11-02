@@ -29,8 +29,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.faces.bean.ManagedBean;
-import javax.faces.bean.SessionScoped;
+import javax.inject.Named;
 
 import lombok.extern.slf4j.Slf4j;
 import org.sakaiproject.component.cover.ServerConfigurationService;
@@ -47,8 +46,7 @@ import org.sakaiproject.tool.assessment.ui.listener.util.ContextUtil;
  *
  */
 @Slf4j
-@ManagedBean(name="template")
-@SessionScoped
+@Named(value = "template")
  public class TemplateBean implements Serializable {
   private static final long serialVersionUID = 7526471155622776147L;
   private Map values = new HashMap();

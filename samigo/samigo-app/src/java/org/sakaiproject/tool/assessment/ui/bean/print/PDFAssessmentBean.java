@@ -33,10 +33,9 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 
-import javax.faces.bean.ManagedBean;
-import javax.faces.bean.SessionScoped;
 import javax.faces.context.FacesContext;
 import javax.imageio.ImageIO;
+import javax.inject.Named;
 import javax.servlet.http.HttpServletResponse;
 
 import lombok.extern.slf4j.Slf4j;
@@ -78,8 +77,7 @@ import org.sakaiproject.tool.assessment.jsf.convert.AnswerSurveyConverter;
 
 /* Print to PDF backing bean. */
 @Slf4j
-@ManagedBean(name="pdfAssessment")
-@SessionScoped
+@Named(value = "pdfAssessment")
 public class PDFAssessmentBean implements Serializable {
 
 	private static final long serialVersionUID = 1L;

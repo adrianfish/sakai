@@ -41,8 +41,7 @@ import java.util.Map;
 import java.util.Set;
 
 import javax.faces.application.FacesMessage;
-import javax.faces.bean.ManagedBean;
-import javax.faces.bean.SessionScoped;
+import javax.inject.Named;
 import javax.faces.context.FacesContext;
 import javax.faces.model.ListDataModel;
 import javax.faces.model.SelectItem;
@@ -99,8 +98,7 @@ import org.sakaiproject.util.api.FormattedText;
 
 /* Question Pool backing bean. */
 @Slf4j
-@ManagedBean(name="questionpool")
-@SessionScoped
+@Named(value = "questionpool")
 public class QuestionPoolBean implements Serializable {
 	
 	  /** Use serialVersionUID for interoperability. */

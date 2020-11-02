@@ -22,10 +22,8 @@ package org.sakaiproject.tool.assessment.jsf;
 import java.io.Serializable;
 
 import javax.faces.bean.ManagedBean;
-import javax.faces.bean.SessionScoped;
 
 @ManagedBean(name="multilinks")
-@SessionScoped
 public class LinksModelBean implements Serializable {
   private java.util.ArrayList linkListList;
 

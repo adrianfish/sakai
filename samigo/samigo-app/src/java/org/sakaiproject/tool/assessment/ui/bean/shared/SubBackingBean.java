@@ -26,11 +26,9 @@ import java.io.Serializable;
 import java.util.Date;
 import java.util.HashMap;
 
-import javax.faces.bean.ManagedBean;
-import javax.faces.bean.SessionScoped;
+import javax.inject.Named;
 
-@ManagedBean(name="subbackingbean")
-@SessionScoped
+@Named(value = "subbackingbean")
 public class SubBackingBean implements Serializable {
 
 	private static final long serialVersionUID = -116744576891046455L;

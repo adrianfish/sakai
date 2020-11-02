@@ -27,8 +27,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
-import javax.faces.bean.ManagedBean;
-import javax.faces.bean.SessionScoped;
+import javax.inject.Named;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -43,8 +42,7 @@ import org.sakaiproject.util.ResourceLoader;
 
 /* For shared: Person backing bean. */
 @Slf4j
-@ManagedBean(name="person")
-@SessionScoped
+@Named(value = "person")
 public class PersonBean implements Serializable {
 
 	private static final long serialVersionUID = 1884634498046475698L;

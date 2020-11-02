@@ -20,9 +20,8 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import javax.faces.bean.ManagedBean;
 import javax.faces.bean.ManagedProperty;
-import javax.faces.bean.SessionScoped;
+import javax.inject.Named;
 
 import org.sakaiproject.component.cover.ServerConfigurationService;
 import org.sakaiproject.tool.assessment.facade.AssessmentFacade;
@@ -42,8 +41,7 @@ import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-@ManagedBean(name="samLiteBean")
-@SessionScoped
+@Named(value = "samLiteBean")
 public class SamLiteBean implements Serializable {
 	private static final long serialVersionUID = -3122436861866172596L;
 	public static final String DEFAULT_CHARSET = "ascii-us";

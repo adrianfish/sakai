@@ -30,9 +30,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import javax.faces.bean.ManagedBean;
-import javax.faces.bean.SessionScoped;
 import javax.faces.event.ActionEvent;
+import javax.inject.Named;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -56,8 +55,7 @@ import org.sakaiproject.util.ResourceLoader;
 
 /* For evaluation: Question Scores backing bean. */
 @Slf4j
-@ManagedBean(name="questionScores")
-@SessionScoped
+@Named(value = "questionScores")
 public class QuestionScoresBean implements Serializable, PhaseAware {
   @Setter
   private String assessmentId;

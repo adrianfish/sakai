@@ -21,12 +21,10 @@
 
 package org.sakaiproject.tool.assessment.ui.bean.misc;
 
-import javax.faces.bean.ManagedBean;
-import javax.faces.bean.SessionScoped;
+import javax.inject.Named;
 
 /* Build Information. */
-@ManagedBean(name="buildinfo")
-@SessionScoped
+@Named(value = "buildinfo")
 public class BuildInfoBean {
   private String buildVersion;
   private String buildTime;

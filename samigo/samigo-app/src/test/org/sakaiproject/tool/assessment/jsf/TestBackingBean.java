@@ -25,14 +25,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.faces.bean.ManagedBean;
-import javax.faces.bean.SessionScoped;
 
 import org.sakaiproject.tool.assessment.ui.listener.author.AuthorActionListener;
 import org.sakaiproject.tool.assessment.ui.listener.select.SelectActionListener;
 import org.sakaiproject.tool.assessment.ui.listener.delivery.BeginDeliveryActionListener;
 
 @ManagedBean(name="bean")
-@SessionScoped
 public class TestBackingBean implements Serializable {
   private String prop1;
   private String prop2;

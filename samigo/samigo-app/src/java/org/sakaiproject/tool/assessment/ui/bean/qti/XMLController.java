@@ -25,9 +25,8 @@ import java.io.InputStream;
 import java.io.Serializable;
 import java.util.StringTokenizer;
 
-import javax.faces.bean.ManagedBean;
 import javax.faces.bean.ManagedProperty;
-import javax.faces.bean.SessionScoped;
+import javax.inject.Named;
 
 import lombok.extern.slf4j.Slf4j;
 import org.w3c.dom.Document;
@@ -42,8 +41,7 @@ import org.sakaiproject.tool.assessment.qti.util.XmlUtil;
  * <p>Used to maintain information or to dump XML to client.</p>
  */
 @Slf4j
-@ManagedBean(name="xmlController")
-@SessionScoped
+@Named(value = "xmlController")
 public class XMLController implements Serializable {
 
 	private static final long serialVersionUID = 7064783681056628447L;
