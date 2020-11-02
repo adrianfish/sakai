@@ -25,7 +25,8 @@ import java.io.InputStream;
 import java.io.Serializable;
 import java.util.StringTokenizer;
 
-import javax.faces.bean.ManagedProperty;
+import javax.faces.annotation.ManagedProperty;
+import javax.inject.Inject;
 import javax.inject.Named;
 
 import lombok.extern.slf4j.Slf4j;
@@ -49,6 +50,7 @@ public class XMLController implements Serializable {
   private static final String XML_DECL =
     "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>" + "\n";
 
+  @Inject
   @ManagedProperty(value="#{xml}")
   private XMLDisplay xmlBean;
   private String documentType;

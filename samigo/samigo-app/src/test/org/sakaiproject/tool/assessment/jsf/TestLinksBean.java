@@ -23,9 +23,9 @@ package org.sakaiproject.tool.assessment.jsf;
 import java.io.Serializable;
 import java.util.ArrayList;
 
-import javax.faces.bean.ManagedBean;
+import javax.inject.Named;
 
-@ManagedBean(name="testlinks")
+@Named(value = "testlinks")
 public class TestLinksBean implements Serializable {
   public TestLinksBean()
   {

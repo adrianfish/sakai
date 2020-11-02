@@ -23,8 +23,8 @@ package org.sakaiproject.tool.assessment.jsf;
 
 import java.io.Serializable;
 
-import javax.faces.bean.ManagedBean;
 import javax.faces.context.FacesContext;
+import javax.inject.Named;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -38,7 +38,7 @@ import org.sakaiproject.tool.assessment.ui.listener.util.ContextUtil;
  * <p>Description: Test Bean with some properties</p>
  */
 @Slf4j
-@ManagedBean(name="testwsbean")
+@Named(value = "testwsbean")
 public class TestWSBean implements Serializable {
   private String itemid;
   private String itembankxml;

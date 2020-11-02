@@ -20,7 +20,8 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import javax.faces.bean.ManagedProperty;
+import javax.faces.annotation.ManagedProperty;
+import javax.inject.Inject;
 import javax.inject.Named;
 
 import org.sakaiproject.component.cover.ServerConfigurationService;
@@ -54,11 +55,14 @@ public class SamLiteBean implements Serializable {
 	
 	private boolean isVisible = true;
 
+    @Inject
 	@ManagedProperty(value="#{author}")
 	private AuthorBean authorBean;
+    @Inject
 	@ManagedProperty(value="#{authorization}")
 	private AuthorizationBean authorizationBean;
-	@Setter @ManagedProperty(value="#{Components[\"org.sakaiproject.util.api.FormattedText\"]}")
+    @Inject
+	@ManagedProperty(value="#{Components[\"org.sakaiproject.util.api.FormattedText\"]}")
 	private FormattedText formattedText;
 
 	private static final ResourceLoader rb = new ResourceLoader("org.sakaiproject.tool.assessment.bundle.SamLite");

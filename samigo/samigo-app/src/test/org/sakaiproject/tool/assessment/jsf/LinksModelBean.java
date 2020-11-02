@@ -21,9 +21,9 @@
 package org.sakaiproject.tool.assessment.jsf;
 import java.io.Serializable;
 
-import javax.faces.bean.ManagedBean;
+import javax.inject.Named;
 
-@ManagedBean(name="multilinks")
+@Named(value = "multilinks")
 public class LinksModelBean implements Serializable {
   private java.util.ArrayList linkListList;
 

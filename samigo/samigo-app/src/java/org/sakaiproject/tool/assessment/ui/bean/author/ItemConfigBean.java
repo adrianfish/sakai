@@ -26,8 +26,9 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
-import javax.faces.bean.ManagedProperty;
+import javax.faces.annotation.ManagedProperty;
 import javax.faces.model.SelectItem;
+import javax.inject.Inject;
 import javax.inject.Named;
 
 import org.sakaiproject.component.cover.ServerConfigurationService;
@@ -50,38 +51,56 @@ public class ItemConfigBean implements Serializable {
 	private static final long serialVersionUID = 5017545754149103817L;
 
   private static final ResourceLoader res = new ResourceLoader("org.sakaiproject.tool.assessment.bundle.AuthorMessages");
+
+  @Inject
   @ManagedProperty(value="true")
   private boolean showFileUpload;
+  @Inject
   @ManagedProperty(value="true")
   private boolean showEssay;
+  @Inject
   @ManagedProperty(value="true")
   private boolean showAudio;
+  @Inject
   @ManagedProperty(value="true")
   private boolean showMatching;
+  @Inject
   @ManagedProperty(value="true")
   private boolean showTrueFalse;
+  @Inject
   @ManagedProperty(value="true")
   private boolean showMultipleChoiceSingleCorrect;
+  @Inject
   @ManagedProperty(value="true")
   private boolean showMultipleChoiceMultipleCorrect;
+  @Inject
   @ManagedProperty(value="true")
   private boolean showSurvey;
+  @Inject
   @ManagedProperty(value="true")
   private boolean showFillInTheBlank;
+  @Inject
   @ManagedProperty(value="true")
   private boolean showFillInNumeric;
+  @Inject
   @ManagedProperty(value="false")
   private boolean showExtendedMatchingItems;
+  @Inject
   @ManagedProperty(value="true")
   private boolean selectFromQuestionPool;
+  @Inject
   @ManagedProperty(value="false")
   private boolean selectFromQuestionBank;
+  @Inject
   @ManagedProperty(value="true")
   private boolean showMatrixSurvey;
+  @Inject
   @ManagedProperty(value="true")
   private boolean showCalculatedQuestion; // CALCULATED_QUESTION
+  @Inject
   @ManagedProperty(value="true")
   private boolean showImageMapQuestion; //IMAGEMAP_QUESTION
+  @Inject
   @ManagedProperty(value="true")
   private boolean showSearchQuestion; //SEARCH QUESTION
 

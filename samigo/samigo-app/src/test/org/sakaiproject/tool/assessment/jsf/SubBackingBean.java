@@ -24,9 +24,9 @@ import java.io.Serializable;
 import java.util.Date;
 import java.util.HashMap;
 
-import javax.faces.bean.ManagedBean;
+import javax.inject.Named;
 
-@ManagedBean(name="subbean")
+@Named(value = "subbean")
 public class SubBackingBean implements Serializable {
   private String title;
   private String name;

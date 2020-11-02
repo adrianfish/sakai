@@ -30,10 +30,11 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import javax.faces.annotation.ManagedProperty;
 import javax.faces.application.FacesMessage;
-import javax.faces.bean.ManagedProperty;
 import javax.faces.context.FacesContext;
 import javax.faces.event.ValueChangeEvent;
+import javax.inject.Inject;
 import javax.inject.Named;
 
 import org.sakaiproject.component.cover.ComponentManager;
@@ -79,14 +80,19 @@ public class XMLImportBean implements Serializable {
   private String uploadFileName;
   private String importType;
   private String pathToData;
+  @Inject
   @ManagedProperty(value="#{author}")
   private AuthorBean authorBean;
+  @Inject
   @ManagedProperty(value="#{assessmentBean}")
   private AssessmentBean assessmentBean;
+  @Inject
   @ManagedProperty(value="#{itemauthor}")
   private ItemAuthorBean itemAuthorBean;
+  @Inject
   @ManagedProperty(value="#{authorization}")
   private AuthorizationBean authorizationBean;
+  @Inject
   @ManagedProperty(value="#{questionpool}")
   private QuestionPoolBean questionPoolBean;
   private boolean isCP;
