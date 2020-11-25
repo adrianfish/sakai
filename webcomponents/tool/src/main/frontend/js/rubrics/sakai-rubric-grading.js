@@ -29,6 +29,7 @@ export class SakaiRubricGrading extends RubricsElement {
       entityId: { attribute: "entity-id", type: String },
       evaluatedItemId: { attribute: "evaluated-item-id", type: String },
       evaluatedItemOwnerId: { attribute: "evaluated-item-owner-id", type: String },
+      group: { type: Boolean},
 
       // Non attribute
       evaluation: { type: Object },
@@ -239,10 +240,11 @@ export class SakaiRubricGrading extends RubricsElement {
       evaluatorId: window.top.portal.user.id,
       evaluatedItemId: this.evaluatedItemId,
       evaluatedItemOwnerId: this.evaluatedItemOwnerId,
+      evaluatedItemOwnerType: this.group ? "GROUP" : "USER",
       overallComment: "",
       criterionOutcomes: crit,
       toolItemRubricAssociation: this.association._links.self.href,
-      status: status
+      status: status,
     };
 
     if (this.evaluation && this.evaluation.id) {
@@ -385,4 +387,6 @@ export class SakaiRubricGrading extends RubricsElement {
   }
 }
 
-customElements.define("sakai-rubric-grading", SakaiRubricGrading);
+if (!customElements.get("sakai-rubric-grading")) {
+  customElements.define("sakai-rubric-grading", SakaiRubricGrading);
+}
