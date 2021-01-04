@@ -15,6 +15,9 @@
  */
 package org.sakaiproject.springframework.data;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+
 import java.io.Serializable;
 
 /**
@@ -71,6 +74,13 @@ public interface SpringCrudRepository<T, ID extends Serializable> extends Reposi
      * @return all entities
      */
     Iterable<T> findAll();
+
+    /**
+     * Returns all instances of the type.
+     *
+     * @return all entities
+     */
+    Page<T> findAll(Pageable pageable);
 
     /**
      * Returns all instances of the type T with the given IDs.

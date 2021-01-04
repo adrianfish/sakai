@@ -17,6 +17,7 @@ package org.sakaiproject.assignment.impl;
 
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -97,6 +98,22 @@ public class EmailUtil {
         return "From: " + "\"" + serverConfigurationService.getString("ui.service", "Sakai") + "\" <" + serverConfigurationService.getString("setup.request", "no-reply@" + serverConfigurationService.getServerName()) + ">";
     }
 
+    public Map<String, Object> getEmailReplacements(Assignment a, String siteId) {
+
+        Map<String, Object> map = new HashMap<>();
+        try {
+            Site site = siteService.getSite(siteId);
+            map.put("siteTitle", site.getTitle());
+            map.put("siteUrl", site.getUrl());
+            map.put("assignmentTitle", a.getTitle());
+            map.put("assignmentUrl", getAssignmentUrl(a));
+            map.put("bundle", resourceLoader);
+        } catch (Exception e) {
+            log.warn("Failed to get email replacements", e);
+        }
+        return map;
+    }
+
     public String getNotificationMessage(AssignmentSubmission s, String submissionOrReleaseGrade) {
         StringBuilder message = new StringBuilder();
         message.append(MIME_ADVISORY);
@@ -109,8 +126,6 @@ public class EmailUtil {
         message.append(htmlPreamble(submissionOrReleaseGrade));
         if ("submission".equals(submissionOrReleaseGrade))
             message.append(htmlContent(s));
-        else if ("releasegrade".equals(submissionOrReleaseGrade))
-            message.append(htmlContentReleaseGrade(s));
         else
             message.append(htmlContentReleaseResubmission(s));
         message.append(htmlContentAttachments(s));
@@ -126,8 +141,6 @@ public class EmailUtil {
     public String plainTextContent(AssignmentSubmission s, String submissionOrReleaseGrade) {
         if ("submission".equals(submissionOrReleaseGrade))
             return formattedText.convertFormattedTextToPlaintext(htmlContent(s));
-        else if ("releasegrade".equals(submissionOrReleaseGrade))
-            return formattedText.convertFormattedTextToPlaintext(htmlContentReleaseGrade(s));
         else
             return formattedText.convertFormattedTextToPlaintext(htmlContentReleaseResubmission(s));
     }
@@ -240,34 +253,6 @@ public class EmailUtil {
                 }
             });
         }
-
-        return buffer.toString();
-    }
-
-    public String htmlContentReleaseGrade(AssignmentSubmission submission) {
-        Assignment assignment = submission.getAssignment();
-        String context = assignment.getContext();
-
-        String siteTitle;
-        String siteUrl;
-        Site site = null;
-        try {
-            site = siteService.getSite(context);
-            siteTitle = site.getTitle();
-            siteUrl = site.getUrl();
-        } catch (Exception e) {
-            log.warn("Can't get site with id = {}, {}", context, e.getMessage());
-            siteTitle = resourceLoader.getFormattedMessage("cannotfin_site", context);
-            siteUrl = "";
-        }
-
-        StringBuilder buffer = new StringBuilder();
-        // site title and id
-        buffer.append(resourceLoader.getString("noti.site.title")).append(" ").append(siteTitle).append(NEW_LINE);
-        buffer.append(resourceLoader.getString("noti.site.url")).append(" <a href=\"").append(siteUrl).append("\">").append(siteUrl).append("</a>").append(NEW_LINE).append(NEW_LINE);
-        // notification text
-        String linkToToolInSite = "<a href=\"" + getAssignmentUrl(assignment) + "\">" + siteTitle + "</a>";
-        buffer.append(resourceLoader.getFormattedMessage("noti.releasegrade.text", assignment.getTitle(), linkToToolInSite));
 
         return buffer.toString();
     }

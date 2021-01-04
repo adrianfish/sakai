@@ -98,5 +98,9 @@
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
         </dependency>
+		<dependency>
+			<groupId>org.simpleframework</groupId>
+		    <artifactId>simple-xml</artifactId>
+		</dependency>
     </dependencies>
 </project>

@@ -60,6 +60,7 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
 import javax.xml.parsers.DocumentBuilderFactory;
+import javax.annotation.Resource;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.io.FilenameUtils;
@@ -140,6 +141,9 @@ import org.sakaiproject.exception.InUseException;
 import org.sakaiproject.exception.PermissionException;
 import org.sakaiproject.exception.ServerOverloadException;
 import org.sakaiproject.exception.TypeException;
+import org.sakaiproject.messaging.api.Message;
+import org.sakaiproject.messaging.api.MessageMedium;
+import org.sakaiproject.messaging.api.UserMessagingService;
 import org.sakaiproject.rubrics.logic.RubricsConstants;
 import org.sakaiproject.rubrics.logic.RubricsService;
 import org.sakaiproject.rubrics.logic.model.ToolItemRubricAssociation;
@@ -240,6 +244,7 @@ public class AssignmentServiceImpl implements AssignmentService, EntityTransferr
     @Setter private TimeService timeService;
     @Setter private ToolManager toolManager;
     @Setter private UserDirectoryService userDirectoryService;
+    @Resource private UserMessagingService userMessagingService;
     @Setter private UserTimeService userTimeService;
 
     private boolean allowSubmitByInstructor;
@@ -275,6 +280,10 @@ public class AssignmentServiceImpl implements AssignmentService, EntityTransferr
 
         // this is needed to avoid a circular dependency, notice we set the AssignmentService proxy and not this
         assignmentSupplementItemService.setAssignmentService(applicationContext.getBean(AssignmentService.class));
+
+        ClassLoader loader = AssignmentService.class.getClassLoader();
+        loader = Thread.currentThread().getContextClassLoader();
+        userMessagingService.importTemplateFromXmlFile(loader.getResourceAsStream("templates/releaseGrade.xml"), "assignments.releasegrade");
     }
 
     @Override
@@ -4159,10 +4168,12 @@ public class AssignmentServiceImpl implements AssignmentService, EntityTransferr
         String resubmitNumber = submission.getProperties().get(AssignmentConstants.ALLOW_RESUBMIT_NUMBER);
 
         boolean released = BooleanUtils.toBoolean(submission.getGradeReleased());
-        Set<String> submitterIds = submission.getSubmitters().stream().map(AssignmentSubmissionSubmitter::getSubmitter).collect(Collectors.toSet());
+        //Set<String> submitterIds = submission.getSubmitters().stream().map(AssignmentSubmissionSubmitter::getSubmitter).collect(Collectors.toSet());
+        Set<String> submitterIds = new HashSet<>();
         try {
             Set<String> siteUsers = siteService.getSite(siteId).getUsers();
-            filteredUsers = submitterIds.stream().filter(siteUsers::contains).map(id -> {
+            submitterIds = submission.getSubmitters().stream().map(AssignmentSubmissionSubmitter::getSubmitter).filter(siteUsers::contains).collect(Collectors.toSet());
+            filteredUsers = submitterIds.stream().map(id -> {
                 try {
                     return userDirectoryService.getUser(id);
                 } catch (UserNotDefinedException e) {
@@ -4178,8 +4189,10 @@ public class AssignmentServiceImpl implements AssignmentService, EntityTransferr
         if (released && StringUtils.equals(AssignmentConstants.ASSIGNMENT_RELEASEGRADE_NOTIFICATION_EACH, assignmentProperties.get(AssignmentConstants.ASSIGNMENT_RELEASEGRADE_NOTIFICATION_VALUE))) {
             // send email to every submitters
             if (!filteredUsers.isEmpty()) {
-                // send the message immidiately
-                emailService.sendToUsers(filteredUsers, emailUtil.getHeaders(null, "releasegrade"), emailUtil.getNotificationMessage(submission, "releasegrade"));
+                // send the message immediately
+                userMessagingService.message(filteredUsers,
+                        Message.builder().tool("assignments").type("releasegrade").build(),
+                        Arrays.asList(new MessageMedium[] {MessageMedium.EMAIL}), emailUtil.getEmailReplacements(assignment, siteId), NotificationService.NOTI_REQUIRED);
             }
         }
         if (StringUtils.isNotBlank(resubmitNumber) && StringUtils.equals(AssignmentConstants.ASSIGNMENT_RELEASERESUBMISSION_NOTIFICATION_EACH, assignmentProperties.get(AssignmentConstants.ASSIGNMENT_RELEASERESUBMISSION_NOTIFICATION_VALUE))) {

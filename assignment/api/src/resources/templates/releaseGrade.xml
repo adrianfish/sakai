@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<emailTemplates>
+<emailTemplate>
+  <subject>[${localSakaiName}] ${bundle["noti.releasegrade.subject.content"]} </subject>
+    <message>${bundle["noti.site.title"]} ${siteTitle}
+        ${bundle["noti.site.url"]} <a href="${siteUrl}">${siteUrl}</a>
+
+        ${bundle["noti.releasegrade.text"]?replace("{0}", assignmentTitle)?replace("{1}", assignmentUrl)}
+
+    </message>
+    <messagehtml>
+        ${bundle["noti.site.title"]} ${siteTitle}
+${bundle["noti.site.url"]} <a href="${siteUrl}">${siteUrl}</a>
+&lt;br /&gt;
+${bundle["noti.releasegrade.text"]?replace("{0}", assignmentTitle)?replace("{1}", assignmentUrl)}
+    </messagehtml>
+    <version>1</version>
+    <owner>admin</owner>
+    <key>assignments.releasegrade</key>
+    <locale></locale>
+    <localeLangTag></localeLangTag>
+</emailTemplate>
+</emailTemplates>
