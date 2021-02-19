@@ -14,65 +14,85 @@
  * limitations under the License.
  */
 
-function BBBPermissions(data) {
+export class BBBPermissions {
+
+  constructor(data) {
 
     if (data) {
-        for (var i = 0, j = data.length; i < j; i++) {
+      data.forEach(p => {
 
-            // BBB specific permissions.
-            if ('bbb.admin' === data[i]) {
-                this.bbbAdmin = true;
-            } else if ('bbb.create' === data[i]) {
-                this.bbbCreate = true;
-            } else if ('bbb.edit.own' === data[i]) {
-                this.bbbEditOwn = true;
-                this.bbbViewMeetingList = true;
-            } else if ('bbb.edit.any' === data[i]) {
-                this.bbbEditAny = true;
-                this.bbbViewMeetingList = true;
-            } else if ('bbb.delete.own' === data[i]) {
-                this.bbbDeleteOwn = true;
-                this.bbbViewMeetingList = true;
-            } else if ('bbb.delete.any' === data[i]) {
-                this.bbbDeleteAny = true;
-                this.bbbViewMeetingList = true;
-            } else if ('bbb.participate' === data[i]) {
-                this.bbbParticipate = true;
-                this.bbbViewMeetingList = true;
-            } else if ('bbb.recording.view' === data[i]) {
-                this.bbbRecordingView = true;
-            } else if ('bbb.recording.edit.own' === data[i]) {
-                this.bbbRecordingEditOwn = true;
-            } else if ('bbb.recording.edit.any' === data[i]) {
-                this.bbbRecordingEditAny = true;
-            } else if ('bbb.recording.delete.own' === data[i]) {
-                this.bbbRecordingDeleteOwn = true;
-            } else if ('bbb.recording.delete.any' === data[i]) {
-                this.bbbRecordingDeleteAny = true;
-            } else if ('bbb.recording.extendedformats.own' === data[i]) {
-                this.bbbRecordingExtendedFormatsOwn = true;
-            } else if ('bbb.recording.extendedformats.any' === data[i]) {
-                this.bbbRecordingExtendedFormatsAny = true;
-            }
-
-            // Sakai permissions.
-            // Site Info:
-            else if ('site.upd' === data[i]) {
-                this.siteUpdate = true;
-            } else if ('site.viewRoster' === data[i]) {
-                this.siteViewRoster = true;
-                // Calendar:
-            } else if ('calendar.new' === data[i]) {
-                this.calendarNew = true;
-            } else if ('calendar.revise.own' === data[i]) {
-                this.calendarReviseOwn = true;
-            } else if ('calendar.revise.any' === data[i]) {
-                this.calendarReviseAny = true;
-            } else if ('calendar.delete.own' === data[i]) {
-                this.calendarDeleteOwn = true;
-            } else if ('calendar.delete.any' === data[i]) {
-                this.calendarDeleteAny = true;
-            }
+        switch (p) {
+          case "bbb.admin":
+            this.bbbAdmin = true;
+            break;
+          case "bbb.create":
+            this.bbbCreate = true;
+            break;
+          case "bbb.edit.own":
+            this.bbbEditOwn = true;
+            this.bbbViewMeetingList = true;
+            break;
+          case "bbb.edit.any":
+            this.bbbEditAny = true;
+            this.bbbViewMeetingList = true;
+            break;
+          case "bbb.delete.own":
+            this.bbbDeleteOwn = true;
+            this.bbbViewMeetingList = true;
+            break;
+          case "bbb.delete.any":
+            this.bbbDeleteAny = true;
+            this.bbbViewMeetingList = true;
+            break;
+          case "bbb.participate":
+            this.bbbParticipate = true;
+            this.bbbViewMeetingList = true;
+            break;
+          case "bbb.recording.view":
+            this.bbbRecordingView = true;
+            break;
+          case "bbb.recording.edit.own":
+            this.bbbRecordingEditOwn = true;
+            break;
+          case "bbb.recording.edit.any":
+            this.bbbRecordingEditAny = true;
+            break;
+          case "bbb.recording.delete.own":
+            this.bbbRecordingDeleteOwn = true;
+            break;
+          case "bbb.recording.delete.any":
+            this.bbbRecordingDeleteAny = true;
+            break;
+          case "bbb.recording.extendedformats.own":
+            this.bbbRecordingExtendedFormatsOwn = true;
+            break;
+          case "bbb.recording.extendedformats.any":
+            this.bbbRecordingExtendedFormatsAny = true;
+            break;
+          case "site.upd":
+            this.siteUpdate = true;
+            break;
+          case "site.viewRoster":
+            this.siteViewRoster = true;
+            break;
+          case "calendar.new":
+            this.calendarNew = true;
+            break;
+          case "calendar.revise.own":
+            this.calendarReviseOwn = true;
+            break;
+          case "calendar.revise.any":
+            this.calendarReviseAny = true;
+            break;
+          case "calendar.delete.own":
+            this.calendarDeleteOwn = true;
+            break;
+          case "calendar.delete.any":
+            this.calendarDeleteAny = true;
+            break;
+          default:
         }
+      });
     }
-}
+  }
+};

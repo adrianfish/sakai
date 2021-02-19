@@ -514,13 +514,12 @@ public class BBBMeetingManagerImpl implements BBBMeetingManager {
         Map<String, String> tmpMeta = meeting.getMeta();
         if( !tmpMeta.containsKey("origin")) tmpMeta.put("origin", "Sakai");
         if( !tmpMeta.containsKey("originVersion")) tmpMeta.put("originVersion", serverConfigurationService.getString("version.sakai", ""));
-        ResourceLoader toolParameters = new ResourceLoader("Tool");
-        if( !tmpMeta.containsKey("originServerCommonName")) tmpMeta.put("originServerCommonName", serverConfigurationService.getServerName() );
-        if( !tmpMeta.containsKey("originServerUrl")) tmpMeta.put("originServerUrl", serverConfigurationService.getServerUrl().toString() );
-        if( !tmpMeta.containsKey("originTag")) tmpMeta.put("originTag", "Sakai[" + serverConfigurationService.getString("version.sakai", "") + "]" + BBBMeetingManager.TOOL_WEBAPP + "[" + toolParameters.getString("bbb_version") + '_' + toolParameters.getString("bbb_buildSerial") + "]" );
-        if( !tmpMeta.containsKey("context")) tmpMeta.put("context", siteService.getSiteDisplay(meeting.getSiteId()) );
-        if( !tmpMeta.containsKey("contextId")) tmpMeta.put("contextId", meeting.getSiteId() );
-        if( !tmpMeta.containsKey("contextActivity")) tmpMeta.put("contextActivity", meeting.getName() );
+        if( !tmpMeta.containsKey("originServerCommonName")) tmpMeta.put("originServerCommonName", serverConfigurationService.getServerName());
+        if( !tmpMeta.containsKey("originServerUrl")) tmpMeta.put("originServerUrl", serverConfigurationService.getServerUrl().toString());
+        if( !tmpMeta.containsKey("originTag")) tmpMeta.put("originTag", "Sakai[" + serverConfigurationService.getString("version.sakai", "") + "]");
+        if( !tmpMeta.containsKey("context")) tmpMeta.put("context", siteService.getSiteDisplay(meeting.getSiteId()));
+        if( !tmpMeta.containsKey("contextId")) tmpMeta.put("contextId", meeting.getSiteId());
+        if( !tmpMeta.containsKey("contextActivity")) tmpMeta.put("contextActivity", meeting.getName());
 
         /*
          * //////////////////////////////////////////////////////////////////////////////////////////////////
@@ -759,18 +758,6 @@ public class BBBMeetingManagerImpl implements BBBMeetingManager {
                 - TimeZone.getDefault().getOffset(timeMs); // server timezone offset
 
         return new Date(timeMs);
-    }
-
-
-    public Map<String, Object> getToolVersion() {
-
-        Map<String, Object> responseMap = new HashMap<>();
-
-        ResourceLoader toolParameters = new ResourceLoader("Tool");
-        responseMap.put("version", toolParameters.getString("bbb_version") );
-        responseMap.put("buildSerial", toolParameters.getString("bbb_buildSerial") );
-
-        return responseMap;
     }
 
     public String getAutorefreshForMeetings() {
@@ -1040,15 +1027,7 @@ public class BBBMeetingManagerImpl implements BBBMeetingManager {
             String userId = user.getId();
             log.debug("User: {}", userId);
             String userLocale = getUserLocale(userId);
-
-            if (true == isNewMeeting) {
-                msgs = new ResourceLoader(userId, "EmailNotification");
-            } else if (true == recordingReady){
-                msgs = new ResourceLoader(userId, "EmailNotificationRecordingReady");
-            } else {
-                msgs = new ResourceLoader(userId, "EmailNotificationUpdate");
-            }
-
+            msgs = new ResourceLoader(userId, "meetings");
             // Email message
             final String emailTitle = msgs.getFormattedMessage("email.title", new Object[] { siteTitle, meeting.getName() });
             StringBuilder msg = new StringBuilder();

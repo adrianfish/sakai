@@ -27,6 +27,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Random;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.commons.fileupload.FileItem;
@@ -462,7 +463,6 @@ public class BBBMeetingEntityProvider extends AbstractEntityProvider implements
         config.put("serverTimeInUserTimezone", meetingManager.getServerTimeInUserTimezone());
         config.put("recordingFormatFilterEnabled", meetingManager.isRecordingFormatFilterEnabled());
         settings.put("config", config);
-        settings.put("toolVersion", meetingManager.getToolVersion());
         return new ActionReturn(settings);
     }
 
@@ -923,7 +923,7 @@ public class BBBMeetingEntityProvider extends AbstractEntityProvider implements
     }
 
     private String getHtmlForJoining(String joinUrl, String meetingId, boolean waitformoderator, String groupId){
-        ResourceLoader toolMessages = new ResourceLoader("ToolMessages");
+        ResourceLoader toolMessages = new ResourceLoader("meetings");
         Locale locale = (new ResourceLoader()).getLocale();
         toolMessages.setContextLocale(locale);
         String waiting_for_moderator_tooltip = toolMessages.getString("bbb_meetinginfo_waiting_for_moderator_tooltip");
@@ -1289,17 +1289,14 @@ public class BBBMeetingEntityProvider extends AbstractEntityProvider implements
     }
 
     public String[] getEventKeys() {
-        return BBBMeetingManager.EVENT_KEYS;
+        return BBBMeetingManager.EVENT_KEYS.toArray(new String[0]);
     }
 
     public Map<String, String> getEventNames(Locale locale) {
-        Map<String, String> localeEventNames = new HashMap<String, String>();
-        ResourceLoader msgs = new ResourceLoader("Events");
+
+        ResourceLoader msgs = new ResourceLoader("meetings");
         msgs.setContextLocale(locale);
-        for (int i = 0; i < BBBMeetingManager.EVENT_KEYS.length; i++) {
-            localeEventNames.put(BBBMeetingManager.EVENT_KEYS[i], msgs.getString(BBBMeetingManager.EVENT_KEYS[i]));
-        }
-        return localeEventNames;
+        return BBBMeetingManager.EVENT_KEYS.stream().collect(Collectors.toMap(e -> e, e -> msgs.getString(e)));
     }
 
     // --- UTILITY METHODS

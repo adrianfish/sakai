@@ -25,7 +25,7 @@
 
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
-    <script type="text/javascript">
+    <script>
         var d = new Date();
         var browserTimezoneOffset = (d.getTimezoneOffset() * 60 * 1000 * -1).toString();
         var meetings = {
@@ -44,16 +44,13 @@
     ${sakaiHtmlHead}
     <link rel="stylesheet" type="text/css" href="/bbb-tool/css/bbb.css" />
     <link rel="stylesheet" type="text/css" href="/bbb-tool/lib/jquery.datepick.package-3.7.5/redmond.datepick.css" />
-    <script type="text/javascript" src="/library/webjars/jquery/1.12.4/jquery.min.js"></script>
-    <script type="text/javascript" src="/library/js/trimpath-template-latest.js"></script>
-    <script type="text/javascript" src="/library/js/jquery/i18n-properties/1.0.9/jquery.i18n.properties-min-1.0.9.js"></script>
-    <script type="text/javascript" src="/bbb-tool/lib/jquery.tablesorter.min.js"></script>
-    <script type="text/javascript" src="/bbb-tool/lib/jquery.datepick.package-3.7.5/jquery.datepick.pack.js"></script>
-    <script type="text/javascript" src="/bbb-tool/lib/jquery.browser.min.js"></script>
-    <script type="text/javascript" src="/bbb-tool/lib/jquery.timePicker.js"></script>
-    <script type="text/javascript" src="/bbb-tool/lib/jquery.tipTip.minified.js"></script>
-    <script type="text/javascript" src="/bbb-tool/js/bbb_utils.js"></script>
-    <script type="text/javascript" src="/bbb-tool/js/bbb_perms.js"></script>
+    <script src="/library/webjars/jquery/1.12.4/jquery.min.js"></script>
+    <script src="/library/js/trimpath-template-latest.js"></script>
+    <script src="/bbb-tool/lib/jquery.tablesorter.min.js"></script>
+    <script src="/bbb-tool/lib/jquery.datepick.package-3.7.5/jquery.datepick.pack.js"></script>
+    <script src="/bbb-tool/lib/jquery.browser.min.js"></script>
+    <script src="/bbb-tool/lib/jquery.timePicker.js"></script>
+    <script src="/bbb-tool/lib/jquery.tipTip.minified.js"></script>
 </head>
 <body>
 
@@ -64,92 +61,8 @@
 <div id="bbb_container">
     <div id="bbb_content"></div>
 </div>
-<div id="bbb_footer"></div>
 
 <!--  Templates Start -->
-<div id="bbb_toolbar_template" style="display:none;"><!--
-<ul id="bbb_toolbar_items" class="navIntraTool actionToolBar" role="menu">
-
-    <li class="firstToolBarItem" role="menuitem">
-          <span><a id="bbb_home_link" title="${D}{bbb_home_tooltip}" href="javascript:;">${D}{bbb_home_label}</a></span>
-    </li>
-    <li role="menuitem">
-          <span><a id="bbb_recordings_link" title="${D}{bbb_recordings_tooltip}" href="javascript:;">${D}{bbb_recordings_label}</a></span>
-    </li>
-    <li role="menuitem">
-          <span><a id="bbb_permissions_link" title="${D}{bbb_permissions_tooltip}" href="javascript:;">${D}{bbb_permissions_label}</a></span>
-    </li>
-</ul>
--->
-</div>
-
-<div id="bbb_rooms_template" style="display:none"><!--
-<input type="button" id="bbb_create_meeting_link" title="${D}{bbb_create_meeting_tooltip}" value="${D}{bbb_create_meeting_label}" />
-<input type="text" class="search" placeholder="${D}{bbb_search}">
-<table id="bbb_meeting_table" class="listHier">
-    <thead>
-        <tr>
-            <th class="bbb_name">${D}{bbb_th_meetingname}</th>
-            <th class="bbb_status">${D}{bbb_th_status}</th>
-            <th class="bbb_startDate">${D}{bbb_th_startdate}</th>
-            <th class="bbb_endDate">${D}{bbb_th_enddate}</th>
-            <th class="owner">${D}{bbb_th_owner}</th>
-        </tr>
-    </thead>
-    <tbody>
-{for m in meetings}
-    {if !m.deleted}
-      <tr class="meetingRow">
-        <td>
-          {if m.joinable}
-              <a href="javascript:;" onclick="return meetings.switchState('meetingInfo',{'meetingId':'${D}{m.id}'})" title="${D}{bbb_meeting_details_tooltip}"><strong>${D}{m.name}</strong></a>
-          {else}
-              <span>${D}{m.name}</span>
-          {/if}
-
-              <div class="itemAction" style="margin:0; padding:0;">
-              <small>
-                {if m.canEdit}
-                <div id="edit_meeting" style="display: inline; margin:0; padding:0;">
-                    <a href="javascript:;" onclick="return meetings.switchState('addUpdateMeeting',{'meetingId':'${D}{m.id}'});" title="${D}{bbb_action_edit_meeting_tooltip}">${D}{bbb_action_edit_meeting}</a>
-                </div>
-                {/if}
-                {if m.canDelete}
-                <div id="delete_meeting" style="display: inline; margin:0; padding:0;">
-                    &nbsp;|&nbsp;
-                    <a href="javascript:;" onclick="return meetings.utils.deleteMeeting('${D}{escape(m.name)}','${D}{m.id}');" title="${D}{bbb_action_delete_meeting_tooltip}">${D}{bbb_action_delete_meeting}</a>
-                </div>
-                {/if}
-                {if m.canEnd}
-        		{var end_meetingClass = (m.groupActive || (m.joinable && m.joinableMode == 'inprogress'))? "bbb_end_meeting_shown": "bbb_end_meeting_hidden" }
-                <div id="end_meeting_${D}{m.id}" class="${D}{end_meetingClass}" >
-                    &nbsp;|&nbsp;
-                    <a href="javascript:;" onclick="return meetings.utils.endMeeting('${D}{escape(m.name)}','${D}{m.id}');" title="${D}{bbb_action_end_meeting_tooltip}">${D}{bbb_action_end_meeting}</a>
-                </div>
-                {/if}
-              </small>
-              </div>
-        </td>
-        {var statusClass = m.joinable ? 'status_joinable_' + m.joinableMode: (m.notStarted ? 'bbb_status_notstarted' : 'bbb_status_finished')}
-        {var statusText = m.joinable ? (m.joinableMode == 'available'? bbb_status_joinable_available: m.joinableMode == 'inprogress'? bbb_status_joinable_inprogress: m.joinableMode == 'unavailable'? bbb_status_joinable_unavailable: m.joinableMode == 'unreachable'? bbb_status_joinable_unreachable: '' ) : (m.notStarted ? bbb_status_notstarted : bbb_status_finished)}
-        <td id="meeting_status_${D}{m.id}" class="${D}{statusClass}">${D}{statusText}</td>
-        <td>${D}{m.formattedStartDate}</td>
-        <td>${D}{m.endDate ? new Date( parseInt(m.endDate) - parseInt(browserTimezoneOffset) + parseInt(timezoneoffset) + ( (new Date()).dst() && !(new Date( parseInt(m.endDate) - parseInt(browserTimezoneOffset) + parseInt(timezoneoffset))).dst()? 3600000: !(new Date()).dst() && (new Date( parseInt(m.endDate) - parseInt(browserTimezoneOffset) + parseInt(timezoneoffset))).dst()? (3600000 * -1): 0 ) ).toISO8601String() : ''}</td>
-        <td>${D}{m.ownerDisplayName}</td>
-      </tr>
-    {/if}
-{/for}
-      <tr>
-        <td></td>
-        <td></td>
-        <td></td>
-        <td></td>
-        <td></td>
-      </tr>
-    </tbody>
-</table>
--->
-</div>
 
 <div id="bbb_recordings_template" style="display:none"><!--
 {if stateFunction == "recordings_meeting"}
@@ -252,244 +165,8 @@
 -->
 </div>
 
-<div id="bbb_addUpdate_meeting_template" style="display:none"><!--
-<form id="bbb_add_update_form" action="${D}{actionUrl}" method="post" enctype="multipart/form-data">
-    <input id="openDate" type="hidden" value=""/>
-    <input id="closeDate" type="hidden" value=""/>
-    <h3>${D}{bbb_info}</h3>
-    <p class="instruction">${D}{bbb_info_instr}</p>
-    <table cellpadding="0" cellspacing="0" border="0" class="bbb_form_container">
-      <tr>
-        <td class="bbb_lbl">${D}{bbb_info_title}</td>
-        <td>
-            <input id="bbb_meeting_name_field" name="name" type="text" {if !isNew}value="${D}{meeting.name}"{/if} style="width: 400px;" />
-        </td>
-      </tr>
-      <tr>
-        <td class="bbb_lbl">${D}{bbb_info_description}</td>
-        <td>
-            <textarea class="bbb_welcome_message_textarea" id="bbb_welcome_message_textarea" name="properties.welcomeMessage" cols="36" rows="10" style="width: 480px;" wrap="virtual">{if isNew}${D}{bbb_default_welcome_description}{else}${D}{meeting.properties.welcomeMessage}{/if}</textarea>
-        </td>
-      </tr>
-      {if recordingEnabled}
-          {var recordingChecked = isNew ? recordingDefault : meeting.recording }
-          {if recordingEditable}
-          <tr>
-            <td class="bbb_lbl">${D}{bbb_info_recording}</td>
-            <td>
-                <input id="recording" name="recording" type="checkbox" {if recordingChecked}checked{/if}/>
-            </td>
-          </tr>
-          {else}
-          <input id="recording" name="recording" type="hidden" {if recordingEditable}value="${D}{recordingChecked}"{/if}/>
-          {/if}
-      {/if}
-      {if durationEnabled}
-      <tr>
-        <td class="bbb_lbl">${D}{bbb_info_duration}</td>
-        <td>
-            <input id="recordingDuration" name="recordingDuration" type="text" value="${D}{meeting.recordingDuration}" style="width: 35px;" />&nbsp;${D}{bbb_info_recording_duration_units}
-        </td>
-      </tr>
-      {/if}
-      {if waitmoderatorEnabled}
-          {var waitForModerator = isNew ? waitmoderatorDefault : meeting.waitForModerator }
-          {if waitmoderatorEditable}
-          <tr>
-            <td class="bbb_lbl">${D}{bbb_info_waitformoderator}</td>
-            <td>
-                <input id="waitForModerator" name="waitForModerator" type="checkbox" {if waitForModerator}checked{/if}/>
-            </td>
-          </tr>
-          {else}
-          <input id="waitForModerator" name="waitForModerator" type="hidden" {if waitmoderatorEditable}value="${D}{waitForModerator}"{/if}/>
-          {/if}
-      {/if}
-      {if multiplesessionsallowedEnabled}
-      {var multipleSessionsAllowed = isNew ? multiplesessionsallowedDefault : meeting.multipleSessionsAllowed }
-          {if multiplesessionsallowedEditable}
-          <tr>
-            <td class="bbb_lbl">${D}{bbb_info_multiplesessionsallowed}</td>
-            <td>
-                <input id="multipleSessionsAllowed" name="multipleSessionsAllowed" type="checkbox" {if multipleSessionsAllowed}checked{/if}/>
-            </td>
-          </tr>
-          {else}
-          <input id="multipleSessionsAllowed" name="mulitpleSessionsAllowed" type="hidden" {if multipleSessionsAllowed}value="${D}{multipleSessionsAllowed}"{/if}/>
-          {/if}
-      {/if}
-      {if preuploadpresentationEnabled}
-      <tr>
-        <td class="bbb_lbl">${D}{bbb_info_preuploadpresentation}</td>
-        <td>
-            <input type="file" id="selectFile" name="selectFile" style="display:inline;"/>
-            <span id="bbb_addFile_ajaxInd"></span>
-            <input type="hidden" id="fileUrl" name="presentation" />
-            <table id="fileView" class="attachList listHier indnt1" style="margin-bottom:.5em; margin-top:0; width:auto; display:none;">
-                <tr>
-                    <td><a href="#" id="url" target="_blank"/></td>
-                    <td><a href="javascript:;" id="removeUpload">${D}{bbb_info_remove}</a></td>
-                </tr>
-            </table>
-        </td>
-      </tr>
-      {/if}
-      {if groupsessionsEnabled}
-          {var groupSessions = isNew ? groupsessionsDefault : meeting.groupSessions }
-          {if groupsessionsEditable}
-          <tr>
-            <td class="bbb_lbl">${D}{bbb_info_groupsessions}</td>
-            <td>
-                <input id="groupSessions" name="groupSessions" type="checkbox" {if groupSessions}checked{/if}/>
-            </td>
-          </tr>
-          {else}
-          <input id="groupSessions" name="groupSessions" type="hidden" {if groupSessions}value="${D}{groupSessions}"{/if}/>
-          {/if}
-      {/if}
-    </table>
-
-    <br/>
-    <h3>${D}{bbb_participants}</h3>
-    <p class="instruction">${D}{bbb_participants_instr}</p>
-    <table cellpadding="0" cellspacing="0" border="0" class="bbb_form_container">
-      <tr>
-        <td class="bbb_lbl">${D}{bbb_participants_add}</td>
-        <td>
-            <select id="selType" onchange="meetings.updateParticipantSelectionUI()">
-                <option value="${D}{selTypes.all.id}" selected="selected">${D}{selTypes.all.title}</option>
-                <option value="${D}{selTypes.user.id}">${D}{selTypes.user.title}</option>
-                {if selOptions['groups'].length > 0}
-                <option value="${D}{selTypes.group.id}">${D}{selTypes.group.title}</option>
-                {/if}
-                <option value="${D}{selTypes.role.id}">${D}{selTypes.role.title}</option>
-            </select>
-            <select id="selOption" disabled="disabled"></select>
-            <input id="bbb_add" type="button" value="${D}{bbb_add}"
-                onclick="meetings.addParticipantRow(jQuery('#selType').val(), jQuery('#selOption').val(), jQuery('#selOption option:selected').text());return false;"/>
-        </td>
-      </tr>
-      <tr>
-        <td class="bbb_lbl" style="padding-top: 6px">${D}{bbb_participants_list}</td>
-        <td>
-            <table id="selContainer">
-                <tbody></tbody>
-            </table>
-        </td>
-      </tr>
-    </table>
-
-    <br/>
-    <h3>${D}{bbb_availability}</h3>
-    <p class="instruction">${D}{bbb_availability_instr}</p>
-    <table cellpadding="0" cellspacing="0" border="0" class="bbb_form_container">
-      <tr>
-        <td class="bbb_lbl">${D}{bbb_availability_startdate}</td>
-        <td>
-            {var showStartDate = isNew ? false : meeting.startDate && meeting.startDate > 0}
-            <input id="startDate1" type="checkbox" {if showStartDate}checked{/if} />
-            <span id="startDateBox" style="{if !showStartDate}display:none;{/if}">
-                <input id="startDate2" type="text" class="date-picker-field"/>
-                <input id="startTime" type="text" class="time-picker-field"/>
-                <input id="startDate" name="startDate" type="hidden"/>
-                {if (isNew && meetings.userPerms.calendarNew) || (!isNew && ( (meeting.ownerId == meetings.currentUser.id && meetings.userPerms.calendarReviseOwn) || (meeting.ownerId != meetings.currentUser.id && meetings.userPerms.calendarReviseAny) ))}
-                    {var addToCalendar = isNew ? true : meeting.properties.calendarEventId != null}
-                    <input id="addToCalendar" type="checkbox" name="addToCalendar" {if addToCalendar}checked{/if}/>
-                    <span>${D}{bbb_availability_addtocal}</span>
-                {/if}
-            </span>
-        </td>
-      </tr>
-      <tr>
-        <td class="bbb_lbl">${D}{bbb_availability_enddate}</td>
-        <td>
-            {var showEndDate = isNew ? false : meeting.endDate && meeting.endDate > 0}
-            <input id="endDate1" type="checkbox" {if showEndDate}checked{/if} />
-            <span id="endDateBox" style="{if !showEndDate}display:none;{/if}">
-                <input id="endDate2" type="text" class="date-picker-field"/>
-                <input id="endTime" type="text" class="time-picker-field"/>
-                <input id="endDate" name="endDate" type="hidden"/>
-            </span>
-        </td>
-      </tr>
-    </table>
-
-    <br/>
-    <h3>${D}{bbb_notification}</h3>
-    <p class="instruction">{if isNew}${D}{bbb_notification_instr}{else}${D}{bbb_notification_instr_edit}{/if}</p>
-    <table cellpadding="0" cellspacing="0" border="0" class="bbb_form_container">
-      <tr>
-        <td class="bbb_lbl">{if isNew}${D}{bbb_notification_notify}{else}${D}{bbb_notification_notify_edit}{/if}</td>
-        <td>
-            {var notifyParticipantsChecked = false }
-            <input id="notifyParticipants" name="notifyParticipants" type="checkbox" {if notifyParticipantsChecked}checked{/if} onclick="meetings.utils.setNotifictionOptions();"/>
-            <span id="notifyParticipants_iCalAttach_span"></span>
-        </td>
-      </tr>
-    </table>
-
-    <input id="isNew" type="hidden" value="${D}{isNew}"/>
-    <input id="siteId" name="siteId" type="hidden" value="${D}{siteId}"/>
-    {if !isNew}<input id="meetingId" type="hidden" value="${D}{meeting.id}"/>{/if}
-    <div class="act">
-        <input id="bbb_save" type="button" class="active" value="${D}{bbb_save}"/>
-        <input id="bbb_cancel" type="button" value="${D}{bbb_cancel}"/>
-        <span id="bbb_addUpdate_ajaxInd"></span>
-    </div>
-</form>
--->
-</div>
-
 <div id="bbb_permissions_template" style="display:none"><!--
-<p class="instruction">${D}{bbb_permissions_instr}</p>
-<table id="bbb_permissions_table" class="listHier lines tableList" style="width: 500px">
-    <thead>
-        <tr class="listHier">
-            <th>${D}{bbb_permissions_label}</th>
-            <th>${D}{bbb_permissions_create}</th>
-            <th>${D}{bbb_permissions_edit_own}</th>
-            <th>${D}{bbb_permissions_edit_any}</th>
-            <th>${D}{bbb_permissions_delete_own}</th>
-            <th>${D}{bbb_permissions_delete_any}</th>
-            <th>${D}{bbb_permissions_participate}</th>
-            <th>${D}{bbb_permissions_recordings_view}</th>
-            <th>${D}{bbb_permissions_recordings_edit_own}</th>
-            <th>${D}{bbb_permissions_recordings_edit_any}</th>
-            <th>${D}{bbb_permissions_recordings_delete_own}</th>
-            <th>${D}{bbb_permissions_recordings_delete_any}</th>
-            {if recordingformatfilter_enabled}
-            <th>${D}{bbb_permissions_recordings_extendedformats_own}</th>
-            <th>${D}{bbb_permissions_recordings_extendedformats_any}</th>
-            {/if}
-        </tr>
-    </thead>
-<tbody>
-{for p in permissions}
-<tr>
-    <td>${D}{p.role}</td>
-    <td><input type="checkbox" class="bbb_permission_checkbox" {if p.bbb_create}checked="checked"{/if} id="${D}{p.role}:bbb.create"/></td>
-    <td><input type="checkbox" class="bbb_permission_checkbox" {if p.bbb_edit_own}checked="checked"{/if} id="${D}{p.role}:bbb.edit.own"/></td>
-    <td><input type="checkbox" class="bbb_permission_checkbox" {if p.bbb_edit_any}checked="checked"{/if} id="${D}{p.role}:bbb.edit.any"/></td>
-    <td><input type="checkbox" class="bbb_permission_checkbox" {if p.bbb_delete_own}checked="checked"{/if} id="${D}{p.role}:bbb.delete.own"/></td>
-    <td><input type="checkbox" class="bbb_permission_checkbox" {if p.bbb_delete_any}checked="checked"{/if} id="${D}{p.role}:bbb.delete.any"/></td>
-    <td><input type="checkbox" class="bbb_permission_checkbox" {if p.bbb_participate}checked="checked"{/if} id="${D}{p.role}:bbb.participate"/></td>
-    <td><input type="checkbox" class="bbb_permission_checkbox" {if p.bbb_recording_view}checked="checked"{/if} id="${D}{p.role}:bbb.recording.view"/></td>
-    <td><input type="checkbox" class="bbb_permission_checkbox" {if p.bbb_recording_edit_own}checked="checked"{/if} id="${D}{p.role}:bbb.recording.edit.own"/></td>
-    <td><input type="checkbox" class="bbb_permission_checkbox" {if p.bbb_recording_edit_any}checked="checked"{/if} id="${D}{p.role}:bbb.recording.edit.any"/></td>
-    <td><input type="checkbox" class="bbb_permission_checkbox" {if p.bbb_recording_delete_own}checked="checked"{/if} id="${D}{p.role}:bbb.recording.delete.own"/></td>
-    <td><input type="checkbox" class="bbb_permission_checkbox" {if p.bbb_recording_delete_any}checked="checked"{/if} id="${D}{p.role}:bbb.recording.delete.any"/></td>
-    {if recordingformatfilter_enabled}
-    <td><input type="checkbox" class="bbb_permission_checkbox" {if p.bbb_recording_extendedformats_own}checked="checked"{/if} id="${D}{p.role}:bbb.recording.extendedformats.own"/></td>
-    <td><input type="checkbox" class="bbb_permission_checkbox" {if p.bbb_recording_extendedformats_any}checked="checked"{/if} id="${D}{p.role}:bbb.recording.extendedformats.any"/></td>
-    {/if}
-</tr>
-{/for}
-</tbody>
-</table>
-<div class="act">
-    <input id="bbb_permissions_save_button" type="submit" class="active" value="${D}{bbb_save}"/>
-    <input type="button" value="${D}{bbb_cancel}" onclick="${D}('#bbb_home_link').click(); return false;"/>
-</div>
+<sakai-permissions tool="meetings">
 -->
 </div>
 
@@ -587,12 +264,10 @@
 -->
 </div>
 
-<div id="bbb_toolfooter_template" style="display:none;"><!--
-    <span><br><br><br><p id="bbb_footer_info" align="center"><font size="1">Version ${D}{bbbTool.version}_${D}{bbbTool.buildSerial}</font></p></span>
--->
-</div>
-
-<script type="text/javascript" src="/bbb-tool/js/bbb.js"></script>
+<script type="module">
+    import {loadMeetings} from "/bbb-tool/js/bbb.js";
+    loadMeetings();
+</script>
 
 </div> <!-- /portletBody -->
 
