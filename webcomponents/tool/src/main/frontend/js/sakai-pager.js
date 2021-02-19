@@ -111,4 +111,5 @@ export class SakaiPager extends SakaiElement {
   }
 }
 
-customElements.define("sakai-pager", SakaiPager);
+const tagName = "sakai-pager";
+!customElements.get(tagName) && customElements.define(tagName, SakaiPager);
