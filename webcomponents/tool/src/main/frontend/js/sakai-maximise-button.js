@@ -15,12 +15,20 @@ class SakaiMaximiseButton extends SakaiElement {
 
     return {
       fullScreen: { attribute: "full-screen", type: Boolean },
-      i18n: Object,
+      i18n: { type: Object},
     };
   }
 
+  set i18n(value) {
+
+    this._i18n = value;
+    this.requestUpdate();
+  }
+
+  get i18n() { return this._i18n; }
+
   shouldUpdate(changed) {
-    return true;//this.i18n;
+    return this.i18n;
   }
 
   render() {
@@ -70,4 +78,6 @@ class SakaiMaximiseButton extends SakaiElement {
   }
 }
 
-customElements.define("sakai-maximise-button", SakaiMaximiseButton);
+if (!customElements.get("sakai-maximise-button")) {
+  customElements.define("sakai-maximise-button", SakaiMaximiseButton);
+}

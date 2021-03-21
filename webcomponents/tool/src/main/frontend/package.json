@@ -10,7 +10,7 @@
     "storybook": "npm install && empathise install --assets-directory=js/assets && start-storybook -s ./storybook-resources -p 6006",
     "build-storybook": "build-storybook",
     "test": "mocha -r esm",
-    "test2": "karma start --single-run --browsers ChromeHeadless karma.conf.js",
+    "test2": "web-test-runner test/**/*test.js --node-resolve",
     "eslint": "eslint js"
   },
   "keywords": [],
