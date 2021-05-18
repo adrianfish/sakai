@@ -23,6 +23,8 @@ export const BasicDisplay = () => {
 
   return html`
     ${unsafeHTML(styles)}
-    <sakai-date-picker>
+    <div style="width: 400px;">
+    <sakai-date-picker></sakai-date-picker>
+    </div>
   `;
 };

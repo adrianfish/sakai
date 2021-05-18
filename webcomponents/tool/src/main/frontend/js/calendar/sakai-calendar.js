@@ -12,7 +12,7 @@ export class SakaiCalendar extends LionCalendar {
   static get localizeNamespaces() {
     return [
       {
-        'lion-calendar': /** @param {string} locale */ locale => {
+        'lion-calendar': locale => {
           switch (locale) {
             case 'bg-BG':
               return import('../assets/@lion/calendar/translations/bg.js');
@@ -66,17 +66,18 @@ export class SakaiCalendar extends LionCalendar {
       selected: Object,
       readOnly: { attribute: "read-only", type: Boolean },
       compact: Boolean,
-      i18n: Object,
+      i18n: { attribute: false, type: Object},
       siteId: { attribute: "site-id", type: String },
       userId: { attribute: "user-id", type: String },
-      selectedDate: Number,
-      events: { type: Array },
+      selectedDate: { attribute: false, type: Number },
+      events: { attribute: false, type: Array },
     };
   }
 
   constructor() {
 
     super();
+
     loadProperties("calendar").then(r => this.i18n = r);
     this.daysEvents = [];
 
@@ -85,6 +86,10 @@ export class SakaiCalendar extends LionCalendar {
     this.readOnly = true;
 
     this.addEventListener("user-selected-date-changed", e => {
+
+      if (!this.userId && !this.siteId) {
+        return;
+      }
 
       const time = e.detail.selectedDate.getTime();
       this.daysEvents = this.events.filter(e => e.start > time && e.start < (time + 24*60*60*1000));
@@ -109,7 +114,8 @@ export class SakaiCalendar extends LionCalendar {
   get userId() { return this._userId; }
 
   shouldUpdate(changed) {
-    return this.events && super.shouldUpdate(changed);
+    //return this.events && super.shouldUpdate(changed);
+    return super.shouldUpdate(changed);
   }
 
   loadData() {
@@ -128,6 +134,10 @@ export class SakaiCalendar extends LionCalendar {
   update(changed) {
 
     super.update(changed);
+
+    if (!this.events) {
+      return;
+    }
 
     this.shadowRoot.querySelectorAll(".calendar__day-button").forEach(c => {
 

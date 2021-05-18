@@ -1,0 +1,50 @@
+
+> webcomponents@1.0.0 test-setup /Users/fisha/git/sakai/webcomponents/tool/src/main/frontend
+> npm install && empathise install --assets-directory=js/assets
+
+
+> node@13.14.0 preinstall /Users/fisha/git/sakai/webcomponents/tool/src/main/frontend/node_modules/node
+> node installArchSpecificPackage
+
++ node-darwin-x64@13.14.0
+added 1 package in 1.471s
+found 0 vulnerabilities
+
+
+> fsevents@1.2.13 install /Users/fisha/git/sakai/webcomponents/tool/src/main/frontend/node_modules/watchpack-chokidar2/node_modules/fsevents
+> node install.js
+
+  SOLINK_MODULE(target) Release/.node
+  CXX(target) Release/obj.target/fse/fsevents.o
+  SOLINK_MODULE(target) Release/fse.node
+
+> puppeteer@8.0.0 install /Users/fisha/git/sakai/webcomponents/tool/src/main/frontend/node_modules/puppeteer
+> node install.js
+
+Chromium (856583) downloaded to /Users/fisha/git/sakai/webcomponents/tool/src/main/frontend/node_modules/puppeteer/.local-chromium/mac-856583
+
+> @fortawesome/fontawesome-common-types@0.2.35 postinstall /Users/fisha/git/sakai/webcomponents/tool/src/main/frontend/node_modules/@fortawesome/fontawesome-common-types
+> node attribution.js
+
+Font Awesome Free 0.2.35 by @fontawesome - https://fontawesome.com
+License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License)
+
+
+> core-js@3.12.1 postinstall /Users/fisha/git/sakai/webcomponents/tool/src/main/frontend/node_modules/core-js
+> node -e "try{require('./postinstall')}catch(e){}"
+
+
+> core-js-pure@3.12.1 postinstall /Users/fisha/git/sakai/webcomponents/tool/src/main/frontend/node_modules/core-js-pure
+> node -e "try{require('./postinstall')}catch(e){}"
+
+added 2002 packages from 1714 contributors and audited 2013 packages in 62.863s
+
+194 packages are looking for funding
+  run `npm fund` for details
+
+found 141 vulnerabilities (137 moderate, 4 high)
+  run `npm audit fix` to fix them, or `npm audit` for details
+Staging asset dependencies at /var/folders/mm/j_vtl1r16dv3tkwmh7gk55mr0000gn/T/asset_stagetbDrta
+Writing temporary asset manifest...
+Installing modules to asset stage...
+Assets installed to "js/assets" 🖖

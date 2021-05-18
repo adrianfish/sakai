@@ -8,7 +8,6 @@ import { dialogcontentI18n } from "./i18n/dialog-content-i18n.js";
 import { calendarData } from "./data/calendar-data.js";
 
 import '../js/calendar/sakai-calendar.js';
-import '@lion/calendar';
 
 export default {
   title: 'Sakai Calendar',
