@@ -1,4 +1,5 @@
 import { html, LitElement } from "../assets/lit-element/lit-element.js";
+import { loadProperties } from "../sakai-i18n.js";
 
 /**
  * We're extending LitElement here, so our markup will be in the shadow dom. Shadow dom is a double
@@ -8,10 +9,21 @@ import { html, LitElement } from "../assets/lit-element/lit-element.js";
  */
 class SakaiOpenApereo extends LitElement {
 
+  constructor() {
+
+    super();
+
+    loadProperties("openapereo").then(r => this.i18n = r);
+  }
+
+  shouldUpdate() {
+    return this.i18n;
+  }
+
   render() {
 
     return html`
-      <h1>Welcome to Open Apereo</h1>
+      <h1>${this.i18n["welcome"]}</h1>
     `;
   }
 }
