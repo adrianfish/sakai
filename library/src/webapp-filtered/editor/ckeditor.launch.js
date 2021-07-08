@@ -116,6 +116,15 @@ sakai.editor.editors.ckeditor.launch = function(targetId, config, w, h) {
         };
     }
 
+    let siteId = "";
+    if (collectionId) {
+        if (collectionId.startsWith('/user/') && portal && portal.siteId) {
+            siteId = portal.siteId;
+        } else {
+            siteId = collectionId.split('/')[2];
+        }
+    }
+
     var ckconfig = {
 	//Some defaults for audio recorder
         audiorecorder : {
@@ -150,10 +159,15 @@ sakai.editor.editors.ckeditor.launch = function(targetId, config, w, h) {
         filebrowserBrowseUrl :      filebrowser.browseUrl,
         filebrowserImageBrowseUrl : filebrowser.imageBrowseUrl,
         filebrowserFlashBrowseUrl : filebrowser.flashBrowseUrl,
-
-        extraPlugins: (sakai.editor.enableResourceSearch ? 'resourcesearch,' : '')+'',
-
-
+        filebrowserUploadUrl: '/direct/content/direct-upload.json?context=${siteId}',
+        uploadUrl: '/direct/content/direct-upload.json?context=${siteId}',
+        imageUploadUrl: '/direct/content/direct-upload.json?context=${siteId}',
+        extraPlugins: (sakai.editor.enableResourceSearch ? 'resourcesearch,' : '')+'emoji,autolink,codesnippet,mentions,justify,balloontoolbar,balloonpanel,bidi,templates,mathjax,preview,showblocks,find,removeformat,',
+        mentions: [{
+            feed: '/direct/roster/site/'+siteId+'.json',
+            marker: '@',
+            minChars: 0
+        }],
         // These two settings enable the browser's native spell checking and context menus.
         // Control-Right-Click (Windows/Linux) or Command-Right-Click (Mac) on highlighted words
         // will cause the CKEditor menu to be suppressed and display the browser's standard context
@@ -161,45 +175,67 @@ sakai.editor.editors.ckeditor.launch = function(targetId, config, w, h) {
         disableNativeSpellChecker: false,
         browserContextMenuOnCtrl: true,
 
-        // Fix the smileys to a single location
-        smiley_path: "/library/editor/ckeditor/plugins/smiley/images/",
-
+        sakaiDropdownToolbar: true,
+        toolbarCanCollapse: true,
+        toolbarStartupExpanded: false,
+        sakaiOpenLinkToolbar: true,
         toolbar_Basic:
         [
             ['Source', '-', 'Bold', 'Italic', 'Underline', '-', 'Link', 'Unlink', '-', 'NumberedList','BulletedList', 'Blockquote']
         ],
         toolbar_Full:
         [
-            ['About'],
-            ['Source','-','Templates'],
+            ['Format'],
+            ['Bold'],
+            ['Italic'],
+            ['Strike'],
+            ['NumberedList'],
+            ['BulletedList'],
+            ['JustifyLeft'],
+            ['JustifyCenter'],
+            ['Link'],
+            ['Unlink'],
+            ['EmojiPanel'],
+            ['Mathjax'],
+            ['Cut'],
+            ['Copy'],
+            ['Paste'],
+            ['PasteText'],
+            ['RemoveFormat'],
+            // 'SakaiPreview',
+            // 'SakaiPreview2',
+            ['Preview'],
+            // ['A11ychecker'],
+            ['Source'],
             // Uncomment the next line and comment the following to enable the default spell checker.
             // Note that it uses spellchecker.net, displays ads and sends content to remote servers without additional setup.
-            //['Cut','Copy','Paste','PasteText','-','Print', 'SpellChecker', 'Scayt'],
-            ['Cut','Copy','Paste','PasteText','-','Print', 'SakaiPreview'],
-            ['Undo','Redo','-','Find','Replace','-','SelectAll','RemoveFormat'],
-            ['NumberedList','BulletedList','-','Outdent','Indent','Blockquote','CreateDiv'],
+            //['SpellChecker', 'Scayt'],
+
+            //if sakaiDropdownToolbar is true, everything defined after the / will be displayed only after toggle
             '/',
-            ['Bold','Italic','Underline','Strike','-','Subscript','Superscript'],
-						['atd-ckeditor'],
-            ['JustifyLeft','JustifyCenter','JustifyRight','JustifyBlock'],
-            ['BidiLtr', 'BidiRtl' ],
-            ['Link','Unlink','Anchor'],
-            (sakai.editor.enableResourceSearch
-                ? ( sakai.editor.contentItemUrl
-                    ? ['ContentItem', 'AudioRecorder','ResourceSearch', 'Image','Html5video','Table','HorizontalRule','Smiley','SpecialChar']
-                    : ['AudioRecorder','ResourceSearch', 'Image','Html5video','Table','HorizontalRule','Smiley','SpecialChar']
-                  )
-		: ( sakai.editor.contentItemUrl
-                    ? ['ContentItem', 'AudioRecorder', 'Image','Html5video','Table','HorizontalRule','Smiley','SpecialChar']
-                    : ['AudioRecorder', 'Image','Html5video','Table','HorizontalRule','Smiley','SpecialChar']
-                  )
-            ),
-            '/',
-            ['Styles','Format','Font','FontSize'],
-            ['TextColor','BGColor'],
-            ['Maximize', 'ShowBlocks']
-            ,['A11ychecker']
-        ],
+            ['Undo'],
+            ['Redo'],
+            ['Find'],
+            ['Replace'],
+            ['BidiLtr'],
+            ['BidiRtl'],
+            ['Outdent'],
+            ['Indent'],
+            ['JustifyRight'],
+            ['JustifyBlock'],
+            ['atd-ckeditor'],
+            ['Templates'],
+            ['CodeSnippet'],
+            [( sakai.editor.contentItemUrl ? 'ContentItem' : undefined)],
+            [( sakai.editor.enableResourceSearch ? 'ResourceSearch' : undefined)],
+            ['Blockquote'],
+            ['HorizontalRule'],
+            ['Image'],
+            ['Table'],
+            ['SpecialChar'],
+            ['ShowBlocks'],
+            ['Maximize']
+        ].filter(el => el !== undefined),
         toolbar: 'Full',
         resize_dir: 'both',
         //SAK-23418
@@ -224,11 +260,13 @@ sakai.editor.editors.ckeditor.launch = function(targetId, config, w, h) {
             "showWordCount" : true,
             "showCharCount" : true,
         },
-
         //SAK-29598 - Add more templates to CK Editor
-        templates_files: [basePath+"templates/default.js"],
-        templates: 'customtemplates',
-        templates_replaceContent: false
+        templates_files: [basePath+"sakaitemplates/default.js"],
+        templates: 'sakaiTemplates',
+        templates_replaceContent: false,
+        format_tags: 'p;h3;h4;h5',
+        sakaiFormat: false,
+        mathJaxLib: sakai.editor.mathjaxSrc,
     };
 
     // Merge config values into ckconfig
@@ -267,17 +305,20 @@ sakai.editor.editors.ckeditor.launch = function(targetId, config, w, h) {
         CKEDITOR.plugins.addExternal('html5video',webJars+'github-com-bahriddin-ckeditor-html5-video/${ckeditor.html5video.version}/html5video/', 'plugin.js');
         CKEDITOR.plugins.addExternal('audiorecorder',basePath+'audiorecorder/', 'plugin.js');
         CKEDITOR.plugins.addExternal('contentitem',basePath+'contentitem/', 'plugin.js');
-        CKEDITOR.plugins.addExternal('sakaipreview',basePath+'sakaipreview/', 'plugin.js');
+        // CKEDITOR.plugins.addExternal('sakaipreview',basePath+'sakaipreview/', 'plugin.js');
         CKEDITOR.plugins.addExternal('bt_table',basePath+'bt_table/', 'plugin.js');
         CKEDITOR.plugins.addExternal('image2',webJars+'ckeditor-image2/${ckeditor.image2.version}/', 'plugin.js');
-
+        CKEDITOR.plugins.addExternal('sakaidropdowntoolbar', basePath+'sakaidropdowntoolbar/', 'plugin.js');
+        CKEDITOR.plugins.addExternal('sakaiopenlink', basePath+'sakaiopenlink/', 'plugin.js');
+        CKEDITOR.plugins.addExternal('sakaiformat', basePath+'sakaiformat/', 'plugin.js');
+        // CKEDITOR.plugins.addExternal('sakaipreview2', basePath+'sakaipreview2/', 'plugin.js');
         //Autosave has a dependency on notification
         CKEDITOR.plugins.addExternal('autosave',webJars+'ckeditor-autosave/${ckeditor.autosave.version}/', 'plugin.js');
         CKEDITOR.plugins.addExternal('wordcount',webJars+'wordcount/${ckeditor.wordcount.version}/', 'plugin.js');
         CKEDITOR.plugins.addExternal('notification',basePath+'notification/', 'plugin.js');
         // Accessibility checker has a dependency on balloonpanel
-        CKEDITOR.plugins.addExternal('balloonpanel',webJars+'balloonpanel/${ckeditor.balloonpanel.version}/', 'plugin.js');
         CKEDITOR.plugins.addExternal('a11ychecker',webJars+'a11ychecker/${ckeditor.a11ychecker.version}/', 'plugin.js');
+
         /*
            To enable after the deadline uncomment these two lines and add atd-ckeditor to toolbar
            and to extraPlugins. This also needs extra stylesheets.
@@ -307,40 +348,302 @@ sakai.editor.editors.ckeditor.launch = function(targetId, config, w, h) {
         //Add greek special characters to set
         ckconfig.specialChars = CKEDITOR.config.specialChars.concat([ ["&alpha;","alpha"],["&beta;","beta"],["&gamma;","gamma"],["&delta;","delta"],["&epsilon;","epsilon"],["&zeta;","zeta"],["&eta;","eta"],["&theta;","theta"], ["&iota;","iota"],["&kappa;","kappa"],["&lambda;","lambda"],["&mu;","mu"],["&nu;","nu"],["&xi;","xi"],["&omicron;","omnicron"],["&pi;","pi"],["&rho;","rho"],["&sigma;","sigma"],["&tau;","tau"],["&upsilon;","upsilon"], ["&phi;","phi"],["&chi;","chi"],["&psi;","psi"],["&omega;","omega"],["&Alpha;","Alpha"],["&Beta;","Beta"],["&Gamma;","Gamma"],["&Delta;","Delta"],["&Epsilon;","Epsilon"],["&Zeta;","Zeta"],["&Eta;","Eta"],["&Theta;","Theta"], ["&Iota;","Iota"],["&Kappa;","Kappa"],["&Lambda;","Lambda"],["&Mu;","Mu"],["&Nu;","Nu"],["&Xi;","Xi"],["&Omicron;","Omnicron"],["&Pi;","Pi"],["&Rho;","Rho"],["&Sigma;","Sigma"],["&Tau;","Tau"],["&Upsilon;","Upsilon"], ["&Phi;","Phi"],["&Chi;","Chi"],["&Psi;","Psi"],["&Omega;","Omega"] ]);
 
+        //SAK-44562 Dark Mode
+        //Add styles to the content in CKeditor
+        if (sakai.editor.sitePropertiesSkin) {
+            ckconfig.contentsCss.push(sakai.editor.sitePropertiesSkin);
+            ckconfig.contentsCss.push('/library/editor/ckeditor.css');
+        }
+
+        //CKEditor doesn't have a method to add classes to the HTML element
+        //so we manually add the class on load
+        //should be refactored when ckeditor5 is implemented
+        if (document.firstElementChild.classList.contains('sakaiUserTheme-dark')){
+  
+            CKEDITOR.once('instanceReady', addClassOnLoad);
+            // //and we watch for switching out or source mode
+            CKEDITOR.once('instanceReady', function(editor){
+                editor.editor.on('mode', addClassOnModeChange);
+            });
+        }
+
+        //Enable ckeditor to reflect themeswitcher changes. Overrides:
+        //https://github.com/ckeditor/ckeditor4/blob/a786d6f43c17ef90c13b1cf001dbd00204a622b1/skins/moono-lisa/skin.js
+        CKEDITOR.skin.chameleon = ( function() {
+
+        templates = {
+            editor: new CKEDITOR.template(
+                `.cke_reset_all, .cke_reset_all *, .cke_reset_all a, .cke_reset_all textarea [
+                    color:{defaultTextColor};
+                ]
+                {id}.cke_chrome [
+                    color:{defaultTextColor};
+                    border-color:{defaultBorder};
+                ]
+                {id} .cke_top [ 
+                    background-color:{defaultBackground};
+                    border-bottom-color:{defaultBorder};
+                ] 
+                {id} .cke_bottom [
+                    background-color:{defaultBackground};
+                    border-top-color:{defaultBorder};
+                ] 
+                {id} .cke_resizer [
+                    border-right-color:{ckeResizer}
+                ] 
+                {id} .cke_wysiwyg_frame,
+                {id} .cke_wysiwyg_div [
+                    background:{defaultBackground}
+                ] 
+                {id} textarea.cke_source [
+                    background-color: {lightBackground};
+                    color: {defaultTextColor};
+                ]` +
+                // Dialogs.
+                `{id} .cke_dialog_title [
+                    color:{defaultTextColor};
+                    background-color:{defaultBackground};
+                    border-bottom-color:{defaultBorder};
+                ] 
+                {id} .cke_dialog_footer [
+                    color:{defaultTextColor};
+                    background-color:{defaultBackground};
+                    outline-color:{defaultBorder};
+                ] 
+                {id} .cke_dialog_tab [
+                    color:{defaultTextColor};
+                    background-color:{dialogTab};
+                    border-color:{defaultBorder};
+                ] 
+                {id} .cke_dialog_tab:hover, {id} .cke_dialog_tab_selected:hover [
+                    color:{menubuttonTextHover};
+                    background-color:{lightBackground};
+                ] 
+                {id} .cke_dialog_contents [
+                    color:{defaultTextColor};
+                    background-color:{lightBackground};
+                    border-top-color:{defaultBorder};
+                ] 
+                {id} .cke_dialog_tab_selected [
+                    color:{defaultTextColor};
+                    background:{dialogTabSelected};
+                    border-bottom-color:{dialogTabSelectedBorder};
+                ] 
+                {id} .cke_dialog_body [
+                    color:{defaultTextColor};
+                    background:{dialogBody};
+                    border-color:{defaultBorder};
+                ] 
+                .cke_dialog a.cke_dialog_ui_button [
+                    background:{menubutton};
+                    color: {menubuttonIcon};
+                ] 
+                .cke_dialog a.cke_dialog_ui_button:hover [
+                    background:{menubuttonHover};
+                    color:{menubuttonTextHover};
+                ] 
+                .cke_dialog a.cke_dialog_ui_button.cke_dialog_ui_button_ok [
+                    background:{okBackground};
+                    border-color:{okBorderColor};
+                    color: {okColor};
+                ] 
+                {id} input.cke_dialog_ui_input_text, {id} input.cke_dialog_ui_input_password, {id} input.cke_dialog_ui_input_tel, {id} textarea.cke_dialog_ui_input_textarea, {id} select.cke_dialog_ui_input_select [
+                    background:{dialogBody};
+                    border-color:{defaultBorder};
+                    color:{defaultTextColor};
+                ]` +
+                // Toolbars, buttons.
+                `{id} a.cke_button .cke_button_icon [
+                    filter: {invertIfDarkMode}
+                ]
+                {id} a.cke_button_off:hover,
+                {id} a.cke_button_off:focus,
+                {id} a.cke_button_off:active [
+                    background-color:{darkBackground};
+                    border-color:{toolbarElementsBorder};
+                    color:{defaultTextColor};
+                ] 
+                {id} .cke_button_label,
+                {id} a.cke_button_off:hover .cke_button_label,
+                {id} a.cke_button_off:focus .cke_button_label,
+                {id} a.cke_button_off:active .cke_button_label [
+                    color:{defaultTextColor};
+                ] 
+                {id} .cke_button_on [
+                    background-color:{ckeButtonOn};
+                    border-color:{toolbarElementsBorder};
+                ] 
+                {id} .cke_toolbar_separator,
+                {id} .cke_toolgroup a.cke_button:last-child:after,
+                {id} .cke_toolgroup a.cke_button.cke_button_disabled:hover:last-child:after [
+                    background-color: {toolbarElementsBorder};
+                    border-color: {toolbarElementsBorder};
+                ] 
+                {id} .cke_button_arrow [
+                    border--top-color: {toolbarElementsBorder};
+                ]
+                .cke_balloon.cke_balloontoolbar [
+                    background-color:{lightBackground};
+                ]
+                .cke_balloon.cke_balloontoolbar .cke_balloon_triangle_inner.cke_balloon_triangle_bottom,
+                .cke_balloon.cke_balloontoolbar .cke_balloon_triangle_inner.cke_balloon_triangle_top [
+                    border-color: {defaultBorder} transparent;
+                ]
+                .cke_balloon.cke_balloontoolbar .cke_balloon_triangle_outer.cke_balloon_triangle_bottom,
+                .cke_balloon.cke_balloontoolbar .cke_balloon_triangle_outer.cke_balloon_triangle_top [
+                    border-color: {defaultBorder} transparent;
+                ]` +
+                // Combo buttons.
+                `{id} a.cke_combo_button:hover,
+                {id} a.cke_combo_button:focus,
+                {id} .cke_combo_on a.cke_combo_button [
+                    border-color:{toolbarElementsBorder};
+                    color:{menubuttonTextHover};
+                    background-color:{darkBackground};
+                ] 
+                {id} .cke_combo_arrow,
+                {id} .cke_combo:after [
+                    border-top-color:{defaultTextColor};
+                ] 
+                {id} .cke_combo_text [
+                    color:{defaultTextColor};
+                ]`+
+                // Elementspath.
+                `{id} .cke_path_item [
+                    color:{elementsPathColor};
+                ] 
+                {id} a.cke_path_item:hover,
+                {id} a.cke_path_item:focus,
+                {id} a.cke_path_item:active [
+                    color:{menubuttonTextHover};
+                    background-color:{darkBackground};
+                ] 
+                {id}.cke_panel [
+                    border-color:{defaultBorder};
+                ]`
+            ),
+            panel: new CKEDITOR.template(
+                // Context menus.
+                `.cke_menubutton_icon [
+                    background-color:{menubuttonIcon};
+                ] 
+                .cke_menubutton:hover,
+                .cke_menubutton:focus,
+                .cke_menubutton:active [
+                    color:{menubuttonTextHover};
+                    background-color:{menubuttonHover};
+                ] 
+                .cke_menubutton:hover .cke_menubutton_icon, 
+                .cke_menubutton:focus .cke_menubutton_icon, 
+                .cke_menubutton:active .cke_menubutton_icon [
+                    color:{menubuttonTextHover};
+                    background-color:{menubuttonIconHover};
+                ] 
+                .cke_menubutton_disabled:hover .cke_menubutton_icon,
+                .cke_menubutton_disabled:focus .cke_menubutton_icon,
+                .cke_menubutton_disabled:active .cke_menubutton_icon [
+                    background-color:{menubuttonIcon};
+                ] 
+                .cke_menuseparator [
+                    background-color:{menubuttonIcon};
+                ] ` +
+                // Color boxes.
+                `a:hover.cke_colorbox, 
+                a:active.cke_colorbox [
+                    border-color:{defaultBorder};
+                ] 
+                a:hover.cke_colorauto, 
+                a:hover.cke_colormore, 
+                a:active.cke_colorauto, 
+                a:active.cke_colormore [
+                    background-color:{ckeColorauto};
+                    border-color:{defaultBorder};
+                ] `
+            )
+        };
+            return function( editor, part ) {
+                // CKEditor instances have a unique ID, which is used as class name into
+                // the outer container of the editor UI (e.g. ".cke_1").
+                //
+                // The Chameleon feature is available for each CKEditor instance,
+                // independently. Because of this, we need to prefix all CSS selectors with
+                // the unique class name of the instance.
+                uiColor = getComputedStyle(document.firstElementChild);
+                templateStyles = {
+                id: '.' + editor.id,
+                invertIfDarkMode: (document.firstElementChild.classList.contains('sakaiUserTheme-dark')) ? uiColor.getPropertyValue("--sakai-image-invert") : '',
+                // These styles are used by various UI elements.
+                defaultBorder: uiColor.getPropertyValue("--sakai-border-color"),
+                toolbarElementsBorder: uiColor.getPropertyValue("--sakai-border-color"),
+                defaultBackground: uiColor.getPropertyValue("--sakai-background-color-2"),
+                lightBackground: uiColor.getPropertyValue("--sakai-background-color-1"),
+                darkBackground: uiColor.getPropertyValue("--sakai-background-color-3"),
+                defaultTextColor: uiColor.getPropertyValue("--sakai-text-color-1"),
+
+                // These are for specific UI elements.
+                ckeButtonColor: uiColor.getPropertyValue("--sakai-text-color-1"),
+                ckeButtonOn: uiColor.getPropertyValue("--sakai-active-color-1"),
+                ckeResizer: uiColor.getPropertyValue("--sakai-text-color-1"),
+                ckeColorauto: uiColor.getPropertyValue("--sakai-background-color-3"),
+                dialogBody: uiColor.getPropertyValue("--sakai-background-color-2"),
+                dialogTab: uiColor.getPropertyValue("--sakai-background-color-2"),
+                dialogTabSelected: uiColor.getPropertyValue("--sakai-active-color-1"),
+                dialogTabSelectedBorder: uiColor.getPropertyValue("--sakai-border-color"),
+                elementsPathColor: uiColor.getPropertyValue("--sakai-text-color-1"),
+                menubutton: uiColor.getPropertyValue("--button-background"),
+                menubuttonHover: uiColor.getPropertyValue("--button-hover-background"),
+                menubuttonTextHover: uiColor.getPropertyValue("--button-hover-text-color"),
+                menubuttonIcon: uiColor.getPropertyValue("--button-text-color"),
+                menubuttonIconHover: uiColor.getPropertyValue("--button-hover-background"),
+                okBackground: uiColor.getPropertyValue("--sakai-color-green--darker-3"),
+                okBorderColor: uiColor.getPropertyValue("--sakai-color-green--darker-4"),
+                okColor: uiColor.getPropertyValue("--sakai-color-green--lighter-7"),
+                }
+                return templates[ part ]
+                    .output(templateStyles)
+                    .replace( /\[/g, '{' )// Replace brackets with braces.
+                    .replace( /\]/g, '}' );
+            };
+        } )();
     })();
 
-	  let instance = CKEDITOR.replace(targetId, ckconfig);
+    CKEDITOR.on('instanceReady', function(event){
+        if (event.editor.lang.mathjax){
+            event.editor.lang.mathjax.docUrl = '/portal/help/TOCDisplay/content.hlp?docId=howdoiaddlatexlanguagetomycoursesite'
+        }
+    });
+    let instance = CKEDITOR.replace(targetId, ckconfig);
       //SAK-22505
-      CKEDITOR.on('dialogDefinition', function(e) {
-          // Take the dialog name and its definition from the event
-          // data.
-          var dialogName = e.data.name;
-          var dialogDefinition = e.data.definition;
+    //   CKEDITOR.on('dialogDefinition', function(e) {
+    //       // Take the dialog name and its definition from the event
+    //       // data.
+    //       var dialogName = e.data.name;
+    //       var dialogDefinition = e.data.definition;
 
-          var onShow = dialogDefinition.onShow;
-          dialogDefinition.onShow = function() {
-              var result;
-              if (typeof onShow !== 'undefined' && typeof onShow.call === 'function') {
-                  result = onShow.call(this);
-              }
-              return result;
-          }
+    //       var onShow = dialogDefinition.onShow;
+    //       dialogDefinition.onShow = function() {
+    //           var result;
+    //           if (typeof onShow !== 'undefined' && typeof onShow.call === 'function') {
+    //               result = onShow.call(this);
+    //           }
+    //           return result;
+    //       }
 
-          if ( dialogName == 'link' )
-          {
-              var targetTab = dialogDefinition.getContents('target');
-              var linkTypeItems = targetTab.elements[0].children[0].items;
-              var itemsNoPopup = [];
-              for (i=0;i<linkTypeItems.length;i++) {
-                  if (linkTypeItems[i][1] != "popup") {
-                      itemsNoPopup.push(linkTypeItems[i]);
-                  }
-              }
-              targetTab.elements[0].children[0].items = itemsNoPopup;
+    //       if ( dialogName == 'link' )
+    //       {
+    //           var targetTab = dialogDefinition.getContents('target');
+    //           var linkTypeItems = targetTab.elements[0].children[0].items;
+    //           var itemsNoPopup = [];
+    //           for (i=0;i<linkTypeItems.length;i++) {
+    //               if (linkTypeItems[i][1] != "popup") {
+    //                   itemsNoPopup.push(linkTypeItems[i]);
+    //               }
+    //           }
+    //           targetTab.elements[0].children[0].items = itemsNoPopup;
 
-          }
+    //       }
 
-      });
+    //   });
 
   return instance;
 }
