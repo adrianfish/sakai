@@ -2,7 +2,6 @@ import { html } from "../assets/lit-element/lit-element.js";
 import { ifDefined } from "../assets/lit-html/directives/if-defined.js";
 import { loadProperties } from "../sakai-i18n.js";
 import { SakaiElement } from "../sakai-element.js";
-import "../sakai-button.js";
 import "../sakai-editor.js";
 
 export class SakaiCommentEditor extends SakaiElement {

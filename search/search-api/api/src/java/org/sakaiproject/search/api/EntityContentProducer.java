@@ -9,7 +9,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *		 http://www.opensource.org/licenses/ECL-2.0
+ *       http://www.opensource.org/licenses/ECL-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -45,9 +45,7 @@ public interface EntityContentProducer
 	 * @param reference
 	 * @return
 	 */
-	default boolean isContentFromReader(String reference) {
-		return false;
-	}
+	boolean isContentFromReader(String reference);
 
 	/**
 	 * Get a reader for the supplied content resource
@@ -55,9 +53,7 @@ public interface EntityContentProducer
 	 * @param reference 
 	 * @return
 	 */
-	default Reader getContentReader(String reference) {
-		return null;
-	}
+	Reader getContentReader(String reference);
 
 	/**
 	 * Get the content as a string
@@ -65,9 +61,7 @@ public interface EntityContentProducer
 	 * @param reference
 	 * @return
 	 */
-	default String getContent(String reference) {
-		return "";
-	}
+	String getContent(String reference);
 	
 
 	/**
@@ -76,9 +70,7 @@ public interface EntityContentProducer
 	 * @param reference
 	 * @return
 	 */
-	default String getTitle(String reference) {
-		return "";
-	}
+	String getTitle(String reference);
 
 	/**
 	 * Gets the url that displays the entity
@@ -86,9 +78,7 @@ public interface EntityContentProducer
 	 * @param reference
 	 * @return
 	 */
-	default String getUrl(String reference) {
-		return "";
-	}
+	String getUrl(String reference);
 
 	/**
 	 * Gets the url that displays the entity. You can specify a UrlType depending on
@@ -99,8 +89,8 @@ public interface EntityContentProducer
 	 * @return The url as a String
 	 */
 	default String getUrl(String reference, Entity.UrlType urlType) {
-		return this.getUrl(reference);
-	}
+        return this.getUrl(reference);
+    }
 
 	/**
 	 * If the reference matches this EntityContentProducer return true
@@ -108,9 +98,7 @@ public interface EntityContentProducer
 	 * @param reference
 	 * @return
 	 */
-	default boolean matches(String reference) {
-		return false;
-	}
+	boolean matches(String reference);
 
 	/**
 	 * Get the search builder action associated with the event.
@@ -118,65 +106,51 @@ public interface EntityContentProducer
 	 * @param event
 	 * @return One of the {@link SearchBuilderItem} constants.
 	 */
-	default Integer getAction(Event event) {
-		return SearchBuilderItem.ACTION_UNKNOWN;
-	}
+	Integer getAction(Event event);
 
 	/**
 	 * Is the event owned by this EntityContentProducer
 	 * @param event
 	 * @return
 	 */
-	default boolean matches(Event event) {
-		return false;
-	}
+	boolean matches(Event event);
 
 	/**
 	 * What is the name of the tool, 
 	 * @return
 	 */
-	default String getTool() {
-		return "";
-	}
+	String getTool();
 	
 	/**
 	 * get the site ID from the resource Name
 	 *
 	 * @param reference
 	 * @return the site ID or {@code null} if a site ID is not present or this provider does not manage site-specific
-	 *	 content
+	 *   content
 	 */
-	default String getSiteId(String reference) {
-		return "";
-	}
+	String getSiteId(String reference);
 
 	/**
 	 * Get the site content as an iterator
 	 * @param context
 	 * @return an iterator over all content associted with the given site ID, or an empty iterator if this provider
-	 *	 does not manage site-specific content
+	 *   does not manage site-specific content
 	 */
-	default Iterator<String> getSiteContentIterator(String context) {
-		return null;
-	}
+	Iterator<String> getSiteContentIterator(String context);
 
 	/**
 	 * If the reference should be indexed, return true
 	 * @param reference
 	 * @return
 	 */
-	default boolean isForIndex(String reference) {
-		return false;
-	}
+	boolean isForIndex(String reference);
 
 	/**
 	 * returns true if the current user can view the search result
 	 * @param reference 
 	 * @return
 	 */
-	default boolean canRead(String reference) {
-		return false;
-	}
+	boolean canRead(String reference);
 
 	/**
 	 * Gets a map of custom document properties. The names of the map map will contain 
@@ -187,9 +161,7 @@ public interface EntityContentProducer
 	 * If the key starts with a "T" then the index will be tokenized and the T removed to form the index name
 	 * @return
 	 */
-	default Map<String, ?> getCustomProperties(String ref) {
-		return null;
-	}
+	Map<String, ?> getCustomProperties(String ref);
 
 	/**
 	 * At the moment this is a placeholder, but eventually
@@ -198,23 +170,30 @@ public interface EntityContentProducer
 	 * already processing. 
 	 * @return
 	 */
-	default String getCustomRDF(String ref) {
-		return "";
-	}
+	String getCustomRDF(String ref);
 
-	default String getId(String ref) {
-		return "";
-	}
+	/**
+	 * @param ref
+	 * @return
+	 */
+	String getId(String ref);
 
-	default String getType(String ref) {
-		return "";
-	}
+	/**
+	 * @param ref
+	 * @return
+	 */
+	String getType(String ref);
 
-	default String getSubType(String ref) {
-		return "";
-	}
+	/**
+	 * @param ref
+	 * @return
+	 */
+	String getSubType(String ref);
 
-	default String getContainer(String ref) {
-		return "";
-	}
+	/**
+	 * @param ref
+	 * @return
+	 */
+	String getContainer(String ref);
+
 }

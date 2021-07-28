@@ -15,11 +15,6 @@ package org.sakaiproject.conversations.api.beans;
 
 import org.sakaiproject.conversations.api.model.Metadata;
 import org.sakaiproject.conversations.api.model.Comment;
-import org.sakaiproject.time.api.InstantToMillisJsonSerializer;
-import org.sakaiproject.time.api.MillisToInstantJsonDeserializer;
-
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 import java.time.Instant;
 import lombok.Setter;
@@ -30,13 +25,9 @@ public class CommentTransferBean {
     public String id;
     public String message;
     public String creator;
-    @JsonSerialize(using = InstantToMillisJsonSerializer.class)
-    @JsonDeserialize(using = MillisToInstantJsonDeserializer.class)
     public Instant created;
     public String formattedCreatedDate;
     public String modifier;
-    @JsonSerialize(using = InstantToMillisJsonSerializer.class)
-    @JsonDeserialize(using = MillisToInstantJsonDeserializer.class)
     public Instant modified;
     public String formattedModifiedDate;
     public String post;

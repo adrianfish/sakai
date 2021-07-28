@@ -38,23 +38,23 @@ export class SakaiIcon extends LitElement {
       }
       .sakai-smallest-icon {
         pointer-events: none;
-        width: var(--sakai-smallest-icon-width);
-        height: var(--sakai-smallest-icon-height);
+        width: var(--sakai-smallest-icon-width, 8px);
+        height: var(--sakai-smallest-icon-height, 8px);
       }
       .sakai-small-icon {
         pointer-events: none;
-        width: var(--sakai-small-icon-width);
-        height: var(--sakai-small-icon-height);
+        width: var(--sakai-small-icon-width, 14px);
+        height: var(--sakai-small-icon-height, 14px);
       }
       .sakai-medium-icon {
         pointer-events: none;
-        width: var(--sakai-medium-icon-width);
-        height: var(--sakai-medium-icon-height);
+        width: var(--sakai-medium-icon-width, 24px);
+        height: var(--sakai-medium-icon-height, 24px);
       }
       .sakai-large-icon {
         pointer-events: none;
-        width: var(--sakai-large-icon-width);
-        height: var(--sakai-large-icon-height);
+        width: var(--sakai-large-icon-width, 32px);
+        height: var(--sakai-large-icon-height, 32px);
       }
 
       .alert {

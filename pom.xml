@@ -118,6 +118,7 @@
                 <module>usermembership</module>
                 <module>velocity</module>
                 <module>web</module>
+                <module>webapi</module>
                 <module>webcomponents</module>
                 <module>webjars</module>
                 <module>webservices</module>

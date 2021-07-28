@@ -13,6 +13,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.sql.SQLException;
 
 import javax.annotation.Resource;
 
@@ -78,6 +79,7 @@ import org.sakaiproject.util.comparator.UserSortNameComparator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationAdapter;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import org.apache.commons.lang3.StringUtils;
@@ -725,7 +727,7 @@ public class ConversationsServiceImpl implements ConversationsService/*, EntityP
             status.setViewedDate(Instant.now());
             try {
                 postStatusRepository.save(status);
-            } catch (PersistenceException pe) {
+            } catch (Exception e) {
                 log.debug("Caught exception while marking posts viewed. This can happen " +
                     "due to the way the client detects posts scrolling into view");
             }
@@ -1460,7 +1462,7 @@ public class ConversationsServiceImpl implements ConversationsService/*, EntityP
 
     private void afterCommit(Runnable runnable) {
 
-        TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+        TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronizationAdapter() {
 
             @Override
             public void afterCommit() {

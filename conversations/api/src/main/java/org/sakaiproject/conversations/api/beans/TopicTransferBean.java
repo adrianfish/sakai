@@ -20,11 +20,6 @@ import org.sakaiproject.conversations.api.Reaction;
 import org.sakaiproject.conversations.api.TopicType;
 import org.sakaiproject.conversations.api.TopicVisibility;
 import org.sakaiproject.entity.api.Entity;
-import org.sakaiproject.time.api.InstantToMillisJsonSerializer;
-import org.sakaiproject.time.api.MillisToInstantJsonDeserializer;
-
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 import java.time.Instant;
 import java.util.ArrayList;
@@ -40,7 +35,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class TopicTransferBean implements Entity {
+public class TopicTransferBean {
 
     public String id;
     public String title;
@@ -50,13 +45,9 @@ public class TopicTransferBean implements Entity {
     public long numberOfPosts;
     public long numberOfUnreadPosts;
     public String creator;
-    @JsonSerialize(using = InstantToMillisJsonSerializer.class)
-    @JsonDeserialize(using = MillisToInstantJsonDeserializer.class)
     public Instant created;
     public String formattedCreatedDate;
     public String modifier;
-    @JsonSerialize(using = InstantToMillisJsonSerializer.class)
-    @JsonDeserialize(using = MillisToInstantJsonDeserializer.class)
     public Instant modified;
     public String formattedModifiedDate;
     public boolean pinned;
@@ -84,6 +75,7 @@ public class TopicTransferBean implements Entity {
     public boolean canReact;
     public boolean canModerate;
     public boolean isMine;
+    public List<Map<String, String>> links;
 
     public String url;
     public String reference;

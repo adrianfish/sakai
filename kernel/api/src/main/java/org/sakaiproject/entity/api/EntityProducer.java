@@ -22,7 +22,6 @@
 package org.sakaiproject.entity.api;
 
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -42,16 +41,12 @@ public interface EntityProducer
 	/**
 	 * @return a short string identifying the resources kept here, good for a file name or label.
 	 */
-	default String getLabel() {
-		return "";
-	}
+	String getLabel();
 
 	/**
 	 * @return true if the service wants to be part of archive / merge, false if not.
 	 */
-	default boolean willArchiveMerge() {
-		return false;
-	}
+	boolean willArchiveMerge();
 
 	/**
 	 * Archive the resources for the given site.
@@ -69,9 +64,7 @@ public interface EntityProducer
 	 *        archived content. Implementation will may use {@see List#contains(Object)} so choice of implementation should reflect this.
 	 * @return A log of status messages from the archive.
 	 */
-	default String archive(String siteId, Document doc, Stack<Element> stack, String archivePath, List<Reference> attachments) {
-		return "";
-	}
+	String archive(String siteId, Document doc, Stack<Element> stack, String archivePath, List<Reference> attachments);
 
 	/**
 	 * Merge the resources from the archive into the given site.
@@ -94,10 +87,8 @@ public interface EntityProducer
 	 *        set.
 	 * @return A log of status messages from the merge.
 	 */
-	default String merge(String siteId, Element root, String archivePath, String fromSiteId, Map<String, String> attachmentNames, Map<String, String> userIdTrans,
-			Set<String> userListAllowImport) {
-		return "";
-	}
+	String merge(String siteId, Element root, String archivePath, String fromSiteId, Map<String, String> attachmentNames, Map<String, String> userIdTrans,
+			Set<String> userListAllowImport);
 
 	/**
 	 * If the service recognizes the reference as its own, parse it and fill in the Reference
@@ -108,9 +99,7 @@ public interface EntityProducer
 	 *        The Reference object to set with the results of the parse from a recognized reference.
 	 * @return true if the reference belonged to the service, false if not.
 	 */
-	default boolean parseEntityReference(String reference, Reference ref) {
-		return false;
-	}
+	boolean parseEntityReference(String reference, Reference ref);
 
 	/**
 	 * Create an entity description for the entity referenced - the entity will belong to the service.
@@ -119,9 +108,7 @@ public interface EntityProducer
 	 *        The entity reference.
 	 * @return The entity description, or null if one cannot be made.
 	 */
-	default String getEntityDescription(Reference ref) {
-		return "";
-	}
+	String getEntityDescription(Reference ref);
 
 	/**
 	 * Access the resource properties for the referenced entity - the entity will belong to the service.
@@ -130,9 +117,7 @@ public interface EntityProducer
 	 *        The entity reference.
 	 * @return The ResourceProperties object for the entity, or null if it has none.
 	 */
-	default ResourceProperties getEntityResourceProperties(Reference ref) {
-		return null;
-	}
+	ResourceProperties getEntityResourceProperties(Reference ref);
 
 	/**
 	 * Access the referenced Entity - the entity will belong to the service.
@@ -141,9 +126,7 @@ public interface EntityProducer
 	 *        The entity reference.
 	 * @return The Entity, or null if not found.
 	 */
-	default Entity getEntity(Reference ref) {
-		return null;
-	}
+	Entity getEntity(Reference ref);
 
 	/**
 	 * Access a URL for the referenced entity - the entity will belong to the service.
@@ -152,9 +135,7 @@ public interface EntityProducer
 	 *        The entity reference.
 	 * @return The entity's URL, or null if it does not have one.
 	 */
-	default String getEntityUrl(Reference ref) {
-		return "";
-	}
+	String getEntityUrl(Reference ref);
 
 	default Optional<String> getEntityUrl(Reference ref, Entity.UrlType urlType) {
 		return Optional.of(getEntityUrl(ref));
@@ -169,16 +150,12 @@ public interface EntityProducer
 	 *        The userId for a user-specific set of groups, or null for the generic set.
 	 * @return The entity's collection of authorization group ids, or null if this cannot be done.
 	 */
-	default Collection<String> getEntityAuthzGroups(Reference ref, String userId) {
-		return Collections.<String>emptyList();
-	}
+	Collection<String> getEntityAuthzGroups(Reference ref, String userId);
 
 	/**
 	 * Get the HttpAccess object that supports entity access via the access servlet for my entities.
 	 * 
 	 * @return The HttpAccess object for my entities, or null if I do not support access.
 	 */
-	default HttpAccess getHttpAccess() {
-		return null;
-	}
+	HttpAccess getHttpAccess();
 }

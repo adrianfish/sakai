@@ -59,9 +59,7 @@ public interface Entity
 	 *        The name of the entity property whose value controls which alternate reference URL is requested. If null, the native 'raw' URL is requested.
 	 * @return The alternate URL which can be used to access the entity.
 	 */
-	default String getUrl(String rootProperty) {
-        return "";
-    }
+	String getUrl(String rootProperty);
 
 	/**
 	 * Access the alternate internal reference which can be used to access the entity from within the system.
@@ -70,9 +68,7 @@ public interface Entity
 	 *        The name of the entity property whose value controls which alternate reference is requested. If null, the native 'raw' reference is requested.
 	 * @return The the alternate internal reference which can be used to access the entity from within the system.
 	 */
-	default String getReference(String rootProperty) {
-        return "";
-    }
+	String getReference(String rootProperty);
 
 	/**
 	 * Access the id of the entity.
@@ -86,9 +82,7 @@ public interface Entity
 	 * 
 	 * @return The entity's properties.
 	 */
-	default ResourceProperties getProperties() {
-        return null;
-    }
+	ResourceProperties getProperties();
 
 	/**
 	 * Serialize the entity into XML, adding an element to the doc under the top of the stack element.
@@ -99,7 +93,5 @@ public interface Entity
 	 *        The DOM elements, the top of which is the containing element of the new "entity" element.
 	 * @return The newly added element.
 	 */
-	default Element toXml(Document doc, Stack<Element> stack) {
-        return null;
-    }
+	Element toXml(Document doc, Stack<Element> stack);
 }

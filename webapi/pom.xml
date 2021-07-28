@@ -6,7 +6,7 @@
     <parent>
         <groupId>org.sakaiproject</groupId>
         <artifactId>master</artifactId>
-        <version>22-SNAPSHOT</version>
+        <version>20-SNAPSHOT</version>
         <relativePath>../master/pom.xml</relativePath>
     </parent>
 
@@ -52,49 +52,8 @@
             <artifactId>sakai-kernel-util</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.sakaiproject.edu-services.course-management</groupId>
-            <artifactId>coursemanagement-api</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.sakaiproject.announcement</groupId>
-            <artifactId>sakai-announcement-api</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.sakaiproject.assignment</groupId>
-            <artifactId>sakai-assignment-api</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.sakaiproject.msgcntr</groupId>
-            <artifactId>messageforums-api</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.sakaiproject.message</groupId>
-            <artifactId>sakai-message-api</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.sakaiproject.calendar</groupId>
-            <artifactId>sakai-calendar-api</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.sakaiproject.calendar</groupId>
-            <artifactId>sakai-calendar-util</artifactId>
-            <version>22-SNAPSHOT</version>
-        </dependency>
-        <dependency>
             <groupId>org.sakaiproject.conversations</groupId>
             <artifactId>sakai-conversations-api</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.sakaiproject.edu-services.gradebook</groupId>
-            <artifactId>gradebook-service-api</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.sakaiproject.samigo</groupId>
-            <artifactId>samigo-services</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.sakaiproject.samigo</groupId>
-            <artifactId>samigo-api</artifactId>
         </dependency>
         <!-- Spring dependencies -->
         <dependency>
@@ -117,10 +76,6 @@
             <groupId>org.springframework</groupId>
             <artifactId>spring-webmvc</artifactId>
             <scope>compile</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-webflux</artifactId>
         </dependency>
         <dependency>
             <groupId>io.springfox</groupId>

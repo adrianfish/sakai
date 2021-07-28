@@ -4,13 +4,17 @@
 	<parent>
     <groupId>org.sakaiproject.conversations</groupId>
     <artifactId>sakai-conversations-base</artifactId>
-    <version>22-SNAPSHOT</version>
+    <version>20-SNAPSHOT</version>
   </parent>
 
 	<artifactId>sakai-conversations-tool</artifactId>
 	<packaging>war</packaging>
 
-	<name>sakai-conversations-tool</name>
+    <name>sakai-conversations-tool</name>
+
+    <properties>
+        <thymeleaf.version>3.0.10.RELEASE</thymeleaf.version>
+    </properties>
 
 	<dependencies>
 		<dependency>
@@ -52,18 +56,23 @@
 		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-webmvc</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.thymeleaf</groupId>
-			<artifactId>thymeleaf</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.thymeleaf</groupId>
-			<artifactId>thymeleaf-spring5</artifactId>
-    </dependency>
+        </dependency>
+
+        <!-- thymeleaf template engine -->
+        <dependency>
+            <groupId>org.thymeleaf</groupId>
+            <artifactId>thymeleaf</artifactId>
+            <version>${thymeleaf.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.thymeleaf</groupId>
+            <artifactId>thymeleaf-spring4</artifactId>
+            <version>${thymeleaf.version}</version>
+        </dependency>
 		<dependency>
 			<groupId>org.thymeleaf.extras</groupId>
 			<artifactId>thymeleaf-extras-java8time</artifactId>
+            <version>3.0.4.RELEASE</version>
 		</dependency>
 	</dependencies>
 </project>

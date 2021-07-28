@@ -309,7 +309,7 @@ sakai.editor.editors.ckeditor.launch = function(targetId, config, w, h) {
 
     })();
 
-	  CKEDITOR.replace(targetId, ckconfig);
+	  let instance = CKEDITOR.replace(targetId, ckconfig);
       //SAK-22505
       CKEDITOR.on('dialogDefinition', function(e) {
           // Take the dialog name and its definition from the event
@@ -341,6 +341,8 @@ sakai.editor.editors.ckeditor.launch = function(targetId, config, w, h) {
           }
 
       });
+
+  return instance;
 }
 
 sakai.editor.launch = sakai.editor.editors.ckeditor.launch;

@@ -1,4 +1,5 @@
-import { html, ifDefined } from "../assets/@lion/core/index.js";
+import { html } from "../assets/lit-element/lit-element.js";
+import { ifDefined } from "../assets/lit-html/directives/if-defined.js";
 import { SakaiElement } from "../sakai-element.js";
 import "./sakai-topic-list.js";
 import "./sakai-add-topic.js";

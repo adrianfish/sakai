@@ -14,9 +14,9 @@
 package org.sakaiproject.webapi.beans;
 
 import java.util.List;
+import java.util.Map;
 
-import org.springframework.hateoas.EntityModel;
-
+import org.sakaiproject.conversations.api.beans.TopicTransferBean;
 import org.sakaiproject.conversations.api.model.Settings;
 import org.sakaiproject.conversations.api.model.Tag;
 
@@ -25,7 +25,7 @@ public class ConversationsRestBean {
     public String userId;
     public String siteId;
     public List<SimpleGroup> groups;
-    public List<EntityModel> topics;
+    public List<TopicTransferBean> topics;
     public boolean canCreateTopic;
     public boolean canUpdatePermissions;
     public boolean canEditTags;
@@ -36,4 +36,5 @@ public class ConversationsRestBean {
     public Settings settings;
     public boolean showGuidelines;
     public List<Tag> tags;
+    public List<Map<String, String>> links;
 }

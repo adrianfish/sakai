@@ -166,7 +166,7 @@
                                 run build
                             </arguments>
                         </configuration>
-                    </execution-->
+                    </execution>
                 </executions>
             </plugin>
         </plugins>

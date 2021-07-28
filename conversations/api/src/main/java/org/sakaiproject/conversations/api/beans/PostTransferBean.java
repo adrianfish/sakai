@@ -17,8 +17,6 @@ import org.sakaiproject.conversations.api.Reaction;
 import org.sakaiproject.conversations.api.model.Metadata;
 import org.sakaiproject.conversations.api.model.Post;
 import org.sakaiproject.entity.api.Entity;
-import org.sakaiproject.time.api.InstantToMillisJsonSerializer;
-import org.sakaiproject.time.api.MillisToInstantJsonDeserializer;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
@@ -33,21 +31,17 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class PostTransferBean implements Entity {
+public class PostTransferBean {
 
     public String id;
     public String message;
     public int numberOfComments;
     public List<CommentTransferBean> comments;
     public String creator;
-    @JsonSerialize(using = InstantToMillisJsonSerializer.class)
-    @JsonDeserialize(using = MillisToInstantJsonDeserializer.class)
     public Instant created;
     public String formattedCreatedDate;
     public String siteId;
     public String modifier;
-    @JsonSerialize(using = InstantToMillisJsonSerializer.class)
-    @JsonDeserialize(using = MillisToInstantJsonDeserializer.class)
     public Instant modified;
     public String formattedModifiedDate;
     public Map<Reaction, Boolean> myReactions = new HashMap<>();
@@ -73,6 +67,7 @@ public class PostTransferBean implements Entity {
     public boolean canReact;
     public boolean canModerate;
     public boolean isInstructor;
+    public List<Map<String, String>> links;
 
     public String url;
     public String reference;

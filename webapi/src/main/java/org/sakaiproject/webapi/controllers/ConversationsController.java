@@ -35,8 +35,6 @@ import org.sakaiproject.user.api.UserNotDefinedException;
 import org.sakaiproject.webapi.beans.ConversationsRestBean;
 import org.sakaiproject.webapi.beans.SimpleGroup;
 
-import org.springframework.hateoas.EntityModel;
-import org.springframework.hateoas.Link;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -92,7 +90,7 @@ public class ConversationsController extends AbstractSakaiApiController {
 
     @ApiOperation(value = "Get the top level conversations data for a site")
 	@GetMapping(value = "/sites/{siteId}/conversations", produces = MediaType.APPLICATION_JSON_VALUE)
-    public EntityModel getSiteConversations(@PathVariable String siteId) throws ConversationsPermissionsException {
+    public ConversationsRestBean getSiteConversations(@PathVariable String siteId) throws ConversationsPermissionsException {
 
 		String currentUserId = checkSakaiSession().getUserId();
 
@@ -124,9 +122,15 @@ public class ConversationsController extends AbstractSakaiApiController {
             bean.showGuidelines = settings.getRequireGuidelinesAgreement() && !convStatus.getGuidelinesAgreed();
             bean.tags = conversationsService.getTagsForSite(siteId);
 
-            List<Link> links = new ArrayList<>();
-            if (bean.canViewSiteStatistics) links.add(Link.of("/api/sites/" + siteId + "/conversations/stats", "stats"));
-            return EntityModel.of(bean, links);
+            List<Map<String, String>> links = new ArrayList<>();
+            if (bean.canViewSiteStatistics) {
+                Map<String, String> stats = new HashMap<>();
+                stats.put("rel", "stats");
+                stats.put("href", "/api/sites/" + siteId + "/conversations/stats");
+                links.add(stats);
+            }
+            bean.links = links;
+            return bean;
 
         } catch (Exception e) {
             log.error("Failed to load data fully", e);
@@ -150,7 +154,7 @@ public class ConversationsController extends AbstractSakaiApiController {
 
     @ApiOperation(value = "Create a topic")
 	@PostMapping(value = "/sites/{siteId}/topics", produces = MediaType.APPLICATION_JSON_VALUE)
-    public EntityModel createTopic(@PathVariable String siteId, @RequestBody TopicTransferBean topicBean) throws ConversationsPermissionsException {
+    public TopicTransferBean createTopic(@PathVariable String siteId, @RequestBody TopicTransferBean topicBean) throws ConversationsPermissionsException {
 
 		checkSakaiSession();
 
@@ -160,7 +164,7 @@ public class ConversationsController extends AbstractSakaiApiController {
 
     @ApiOperation(value = "Update a topic")
 	@PutMapping(value = "/sites/{siteId}/topics/{topicId}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public EntityModel updateTopic(@PathVariable String siteId, @PathVariable String topicId, @RequestBody TopicTransferBean topicBean) throws ConversationsPermissionsException {
+    public TopicTransferBean updateTopic(@PathVariable String siteId, @PathVariable String topicId, @RequestBody TopicTransferBean topicBean) throws ConversationsPermissionsException {
 
 		checkSakaiSession();
 
@@ -215,7 +219,7 @@ public class ConversationsController extends AbstractSakaiApiController {
 
     @ApiOperation(value = "Lock a topic")
 	@PostMapping(value = "/sites/{siteId}/topics/{topicId}/locked", produces = MediaType.APPLICATION_JSON_VALUE)
-    public EntityModel lockTopic(@PathVariable String siteId, @PathVariable String topicId, @RequestBody Boolean locked) throws ConversationsPermissionsException {
+    public TopicTransferBean lockTopic(@PathVariable String siteId, @PathVariable String topicId, @RequestBody Boolean locked) throws ConversationsPermissionsException {
 
 		checkSakaiSession();
 
@@ -242,19 +246,69 @@ public class ConversationsController extends AbstractSakaiApiController {
     }
 
 
-    private EntityModel entityModelForTopicBean(TopicTransferBean topicBean) {
+    private TopicTransferBean entityModelForTopicBean(TopicTransferBean topicBean) {
 
-        List<Link> links = new ArrayList<>();
-        links.add(Link.of(topicBean.url, "self"));
-        links.add(Link.of(topicBean.url + "/bookmarked", "bookmark"));
-        links.add(Link.of(topicBean.url + "/posts/markpostsviewed", "markpostsviewed"));
-        if (topicBean.canPin) links.add(Link.of(topicBean.url + "/pinned", "pin"));
-        if (topicBean.canPost) links.add(Link.of(topicBean.url + "/posts", "post"));
-        if (topicBean.canDelete) links.add(Link.of(topicBean.url, "delete"));
-        if (topicBean.canReact) links.add(Link.of(topicBean.url + "/reactions", "react"));
-        if (topicBean.canModerate) links.add(Link.of(topicBean.url + "/locked", "lock"));
-        if (topicBean.canModerate) links.add(Link.of(topicBean.url + "/hidden", "hide"));
-        return EntityModel.of(topicBean, links);
+        List<Map<String, String>> links = new ArrayList<>();
+
+        Map<String, String> self = new HashMap<>();
+        self.put("rel", "self");
+        self.put("href", topicBean.url);
+        links.add(self);
+
+        Map<String, String> bookmark = new HashMap<>();
+        bookmark.put("rel", "bookmark");
+        bookmark.put("href", topicBean.url + "/bookmarked");
+        links.add(bookmark);
+
+        Map<String, String> markpostsviewed = new HashMap<>();
+        markpostsviewed.put("rel", "markpostsviewed");
+        markpostsviewed.put("href", topicBean.url + "/posts/markpostsviewed");
+        links.add(markpostsviewed);
+
+        if (topicBean.canPin) {
+            Map<String, String> pin = new HashMap<>();
+            pin.put("rel", "pin");
+            pin.put("href", topicBean.url + "/pinned");
+            links.add(pin);
+        }
+
+        if (topicBean.canPost) {
+            Map<String, String> post = new HashMap<>();
+            post.put("rel", "post");
+            post.put("href", topicBean.url + "/posts");
+            links.add(post);
+        }
+
+        if (topicBean.canDelete) {
+            Map<String, String> delete = new HashMap<>();
+            delete.put("rel", "delete");
+            delete.put("href", topicBean.url);
+            links.add(delete);
+        }
+
+        if (topicBean.canReact) {
+            Map<String, String> react = new HashMap<>();
+            react.put("rel", "react");
+            react.put("href", topicBean.url + "/reactions");
+            links.add(react);
+        }
+
+        if (topicBean.canModerate) {
+            Map<String, String> lock = new HashMap<>();
+            lock.put("rel", "lock");
+            lock.put("href", topicBean.url + "/locked");
+            links.add(lock);
+        }
+
+        if (topicBean.canModerate) {
+            Map<String, String> hide = new HashMap<>();
+            hide.put("rel", "hide");
+            hide.put("href", topicBean.url + "/hidden");
+            links.add(hide);
+        }
+
+        topicBean.links = links;
+        return topicBean;
     }
 
     @ApiOperation(value = "Create a post")
@@ -264,12 +318,12 @@ public class ConversationsController extends AbstractSakaiApiController {
 		checkSakaiSession();
         postBean.siteId = siteId;
         postBean.topic = topicId;
-        return conversationsService.savePost(postBean);
+        return entityModelForPostBean(conversationsService.savePost(postBean));
     }
 
     @ApiOperation(value = "Get the posts for a topic")
 	@GetMapping(value = "/sites/{siteId}/topics/{topicId}/posts", produces = MediaType.APPLICATION_JSON_VALUE)
-    public List<EntityModel> getTopicPosts(@PathVariable String siteId, @PathVariable String topicId) throws ConversationsPermissionsException {
+    public List<PostTransferBean> getTopicPosts(@PathVariable String siteId, @PathVariable String topicId) throws ConversationsPermissionsException {
 
 		checkSakaiSession();
         return conversationsService.getPostsByTopicId(siteId, topicId).stream()
@@ -284,7 +338,7 @@ public class ConversationsController extends AbstractSakaiApiController {
 
         postBean.siteId = siteId;
         postBean.id = postId;
-        return conversationsService.savePost(postBean);
+        return entityModelForPostBean(conversationsService.savePost(postBean));
     }
 
     @ApiOperation(value = "Delete a post")
@@ -329,7 +383,7 @@ public class ConversationsController extends AbstractSakaiApiController {
 
     @ApiOperation(value = "Lock a post")
 	@PostMapping(value = "/sites/{siteId}/topics/{topicId}/posts/{postId}/locked", produces = MediaType.APPLICATION_JSON_VALUE)
-    public EntityModel lockPost(@PathVariable String siteId, @PathVariable String topicId, @PathVariable String postId, @RequestBody Boolean locked) throws ConversationsPermissionsException {
+    public PostTransferBean lockPost(@PathVariable String siteId, @PathVariable String topicId, @PathVariable String postId, @RequestBody Boolean locked) throws ConversationsPermissionsException {
 
 		checkSakaiSession();
 
@@ -346,15 +400,45 @@ public class ConversationsController extends AbstractSakaiApiController {
         return new ResponseEntity(HttpStatus.OK);
     }
 
-    private EntityModel entityModelForPostBean(PostTransferBean postBean) {
+    private PostTransferBean entityModelForPostBean(PostTransferBean postBean) {
 
-        List<Link> links = new ArrayList<>();
-        links.add(Link.of(postBean.url, "self"));
-        if (postBean.canDelete) links.add(Link.of(postBean.url, "delete"));
-        if (postBean.canReact) links.add(Link.of(postBean.url + "/reactions", "react"));
-        if (postBean.canModerate) links.add(Link.of(postBean.url + "/locked", "lock"));
-        if (postBean.canModerate) links.add(Link.of(postBean.url + "/hidden", "hide"));
-        return EntityModel.of(postBean, links);
+        List<Map<String, String>> links = new ArrayList<>();
+
+        Map<String, String> self = new HashMap<>();
+        self.put("rel", "self");
+        self.put("href", postBean.url);
+        links.add(self);
+
+        if (postBean.canDelete) {
+            Map<String, String> delete = new HashMap<>();
+            delete.put("rel", "delete");
+            delete.put("href", postBean.url);
+            links.add(delete);
+        }
+
+        if (postBean.canReact) {
+            Map<String, String> react = new HashMap<>();
+            react.put("rel", "react");
+            react.put("href", postBean.url + "/reactions");
+            links.add(react);
+        }
+
+        if (postBean.canModerate) {
+            Map<String, String> lock = new HashMap<>();
+            lock.put("rel", "lock");
+            lock.put("href", postBean.url + "/locked");
+            links.add(lock);
+        }
+
+        if (postBean.canModerate) {
+            Map<String, String> hide = new HashMap<>();
+            hide.put("rel", "hide");
+            hide.put("href", postBean.url + "/hidden");
+            links.add(hide);
+        }
+
+        postBean.links = links;
+        return postBean;
     }
 
     @ApiOperation(value = "Create a comment")

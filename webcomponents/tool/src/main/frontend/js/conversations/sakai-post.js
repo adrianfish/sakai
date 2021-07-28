@@ -6,7 +6,6 @@ import { reactionsMixin } from "./reactions-mixin.js";
 import "../sakai-editor.js";
 import "./sakai-comment.js";
 import "./sakai-comment-editor.js";
-import "../sakai-options-menu.js";
 import "../sakai-icon.js";
 import "./options-menu.js";
 

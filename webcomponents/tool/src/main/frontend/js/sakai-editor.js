@@ -1,5 +1,7 @@
 import {SakaiElement} from "./sakai-element.js";
 import {html} from "./assets/lit-element/lit-element.js";
+import { ifDefined } from "./assets/lit-html/directives/if-defined.js";
+import { unsafeHTML } from "./assets/lit-html/directives/unsafe-html.js";
 
 class SakaiEditor extends SakaiElement {
 
@@ -45,6 +47,9 @@ class SakaiEditor extends SakaiElement {
     } else {
       this.editor.destroy()
     }
+  }
+
+  get active() { return this._active; }
 
   attachEditor() {
 
@@ -70,49 +75,25 @@ class SakaiEditor extends SakaiElement {
   }
 
   firstUpdated(changed) {
->>>>>>> b1af8df49e1 (SAK-45092 Create a new tool for handling conversations in Sakai)
 
-    render() {
-        console.debug("Sakai Editor render");
+    super.firstUpdated(changed);
 
-        return html`
-            <div id="${this.editorId}">
-                <h2>${this.text}</h2>
-            </div>
-        `;
+    if (!this.delay) {
+      this.attachEditor();
     }
+  }
 
-    firstUpdated(changedProperties) {
-        console.debug("Sakai Editor firstUpdated");
-        const element = this.querySelector(`#${this.editorId}`);
+  render() {
 
-        if (this.mode === "inline") {
-            CKEDITOR.InlineEditor.create(element)
-                .then(editor => {
-                    console.debug(editor);
-                })
-                .catch(error => {
-                    console.error(error.stack);
-                });
-        } else if (this.mode === "balloon") {
-            CKEDITOR.BalloonEditor.create(element)
-                .then(editor => {
-                    console.debug(editor);
-                })
-                .catch(error => {
-                    console.error(error.stack);
-                });
-        } else {
-            // classic editor is the default
-            CKEDITOR.ClassicEditor.create(element)
-                .then(editor => {
-                    console.debug(editor);
-                })
-                .catch(error => {
-                    console.error(error.stack);
-                });
-        }
-    }
+    return html `
+      <div id="${this.elementId}" tabindex="0" contenteditable=${ifDefined(this.type === "inline" && this.active ? "true" : undefined)}>${unsafeHTML(this.content)}</div>
+    `;
+  }
 }
 
-customElements.define("sakai-editor", SakaiEditor);
+if (!customElements.get("sakai-editor")) {
+  customElements.define("sakai-editor", SakaiEditor);
+}
+
+SakaiEditor.toolbars = new Map();
+SakaiEditor.toolbars.set("basic", [{ name: 'document', items : ['Source', '-', 'Bold', 'Italic', 'Underline', '-', 'Link', 'Unlink', '-', 'NumberedList','BulletedList', 'Blockquote']}]);

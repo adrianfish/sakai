@@ -9,6 +9,17 @@ import "./sakai-group-picker.js";
  *
  * <sakai-permissions tool="roster" />
  *
+ * Other attributes:
+ * 
+ * bundle-key: Allows to set the bundle name (f.ex: "announcement" or "org.sakaiproject.api.app.messagecenter.bundle.Messages"). By default, it will take the tool attribute value.
+ * on-refresh: Allows to set the return page location. By default, it will refresh the current URL.
+ * group-reference: Allows to set reference to get permissions from. By default, "/site/${portal.siteId}". Order is important. This attribute must be set before the tool attribute.
+ * disabled-groups: Disables all other options apart form "Site" in the Site/Group selector. By default, false (groups are shown). Order is important. This attribute must be set before the tool attribute.
+ *
+ * Usage, from the Podcasts tool:
+ *
+ * <sakai-permissions group-reference="/content/group/%SITE_ID%/Podcasts/" disabled-groups=true tool="content" bundle-key="org.sakaiproject.api.podcasts.bundle.Messages" />
+ *
  * This component needs to be able to lookup a tool's translations, and this happens via the
  * sakai-i18n.js module, loading the translations from a Sakai web service. The translations need
  * to be jarred and put in TOMCAT/lib, and the permission translation keys need to start with "perm-",
@@ -38,7 +49,7 @@ class SakaiPermissions extends SakaiElement {
 
     this.loadTranslations("permissions-wc").then(i18n => {
 
-      this.loadTranslations(this.tool).then(tool => {
+      this.loadTranslations(this.bundleKey ? this.bundleKey : this.tool).then(tool => {
 
         Object.keys(tool).filter(k => k.startsWith("perm-")).forEach(k => i18n[k.substring(5)] = tool[k]);
         this.i18n = i18n;
@@ -51,6 +62,10 @@ class SakaiPermissions extends SakaiElement {
 
     return {
       tool: String,
+      groupReference: { attribute: 'group-reference', type: String },
+      disableGroups: { attribute: 'disabled-groups', type: Boolean },
+      bundleKey: { attribute: 'bundle-key', type: String },
+      onRefresh: { attribute: 'on-refresh', type: String },
       roles: {type: Array},
       groups: Array,
       fireEvent: { attribute: "fire-event", type: Boolean },
@@ -65,11 +80,11 @@ class SakaiPermissions extends SakaiElement {
 
   get tool() { return this._tool; }
 
-  updated(changedProperties) {
+  updated() {
     this.attachHandlers();
   }
 
-  shouldUpdate(changed) {
+  shouldUpdate() {
     return this.i18n;
   }
 
@@ -87,7 +102,7 @@ class SakaiPermissions extends SakaiElement {
         <div class="permissions-undo-button">
           <input type="button" value="${this.i18n["per.lis.restoredef"]}" aria-label="${this.i18n["undo"]}" @click=${this.resetPermissions} />
         </div>
-        <table id="${this.tool}-permissions-table" class="permissions-table listHier checkGrid specialLink" cellspacing="0" summary="${this.i18n["per.lis"]}" border="0" style="width:auto">
+        <table id="${this.tool}-permissions-table" class="permissions-table listHier checkGrid specialLink" cellspacing="0" summary="${this.i18n["per.lis"]}" border="0">
           <tr>
             <th id="permission">
               <a href="#" title="${this.i18n["per.lis.head.title"]}">${this.i18n["per.lis.head"]}</a>
@@ -104,11 +119,11 @@ class SakaiPermissions extends SakaiElement {
               </a>
             </td>
             ${this.roles.map(role => html`
-            <td class="${role}-checkbox-cell checkboxCell">
+            <td class="${role.replace(" ", "_")}-checkbox-cell checkboxCell">
               <label for="${role}:${perm}" class="sr-only">
                 <span>${this.i18n["gen.enable"]} ${role}</span>
               </label>
-              <input type="checkbox" class="sakai-permission-checkbox" aria-label="${this.i18n["gen.enable"]} ${role}" .checked=${this.on[role].includes(perm)} id="${role}:${perm}"/>
+              <input type="checkbox" class="sakai-permission-checkbox" aria-label="${this.i18n["gen.enable"]} ${role}" .checked=${this.on[role].includes(perm)} data-role="${role}" data-perm="${perm}" id="${role}:${perm}"/>
             </td>
             `)}
           </tr>
@@ -133,7 +148,9 @@ class SakaiPermissions extends SakaiElement {
 
         this.on = data.on;
         this.available = data.available;
-        this.groups = data.groups;
+        if (!this.disableGroups) {
+          this.groups = data.groups;
+        }
         this.roles = Object.keys(this.on);
         this.roleNameMappings = data.roleNameMappings;
       })
@@ -165,7 +182,7 @@ class SakaiPermissions extends SakaiElement {
       })
       .catch(error => {
 
-        document.querySelector(`#${this.tool}-failure-message`).style.display = "inline-block";
+        document.querySelector(`#${this.tool.replace('.', '\\.')}-failure-message`).style.display = "inline-block";
         console.error(`Failed to save permissions for tool ${this.tool}`, error)
       })
       .finally(() => document.body.style.cursor = "default");
@@ -219,7 +236,7 @@ class SakaiPermissions extends SakaiElement {
 
       if (e.target.dataset.role) {
         const role = e.target.dataset.role.replace("\.", "\\.");
-        $('.' + role + "-checkbox-cell").add(e.target).toggleClass('rowHover', e.type === "mouseenter");
+        $('.' + role.replace(" ", "_") + "-checkbox-cell").add(e.target).toggleClass('rowHover', e.type === "mouseenter");
       }
     });
 
@@ -242,9 +259,8 @@ class SakaiPermissions extends SakaiElement {
 
       const role = e.target.dataset.role.replace("\.", "\\.");
 
-      var col = ($(e.target).parent('th').prevAll().size());
-      var anyChecked = $('.permissions-table .' + role + '-checkbox-cell input:checked').not('[disabled]').length > 0;
-      $('.permissions-table .' + role + '-checkbox-cell input').not('[disabled]').prop('checked', !anyChecked).change();
+      var anyChecked = $('.permissions-table .' + role.replace(" ", "_") + '-checkbox-cell input:checked').not('[disabled]').length > 0;
+      $('.permissions-table .' + role.replace(" ", "_") + '-checkbox-cell input').not('[disabled]').prop('checked', !anyChecked).change();
       e.preventDefault();
     });
 
