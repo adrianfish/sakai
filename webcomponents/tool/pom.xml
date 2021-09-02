@@ -180,8 +180,17 @@
                             </arguments>
                         </configuration>
                     </execution>
+                    <!--execution>
+                        <id>eslint</id>
+                        <goals>
+                            <goal>npm</goal>
+                        </goals>
+                        <configuration>
+                            <arguments>run eslint</arguments>
+                        </configuration>
+                    </execution-->
                     <execution>
-                        <id>npm tailor</id>
+                        <id>npm empathise</id>
                         <goals>
                             <goal>npm</goal>
                         </goals>

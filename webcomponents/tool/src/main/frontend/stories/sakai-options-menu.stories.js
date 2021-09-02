@@ -1,25 +1,43 @@
 import { html } from 'lit-html';
 import { unsafeHTML } from 'lit-html/directives/unsafe-html';
-import { withKnobs, text, boolean, number } from "@storybook/addon-knobs";
-import { styles } from "./styles/sakai-styles.js";
-
 import '../js/sakai-options-menu.js';
+import { sakaiStyles } from "./styles/sakai-styles.js";
 
 export default {
   title: 'Sakai Options Menu',
-  decorators: [withKnobs]
 };
 
-export const BasicDisplay = () => html`
+const markup = (placement) => {
 
-  ${unsafeHTML(styles)}
-
-  <sakai-options-menu placement="${text('placement', 'right')}">
-    <div slot="content">
-      <div>Select some fruit options!</div>
-      <div><input type="checkbox" />Bananas</div>
-      <div><input type="checkbox" />Apples</div>
-      <div><input type="checkbox" />Orange</div>
-    </div>
+  return html`
+  ${unsafeHTML(sakaiStyles)}
+  <style>
+    sakai-kebab-menu {
+      margin: 400px;
+    }
+  </style>
+  <sakai-options-menu placement="${placement}">
+    <span slot="invoker"><sakai-icon slot="invoker" type="cog" size="small"></sakai-icon>Settings</span>
+    <ul slot="content">
+      <li>Chickens</li>
+      <li>Pheasants</li>
+    </ul>
   </sakai-options-menu>
-`;
+  `;
+};
+
+export const Bottom = () => {
+  return markup("bottom");
+};
+
+export const Top = () => {
+  return markup("top");
+};
+
+export const Left = () => {
+  return markup("left");
+};
+
+export const Right = () => {
+  return markup("right");
+};
