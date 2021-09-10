@@ -21,7 +21,7 @@ export class SakaiRubricsSharedList extends RubricsElement {
 
     super.attributeChangedCallback(name, oldValue, newValue);
 
-    if ("token" === name) {
+    if (name === "token") {
       this.getSharedRubrics(newValue);
     }
   }
@@ -49,7 +49,7 @@ export class SakaiRubricsSharedList extends RubricsElement {
 
   getSharedRubrics(token) {
 
-    var params = {"projection": "inlineRubric"};
+    const params = {"projection": "inlineRubric"};
 
     SakaiRubricsHelpers.get("/rubrics-service/rest/rubrics/search/shared-only", token, { params })
       .then(data => this.rubrics = data._embedded.rubrics );
@@ -57,7 +57,7 @@ export class SakaiRubricsSharedList extends RubricsElement {
 
   copyToSite(e) {
 
-    var options = { extraHeaders: { "x-copy-source": e.detail, "lang": this.locale  } };
+    const options = { extraHeaders: { "x-copy-source": e.detail, "lang": this.locale  } };
     SakaiRubricsHelpers.post("/rubrics-service/rest/rubrics/", this.token, options)
       .then(() => this.dispatchEvent(new CustomEvent("copy-share-site")));
   }

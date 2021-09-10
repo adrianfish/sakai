@@ -39,7 +39,7 @@ export class SakaiRubricGrading extends RubricsElement {
   set token(newValue) {
 
     if (!newValue.startsWith("Bearer")) {
-      this._token = "Bearer " + newValue;
+      this._token = `Bearer ${  newValue}`;
     } else {
       this._token = newValue;
     }
@@ -183,7 +183,6 @@ export class SakaiRubricGrading extends RubricsElement {
 
     console.debug("release");
 
-    // If there are no criteria, this evaluation has been cancelled.
     if (this.criteria.length == 0) return;
 
     this.dispatchRatingChanged(this.criteria, 2).then(evaluation => {
@@ -289,7 +288,7 @@ export class SakaiRubricGrading extends RubricsElement {
       criterionId: criterion.id,
       value: criterion.pointoverride,
     };
-    this.dispatchEvent(new CustomEvent("rubric-rating-tuned", { detail: detail, bubbles: true, composed: true }));
+    this.dispatchEvent(new CustomEvent("rubric-rating-tuned", { detail, bubbles: true, composed: true }));
 
     this.updateTotalPoints();
     this.dispatchRatingChanged(this.criteria, 1);
@@ -318,7 +317,7 @@ export class SakaiRubricGrading extends RubricsElement {
       overallComment: "",
       criterionOutcomes: crit,
       toolItemRubricAssociation: this.association._links.self.href,
-      status: status,
+      status,
     };
 
     if (this.evaluation && this.evaluation.id) {
@@ -396,9 +395,9 @@ export class SakaiRubricGrading extends RubricsElement {
 
     if ((ovrdvl || ovrdvl === 0) && parseFloat(ovrdvl) !== parseFloat(selected)) {
       return 'strike';
-    } else {
-      return '';
     }
+    return '';
+
   }
 
   emptyCriterion(criterion) {
@@ -484,7 +483,7 @@ export class SakaiRubricGrading extends RubricsElement {
         entityId: this.entityId,
         value: this.totalPoints.toLocaleString(this.locale, { maximumFractionDigits: 2 }),
       };
-      this.dispatchEvent(new CustomEvent('total-points-updated', { detail: detail, bubbles: true, composed: true }));
+      this.dispatchEvent(new CustomEvent('total-points-updated', { detail, bubbles: true, composed: true }));
     }
   }
 
