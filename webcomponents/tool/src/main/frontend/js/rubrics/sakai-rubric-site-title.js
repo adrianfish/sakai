@@ -23,7 +23,7 @@ export class SakaiRubricSiteTitle extends RubricsElement {
 
     super.attributeChangedCallback(name, oldValue, newValue);
 
-    if ("site-id" === name) {
+    if (name === "site-id") {
       this.setSiteTitle();
     }
   }
@@ -34,12 +34,12 @@ export class SakaiRubricSiteTitle extends RubricsElement {
 
   setSiteTitle() {
 
-    var self = this;
+    const self = this;
     jQuery.ajax({
-      url: '/sakai-ws/rest/sakai/getSiteTitle?sessionid=' + sakaiSessionId + '&siteid=' + this.siteId
-    }).done(function (response) {
+      url: `/sakai-ws/rest/sakai/getSiteTitle?sessionid=${  sakaiSessionId  }&siteid=${  this.siteId}`
+    }).done((response) => {
       self.siteTitle = response;
-    }).fail(function () {
+    }).fail(() => {
       self.siteTitle = self.siteId;
     });
   }

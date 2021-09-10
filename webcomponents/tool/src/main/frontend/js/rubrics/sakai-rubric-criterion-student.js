@@ -162,9 +162,9 @@ export class SakaiRubricCriterionStudent extends RubricsElement {
 
     if ((pointoverride || pointoverride === 0) && (parseFloat(pointoverride) !== parseFloat(selected))) {
       return true;
-    } else {
-      return false;
     }
+    return false;
+
   }
 
   updateTotalPoints() {
@@ -175,15 +175,15 @@ export class SakaiRubricCriterionStudent extends RubricsElement {
         return a + parseFloat(c.pointoverride);
       } else if (c.selectedvalue) {
         return a + parseFloat(c.selectedvalue);
-      } else {
-        return a;
       }
+      return a;
+
     }, 0);
 
     this.ready = true;
   }
 
-  getOverriddenClass(ovrdvl,selected) {
+  getOverriddenClass(ovrdvl, selected) {
 
     if (!this.rubricAssociation.parameters.fineTunePoints) {
       return '';
@@ -191,9 +191,9 @@ export class SakaiRubricCriterionStudent extends RubricsElement {
 
     if ((ovrdvl || ovrdvl === 0) && (parseFloat(ovrdvl) !== parseFloat(selected))) {
       return 'strike';
-    } else {
-      return '';
     }
+    return '';
+
   }
 }
 
