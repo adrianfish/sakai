@@ -1,0 +1,112 @@
+sakai-tasks {
+  #add-block {
+    text-align: right;
+    margin-top: 8px;
+    margin-bottom: 10px;
+  }
+    sakai-icon[type="add"] {
+      color: green;
+    }
+
+  #controls {
+    display: flex;
+    margin-bottom: 10px;
+  }
+    #filter {
+      flex: 1;
+    }
+    #sort {
+      flex: 2;
+      text-align: right;
+    }
+
+  #tasks {
+    display: grid;
+    grid-template-columns: 0fr 4fr 0fr;
+    grid-auto-rows: minmax(10px, auto);
+  }
+    #tasks > div:nth-child(-n+3) {
+      padding-bottom: 14px;
+    }
+    .header {
+      font-weight: bold;
+      padding: 0 5px 0 5px;
+    }
+    .cell {
+      padding: 8px;
+      font-size: var(--sakai-grades-title-font-size, 12px);
+    }
+    .even {
+      background-color: var(--sakai-table-even-color, #f4f4f4);
+    }
+
+    .priority-block {
+      flex: 1;
+      display: flex;
+      align-items: center;
+    }
+      .priority_5 {
+        color: red;
+      }
+      .priority_4 {
+        color: brown;
+      }
+      .priority_3 {
+        color: orange;
+      }
+      .priority_2 {
+        color: yellow;
+      }
+      .priority_1 {
+        color: green;
+      }
+
+    .task-block {
+      flex: 3 3 0px;
+    }
+      .site-title {
+        font-size: var(--sakai-task-site-title-font-size, 12px);
+        margin-bottom: 5px;
+      }
+      .description {
+        font-size: var(--sakai-task-site-title-font-size, 14px);
+        margin-bottom: 5px;
+      }
+      .due-date {
+        font-size: var(--sakai-task-site-title-font-size, 12px);
+      }
+      .due {
+        font-weight: var(--sakai-task-due-font-weight, bold);
+      }
+
+    .link-block {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+    }
+      .link-block div {
+        margin-right: 8px;
+      }
+
+    .task-text {
+      margin-left: 20px;
+    }
+
+    .task-text-toggle {
+      margin-top: 10px;
+      margin-bottom: 10px;
+    }
+      .edit {
+        margin-right: 8px;
+      }
+
+      .demo-box-placements {
+        display: flex;
+        flex-direction: column;
+        margin: 40px 0 0 200px;
+      }
+
+      .demo-box-placements lion-tooltip {
+        margin: 20px;
+      }
+}

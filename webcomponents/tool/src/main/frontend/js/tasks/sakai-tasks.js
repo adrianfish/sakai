@@ -1,9 +1,8 @@
-import { css, html } from "../assets/lit-element/lit-element.js";
+import { html } from "../assets/lit-element/lit-element.js";
 import {unsafeHTML} from '../assets/lit-html/directives/unsafe-html.js';
 import { SakaiPageableElement } from '../sakai-pageable-element.js';
 import '../sakai-icon.js';
 import moment from "../assets/moment/dist/moment.js";
-import "../assets/@lion/dialog/lion-dialog.js";
 import "./sakai-tasks-create-task.js";
 import "../sakai-editor.js";
 
@@ -25,6 +24,8 @@ export class SakaiTasks extends SakaiPageableElement {
     this.currentFilter = "current";
     this.loadTranslations("tasks").then(r => this.i18n = r);
   }
+
+  createRenderRoot() { return this; }
 
   set data(value) {
 
@@ -260,23 +261,11 @@ export class SakaiTasks extends SakaiPageableElement {
     return html`
 
       <div id="add-block">
-        <lion-dialog id="add-edit-dialog">
-
-          <sakai-tasks-create-task class="dialog-content"
-            id="create-task"
-            slot="content"
-            @task-created=${this.taskCreated}
-            @soft-deleted=${this.softDeleteTask}>
-
-            <div slot="task-text">
-              <sakai-editor element-id="task-text-editor" toolbar="basic" delay></sakai-editor>
-            </div>
-
-          </sakai-tasks-create-task>
-
-          <div slot="invoker"><a @click=${this.add} href="javascript:;" title="${this.i18n.add_task}" aria-label="${this.i18n.add_task}"><sakai-icon type="add" size="small"></a></div>
-
-        </lion-dialog>
+        <sakai-tasks-create-task
+          id="create-task"
+          @task-created=${this.taskCreated}
+          @soft-deleted=${this.softDeleteTask}>
+        </sakai-tasks-create-task>
       </div>
       <div id="controls">
         <div id="filter">
@@ -387,127 +376,7 @@ export class SakaiTasks extends SakaiPageableElement {
       }
     `;
   }
-
-  static get styles() {
-
-    return [
-      ...super.styles,
-      css`
-        #add-block {
-          text-align: right;
-          margin-top: 8px;
-          margin-bottom: 10px;
-        }
-          sakai-icon[type="add"] {
-            color: green;
-          }
-
-        #controls {
-          display: flex;
-          margin-bottom: 10px;
-        }
-          #filter {
-            flex: 1;
-          }
-          #sort {
-            flex: 2;
-            text-align: right;
-          }
-
-        #tasks {
-          display: grid;
-          grid-template-columns: 0fr 4fr 0fr;
-          grid-auto-rows: minmax(10px, auto);
-        }
-          #tasks > div:nth-child(-n+3) {
-            padding-bottom: 14px;
-          }
-          .header {
-            font-weight: bold;
-            padding: 0 5px 0 5px;
-          }
-          .cell {
-            padding: 8px;
-            font-size: var(--sakai-grades-title-font-size, 12px);
-          }
-          .even {
-            background-color: var(--sakai-table-even-color, #f4f4f4);
-          }
-
-          .priority-block {
-            flex: 1;
-            display: flex;
-            align-items: center;
-          }
-            .priority_5 {
-              color: red;
-            }
-            .priority_4 {
-              color: brown;
-            }
-            .priority_3 {
-              color: orange;
-            }
-            .priority_2 {
-              color: yellow;
-            }
-            .priority_1 {
-              color: green;
-            }
-
-          .task-block {
-            flex: 3 3 0px;
-          }
-            .site-title {
-              font-size: var(--sakai-task-site-title-font-size, 12px);
-              margin-bottom: 5px;
-            }
-            .description {
-              font-size: var(--sakai-task-site-title-font-size, 14px);
-              margin-bottom: 5px;
-            }
-            .due-date {
-              font-size: var(--sakai-task-site-title-font-size, 12px);
-            }
-            .due {
-              font-weight: var(--sakai-task-due-font-weight, bold);
-            }
-
-          .link-block {
-            display: flex;
-            align-items: center;
-            justify-content: flex-end;
-          }
-            .link-block div {
-              margin-right: 8px;
-            }
-
-          .task-text {
-            margin-left: 20px;
-          }
-
-          .task-text-toggle {
-            margin-top: 10px;
-            margin-bottom: 10px;
-          }
-            .edit {
-              margin-right: 8px;
-            }
-
-            .demo-box-placements {
-              display: flex;
-              flex-direction: column;
-              margin: 40px 0 0 200px;
-            }
-
-            .demo-box-placements lion-tooltip {
-              margin: 20px;
-            }
-      `,
-    ];
-  }
 }
 
-if (!customElements.get("sakai-tasks")) {
-  customElements.define("sakai-tasks", SakaiTasks);
-}
+const tagName = "sakai-tasks";
+!customElements.get(tagName) && customElements.define(tagName, SakaiTasks);

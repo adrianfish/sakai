@@ -1,19 +1,19 @@
-import { css, html } from "../assets/lit-element/lit-element.js";
+import { html } from "../assets/lit-element/lit-element.js";
 import { loadProperties } from "../sakai-i18n.js";
-import { SakaiDialogContent } from "../sakai-dialog-content.js";
+import { SakaiModal } from "../sakai-modal.js";
 import "../datepicker/sakai-date-picker.js";
 import "../sakai-icon.js";
 import "../sakai-editor.js";
 
-export class SakaiTasksCreateTask extends SakaiDialogContent {
+class SakaiTasksCreateTask extends SakaiModal {
 
   static get properties() {
 
     return {
-      i18n: Object,
-      task: {type: Object},
-      description: String,
-      error: { type: Boolean }
+      i18n: { attribute: false, type: Object },
+      task: { type: Object },
+      description: { type: String },
+      error: { type: Boolean },
     };
   }
 
@@ -25,7 +25,9 @@ export class SakaiTasksCreateTask extends SakaiDialogContent {
     loadProperties("tasks").then(r => this.i18n = r);
   }
 
-  title() {
+  getTitle() {
+
+    console.log("title");
 
     return html`
       ${this.task.taskId == "" ? this.i18n.create_new_task : this.i18n.edit_task}
@@ -34,7 +36,7 @@ export class SakaiTasksCreateTask extends SakaiDialogContent {
 
   save() {
 
-    this.task.description = this.shadowRoot.getElementById("description").value;
+    this.task.description = this.querySelector("#description").value;
     this.task.notes = this.getEditor().getData();
 
     fetch(`/api/tasks/${this.task.taskId}`, {
@@ -66,7 +68,7 @@ export class SakaiTasksCreateTask extends SakaiDialogContent {
   resetDate() {
 
     this.task.due = Date.now();
-    const el = this.shadowRoot.getElementById("due");
+    const el = this.querySelector("#due");
     if (el) {
       el.epochMillis = this.task.due;
     }
@@ -80,9 +82,10 @@ export class SakaiTasksCreateTask extends SakaiDialogContent {
     this.error = false;
 
     this.requestUpdate("task", old);
+    /*
     this.updateComplete.then(() => {
 
-      const datePicker = this.shadowRoot.getElementById("due");
+      const datePicker = this.querySelector("#due");
 
       if (value.system) {
         datePicker.disable();
@@ -90,34 +93,31 @@ export class SakaiTasksCreateTask extends SakaiDialogContent {
         datePicker.enable();
         datePicker.epochMillis = value.due;
       }
-      const descriptionEl = this.shadowRoot.getElementById("description");
+      const descriptionEl = this.querySelector("#description");
       descriptionEl.disabled = value.system;
       descriptionEl.value = value.description;
-      this.shadowRoot.getElementById("priority").value = value.priority;
+      this.querySelector("#priority").value = value.priority;
       const editor = this.getEditor();
       if (editor) {
         editor.setData(value.notes);
         editor.isReadOnly = value.system;
       }
     });
+      */
   }
 
-  get task() {
-    return this._task;
-  }
+  get task() { return this._task; }
 
+  /*
   shouldUpdate(changed) {
     return this.task && this.i18n && super.shouldUpdate(changed);
   }
+  */
 
   getEditorTag() {
 
-    const el = this.shadowRoot.querySelector("slot[name='task-text'");
-
-    if (el) {
-      const slottedNodes = this.shadowRoot.querySelector("slot[name='task-text'").assignedNodes();
-      return slottedNodes[0].querySelector("sakai-editor");
-    }
+    const el = this.querySelector("sakai-editor");
+    return el;
   }
 
   getEditor() {
@@ -135,30 +135,31 @@ export class SakaiTasksCreateTask extends SakaiDialogContent {
     if (e.target.checked) {
       this.task.softDeleted = false;
     }
-
-    console.log(this.task);
   }
 
   resetEditor() {
     this.getEditor().setData(this.task.notes || "");
   }
 
-  connectedCallback() {
+  trigger() {
 
-    super.connectedCallback();
+    console.log("trigger");
 
-    if (typeof CKEDITOR !== "undefined") {
-      const tag = this.getEditorTag();
-      if (tag) {
-        return tag.attachEditor();
-      }
-    }
+    return html`
+      <div>
+        <a
+            href="javascript:;"
+            title="${this.i18n.add_task}"
+            aria-label="${this.i18n.add_task}">
+          <sakai-icon type="add" size="small">
+        </a>
+      </div>`;
   }
 
   content() {
+    console.log("content");
 
     return html`
-
       <div class="label">
         <label for="description">${this.i18n.description}</label>
       </div>
@@ -206,7 +207,7 @@ export class SakaiTasksCreateTask extends SakaiDialogContent {
         <label for="text">${this.i18n.text}</label>
       </div>
       <div class="input">
-        <slot id="task-text" name="task-text"></slot>
+        <sakai-editor element-id="task-text-editor" toolbar="basic" delay></sakai-editor>
       </div>
       ${this.error ? html`<div id="error">${this.i18n.save_failed}</div>` : ""}
     `;
@@ -219,10 +220,10 @@ export class SakaiTasksCreateTask extends SakaiDialogContent {
     `;
   }
 
+  /*
   static get styles() {
 
-    return [SakaiDialogContent.styles,
-      css`
+    return css`
         #due-and-priority-block {
           display: flex;
           justify-content: space-between;
@@ -246,10 +247,10 @@ export class SakaiTasksCreateTask extends SakaiDialogContent {
         font-weight: bold;
         color: var(--sakai-tasks-save-failed-color, red)
       }
-    `];
+    `;
   }
+  */
 }
 
-if (!customElements.get("sakai-tasks-create-task")) {
-  customElements.define("sakai-tasks-create-task", SakaiTasksCreateTask);
-}
+const tagName = "sakai-tasks-create-task";
+!customElements.get(tagName) && customElements.define(tagName, SakaiTasksCreateTask);

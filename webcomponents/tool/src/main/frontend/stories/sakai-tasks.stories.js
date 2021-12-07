@@ -1,7 +1,6 @@
 import { html } from 'lit-html';
 import { unsafeHTML } from 'lit-html/directives/unsafe-html';
 import fetchMock from "fetch-mock";
-import { styles } from "./styles/sakai-styles.js";
 import { dialogcontentI18n } from "./i18n/dialog-content-i18n.js";
 import { tasksI18n } from "./i18n/tasks-i18n.js";
 import { tasksData } from "./data/tasks-data.js";
@@ -13,6 +12,7 @@ export default {
   decorators: [(storyFn) => {
     parent.portal = {locale: "en-GB"};
     fetchMock
+      .get(/sakai-ws\/rest\/i18n\/getI18nProperties.*/, tasksI18n, {overwriteRoutes: true})
       .get(/.*dialog-content.*/, dialogcontentI18n, {overwriteRoutes: true})
       .get("/api/tasks", tasksData, {overwriteRoutes: true})
       .get(/.*tasks.*/, tasksI18n, {overwriteRoutes: true})
@@ -26,8 +26,8 @@ export default {
 
 export const BasicDisplay = () => {
 
+    //${unsafeHTML(localStyles)}
   return html`
-    ${unsafeHTML(styles)}
     <div style="width: 400px;">
       <sakai-tasks user-id="adrian">
     </div>
