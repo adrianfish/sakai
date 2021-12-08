@@ -1,7 +1,7 @@
 import { html } from "../assets/lit-element/lit-element.js";
-import { loadProperties } from "../sakai-i18n.js";
 import { SakaiModal } from "../sakai-modal.js";
 import "../datepicker/sakai-date-picker.js";
+//import "../sakai-date-picker.js";
 import "../sakai-icon.js";
 import "../sakai-editor.js";
 
@@ -20,14 +20,12 @@ class SakaiTasksCreateTask extends SakaiModal {
   constructor() {
 
     super();
-    this.defaultTask = { taskId: "", description: "", priority: "3", notes: "", due: Date.now() };
+    this.defaultTask = { taskId: "", description: "balls", priority: "3", notes: "", due: Date.now() };
     this.task = { ...this.defaultTask};
-    loadProperties("tasks").then(r => this.i18n = r);
+    this.loadTranslations("tasks").then(r => this.i18n = r);
   }
 
-  getTitle() {
-
-    console.log("title");
+  title() {
 
     return html`
       ${this.task.taskId == "" ? this.i18n.create_new_task : this.i18n.edit_task}
@@ -38,6 +36,8 @@ class SakaiTasksCreateTask extends SakaiModal {
 
     this.task.description = this.querySelector("#description").value;
     this.task.notes = this.getEditor().getData();
+
+    console.log(this.task);
 
     fetch(`/api/tasks/${this.task.taskId}`, {
       credentials: "include",
@@ -82,7 +82,6 @@ class SakaiTasksCreateTask extends SakaiModal {
     this.error = false;
 
     this.requestUpdate("task", old);
-    /*
     this.updateComplete.then(() => {
 
       const datePicker = this.querySelector("#due");
@@ -103,16 +102,13 @@ class SakaiTasksCreateTask extends SakaiModal {
         editor.isReadOnly = value.system;
       }
     });
-      */
   }
 
   get task() { return this._task; }
 
-  /*
   shouldUpdate(changed) {
     return this.task && this.i18n && super.shouldUpdate(changed);
   }
-  */
 
   getEditorTag() {
 
@@ -143,13 +139,12 @@ class SakaiTasksCreateTask extends SakaiModal {
 
   trigger() {
 
-    console.log("trigger");
-
     return html`
       <div>
         <a
             href="javascript:;"
             title="${this.i18n.add_task}"
+            data-toggle="modal" data-target="#balls"
             aria-label="${this.i18n.add_task}">
           <sakai-icon type="add" size="small">
         </a>
@@ -157,25 +152,24 @@ class SakaiTasksCreateTask extends SakaiModal {
   }
 
   content() {
-    console.log("content");
 
     return html`
-      <div class="label">
+      <div class="sakai-modal-label">
         <label for="description">${this.i18n.description}</label>
       </div>
       <div class="input"><input type="text" id="description" size="50" maxlength="150" .value=${this.task.description}></div>
       <div id="due-and-priority-block">
         <div id="due-block">
-          <div class="label">
+          <div class="sakai-modal-label">
             <label for="due">${this.i18n.due}</label>
           </div>
           <div class="input">
-            <sakai-date-picker id="due" @datetime-selected=${(e) => { this.task.due = e.detail.epochMillis; this.dueUpdated = true; }} epoch-millis=${this.task.due}></sakai-date-picker>
+            <sakai-date-picker1 id="due" @datetime-selected=${(e) => { this.task.due = e.detail.epochMillis; this.dueUpdated = true; }} epoch-millis=${this.task.due}></sakai-date-picker1>
           </div>
         </div>
         <div id="spacer"></div>
         <div id="priority-block">
-          <div class="label">
+          <div class="sakai-modal-label">
             <label for="priority">${this.i18n.priority}</label>
           </div>
           <div class="input">
@@ -203,11 +197,11 @@ class SakaiTasksCreateTask extends SakaiModal {
           </div>
         </div>
       ` : ""}
-      <div class="label">
+      <div class="sakai-modal-label">
         <label for="text">${this.i18n.text}</label>
       </div>
       <div class="input">
-        <sakai-editor element-id="task-text-editor" toolbar="basic" delay></sakai-editor>
+        <sakai-editor element-id="task-text-editor" toolbar="basic"></sakai-editor>
       </div>
       ${this.error ? html`<div id="error">${this.i18n.save_failed}</div>` : ""}
     `;
@@ -219,37 +213,6 @@ class SakaiTasksCreateTask extends SakaiModal {
       <sakai-button @click=${this.save} primary>${this.task.taskId == "" ? this.i18n.add : this.i18n.save}</sakai-button>
     `;
   }
-
-  /*
-  static get styles() {
-
-    return css`
-        #due-and-priority-block {
-          display: flex;
-          justify-content: space-between;
-        }
-          #due-block {
-            flex: 1;
-          }
-          #spacer {
-            flex: 2;
-          }
-          #priority-block {
-            flex: 1;
-          }
-        #complete-block {
-          margin-bottom: 10px;
-        }
-          #complete-block input {
-            margin-left: 10px;
-          }
-      #error {
-        font-weight: bold;
-        color: var(--sakai-tasks-save-failed-color, red)
-      }
-    `;
-  }
-  */
 }
 
 const tagName = "sakai-tasks-create-task";

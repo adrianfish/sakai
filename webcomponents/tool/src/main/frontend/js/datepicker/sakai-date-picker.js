@@ -3,13 +3,14 @@ import "../assets/flatpickr/dist/flatpickr.min.js";
 import moment from "../assets/moment/dist/moment.js";
 import { loadProperties } from "../sakai-i18n.js";
 import { flatpickerStyles } from "./flatpicker-styles.js";
-import "../assets/flatpickr/dist/plugins/confirmDate/confirmDate.js";
+import confirmDatePlugin from "../assets/flatpickr/dist/plugins/confirmDate/confirmDate.js";
+import "../sakai-icon.js";
 
 /**
  * Renders an input which, when clicked, launches a Flatpickr instance.
  *
  * @example <caption>Usage:</caption>
- * <sakai-date-picker epoch-millis="345922925445" @/>
+ * <sakai-date-picker epoch-millis="345922925445" />
  * <sakai-date-picker hours-from-now="5" />
  *
  * The tag fires the event 'datetime-selected'. You'd handle that with (vanillajs):
@@ -87,11 +88,12 @@ class SakaiDatePicker extends LitElement {
     const config = {
       enableTime: true,
       appendTo: this.shadowRoot,
+      static: true,
       time_24hr: true,
       allowInput: !this.disabled,
       defaultHour: this.start.hours(),
       defaultMinute: this.start.minutes(),
-      plugins: [new confirmDatePlugin({confirmIcon: `<sakai-icon type"add"></sakai-icon>`, confirmText: "Ok"})],
+      plugins: [new confirmDatePlugin({confirmIcon: `<sakai-icon type"add" size="small">`})],
       onReady() {
 
         this.showTimeInput = true;
@@ -142,6 +144,5 @@ class SakaiDatePicker extends LitElement {
   }
 }
 
-if (!customElements.get("sakai-date-picker")) {
-  customElements.define("sakai-date-picker", SakaiDatePicker);
-}
+const tagName = "sakai-date-picker1";
+!customElements.get(tagName) && customElements.define(tagName, SakaiDatePicker);

@@ -1,5 +1,6 @@
 import {SakaiElement} from "./sakai-element.js";
 import {html} from "./assets/lit-element/lit-element.js";
+import moment from "../assets/moment/dist/moment.js";
 
 /**
  * Renders an input which, when clicked, launches a Flatpickr instance. This tag relies
@@ -66,6 +67,10 @@ class SakaiDatePicker extends SakaiElement {
   }
 
   firstUpdated() {
+    this.attachPicker();
+  }
+
+  attachPicker() {
 
     const self = this;
 
@@ -78,7 +83,7 @@ class SakaiDatePicker extends SakaiElement {
       position: "auto",
       confirmDate: {
         "enableTime": true,
-        "plugins": [new confirmDatePlugin({})]
+        //"plugins": [new confirmDatePlugin({})]
       },
       onReady() {
         this.showTimeInput = true;
@@ -92,7 +97,7 @@ class SakaiDatePicker extends SakaiElement {
     config.locale = window.top.portal && window.top.portal.locale ? window.top.portal.locale.split("-")[0] : "default";
     if (config.locale === "en") config.locale = "default";
 
-    flatpickr(`#picker-${this.idSalt}`, config);
+    this.flatpickr = flatpickr(`#picker-${this.idSalt}`, config);
   }
 
   render() {
@@ -106,14 +111,37 @@ class SakaiDatePicker extends SakaiElement {
 
   getPreferredSakaiDatetime(epochMillis) {
 
-    if (portal.user && portal.user.offsetFromServerMillis) {
+    if (typeof portal !== "undefined" && portal.user && portal.user.offsetFromServerMillis) {
       const osTzOffset = new Date().getTimezoneOffset();
       return moment(epochMillis).add(portal.user.offsetFromServerMillis, 'ms').add(osTzOffset, 'm');
     }
-    window.console && console.debug("No user timezone or server time set. Using agent's time and timezone for initial datetime");
-    return moment();
+    window.console && window.console.debug("No user timezone or server time set. Using agent's time and timezone for initial datetime");
+    return moment(epochMillis);
 
+  }
+
+  disable() {
+
+    this.enabled = false;
+
+    this.flatpicker.destroy();
+    const el = this.querySelector("#picker");
+    el.disabled = true;
+    el.value = this.start.format("LLLL");
+  }
+
+  enable() {
+
+    this.enabled = true;
+
+    this.updateComplete.then(() => {
+
+      this.querySelector(`#picker-${this.idSalt}`).disabled = false;
+      this.attachPicker();
+    });
   }
 }
 
-customElements.define("sakai-date-picker", SakaiDatePicker);
+if (!customElements.get("sakai-date-picker")) {
+  customElements.define("sakai-date-picker", SakaiDatePicker);
+}

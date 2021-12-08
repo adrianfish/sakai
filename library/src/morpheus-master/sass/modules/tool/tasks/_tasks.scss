@@ -109,4 +109,69 @@ sakai-tasks {
       .demo-box-placements lion-tooltip {
         margin: 20px;
       }
+
+      .sakai-modal-content {
+        background-color: var(--sakai-background-color-3);
+        border-radius: 0px;
+      }
+
+      .sakai-modal-header {
+        #titlebar {
+          padding: 14px;
+          display: flex;
+          font-size: 16px;
+          align-items: center;
+          border-bottom: var(--sakai-border-color) solid 1px;
+        }
+          #title {
+            flex: 2;
+          }
+          #close {
+            flex: 1;
+            text-align: right;
+          }
+      }
+
+      .sakai-modal-body {
+        //background-color: var(--sakai-modal-content-bg);
+        background-color: #FFFFFF;
+        color: black;
+        padding: 20px;
+        div.sakai-modal-label {
+          color: black;
+          margin-bottom: 4px;
+          font-weight: bold;
+        }
+        div.input {
+          margin-bottom: 10px;
+        }
+      }
+
+      
+  sakai-tasks-create-task {
+
+    #due-and-priority-block {
+      display: flex;
+      justify-content: space-between;
+    }
+    #due-block {
+      flex: 1;
+    }
+    #spacer {
+      flex: 2;
+    }
+    #priority-block {
+      flex: 1;
+    }
+    #complete-block {
+      margin-bottom: 10px;
+    }
+    #complete-block input {
+      margin-left: 10px;
+    }
+    #error {
+      font-weight: bold;
+      color: var(--sakai-tasks-save-failed-color, red)
+    }
+  }
 }

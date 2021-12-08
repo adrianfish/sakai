@@ -260,7 +260,7 @@ export class SakaiTasks extends SakaiPageableElement {
 
     return html`
 
-      <div id="add-block">
+      <div>
         <sakai-tasks-create-task
           id="create-task"
           @task-created=${this.taskCreated}

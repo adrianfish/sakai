@@ -1,6 +1,5 @@
-import { html } from "../assets/lit-element/lit-element.js";
-import { SakaiElement } from "../sakai-element.js";
-import "../sakai-icon.js";
+import { html } from "./assets/lit-element/lit-element.js";
+import { SakaiElement } from "./sakai-element.js";
 
 export class SakaiModal extends SakaiElement {
 
@@ -13,11 +12,9 @@ export class SakaiModal extends SakaiElement {
   }
   */
 
-  /*
   constructor() {
     super();
   }
-  */
 
   trigger() {}
   title() {}
@@ -26,35 +23,26 @@ export class SakaiModal extends SakaiElement {
 
   render() {
 
-    console.log("render");
-
     return html`
       ${this.trigger()}
-      <div>
-        <a
-            href="javascript:;"
-            title="${this.i18n.add_task}"
-            data-toggle="modal"
-            data-target="#balls"
-            aria-label="${this.i18n.add_task}">
-          <sakai-icon type="add" size="small">
-        </a>
-      </div>
       <div id="balls" class="modal" tabindex="-1" role="dialog">
-        <div class="modal-dialog" role="document">
-          <div class="modal-content">
-            <div class="modal-header">
-              ${this.title()}
-              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                <span aria-hidden="true">&times;</span>
-              </button>
+        <div class="sakai-modal modal-dialog" role="document">
+          <div class="sakai-modal-content modal-content">
+            <div class="sakai-modal-header modal-header">
+              <div id="titlebar">
+                <div id="title">${this.title()}</div>
+                <div id="close">
+                  <a href="javascript:;" aria-label="close" data-dismiss="modal">
+                    <sakai-icon type="close"></sakai-icon>
+                  </a>
+                </div>
+              </div>
             </div>
-            <div class="modal-body">
+            <div class="sakai-modal-body modal-body">
               ${this.content()}
             </div>
             <div class="modal-footer">
-              <button type="button" class="btn btn-primary">Save changes</button>
-              <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+              ${this.buttons()}
             </div>
           </div>
         </div>
