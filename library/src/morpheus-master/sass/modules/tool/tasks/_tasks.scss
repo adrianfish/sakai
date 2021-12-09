@@ -157,14 +157,15 @@ sakai-tasks {
     #due-block {
       flex: 1;
     }
-    #spacer {
-      flex: 2;
-    }
     #priority-block {
       flex: 1;
+      margin-left: auto;
     }
     #complete-block {
       margin-bottom: 10px;
+    }
+    #description {
+      width: 100%;
     }
     #complete-block input {
       margin-left: 10px;

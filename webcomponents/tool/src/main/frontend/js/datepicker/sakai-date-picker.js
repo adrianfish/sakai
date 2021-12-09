@@ -139,6 +139,12 @@ class SakaiDatePicker extends LitElement {
   static get styles() {
 
     return css`
+      input {
+        border-radius: 4px;
+        border: 1px solid var(--sakai-border-color);
+        font-size: 14px;
+        padding: 2px;
+      }
       ${flatpickerStyles}
     `;
   }

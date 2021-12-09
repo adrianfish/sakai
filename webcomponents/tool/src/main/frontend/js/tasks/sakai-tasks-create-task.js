@@ -167,7 +167,6 @@ class SakaiTasksCreateTask extends SakaiModal {
             <sakai-date-picker1 id="due" @datetime-selected=${(e) => { this.task.due = e.detail.epochMillis; this.dueUpdated = true; }} epoch-millis=${this.task.due}></sakai-date-picker1>
           </div>
         </div>
-        <div id="spacer"></div>
         <div id="priority-block">
           <div class="sakai-modal-label">
             <label for="priority">${this.i18n.priority}</label>
