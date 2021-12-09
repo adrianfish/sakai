@@ -37,8 +37,6 @@ class SakaiTasksCreateTask extends SakaiModal {
     this.task.description = this.querySelector("#description").value;
     this.task.notes = this.getEditor().getData();
 
-    console.log(this.task);
-
     fetch(`/api/tasks/${this.task.taskId}`, {
       credentials: "include",
       method: "PUT",
@@ -144,7 +142,7 @@ class SakaiTasksCreateTask extends SakaiModal {
         <a
             href="javascript:;"
             title="${this.i18n.add_task}"
-            data-toggle="modal" data-target="#balls"
+            data-toggle="modal" data-target="#${this.modalId}"
             aria-label="${this.i18n.add_task}">
           <sakai-icon type="add" size="small">
         </a>
@@ -154,6 +152,7 @@ class SakaiTasksCreateTask extends SakaiModal {
   content() {
 
     return html`
+    <div>
       <div class="sakai-modal-label">
         <label for="description">${this.i18n.description}</label>
       </div>
@@ -203,6 +202,7 @@ class SakaiTasksCreateTask extends SakaiModal {
         <sakai-editor element-id="task-text-editor" toolbar="basic"></sakai-editor>
       </div>
       ${this.error ? html`<div id="error">${this.i18n.save_failed}</div>` : ""}
+      </div>
     `;
   }
 

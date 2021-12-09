@@ -3,30 +3,29 @@ import { SakaiElement } from "./sakai-element.js";
 
 export class SakaiModal extends SakaiElement {
 
-  /*
   static get properties() {
 
     return {
-      i18n: { attribute: false, type: Object },
+      modalId: { attribute: "modal-id", type: String },
+      modalClass: { attribute: "modal-class", type: String },
     };
-  }
-  */
-
-  constructor() {
-    super();
   }
 
   trigger() {}
   title() {}
   content() {}
-  //buttons() {}
+  buttons() {}
+
+  shouldUpdate(changed) {
+    return this.modalId && this.modalClass;
+  }
 
   render() {
 
     return html`
       ${this.trigger()}
-      <div id="balls" class="modal" tabindex="-1" role="dialog">
-        <div class="sakai-modal modal-dialog" role="document">
+      <div id="${this.modalId}" class="modal" tabindex="-1" role="dialog">
+        <div class="sakai-modal modal-dialog ${this.modalClass}" role="document">
           <div class="sakai-modal-content modal-content">
             <div class="sakai-modal-header modal-header">
               <div id="titlebar">
@@ -41,7 +40,7 @@ export class SakaiModal extends SakaiElement {
             <div class="sakai-modal-body modal-body">
               ${this.content()}
             </div>
-            <div class="modal-footer">
+            <div class="sakai-modal-footer modal-footer">
               ${this.buttons()}
             </div>
           </div>

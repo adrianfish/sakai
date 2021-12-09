@@ -263,6 +263,8 @@ export class SakaiTasks extends SakaiPageableElement {
       <div>
         <sakai-tasks-create-task
           id="create-task"
+          modal-id="create-task"
+          modal-class="create-task-modal"
           @task-created=${this.taskCreated}
           @soft-deleted=${this.softDeleteTask}>
         </sakai-tasks-create-task>

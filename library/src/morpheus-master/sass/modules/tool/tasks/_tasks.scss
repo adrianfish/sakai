@@ -110,42 +110,47 @@ sakai-tasks {
         margin: 20px;
       }
 
-      .sakai-modal-content {
-        background-color: var(--sakai-background-color-3);
-        border-radius: 0px;
-      }
+.sakai-modal {
 
-      .sakai-modal-header {
-        #titlebar {
-          padding: 14px;
-          display: flex;
-          font-size: 16px;
-          align-items: center;
-          border-bottom: var(--sakai-border-color) solid 1px;
-        }
-          #title {
-            flex: 2;
-          }
-          #close {
-            flex: 1;
-            text-align: right;
-          }
-      }
+  .sakai-modal-content {
+    background-color: var(--sakai-background-color-3);
+    border-radius: 0px;
+  }
 
-      .sakai-modal-body {
-        //background-color: var(--sakai-modal-content-bg);
-        background-color: #FFFFFF;
-        color: black;
-        padding: 20px;
-        div.sakai-modal-label {
-          color: black;
-          margin-bottom: 4px;
-          font-weight: bold;
-        }
-        div.input {
-          margin-bottom: 10px;
-        }
+  .sakai-modal-header {
+    #titlebar {
+      display: flex;
+      font-size: 16px;
+      align-items: center;
+      border-bottom: var(--sakai-border-color) solid 1px;
+    }
+      #title {
+        flex: 2;
       }
+      #close {
+        flex: 1;
+        text-align: right;
+      }
+  }
+
+  .sakai-modal-body {
+    background-color: #FFFFFF;
+    color: black;
+    padding: 20px;
+    div.sakai-modal-label {
+      color: black;
+      margin-bottom: 4px;
+      font-weight: bold;
+    }
+    div.input {
+      margin-bottom: 10px;
+    }
+  }
+
+  .sakai-modal-footer {
+    padding: 12px;
+  }
+}
 
       
   sakai-tasks-create-task {
@@ -154,11 +159,7 @@ sakai-tasks {
       display: flex;
       justify-content: space-between;
     }
-    #due-block {
-      flex: 1;
-    }
     #priority-block {
-      flex: 1;
       margin-left: auto;
     }
     #complete-block {
@@ -173,6 +174,10 @@ sakai-tasks {
     #error {
       font-weight: bold;
       color: var(--sakai-tasks-save-failed-color, red)
+    }
+    .create-task-modal {
+      width: 400px;
+      margin: auto;
     }
   }
 }
