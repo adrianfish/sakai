@@ -147,7 +147,10 @@ export class SakaiTasksCreateTask extends SakaiDialogContent {
             <label for="due">${this.i18n.due}</label>
           </div>
           <div class="input">
-            <sakai-date-picker id="due" @datetime-selected=${(e) => { this.task.due = e.detail.epochMillis; this.dueUpdated = true; }} epoch-millis=${this.task.due}></sakai-date-picker>
+            <sakai-date-picker id="due"
+                @datetime-selected=${(e) => { this.task.due = e.detail.epochMillis; this.dueUpdated = true; }}
+                epoch-millis=${this.task.due}>
+            </sakai-date-picker>
           </div>
         </div>
         <div id="spacer"></div>
