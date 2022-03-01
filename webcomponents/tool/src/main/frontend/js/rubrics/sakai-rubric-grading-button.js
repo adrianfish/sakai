@@ -11,7 +11,7 @@ class SakaiRubricGradingButton extends RubricsElement {
   }
 
   set token(newValue) {
-    this._token = "Bearer " + newValue;
+    this._token = `Bearer ${  newValue}`;
   }
 
   get token() { return this._token; }

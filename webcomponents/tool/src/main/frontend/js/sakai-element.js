@@ -42,12 +42,12 @@ class SakaiElement extends LitElement {
 
   setSetting(component, name, value) {
 
-    var currentString = localStorage.getItem(`${component}-settings`);
+    const currentString = localStorage.getItem(`${component}-settings`);
+    let settings = {};
     if (!currentString) {
-      var settings = {};
       settings[name] = value;
     } else {
-      var settings = JSON.parse(currentString);
+      settings = JSON.parse(currentString);
       settings[name] = value;
     }
     localStorage.setItem(`${component}-settings`, JSON.stringify(settings));
@@ -55,13 +55,13 @@ class SakaiElement extends LitElement {
 
   getSetting(component, name) {
 
-    var currentString = localStorage.getItem(`${component}-settings`);
+    const currentString = localStorage.getItem(`${component}-settings`);
     if (!currentString) {
       return null;
-    } else {
-      var settings = JSON.parse(currentString);
-      return settings[name];
     }
+    const settings = JSON.parse(currentString);
+    return settings[name];
+
   }
 }
 

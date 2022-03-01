@@ -85,6 +85,7 @@
                                 <exclude>package-lock.json</exclude>
                                 <exclude>.gitignore</exclude>
                                 <exclude>.jshintrc</exclude>
+                                <exclude>.eslintrc.js</exclude>
                             </excludes>
                         </fileset>
                         <fileset>
@@ -178,6 +179,15 @@
                                 webpack@4
                                 webpack-cli@3
                             </arguments>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>eslint</id>
+                        <goals>
+                            <goal>npm</goal>
+                        </goals>
+                        <configuration>
+                            <arguments>run eslint</arguments>
                         </configuration>
                     </execution>
                     <execution>

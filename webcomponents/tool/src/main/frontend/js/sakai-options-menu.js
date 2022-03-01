@@ -79,11 +79,11 @@ export class SakaiOptionsMenu extends LitElement {
   setupPopper() {
 
     this.popper = createPopper(this.invoker, this.content, {
-        placement: this.placement,
-        modifiers: [
-          { name: 'offset', options: { offset: [0, 8] }},
-        ]
-      }
+      placement: this.placement,
+      modifiers: [
+        { name: 'offset', options: { offset: [0, 8] }},
+      ]
+    }
     );
   }
 

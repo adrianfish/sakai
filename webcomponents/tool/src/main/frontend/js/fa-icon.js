@@ -34,13 +34,13 @@ class FaIcon extends LitElement {
       fab: 'brands',
       fa: 'solid'
     };
-    const getPrefix = iClass => {
-      const data = iClass.split(' ');
-      return [PREFIX_TO_STYLE[data[0]], normalizeIconName(data[1])];
-    };
     const normalizeIconName = name => {
       const icon = name.replace('fa-', '');
       return icon;
+    };
+    const getPrefix = iClass => {
+      const data = iClass.split(' ');
+      return [PREFIX_TO_STYLE[data[0]], normalizeIconName(data[1])];
     };
     const data = getPrefix(className);
     return `${this.pathPrefix}/@fortawesome/fontawesome-free/sprites/${data[0]}.svg#${data[1]}`;

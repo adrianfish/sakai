@@ -28,7 +28,7 @@ export class SakaiRubricStudentPreviewButton extends RubricsElement {
   set token(newValue) {
 
     this.i18nPromise.then(r => this.initLightbox(newValue, r));
-    this._token = "Bearer " + newValue;
+    this._token = `Bearer ${  newValue}`;
   }
 
   get token() { return this._token; }
