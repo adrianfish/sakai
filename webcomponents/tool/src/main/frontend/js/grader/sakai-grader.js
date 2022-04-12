@@ -582,7 +582,7 @@ export class SakaiGrader extends gradableDataMixin(SakaiElement) {
     if (!feedbackPanel.dialog("instance")) {
       feedbackPanel.dialog({
         width: "auto",
-        beforeClose: () => { return this.cancelFeedbackToggle(); },
+        beforeClose: () => this.cancelFeedbackToggle(),
       });
       this.feedbackCommentEditor = this.replaceWithEditor("grader-feedback-comment");
     } else {
@@ -646,7 +646,7 @@ export class SakaiGrader extends gradableDataMixin(SakaiElement) {
     if (!privateNotesPanel.dialog("instance")) {
       privateNotesPanel.dialog({
         width: "auto",
-        beforeClose: () => { return this.cancelPrivateNotesToggle(); },
+        beforeClose: () => this.cancelPrivateNotesToggle(),
       });
       this.privateNotesEditor = this.replaceWithEditor("grader-private-notes");
     } else {
