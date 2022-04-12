@@ -804,18 +804,28 @@ function includeWebjarLibrary(library) {
 			jsReferences.push('/dist/js/fontawesome-iconpicker.min.js');
 			cssReferences.push('/dist/css/fontawesome-iconpicker.min.css');
 			break;
-		case 'flatpickr':
-			libraryVersion = "4.6.9";
-			jsReferences.push('/dist/flatpickr.min.js');
-			jsReferences.push('/dist/plugins/confirmDate/confirmDate.js');
-			cssReferences.push('/dist/flatpickr.min.css');
-			cssReferences.push('/dist/plugins/confirmDate/confirmDate.css');
-			if (portal) {
-				let lang = portal.locale.split("-")[0];
-				if (lang !== "en") {
-					jsReferences.push(`/dist/l10n/${lang}.js'`);
-				}
-			}
+		case 'fullcalendar':
+			libraryVersion = "5.10.2";
+			jsReferences.push('/main.min.js');
+			jsReferences.push('/locales-all.min.js');
+			cssReferences.push('/main.min.css');
+			break;
+		case 'recordrtc':
+			libraryVersion = "5.6.2";
+			jsReferences.push('/RecordRTC.js');
+			break;
+		case 'webrtc-adapter':
+			libraryVersion = "8.0.0";
+			jsReferences.push('/out/adapter.js');
+			break;
+		case 'video.js':
+			libraryVersion = "7.14.0";
+			jsReferences.push('/dist/video.min.js');
+			cssReferences.push('/dist/video-js.css');
+			break;
+		case 'wavesurfer.js':
+			libraryVersion = "5.1.0";
+			jsReferences.push('/dist/wavesurfer.min.js');
 			break;
 		default:
 			if (library.endsWith(".js")) {
