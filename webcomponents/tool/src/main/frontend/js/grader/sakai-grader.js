@@ -424,18 +424,11 @@ export class SakaiGrader extends gradableDataMixin(SakaiElement) {
         ` : ""}
         <div class="grader-label content-button-block">
           <button id="grader-private-notes-button" @click=${this.togglePrivateNotes} aria-haspopup="true" title="${this.i18n.private_notes_tooltip}" >${this.assignmentsI18n["note.label"]}</button>
-<<<<<<< HEAD
           ${this.submission.privateNotes ? html`<div class="active-indicator ${this.savedPvtNotes ? "" : "unsaved"}" aria-label="${this.pvtNotePresentMsg()}" title="${this.pvtNotePresentMsg()}"></div>` : ""}
         </div>
         <div id="private-notes-panel" class="grader-panel" title="${this.assignmentsI18n["note.label"]}" style="display: none;">
           <div class="sak-banner-info">${unsafeHTML(this.i18n.private_notes_tooltip)}</div>
           <div id="private-notes-unsaved-msg" class="sak-banner-error hidden">${this.i18n.unsaved_text_warning}</div>
-=======
-          ${this.submission.privateNotes ? html`<div class="active-indicator" aria-label="${this.i18n.notes_present}" title="${this.i18n.notes_present}"></div>` : ""}
-        </div>
-        <div id="private-notes-panel" class="grader-panel" title="${this.assignmentsI18n["note.label"]}" style="display: none;">
-          <div class="sak-banner-info">${unsafeHTML(this.i18n.private_notes_tooltip)}</div>
->>>>>>> 7d2bc9eb2c5 (SAK-46206 Make the build fail on bad javascript practices. (#9790))
           <div><textarea id="grader-private-notes" .value=${this.submission.privateNotes}></textarea></div>
           <button @click=${this.doneWithPrivateNotesDialog}>${this.assignmentsI18n["gen.don"]}</button>
           <button @click=${this.cancelPrivateNotesToggle}>${this.assignmentsI18n["gen.can"]}</button>
@@ -536,7 +529,6 @@ export class SakaiGrader extends gradableDataMixin(SakaiElement) {
 
   cancelRubric() {
 
-<<<<<<< HEAD
     const rubricGrading = document.getElementsByTagName("sakai-rubric-grading").item(0);
     rubricGrading && rubricGrading.cancel();
 
@@ -550,13 +542,6 @@ export class SakaiGrader extends gradableDataMixin(SakaiElement) {
       autosave: { delay: 10000000, messageType: "no" },
       toolbarSet: "Basic",
       startupFocus: true,
-=======
-    const editor = CKEDITOR.replace(id, {
-      toolbar: [['Bold', 'Italic', 'Underline', 'TextColor'], ['NumberedList', 'BulletedList', 'Blockquote']],
-      width,
-      height,
-      startupFocus: true
->>>>>>> 7d2bc9eb2c5 (SAK-46206 Make the build fail on bad javascript practices. (#9790))
     });
 
     editor.on("change", () => this.modified = true);
@@ -597,7 +582,7 @@ export class SakaiGrader extends gradableDataMixin(SakaiElement) {
     if (!feedbackPanel.dialog("instance")) {
       feedbackPanel.dialog({
         width: "auto",
-        beforeClose: () => { return this.cancelFeedbackToggle(); },
+        beforeClose: () => this.cancelFeedbackToggle(),
       });
       this.feedbackCommentEditor = this.replaceWithEditor("grader-feedback-comment");
     } else {
@@ -661,7 +646,7 @@ export class SakaiGrader extends gradableDataMixin(SakaiElement) {
     if (!privateNotesPanel.dialog("instance")) {
       privateNotesPanel.dialog({
         width: "auto",
-        beforeClose: () => { return this.cancelPrivateNotesToggle(); },
+        beforeClose: () => this.cancelPrivateNotesToggle(),
       });
       this.privateNotesEditor = this.replaceWithEditor("grader-private-notes");
     } else {

@@ -72,7 +72,6 @@ export class Submission {
         this.resubmitDate = moment(parseInt(init.properties.allow_resubmit_closeTime, 10)).valueOf();
       }
 
-
       // We need this for setting the default resubmission date
       this.assignmentCloseTime = init.assignmentCloseTime.epochSecond * 1000;
     } else {

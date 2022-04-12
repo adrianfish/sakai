@@ -37,7 +37,7 @@ export class SakaiCalendar extends LionCalendar {
     this.addEventListener("user-selected-date-changed", event => {
 
       const time = event.detail.selectedDate.getTime();
-      this.daysEvents = this.events.filter(e => e.start > time && e.start < (time + 24*60*60*1000));
+      this.daysEvents = this.events.filter(e => e.start > time && e.start < (time + 24 * 60 * 60 * 1000));
       this.selectedDate = time;
     });
   }
@@ -80,7 +80,7 @@ export class SakaiCalendar extends LionCalendar {
       c.classList.remove("deadline");
 
       const time = c.date.getTime();
-      const matchingEvent = this.events.find(e => e.start > time && e.start < (time + 24*60*60*1000));
+      const matchingEvent = this.events.find(e => e.start > time && e.start < (time + 24 * 60 * 60 * 1000));
       if (matchingEvent) {
         c.classList.add("has-events");
         if (matchingEvent.type === "deadline") {
@@ -108,7 +108,7 @@ export class SakaiCalendar extends LionCalendar {
 
       <div id="container">
         <lion-dialog id="display-dialog">
-          <sakai-calendar-display-event slot="content" selected="${ifDefined(this.selected ? JSON.stringify(this.selected): undefined)}"></sakai-calendar-display-event>
+          <sakai-calendar-display-event slot="content" selected="${ifDefined(this.selected ? JSON.stringify(this.selected) : undefined)}"></sakai-calendar-display-event>
           <button slot="invoker" style="display: none">none</button>
         </lion-dialog>
         ${this.readOnly ? "" : html`

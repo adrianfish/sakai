@@ -201,7 +201,7 @@ export class SakaiRubric extends RubricsElement {
     const saveWeightsBtn = document.querySelector(`[rubric-id='${this.rubric.id}'] .save-weights`);
     const saveSuccessLbl = document.querySelector(`[rubric-id='${this.rubric.id}'] .save-success`);
 
-    if(saveWeightsBtn) saveWeightsBtn.setAttribute('disabled', true);
+    if (saveWeightsBtn) saveWeightsBtn.setAttribute('disabled', true);
 
     this.rubric.criterions.forEach(cr => {
       $.ajax({
@@ -212,12 +212,12 @@ export class SakaiRubric extends RubricsElement {
         data: JSON.stringify({ weight: cr.weight })
       }).done(() => {
 
-        if(saveSuccessLbl) saveSuccessLbl.classList.add('in');
+        if (saveSuccessLbl) saveSuccessLbl.classList.add('in');
         setTimeout(() => {
-          if(saveWeightsBtn) saveWeightsBtn.removeAttribute('disabled');
+          if (saveWeightsBtn) saveWeightsBtn.removeAttribute('disabled');
         }, 1000);
         setTimeout(() => {
-          if(saveSuccessLbl) saveSuccessLbl.classList.remove('in');
+          if (saveSuccessLbl) saveSuccessLbl.classList.remove('in');
         }, 5000);
         this.requestUpdate();
       }).fail((jqXHR, error, message) => {
