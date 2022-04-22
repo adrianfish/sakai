@@ -199,7 +199,6 @@ export class SakaiTasksCreateTask extends SakaiDialogContent {
             <input
               type="checkbox"
               id="complete"
-              aria-label="${this.i18n.complete_tooltip}"
               title="${this.i18n.complete_tooltip}"
               @click=${this.complete}
               ?checked=${this.task.complete}>
