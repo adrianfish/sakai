@@ -35,7 +35,7 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Controller
-public class MainController {
+public class ConversationsController {
 
 	@Resource
 	private SessionManager sessionManager;
@@ -53,7 +53,6 @@ public class MainController {
         return "bootstrap";
 	}
 
-    /*
 	@GetMapping(value = "/topics/{topicId}")
     public String topic(Model model, @PathVariable String topicId, HttpServletRequest request) {
 
@@ -64,6 +63,30 @@ public class MainController {
         return "bootstrap";
     }
 
+	@GetMapping(value = "/topics/{topicId}/posts/{postId}")
+    public String post(Model model, @PathVariable String topicId, @PathVariable String postId, HttpServletRequest request) {
+
+        checkSakaiSession();
+
+        loadModel(model, request);
+        model.addAttribute("topicId", topicId);
+        model.addAttribute("postId", postId);
+        return "bootstrap";
+    }
+
+	@GetMapping(value = "/topics/{topicId}/posts/{postId}/comments/{commentId}")
+    public String comment(Model model, @PathVariable String topicId, @PathVariable String postId, @PathVariable String commentId, HttpServletRequest request) {
+
+        checkSakaiSession();
+
+        loadModel(model, request);
+        model.addAttribute("topicId", topicId);
+        model.addAttribute("postId", postId);
+        model.addAttribute("commentId", commentId);
+        return "bootstrap";
+    }
+
+    /*
     @GetMapping(value = "/settings")
     public String topic(Model model, HttpServletRequest request) {
 
