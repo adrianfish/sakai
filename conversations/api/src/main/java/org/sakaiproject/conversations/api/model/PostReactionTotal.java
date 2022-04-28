@@ -2,12 +2,9 @@ package org.sakaiproject.conversations.api.model;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.Index;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
@@ -30,9 +27,8 @@ public class PostReactionTotal implements PersistableEntity<Long> {
     @Column(name = "ID")
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "POST_ID", nullable = false)
-    private Post post;
+    @Column(name = "POST_ID", nullable = false)
+    private String postId;
 
     @Column(name = "REACTION", nullable = false)
     private Reaction reaction;

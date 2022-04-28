@@ -7,14 +7,6 @@
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
 
-        <script type="importmap">
-        {
-            "imports": {
-                "@popperjs/core/dist/esm/popper.js": "/webcomponents/assets/@popperjs/core/dist/esm/popper.js"
-            }
-        }
-        </script>
-
         <script> ## Include this at the top so tool markup and headscripts.js can use it
             ## SAK-16484 Allow Javascript to easily get at user details.
             ## SAK-13987, SAK-16162, SAK-19132 - Portal Logout Timer
@@ -82,7 +74,6 @@
         <link href="${pageWebjarsPath}cropper/4.0.0/dist/cropper.min.css$!{portalCDNQuery}" rel="stylesheet">
         <link href="${pageWebjarsPath}fontawesome/4.7.0/css/font-awesome.min.css$!{portalCDNQuery}" rel="stylesheet">
         <script src="${pageSkinRepo}/${pageSkin}/js/lib/modernizr.js$!{portalCDNQuery}"></script>
-        <script src="/webcomponents/assets/@webcomponents/webcomponentsjs/webcomponents-loader.js$!{portalCDNQuery}"></script>
         <script src="${pageWebjarsPath}momentjs/2.24.0/min/moment-with-locales.min.js$!{portalCDNQuery}"></script>
         <script type="module" src="/webcomponents/sakai-profile.js$!{portalCDNQuery}"></script>
         <script type="module" src="/webcomponents/sakai-pronunciation-player.js$!{portalCDNQuery}"></script>

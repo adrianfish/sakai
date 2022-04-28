@@ -22,7 +22,6 @@ import static org.elasticsearch.index.query.FilterBuilders.termFilter;
 import static org.elasticsearch.index.query.QueryBuilders.boolQuery;
 import static org.elasticsearch.index.query.QueryBuilders.filteredQuery;
 import static org.elasticsearch.index.query.QueryBuilders.matchAllQuery;
-import static org.elasticsearch.index.query.QueryBuilders.matchQuery;
 import static org.elasticsearch.index.query.QueryBuilders.simpleQueryStringQuery;
 import static org.elasticsearch.index.query.QueryBuilders.termQuery;
 import static org.elasticsearch.index.query.QueryBuilders.termsQuery;
@@ -852,7 +851,7 @@ public abstract class BaseElasticSearchIndexBuilder implements ElasticSearchInde
      */
     protected void indexAdd(String resourceName, EntityContentProducer ecp) {
         try {
-            prepareIndexAdd(resourceName, ecp, false);
+            prepareIndexAdd(resourceName, ecp, true);
         } catch (NoContentException e) {
             deleteDocument(e);
         } catch (Exception e) {
@@ -1057,7 +1056,6 @@ public abstract class BaseElasticSearchIndexBuilder implements ElasticSearchInde
 
         return properties;
     }
-
 
     @Override
     public SearchResponse search(String searchTerms, List<String> references, List<String> siteIds, int start, int end) {
