@@ -227,7 +227,7 @@ public class ConversationsServiceImpl implements ConversationsService, Observer 
 
         if (StringUtils.isBlank(currentUserId)) return false;
 
-        final String siteRef = "/site/" + topic.getSiteId();
+        final String siteRef = siteService.siteReference(topic.getSiteId());
 
         if (!securityService.unlock(SiteService.SITE_VISIT, siteRef)) return false;
 
@@ -244,7 +244,7 @@ public class ConversationsServiceImpl implements ConversationsService, Observer 
 
         if (!topic.getDraft() && topic.getVisibility() == TopicVisibility.SITE) return true;
 
-        if (topic.getVisibility() == TopicVisibility.INSTRUCTORS
+        if (!topic.getDraft() && topic.getVisibility() == TopicVisibility.INSTRUCTORS
                     && securityService.unlock(Permissions.ROLETYPE_INSTRUCTOR.label, siteRef)) {
             return true;
         }
