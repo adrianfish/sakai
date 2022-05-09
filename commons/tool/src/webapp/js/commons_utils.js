@@ -380,8 +380,6 @@ commons.utils = {
 
         $(document).ready(function () {
 
-            profile.attachPopups($("#commons-author-name-" + post.id));
-
             $('#commons-post-edit-link-' + post.id).click(self.editPostHandler);
             $('#commons-post-delete-link-' + post.id).click(self.deletePostHandler);
             var textarea = $('#commons-comment-textarea-' + post.id);
@@ -499,8 +497,6 @@ commons.utils = {
 
                     // Now render them into their placeholders
                     posts.forEach(function (p) { commons.utils.renderPost(p, 'commons-post-' + p.id); });
-
-                    profile.attachPopups($('.profile-popup-trigger'));
 
                     loadImage.hide();
                     try {
