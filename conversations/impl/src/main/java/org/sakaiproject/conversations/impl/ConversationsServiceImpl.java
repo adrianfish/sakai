@@ -95,6 +95,7 @@ import lombok.Setter;
 
 @Slf4j
 @Setter
+@Transactional
 public class ConversationsServiceImpl implements ConversationsService, Observer {
 
     private AuthzGroupService authzGroupService;
@@ -261,7 +262,6 @@ public class ConversationsServiceImpl implements ConversationsService, Observer 
         return false;
     }
 
-    @Transactional
     public List<TopicTransferBean> getTopicsForSite(String siteId) throws ConversationsPermissionsException {
 
         String currentUserId = getCheckedCurrentUserId();
@@ -364,7 +364,6 @@ public class ConversationsServiceImpl implements ConversationsService, Observer 
         });
     }
 
-    @Transactional
     public TopicTransferBean saveTopic(final TopicTransferBean topicBean, boolean sendMessage) throws ConversationsPermissionsException {
 
         String currentUserId = getCheckedCurrentUserId();
@@ -503,7 +502,6 @@ public class ConversationsServiceImpl implements ConversationsService, Observer 
         return decoratedBean;
     }
 
-    @Transactional
     public void pinTopic(String topicId, boolean pinned) throws ConversationsPermissionsException {
 
         String currentUserId = getCheckedCurrentUserId();
@@ -519,7 +517,6 @@ public class ConversationsServiceImpl implements ConversationsService, Observer 
         topicRepository.save(topic);
     }
 
-    @Transactional
     public TopicTransferBean lockTopic(String topicId, boolean locked, boolean needsModerator) throws ConversationsPermissionsException {
 
         String currentUserId = getCheckedCurrentUserId();
@@ -554,17 +551,17 @@ public class ConversationsServiceImpl implements ConversationsService, Observer 
         postRepository.findByParentPostId(post.getId()).forEach(p -> recursivelyLockPosts(p, locked));
     }
 
-    @Transactional
-    public ConversationsTopic hideTopic(String topicId, boolean hidden) throws ConversationsPermissionsException {
+    public ConversationsTopic hideTopic(String topicId, boolean hidden, boolean needsModerator) throws ConversationsPermissionsException {
 
-        String currentUserId = getCheckedCurrentUserId();
+        getCheckedCurrentUserId();
 
         ConversationsTopic topic = topicRepository.findById(topicId)
             .orElseThrow(() -> new IllegalArgumentException("No topic for id " + topicId));
 
-        if (!securityService.unlock(Permissions.MODERATE.label, "/site/" + topic.getSiteId())) {
-            throw new ConversationsPermissionsException("Current user cannot hide/show topics.");
+        if (needsModerator && !securityService.unlock(Permissions.MODERATE.label, "/site/" + topic.getSiteId())) {
+            throw new ConversationsPermissionsException("Current user cannot lock/unlock topics.");
         }
+
         topic.setHidden(hidden);
 
         if (!hidden) {
@@ -575,7 +572,6 @@ public class ConversationsServiceImpl implements ConversationsService, Observer 
         return topicRepository.save(topic);
     }
 
-    @Transactional
     public void bookmarkTopic(String topicId, boolean bookmarked) throws ConversationsPermissionsException {
 
         String currentUserId = getCheckedCurrentUserId();
@@ -589,7 +585,6 @@ public class ConversationsServiceImpl implements ConversationsService, Observer 
         });
     }
 
-    @Transactional
     public void deleteTopic(String topicId) throws ConversationsPermissionsException {
 
         String currentUserId = getCheckedCurrentUserId();
@@ -627,7 +622,6 @@ public class ConversationsServiceImpl implements ConversationsService, Observer 
         });
     }
 
-    @Transactional
     public Map<Reaction, Integer> saveTopicReactions(String topicId, Map<Reaction, Boolean> reactions) throws ConversationsPermissionsException {
 
         String currentUserId = getCheckedCurrentUserId();
@@ -701,7 +695,6 @@ public class ConversationsServiceImpl implements ConversationsService, Observer 
         return postRepository.findById(postId).map(PostTransferBean::of);
     }
 
-    @Transactional
     public PostTransferBean savePost(PostTransferBean postBean, boolean sendMessage) throws ConversationsPermissionsException {
 
         String currentUserId = getCheckedCurrentUserId();
@@ -851,7 +844,6 @@ public class ConversationsServiceImpl implements ConversationsService, Observer 
         return canUserViewPost(post, currentUserId);
     }
 
-    @Transactional
     private ConversationsTopic lockIfAfterLockDate(ConversationsTopic topic) {
 
         Instant now = Instant.now();
@@ -867,7 +859,6 @@ public class ConversationsServiceImpl implements ConversationsService, Observer 
     }
 
     /*
-    @Transactional
     private Topic setupDateState(Topic topic) {
 
         Instant now = Instant.now();
@@ -907,12 +898,11 @@ public class ConversationsServiceImpl implements ConversationsService, Observer 
     }
     */
 
-    @Transactional
     private ConversationsTopic showIfAfterShowDate(ConversationsTopic topic) {
 
         if (topic.getShowDate() != null && topic.getHidden() && topic.getShowDate().isBefore(Instant.now())) {
             try {
-                return this.hideTopic(topic.getId(), false);
+                return hideTopic(topic.getId(), false, false);
             } catch (ConversationsPermissionsException cpe) {
                 return topic;
             }
@@ -921,12 +911,11 @@ public class ConversationsServiceImpl implements ConversationsService, Observer 
         }
     }
 
-    @Transactional
     private ConversationsTopic hideIfAfterHideDate(ConversationsTopic topic) {
 
         if (topic.getHideDate() != null && !topic.getHidden() && topic.getHideDate().isBefore(Instant.now())) {
             try {
-                return this.hideTopic(topic.getId(), true);
+                return this.hideTopic(topic.getId(), true, false);
             } catch (ConversationsPermissionsException cpe) {
                 return topic;
             }
@@ -945,7 +934,6 @@ public class ConversationsServiceImpl implements ConversationsService, Observer 
                 Arrays.asList(new MessageMedium[] {MessageMedium.EMAIL}), replacements, NotificationService.NOTI_OPTIONAL);
     }
 
-    @Transactional
     private void updateThreadHowActiveScore(ConversationsPost thread) {
 
         int numberOfReplies = thread.getNumberOfThreadReplies();
@@ -1152,7 +1140,6 @@ public class ConversationsServiceImpl implements ConversationsService, Observer 
         }
     }
 
-    @Transactional
     public void deletePost(String siteId, String topicId, String postId, boolean setTopicResolved) throws ConversationsPermissionsException {
 
         String currentUserId = getCheckedCurrentUserId();
@@ -1202,7 +1189,6 @@ public class ConversationsServiceImpl implements ConversationsService, Observer 
         });
     }
 
-    @Transactional
     public PostTransferBean lockPost(String siteId, String topicId, String postId, boolean locked) throws ConversationsPermissionsException {
 
         String currentUserId = getCheckedCurrentUserId();
@@ -1238,7 +1224,6 @@ public class ConversationsServiceImpl implements ConversationsService, Observer 
         postBean.posts = children;
     }
 
-    @Transactional
     public PostTransferBean hidePost(String siteId, String topicId, String postId, boolean hidden) throws ConversationsPermissionsException {
 
         if (!securityService.unlock(Permissions.MODERATE.label, "/site/" + siteId)) {
@@ -1259,7 +1244,6 @@ public class ConversationsServiceImpl implements ConversationsService, Observer 
         return bean;
     }
 
-    @Transactional
     public Map<Reaction, Integer> savePostReactions(String topicId, String postId, Map<Reaction, Boolean> reactions) throws ConversationsPermissionsException {
 
         String currentUserId = getCheckedCurrentUserId();
@@ -1327,7 +1311,6 @@ public class ConversationsServiceImpl implements ConversationsService, Observer 
                 .stream().collect(Collectors.toMap(rt -> rt.getReaction(), rt -> rt.getTotal()));
     }
 
-    @Transactional
     public void markPostsViewed(Set<String> postIds, String topicId) throws ConversationsPermissionsException {
 
         String currentUserId = getCheckedCurrentUserId();
@@ -1368,7 +1351,6 @@ public class ConversationsServiceImpl implements ConversationsService, Observer 
         return commentRepository.findById(commentId).map(CommentTransferBean::of);
     }
 
-    @Transactional
     public CommentTransferBean saveComment(CommentTransferBean commentBean) throws ConversationsPermissionsException {
 
         String currentUserId = getCheckedCurrentUserId();
@@ -1424,7 +1406,6 @@ public class ConversationsServiceImpl implements ConversationsService, Observer 
         return decorateCommentBean(CommentTransferBean.of(updatedComment), commentBean.siteId, currentUserId);
     }
 
-    @Transactional
     public void deleteComment(String siteId, String commentId) throws ConversationsPermissionsException {
 
         String currentUserId = getCheckedCurrentUserId();
@@ -1457,12 +1438,10 @@ public class ConversationsServiceImpl implements ConversationsService, Observer 
         }));
     }
 
-    @Transactional
     private List<TopicTransferBean> decorateTopics(List<ConversationsTopic> topics, String currentUserId, Settings settings) {
         return topics.stream().map(t -> decorateTopicBean(TopicTransferBean.of(t), t, currentUserId, settings)).collect(Collectors.toList());
     }
 
-    @Transactional
     private TopicTransferBean decorateTopicBean(TopicTransferBean topicBean, ConversationsTopic topic, String currentUserId, Settings settings) {
 
         try {
@@ -1692,7 +1671,6 @@ public class ConversationsServiceImpl implements ConversationsService, Observer 
         return commentBean;
     }
 
-    @Transactional
     public PostTransferBean upvotePost(String siteId, String topicId, String postId) throws ConversationsPermissionsException {
 
         String currentUserId = getCheckedCurrentUserId();
@@ -1729,7 +1707,6 @@ public class ConversationsServiceImpl implements ConversationsService, Observer 
         return PostTransferBean.of(postRepository.save(post));
     }
 
-    @Transactional
     public PostTransferBean unUpvotePost(String siteId, String postId) throws ConversationsPermissionsException {
 
         String currentUserId = getCheckedCurrentUserId();
@@ -1760,7 +1737,6 @@ public class ConversationsServiceImpl implements ConversationsService, Observer 
         return PostTransferBean.of(postRepository.save(post));
     }
 
-    @Transactional
     public Tag saveTag(Tag tag) throws ConversationsPermissionsException {
 
         getCheckedCurrentUserId();
@@ -1774,7 +1750,6 @@ public class ConversationsServiceImpl implements ConversationsService, Observer 
         return tagRepository.save(tag);
     }
 
-    @Transactional
     public List<Tag> createTags(List<Tag> tags) throws ConversationsPermissionsException {
 
         getCheckedCurrentUserId();
@@ -1802,7 +1777,6 @@ public class ConversationsServiceImpl implements ConversationsService, Observer 
         return tagRepository.findBySiteId(siteId);
     }
 
-    @Transactional
     public void deleteTag(Long tagId) throws ConversationsPermissionsException {
 
         getCheckedCurrentUserId();
@@ -1842,7 +1816,6 @@ public class ConversationsServiceImpl implements ConversationsService, Observer 
         return settingsRepository.findBySiteId(siteId).orElse(new Settings(siteId));
     }
 
-    @Transactional
     public Settings saveSettings(Settings settings) throws ConversationsPermissionsException {
 
         getCheckedCurrentUserId();

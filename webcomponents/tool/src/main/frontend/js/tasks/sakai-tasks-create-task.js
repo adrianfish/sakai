@@ -5,6 +5,14 @@ import "../sakai-date-picker.js";
 import "../sakai-icon.js";
 import "../sakai-editor.js";
 
+/**
+ * Handles the creation or updating of user or site tasks
+ *
+ * @property {string} [siteId]
+ * @property {string} [userId]
+ * @property {object} [task]
+ * @fires {task-created} Fired when the task has been created. The detail is the new/updated task.
+ */
 export class SakaiTasksCreateTask extends SakaiDialogContent {
 
   static get properties() {
@@ -52,7 +60,6 @@ export class SakaiTasksCreateTask extends SakaiDialogContent {
         }
         this.error = true;
         throw new Error();
-
       })
       .then(savedTask => {
 
@@ -67,9 +74,7 @@ export class SakaiTasksCreateTask extends SakaiDialogContent {
 
     this.task.due = Date.now();
     const el = this.shadowRoot.getElementById("due");
-    if (el) {
-      el.epochMillis = this.task.due;
-    }
+    el && (el.epochMillis = this.task.due);
   }
 
   set task(value) {
@@ -125,6 +130,14 @@ export class SakaiTasksCreateTask extends SakaiDialogContent {
   }
 
   reset() {
+
+    this.getEditor().clear();
+    const descriptionEl = this.shadowRoot.getElementById("description");
+    const datePicker = this.shadowRoot.getElementById("due");
+    const completeEl = this.shadowRoot.getElementById("complete");
+    datePicker.disabled = false;
+    descriptionEl.disabled = false;
+    if (completeEl) { completeEl.checked = false; }
     this.task = { ...this.defaultTask};
   }
 
@@ -170,7 +183,7 @@ export class SakaiTasksCreateTask extends SakaiDialogContent {
           </div>
           <div class="input">
             <sakai-date-picker id="due"
-                @datetime-selected=${(e) => { this.task.due = e.detail.epochMillis; this.dueUpdated = true; }}
+                @datetime-selected=${e => { this.task.due = e.detail.epochMillis; this.dueUpdated = true; }}
                 epoch-millis=${this.task.due}
                 label="${this.i18n.due}">
             </sakai-date-picker>
