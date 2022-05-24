@@ -20,6 +20,7 @@ export class SakaiTasksCreateTask extends SakaiDialogContent {
   constructor() {
 
     super();
+
     this.defaultTask = { taskId: "", description: "", priority: "3", notes: "", due: Date.now() };
     this.task = { ...this.defaultTask};
     loadProperties("tasks").then(r => this.i18n = r);
@@ -44,32 +45,29 @@ export class SakaiTasksCreateTask extends SakaiDialogContent {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(this.task),
     })
-      .then(r => {
+    .then(r => {
 
-        if (r.ok) {
-          this.error = false;
-          return r.json();
-        }
-        this.error = true;
-        throw new Error();
+      if (r.ok) {
+        this.error = false;
+        return r.json();
+      }
+      this.error = true;
+      throw new Error(`Network error while saving task: ${r.status}`);
+    })
+    .then(savedTask => {
 
-      })
-      .then(savedTask => {
-
-        this.task = savedTask;
-        this.dispatchEvent(new CustomEvent("task-created", {detail: { task: this.task }, bubbles: true }));
-        this.close();
-      })
-      .catch(() => {});
+      this.task = savedTask;
+      this.dispatchEvent(new CustomEvent("task-created", {detail: { task: this.task }, bubbles: true }));
+      this.close();
+    })
+    .catch(() => {});
   }
 
   resetDate() {
 
     this.task.due = Date.now();
     const el = this.shadowRoot.getElementById("due");
-    if (el) {
-      el.epochMillis = this.task.due;
-    }
+    el && (el.epochMillis = this.task.due);
   }
 
   set task(value) {
@@ -135,12 +133,6 @@ export class SakaiTasksCreateTask extends SakaiDialogContent {
     if (e.target.checked) {
       this.task.softDeleted = false;
     }
-
-    console.log(this.task);
-  }
-
-  resetEditor() {
-    this.getEditor().setData(this.task.notes || "");
   }
 
   connectedCallback() {
@@ -170,7 +162,7 @@ export class SakaiTasksCreateTask extends SakaiDialogContent {
           </div>
           <div class="input">
             <sakai-date-picker id="due"
-                @datetime-selected=${(e) => { this.task.due = e.detail.epochMillis; this.dueUpdated = true; }}
+                @datetime-selected=${e => { this.task.due = e.detail.epochMillis; this.dueUpdated = true; }}
                 epoch-millis=${this.task.due}
                 label="${this.i18n.due}">
             </sakai-date-picker>
