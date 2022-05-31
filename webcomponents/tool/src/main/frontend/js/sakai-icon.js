@@ -35,24 +35,21 @@ export class SakaiIcon extends LitElement {
     return css`
       :host(*) {
         display: inline-block;
+        pointer-events: none;
       }
       .sakai-smallest-icon {
-        pointer-events: none;
         width: var(--sakai-smallest-icon-width);
         height: var(--sakai-smallest-icon-height);
       }
       .sakai-small-icon {
-        pointer-events: none;
         width: var(--sakai-small-icon-width);
         height: var(--sakai-small-icon-height);
       }
       .sakai-medium-icon {
-        pointer-events: none;
         width: var(--sakai-medium-icon-width);
         height: var(--sakai-medium-icon-height);
       }
       .sakai-large-icon {
-        pointer-events: none;
         width: var(--sakai-large-icon-width);
         height: var(--sakai-large-icon-height);
       }

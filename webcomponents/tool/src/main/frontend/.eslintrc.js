@@ -1,5 +1,8 @@
 module.exports = {
-  "env": { "browser": true, "es2021": true },
+  "env": {
+    "browser": true,
+    "es2021": true
+  },
   "globals": {
     "$": "readonly",
     "sakai": "readonly",
@@ -11,10 +14,13 @@ module.exports = {
     "confirmDatePlugin": "readonly",
     "flatpickr": "readonly",
     "jQuery": "readonly",
-    "MathJax": "readonly",
+    "MathJax": "readonly"
   },
-  "extends": "eslint:recommended",
-  "parserOptions": { "ecmaVersion": 2020, "sourceType": "module" },
+  "extends": ["eslint:recommended", "plugin:storybook/recommended"],
+  "parserOptions": {
+    "ecmaVersion": 2020,
+    "sourceType": "module"
+  },
   "plugins": ["html"],
   "rules": {
     "accessor-pairs": "error",
@@ -23,7 +29,11 @@ module.exports = {
     "block-spacing": "warn",
     "comma-spacing": "warn",
     "dot-notation": "warn",
-    "indent": ["error", 2, { "SwitchCase": 1, "MemberExpression": "off", "ignoredNodes": ["TemplateLiteral > *"] }],
+    "indent": ["error", 2, {
+      "SwitchCase": 1,
+      "MemberExpression": "off",
+      "ignoredNodes": ["TemplateLiteral > *"]
+    }],
     "keyword-spacing": "error",
     "linebreak-style": ["warn", "unix"],
     "no-array-constructor": "error",
@@ -32,7 +42,9 @@ module.exports = {
     "no-constructor-return": "error",
     "no-duplicate-imports": "error",
     "no-else-return": "error",
-    "no-empty": ["error", { allowEmptyCatch: true }],
+    "no-empty": ["error", {
+      allowEmptyCatch: true
+    }],
     "no-eval": "error",
     "no-extend-native": "error",
     "no-extra-bind": "error",
@@ -56,13 +68,17 @@ module.exports = {
     "no-script-url": "error",
     "no-self-compare": "error",
     "no-sequences": "error",
-    "no-shadow": ["error", { "allow": ["html"] }],
+    "no-shadow": ["error", {
+      "allow": ["html"]
+    }],
     "no-tabs": "error",
     "no-trailing-spaces": "error",
     "no-undef": "error",
     "no-undef-init": "error",
     "no-unmodified-loop-condition": "error",
-    "no-unneeded-ternary": ["error", { defaultAssignment: false }],
+    "no-unneeded-ternary": ["error", {
+      defaultAssignment: false
+    }],
     "no-unreachable-loop": "error",
     "no-unused-vars": ["error"],
     "no-use-before-define": ["error", "nofunc"],
@@ -77,7 +93,8 @@ module.exports = {
     "object-shorthand": "error",
     "prefer-arrow-callback": "error",
     "prefer-const": "error",
-    "prefer-const": "error", // OPINIONATED
+    "prefer-const": "error",
+    // OPINIONATED
     "prefer-exponentiation-operator": "error",
     "prefer-numeric-literals": "error",
     "prefer-object-spread": "error",
@@ -89,6 +106,8 @@ module.exports = {
     "space-infix-ops": "error",
     "space-before-blocks": "error",
     "strict": "error",
-    "yoda": ["error", "never", { onlyEquality: true }],
+    "yoda": ["error", "never", {
+      onlyEquality: true
+    }]
   }
 };
