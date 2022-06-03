@@ -699,6 +699,8 @@ public interface AssignmentService extends EntityProducer {
 
     String getGradeForSubmitter(AssignmentSubmission submission, String submitter);
 
+    boolean isGradeOverridden(AssignmentSubmission submission, String submitter);
+
     /**
      * @param grade
      * @param typeOfGrade

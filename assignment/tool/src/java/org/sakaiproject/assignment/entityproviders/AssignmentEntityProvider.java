@@ -889,12 +889,14 @@ public class AssignmentEntityProvider extends AbstractEntityProvider implements 
         options.put(GRADE_SUBMISSION_GRADE, grade);
 
         // check for grade overrides
-        if (assignment.getIsGroup() && assignment.getTypeOfGrade() == Assignment.GradeType.SCORE_GRADE_TYPE) {
+        if (assignment.getIsGroup()) {
             submission.getSubmitters().forEach(s -> {
 
                 String ug = StringUtils.trimToNull((String) params.get(GRADE_SUBMISSION_GRADE + "_" + s.getSubmitter()));
                 if (ug != null) {
-                    ug = assignmentToolUtils.scalePointGrade(ug, assignment.getScaleFactor(), alerts);
+                    if (assignment.getTypeOfGrade() == Assignment.GradeType.SCORE_GRADE_TYPE) {
+                        ug = assignmentToolUtils.scalePointGrade(ug, assignment.getScaleFactor(), alerts);
+                    }
                     options.put(GRADE_SUBMISSION_GRADE + "_" + s.getSubmitter(), ug);
                 }
             });
@@ -1532,6 +1534,7 @@ public class AssignmentEntityProvider extends AbstractEntityProvider implements 
         private String sortName;
         private String displayId;
         private String grade;
+        private boolean overridden;
 
         public SimpleSubmitter(AssignmentSubmissionSubmitter ass, boolean anonymousGrading) throws UserNotDefinedException {
 
@@ -1539,6 +1542,7 @@ public class AssignmentEntityProvider extends AbstractEntityProvider implements 
 
             this.id = ass.getSubmitter();
             this.grade = assignmentService.getGradeForSubmitter(ass.getSubmission(), id);
+            this.overridden = assignmentService.isGradeOverridden(ass.getSubmission(), id);
             if (!anonymousGrading) {
                 User user = userDirectoryService.getUser(this.id);
                 this.displayName = user.getDisplayName();
