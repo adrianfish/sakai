@@ -92,6 +92,9 @@ export class SakaiHomeDashboard extends LitElement {
     }).catch(error => console.error(error.message));
   }
 
+  _toggleShowMotd() {
+    this.showMotd = !this.showMotd;
+  }
 
   render() {
 
@@ -127,7 +130,7 @@ export class SakaiHomeDashboard extends LitElement {
         ` : ""}
         ${this.data.motd ? html`
           <div id="motd">
-            <div id="motd-title-block" @click=${() => this.showMotd = !this.showMotd}>
+            <div id="motd-title-block" @click="${this._toggleShowMotd}">
               <div id="motd-title">${this.i18n.motd}</div>
               <div id="motd-icon">
                 <a href="javascript:;"

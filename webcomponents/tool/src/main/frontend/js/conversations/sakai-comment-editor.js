@@ -77,6 +77,10 @@ export class SakaiCommentEditor extends SakaiElement {
     });
   }
 
+  _startEditing() {
+    this.editing = true;
+  }
+
   cancelEditing() {
 
     this.editing = false;
@@ -98,7 +102,7 @@ export class SakaiCommentEditor extends SakaiElement {
           <input type="button" @click=${this.cancelEditing} value="${this.i18n.cancel}">
         </div>
         ` : html`
-        <input class="comment-editor-input" value="${this.i18n.add_a_comment}" @click=${() => this.editing = true} @keydown=${() => this.editing = true} />
+        <input class="comment-editor-input" value="${this.i18n.add_a_comment}" @click="${this._startEditing}" @keydown="${this._startEditing}" />
         `}
       </div>
     `;

@@ -121,6 +121,14 @@ export class ConversationsStatistics extends SakaiElement {
     this.loadStatsPage(1);
   }
 
+  _setThisWeek() {
+    this.interval = THIS_WEEK;
+  }
+
+  _setAllTime() {
+    this.interval = ALL_TIME;
+  }
+
   shouldUpdate() {
     return this.i18n && this.stats;
   }
@@ -135,12 +143,12 @@ export class ConversationsStatistics extends SakaiElement {
           <input type="radio"
               name="timeframe"
               value="${THIS_WEEK}"
-              @click=${() => this.interval = THIS_WEEK}
+              @click="${this._setThisWeek}"
               checked>${this.i18n.this_week}
           <input type="radio"
               name="timeframe"
               value="${ALL_TIME}"
-              @click=${() => this.interval = ALL_TIME}>${this.i18n.all_time}
+              @click="${this._setAllTime}">${this.i18n.all_time}
         </div>
       </div>
         <sakai-pager count="${this.count}" current="${this.currentPage}" @page-selected=${this.pageClicked}></sakai-pager>

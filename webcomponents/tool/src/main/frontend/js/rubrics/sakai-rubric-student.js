@@ -100,8 +100,7 @@ class SakaiRubricStudent extends RubricsElement {
                 rubric-id="${this.rubric.id}"
                 tool-id="${this.toolId}"
                 entity-id="${this.entityId}"
-                evaluated-item-id="${this.evaluatedItemId}"
-            />
+                evaluated-item-id="${this.evaluatedItemId}">
           ` : ""}
         </h3>
 
@@ -112,21 +111,21 @@ class SakaiRubricStudent extends RubricsElement {
               class="rubrics-tab-button rubrics-tab-selected"
               @keypress=${this.openGradePreviewTab}
               @click=${this.openGradePreviewTab}>
-            <sr-lang key="grading_rubric">gradingrubric</sr-lang>
+            <sr-lang key="grading_rubric">
           </a>
           <a href="javascript:void(0);"
               id="rubric-student-summary-button"
               class="rubrics-tab-button"
               @keypress=${this.makeStudentSummary}
               @click=${this.makeStudentSummary}>
-            <sr-lang key="student_summary">studentsummary</sr-lang>
+            <sr-lang key="student_summary">
           </a>
           <a href="javascript:void(0);"
               id="rubric-criteria-summary-button"
               class="rubrics-tab-button"
               @keypress=${this.makeCriteriaSummary}
               @click=${this.makeCriteriaSummary}>
-            <sr-lang key="criteria_summary">criteriasummary</sr-lang>
+            <sr-lang key="criteria_summary">
           </a>
         </div>
         ` : html``}

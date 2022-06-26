@@ -49,9 +49,9 @@ export class SakaiRubricStudentPreviewButton extends RubricsElement {
 
     return html`
       ${this.display === "button" ?
-      html`<h3><sr-lang key="grading_rubric" /></h3>
-      <button aria-haspopup="dialog" @click="${this.showRubric}"><sr-lang key="preview_rubric" /></button>`
-      : html`<span class="fa icon-sakai--sakai-rubrics" style="cursor: pointer;" title="${tr("preview_rubric")}" @click="${this.showRubric}" />`
+      html`<h3><sr-lang key="grading_rubric"></h3>
+      <button aria-haspopup="dialog" @click="${this.showRubric}"><sr-lang key="preview_rubric"></button>`
+      : html`<span class="fa icon-sakai--sakai-rubrics" style="cursor: pointer;" title="${tr("preview_rubric")}" @click="${this.showRubric}">`
       }
     `;
   }

@@ -233,6 +233,32 @@ export class SakaiTasksCreateTask extends SakaiDialogContent {
     }
   }
 
+  _setSelectedGroups(e) {
+    this.selectedGroups = e.target.selectedOptions;
+  }
+
+  _setDueDate(e) {
+
+    this.task.due = e.detail.epochMillis;
+    this.dueUpdated = true;
+  }
+
+  _setPriority(e) {
+    this.task.priority = e.target.value;
+  }
+
+  _setUserAssignation() {
+    this.assignationType = "user";
+  }
+
+  _setSiteAssignation() {
+    this.assignationType = "site";
+  }
+
+  _setGroupAssignation() {
+    this.assignationType = "group";
+  }
+
   groupComboList() {
 
     return html`
@@ -240,7 +266,7 @@ export class SakaiTasksCreateTask extends SakaiDialogContent {
           name="${this.i18n.groups}"
           id="group"
           aria-label="${this.i18n.groups}"
-          @change=${e => this.selectedGroups = e.target.selectedOptions}
+          @change="${this._setSelectedGroups}"
           .value=${this.selectedGroups}
           ?disabled=${this.assignationType !== "group"}>
         ${this.optionsGroup.map(option => html`
@@ -278,7 +304,7 @@ export class SakaiTasksCreateTask extends SakaiDialogContent {
           </div>
           <div class="input">
             <sakai-date-picker id="due"
-                @datetime-selected=${e => { this.task.due = e.detail.epochMillis; this.dueUpdated = true; }}
+                @datetime-selected="${this._setDueDate}"
                 epoch-millis=${this.task.due}
                 label="${this.i18n.due}">
             </sakai-date-picker>
@@ -290,7 +316,7 @@ export class SakaiTasksCreateTask extends SakaiDialogContent {
             <label for="priority">${this.i18n.priority}</label>
           </div>
           <div class="input">
-            <select id="priority" @change=${(e) => this.task.priority = e.target.value} .value=${this.task.priority}>
+            <select id="priority" @change="${this._setPriority}" .value=${this.task.priority}>
               <option value="5">${this.i18n.high}</option>
               <option value="4">${this.i18n.quite_high}</option>
               <option value="3">${this.i18n.medium}</option>
@@ -330,8 +356,8 @@ export class SakaiTasksCreateTask extends SakaiDialogContent {
                 name="deliver-task"
                 title="${this.i18n.deliver_my_dashboard}"
                 value="user"
-                @click=${() => this.assignationType = 'user'}
-                ?checked=${this.assignationType === 'user'} >
+                @click="${this._setUserAssignation}"
+                ?checked=${this.assignationType === "user"} >
             <label for="task-current-user">${this.i18n.deliver_my_dashboard}</label>
           </div>
           <div>
@@ -340,8 +366,8 @@ export class SakaiTasksCreateTask extends SakaiDialogContent {
                 name="deliver-task"
                 title="${this.i18n.deliver_site}"
                 value="site"
-                @click=${() => this.assignationType = 'site'}
-                ?checked=${this.assignationType === 'site'}>
+                @click="${this._setSiteAssignation}"
+                ?checked=${this.assignationType === "site"}>
             <label for="task-students">${this.i18n.deliver_site}</label>
           </div>
           <div style="display:${this.existGroups() ? 'inline' : 'none'}">
@@ -350,8 +376,8 @@ export class SakaiTasksCreateTask extends SakaiDialogContent {
                name="deliver-task"
                title="${this.i18n.deliver_group}"
                value="group"
-               @click=${() => this.assignationType = 'group'}
-               ?checked=${this.assignationType === 'group'}>
+               @click="${this._setGroupAssignation}"
+               ?checked=${this.assignationType === "group"}>
             <label for="task-groups">${this.i18n.deliver_group}</label>
           </div>
           <div style="display:${this.existGroups() ? 'block' : 'none'}; margin-left:20px; margin-top:5px;">

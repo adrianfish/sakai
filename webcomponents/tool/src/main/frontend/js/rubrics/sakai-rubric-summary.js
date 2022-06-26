@@ -51,13 +51,13 @@ export class SakaiRubricSummary extends rubricsApiMixin(RubricsElement) {
     if (this.summaryType === "criteria") {
       return html`
         <div class="pull-right collapse-toggle-buttons">
-          <button type="button" @click=${this._expandAll}><sr-lang key="expand_all">expand all</sr-lang></button>
-          <button type="button" @click=${this._collapseAll}><sr-lang key="collapse_all">collapse all</sr-lang></button>
+          <button type="button" @click=${this._expandAll}><sr-lang key="expand_all"></button>
+          <button type="button" @click=${this._collapseAll}><sr-lang key="collapse_all"></button>
         </div>
-        <h3><sr-lang key="criteria_summary">CRITERIA</sr-lang></h3>
+        <h3><sr-lang key="criteria_summary"></h3>
         ${!this.allEvaluations?.length ? html`
           <div class="sak-banner-warn">
-            <sr-lang key="no_evaluations_warning">WARN</sr-lang>
+            <sr-lang key="no_evaluations_warning">
           </div>
         ` : html`
           ${this.criteria.map((c) => html`
@@ -75,16 +75,16 @@ export class SakaiRubricSummary extends rubricsApiMixin(RubricsElement) {
                           <tr>
                             ${c.ratings.map(r => html`
                               <th class="rubrics-summary-table-cell">
-                                  <div>${r.points} <sr-lang key="points">points</sr-lang></div>
+                                  <div>${r.points} <sr-lang key="points"></div>
                                   <div class="summary-rating-name" title="${r.title}">${this._limitCharacters(r.title, 20)}</div>
                               </th>
                               ${this.association.parameters.fineTunePoints && this._getCustomCount(c.id, r.points) > 0 ? html`
-                                <th class="rubrics-summary-table-cell"><sr-lang key="adjusted_score">adjustedscore</sr-lang></th>
+                                <th class="rubrics-summary-table-cell"><sr-lang key="adjusted_score"></th>
                               ` : ""}
                             `)}
-                            <th style="display:none" class="rubrics-summary-table-cell rubrics-summary-average-cell"><sr-lang key="average">average</sr-lang></th>
-                            <th style="display:none" class="rubrics-summary-table-cell "><sr-lang key="median">median</sr-lang></th>
-                            <th style="display:none" class="rubrics-summary-table-cell "><sr-lang key="stdev">stdev</sr-lang></th>
+                            <th style="display:none" class="rubrics-summary-table-cell rubrics-summary-average-cell"><sr-lang key="average"></th>
+                            <th style="display:none" class="rubrics-summary-table-cell "><sr-lang key="median"></th>
+                            <th style="display:none" class="rubrics-summary-table-cell "><sr-lang key="stdev"></th>
                           </tr>
                           <tr>
                             ${c.ratings.map(r => html`
@@ -100,15 +100,15 @@ export class SakaiRubricSummary extends rubricsApiMixin(RubricsElement) {
                         </table>
                       </div>
                       <dl class="dl-horizontal">
-                          <dt><sr-lang key="average">average</sr-lang></dt>
+                          <dt><sr-lang key="average"></dt>
                           <dd>
                               ${this._getPointsAverage(c.id)}
                           </dd>
-                          <dt><sr-lang key="median">median</sr-lang></dt>
+                          <dt><sr-lang key="median"></dt>
                           <dd>
                               ${this._getPointsMedian(c.id)}
                           </dd>
-                          <dt><sr-lang key="stdev">stdev</sr-lang></dt>
+                          <dt><sr-lang key="stdev"></dt>
                           <dd>
                               ${this._getPointsStdev(c.id)}
                           </dd>
@@ -118,25 +118,25 @@ export class SakaiRubricSummary extends rubricsApiMixin(RubricsElement) {
                 </div>
               </div>
           `)}
-          <div><sr-lang key="adjusted_score_warning">adjustedscorewarning</sr-lang></div>
+          <div><sr-lang key="adjusted_score_warning"></div>
         `}
       `;
     }
 
     return html`
-      <h3><sr-lang key="student_summary">studentsummary</sr-lang></h3>
+      <h3><sr-lang key="student_summary"></h3>
       ${!this.allEvaluations?.length ? html`
       <div class="sak-banner-warn">
-          <sr-lang key="no_evaluations_warning">WARN</sr-lang>
+          <sr-lang key="no_evaluations_warning">
       </div>
       ` : html`
       <div class="table-responsive">
         <table id="student-summary" class="rubrics-summary-table table table-bordered table-condensed">
           <thead>
             <tr>
-              <th class="rubrics-summary-table-cell rubrics-summary-table-cell-wide"><sr-lang key="student_name">studentname</sr-lang></th>
+              <th class="rubrics-summary-table-cell rubrics-summary-table-cell-wide"><sr-lang key="student_name"></th>
               ${this.criteria.map(c => html`<th class="rubrics-summary-table-cell" >${c.title}</th>`)}
-              <th class="rubrics-summary-table-cell rubrics-summary-average-cell"><sr-lang key="score">score</sr-lang></th>
+              <th class="rubrics-summary-table-cell rubrics-summary-average-cell"><sr-lang key="score"></th>
             </tr>
           </thead>
           <tbody>
@@ -152,7 +152,7 @@ export class SakaiRubricSummary extends rubricsApiMixin(RubricsElement) {
           </tbody>
           <tfoot>
             <tr>
-              <th class="rubrics-summary-table-cell rubrics-summary-table-cell-wide rubrics-summary-average-row " ><sr-lang key="average">average</sr-lang></th>
+              <th class="rubrics-summary-table-cell rubrics-summary-table-cell-wide rubrics-summary-average-row " ><sr-lang key="average"></th>
               ${this.criteria.map(c => html`
               <td class="rubrics-summary-table-cell rubrics-summary-average-row">${this.averages.get(c.id)}</td>
               `)}

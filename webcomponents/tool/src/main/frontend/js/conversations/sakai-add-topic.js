@@ -304,6 +304,38 @@ export class SakaiAddTopic extends SakaiElement {
     }
   }
 
+  _resetTitle() {
+    this.titleError = false;
+  }
+
+  _setSelectedTagId(e) {
+    this.selectedTagId = e.target.value;
+  }
+
+  _setPinned(e) {
+
+    this.topic.pinned = e.target.checked;
+    this.saveWip();
+  }
+
+  _setAnonymous(e) {
+
+    this.topic.anonymous = e.target.checked;
+    this.saveWip();
+  }
+
+  _setAllowAnonymousPosts(e) {
+
+    this.topic.allowAnonymousPosts = e.target.checked;
+    this.saveWip();
+  }
+
+  _setMustPostBeforeViewing(e) {
+
+    this.topic.mustPostBeforeViewing = e.target.checked;
+    this.saveWip();
+  }
+
   firstUpdated() {
 
     this.querySelector(".summary-input").focus();
@@ -331,7 +363,7 @@ export class SakaiAddTopic extends SakaiElement {
           <div id="post-type-label" class="add-topic-label">${this.i18n.topic_type}</div>
           <div id="topic-type-toggle-block">
             <div @click=${this.setType}
-                @keydown=${this.setType}}
+                @keydown=${this.setType}
                 tabindex="0"
                 data-type="${QUESTION}"
                 class="topic-type-toggle ${this.topic.type === QUESTION ? "active" : ""}">
@@ -342,7 +374,7 @@ export class SakaiAddTopic extends SakaiElement {
               <div class="topic-type-description">${this.i18n.question_type_description}</div>
             </div>
             <div @click=${this.setType}
-                @keydown=${this.setType}}
+                @keydown=${this.setType}
                 tabindex="0"
                 data-type="${DISCUSSION}"
                 class="topic-type-toggle ${this.topic.type === DISCUSSION ? "active" : ""}">
@@ -361,7 +393,7 @@ export class SakaiAddTopic extends SakaiElement {
           <input id="summary"
             class="summary-input ${this.titleError ? "error" : ""}"
             @change=${this.updateSummary}
-            @focus=${() => this.titleError = false}
+            @focus="${this._resetTitle}"
             .value="${this.topic.title}" />
           <div class="required">
             <span>* ${this.i18n.required}</span>
@@ -381,7 +413,7 @@ export class SakaiAddTopic extends SakaiElement {
         <div id="tag-post-block" class="add-topic-block">
           <div id="tag-post-label" class="add-topic-label">${this.i18n.tag_topic}</div>
           ${this.tags.length > 0 ? html`
-          <select @change=${e => this.selectedTagId = e.target.value}>
+          <select @change="${this._setSelectedTagId}">
             ${this.tags.map(tag => html`
             <option value="${tag.id}">${tag.label}</option>
             `)}
@@ -611,7 +643,7 @@ export class SakaiAddTopic extends SakaiElement {
           ${this.canPin ? html`
           <div>
             <input type="checkbox" id="pinned-checkbox"
-              @click=${e => { this.topic.pinned = e.target.checked; this.saveWip(); }}
+              @click="${this._setPinned}"
               ?checked=${this.topic.pinned}>
             </input>
             <span class="topic-option-label">${this.i18n.pinned}</span>
@@ -621,7 +653,7 @@ export class SakaiAddTopic extends SakaiElement {
           ${this.canAnonPost ? html`
           <div>
             <input type="checkbox"
-              @click=${e => { this.topic.anonymous = e.target.checked; this.saveWip(); }}
+              @click=${this._setAnonymous}
               ?checked=${this.topic.anonymous}>
             </input>
             <span class="topic-option-label">${this.i18n.anonymous}</span>
@@ -629,7 +661,7 @@ export class SakaiAddTopic extends SakaiElement {
           </div>
           <div>
             <input type="checkbox"
-              @click=${e => { this.topic.allowAnonymousPosts = e.target.checked; this.saveWip(); }}
+              @click="${this._setAllowAnonymousPosts}"
               ?checked=${this.topic.allowAnonymousPosts}>
             </input>
             <span class="topic-option-label">${this.i18n.anonymous_posts}</span>
@@ -638,7 +670,7 @@ export class SakaiAddTopic extends SakaiElement {
           ` : ""}
           <div>
             <input type="checkbox"
-              @click=${e => { this.topic.mustPostBeforeViewing = e.target.checked; this.saveWip(); }}
+              @click="${this._setMustPostBeforeViewing}"
               ?checked=${this.topic.mustPostBeforeViewing}>
             </input>
             <span class="topic-option-label">${this.i18n.post_before_viewing_label}</span>

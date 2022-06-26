@@ -82,8 +82,7 @@ export class SakaiRubricGrading extends rubricsApiMixin(RubricsElement) {
                 rubric-id="${this.rubric.id}"
                 tool-id="${this.toolId}"
                 entity-id="${this.entityId}"
-                evaluated-item-id="${this.evaluatedItemId}"
-            />
+                evaluated-item-id="${this.evaluatedItemId}">
           ` : ""}
         </h3>
         <div class="rubrics-tab-row">

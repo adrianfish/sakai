@@ -169,7 +169,7 @@ export class SakaiGrader extends gradableDataMixin(SakaiElement) {
         </div>
         <div id="grader-settings-wrapper">
           <a id="settings-link" href="javascript;" @click=${this.toggleSettings} title="${this.i18n.settings}">
-            <fa-icon size="1.3em" i-class="fas cogs" path-prefix="/webcomponents/assets" />
+            <fa-icon size="1.3em" i-class="fas cogs" path-prefix="/webcomponents/assets">
           </a>
           <div id="grader-settings" @keydown=${this.onSettingsKeydown} class="settings">
             <div><label><input type="checkbox" ?disabled=${!this.hasUnsubmitted} @change=${this.submittedOnlyChanged} .checked=${this.submittedOnly} />${this.assignmentsI18n["nav.view.subsOnly"]}</label></div>
@@ -201,13 +201,13 @@ export class SakaiGrader extends gradableDataMixin(SakaiElement) {
         </div>
         <div>
           <button class="btn-transparent" @click=${this.previous} aria-label="${this.i18n.previous_submission_label}" ?disabled=${!this.canSave}>
-            <fa-icon size="2em" i-class="fas arrow-circle-left" path-prefix="/webcomponents/assets" style="vertical-align: middle;" />
+            <fa-icon size="2em" i-class="fas arrow-circle-left" path-prefix="/webcomponents/assets" style="vertical-align: middle;">
           </button>
           <select aria-label="${this.i18n.student_selector_label}" @change=${this.studentSelected} ?disabled=${!this.canSave}>
             ${this.submissions.map(s => html`<option value="${s.id}" .selected=${this.submission.id === s.id}>${s.groupId ? s.groupTitle : s.firstSubmitterName}</option>`)}
           </select>
           <button class="btn-transparent" @click=${this.next} aria-label="${this.i18n.next_submission_label}" ?disabled=${!this.canSave}>
-            <fa-icon size="2em" i-class="fas arrow-circle-right" path-prefix="/webcomponents/assets" style="vertical-align: middle;" />
+            <fa-icon size="2em" i-class="fas arrow-circle-right" path-prefix="/webcomponents/assets" style="vertical-align: middle;">
           </button>
         </div>
         <div>${this.currentStudentInfo}</div>
@@ -224,16 +224,14 @@ export class SakaiGrader extends gradableDataMixin(SakaiElement) {
           <sakai-lti-iframe
             allow-resize="yes"
             new-window-text="${this.i18n.lti_grade_launch_button}"
-            launch-url="${this.submission.ltiSubmissionLaunch}"
-         />
+            launch-url="${this.submission.ltiSubmissionLaunch}">
         ` : "" }
         ${(this.ltiGradableLaunch && ! this.submission.ltiSubmissionLaunch )  ? html`
           <div class="sak-banner-info">${unsafeHTML(this.i18n.lti_grade_launch_instructions)}</div>
           <sakai-lti-iframe
             allow-resize="yes"
             new-window-text="${this.i18n.lti_grade_launch_button}"
-            launch-url="${this.ltiGradableLaunch}"
-         />
+            launch-url="${this.ltiGradableLaunch}">
         ` : "" }
         ${this.submission.submittedTime || (this.submission.draft && this.submission.visible) ? html`
           ${this.submittedTextMode ? html`
@@ -559,8 +557,8 @@ export class SakaiGrader extends gradableDataMixin(SakaiElement) {
           <textarea id="grader-feedback-comment" .value=${this.submission.feedbackComment}></textarea>
           <div class="media-feedback grader-label">
             <span class="feedback-label">${this.i18n.recorded_feedback_label}</span>
-            <fa-icon size="1.5em" i-class="fas microphone" path-prefix="/webcomponents/assets" style="vertical-align: middle;"></fa-icon>
-            <fa-icon size="1.5em" i-class="fas video" path-prefix="/webcomponents/assets" style="vertical-align: middle;"></fa-icon>
+            <fa-icon size="1.5em" i-class="fas microphone" path-prefix="/webcomponents/assets" style="vertical-align: middle;">
+            <fa-icon size="1.5em" i-class="fas video" path-prefix="/webcomponents/assets" style="vertical-align: middle;">
           </div>
           <button @click=${this.doneWithFeedbackDialog}>${this.assignmentsI18n["gen.don"]}</button>
           <button @click=${this.cancelFeedbackToggle}>${this.assignmentsI18n["gen.can"]}</button>
@@ -627,7 +625,7 @@ export class SakaiGrader extends gradableDataMixin(SakaiElement) {
         ${this.submission.submittedTime && !this.submission.showExtension ? html`
           <div class="resubmission-checkbox">
             <label>
-              <input type="checkbox" .checked=${this.showResubmission} @change=${this.toggleResubmissionBlock}/>
+              <input type="checkbox" .checked=${this.showResubmission} @change="${this.toggleResubmissionBlock}" />
               <span>${this.assignmentsI18n.allowResubmit}</span>
             </label>
           </div>
@@ -651,10 +649,10 @@ export class SakaiGrader extends gradableDataMixin(SakaiElement) {
         ` : ""}
         ${this.submission.showExtension ? html`
             <div id="grader-extension-section" >
-                <input type="checkbox" .checked=${this.allowExtension} id="allowExtensionToggle" name="allowExtensionToggle" @change=${this.toggleExtensionBlock}" />
-                <label for="allowExtensionToggle" >${this.assignmentsI18n.allowExtension}</label>
+                <input type="checkbox" .checked=${this.allowExtension} id="allowExtensionToggle" name="allowExtensionToggle" @change="${this.toggleExtensionBlock}" />
+                <label for="allowExtensionToggle">${this.assignmentsI18n.allowExtension}</label>
                 ${this.allowExtension ? html`
-                    <div >${this.assignmentsI18n.allowExtensionCaptionGrader}</div>
+                    <div>${this.assignmentsI18n.allowExtensionCaptionGrader}</div>
                     <div id="allowExtensionTime" >
                     <label>${this.assignmentsI18n["gen.acesubunt"]}</label>
                     <sakai-date-picker
@@ -685,7 +683,7 @@ export class SakaiGrader extends gradableDataMixin(SakaiElement) {
   }
 
   renderGraderReturned() {
-    return html`<span class="grader-returned fa fa-eye" title="${this.i18n.returned_tooltip}" />`;
+    return html`<span class="grader-returned fa fa-eye" title="${this.i18n.returned_tooltip}">`;
   }
 
   render() {
