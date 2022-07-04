@@ -2,7 +2,7 @@ import { html } from 'lit-html';
 import { unsafeHTML } from 'lit-html/directives/unsafe-html';
 import fetchMock from "fetch-mock";
 import { localStyles } from "./styles/local.js";
-import { conversationsI18n } from "../i18n/conversations-i18n.js";
+import { conversationsI18n } from "./conversations-i18n.js";
 import { playpenData } from "./data/playpen-data.js";
 import { playpenStatsPage1 } from "./data/playpen-stats-page1.js";
 import { playpenStatsPage2 } from "./data/playpen-stats-page2.js";

@@ -8,7 +8,7 @@ import { addTopicStyles } from "./styles/sakai-add-topic.js";
 import { topicStyles } from "./styles/sakai-topic.js";
 import { postStyles } from "./styles/sakai-post.js";
 import { conversationsStyles } from "./styles/sakai-conversations.js";
-import { conversationsI18n } from "../i18n/conversations-i18n.js";
+import { conversationsI18n } from "./conversations-i18n.js";
 import { playpenData } from "./data/playpen-data.js";
 import { sandpitData } from "./data/sandpit-data.js";
 import { topic3Posts } from "./data/topic3-posts.js";

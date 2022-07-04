@@ -45,13 +45,17 @@ export class SakaiAddTopic extends SakaiElement {
 
   set aboutReference(value) {
 
+    const old = this._aboutReference;
+
     this._aboutReference = value;
-    this.site.aboutReference = value;
+    this.requestUpdate("aboutReference", old);
   }
 
   get aboutReference() { return this._aboutReference; }
 
   set topic(value) {
+
+    const old = this._topic;
 
     this._topic = value;
 
@@ -60,11 +64,12 @@ export class SakaiAddTopic extends SakaiElement {
     } else {
       this.topic.availability = AVAILABILITY_NOW;
     }
-    this.showShowDatePicker = this.topic.showDate !== null;
-    this.showLockDatePicker = this.topic.lockDate !== null;
-    this.showHideDatePicker = this.topic.hideDate !== null;
-    this.showDue = this.topic.dueDate !== null;
-    this.showAcceptUntil = this.topic.lockDate !== null;
+
+    this.showShowDatePicker = !!this.topic.showDate;
+    this.showLockDatePicker = !!this.topic.lockDate;
+    this.showHideDatePicker = !!this.topic.hideDate;
+    this.showDue = !!this.topic.dueDate
+    this.showAcceptUntil = !!this.topic.lockDate;
 
     const nowMillis = Date.now();
     this.topic.showDateMillis = this.topic.showDate ? this.topic.showDate * 1000 : nowMillis;
@@ -74,15 +79,17 @@ export class SakaiAddTopic extends SakaiElement {
     this.topic.acceptUntilDateMillis = this.topic.acceptUntilDate ? this.topic.acceptUntilDate * 1000 : nowMillis;
 
     this.new = value.id === "";
-    this.requestUpdate();
+    this.requestUpdate("topic", old);
   }
 
   get topic() { return this._topic; }
 
   set tags(value) {
 
+    const old = this._tags;
     this._tags = value;
     this.selectedTagId = this._tags.length ? this._tags[0].id : null;
+    this.requestUpdate("tags", old);
   }
 
   get tags() { return this._tags; }
@@ -91,7 +98,9 @@ export class SakaiAddTopic extends SakaiElement {
     this.save(true);
   }
 
-  saveWip() {
+  async saveWip() {
+
+    await this.updateComplete;
     this.dispatchEvent(new CustomEvent("save-wip-topic", { detail: { topic: this.topic }, bubbles: true }));
   }
 
@@ -128,29 +137,33 @@ export class SakaiAddTopic extends SakaiElement {
         return r.json();
       }
     })
-    .then(topic => {
+    .then(async topic => {
 
       Object.assign(this.topic, topic);
+      await this.updateComplete;
       this.dispatchEvent(new CustomEvent("topic-saved", { detail: { topic: this.topic }, bubbles: true }));
     })
     .catch (error => console.error(error));
   }
 
-  updateMessage(e) {
+  async updateMessage(e) {
 
     this.topic.message = e.detail.content;
+
+    await this.updateComplete;
     this.dispatchEvent(new CustomEvent("topic-dirty", { bubbles: true }));
     this.saveWip();
   }
 
-  updateSummary(e) {
+  async updateSummary(e) {
 
     this.topic.title = e.target.value;
+    await this.updateComplete;
     this.dispatchEvent(new CustomEvent("topic-dirty", { bubbles: true }));
     this.saveWip();
   }
 
-  cancel() {
+  async cancel() {
     this.dispatchEvent(new CustomEvent("topic-add-cancelled", { bubbles: true }));
   }
 
@@ -164,7 +177,9 @@ export class SakaiAddTopic extends SakaiElement {
     this.requestUpdate();
   }
 
-  selectTag() {
+  async selectTag(e) {
+
+    e.stopPropagation();
 
     const tagId = this.selectedTagId;
 
@@ -176,9 +191,9 @@ export class SakaiAddTopic extends SakaiElement {
       this.topic.tags.push(tag);
     }
 
-    this.saveWip();
-
     this.requestUpdate();
+
+    this.saveWip();
   }
 
   removeTag(e) {
@@ -189,13 +204,19 @@ export class SakaiAddTopic extends SakaiElement {
     this.requestUpdate();
   }
 
-  editAvailableTags() {
+  async editAvailableTags(e) {
+
+    e.stopPropagation();
 
     this.saveWip();
+
+    await this.updateComplete;
     this.dispatchEvent(new CustomEvent("edit-tags", { bubbles: true }));
   }
 
   toggleGroup(e) {
+
+    e.stopPropagation();
 
     const groupRef = e.target.value;
     this.topic.groups = this.topic.groups || [];
@@ -214,6 +235,8 @@ export class SakaiAddTopic extends SakaiElement {
 
   toggleShowDue(e) {
 
+    e.stopPropagation();
+
     this.showDue = e.target.checked;
     if (!this.showDue) {
       this.topic.dueDate = undefined;
@@ -223,6 +246,8 @@ export class SakaiAddTopic extends SakaiElement {
   }
 
   toggleShowAcceptUntil(e) {
+
+    e.stopPropagation();
 
     this.showAcceptUntil = e.target.checked;
     if (!this.showAcceptUntil) {
@@ -234,6 +259,8 @@ export class SakaiAddTopic extends SakaiElement {
 
   setVisibility(e) {
 
+    e.stopPropagation();
+
     this.topic.visibility = e.target.dataset.visibility;
     if (this.topic.visibility != GROUP) {
       this.topic.groups = [];
@@ -243,26 +270,40 @@ export class SakaiAddTopic extends SakaiElement {
   }
 
   setShowDate(e) {
+
+    e.stopPropagation();
     this.topic.showDate = e.detail.epochSeconds;
   }
 
   setLockDate(e) {
+
+    e.stopPropagation();
     this.topic.lockDate = e.detail.epochSeconds;
   }
 
   setHideDate(e) {
+
+    e.stopPropagation();
     this.topic.hideDate = e.detail.epochSeconds;
   }
 
   setDueDate(e) {
+
+    console.log("DSASDS");
+
+    e.stopPropagation();
     this.topic.dueDate = e.detail.epochSeconds;
   }
 
   setAcceptUntilDate(e) {
+
+    e.stopPropagation();
     this.topic.acceptUntilDate = e.detail.epochSeconds;
   }
 
-  setAvailableNow() {
+  setAvailableNow(e) {
+
+    e.stopPropagation();
 
     this.topic.availability = AVAILABILITY_NOW;
     this.topic.showDate = null;
@@ -274,13 +315,17 @@ export class SakaiAddTopic extends SakaiElement {
     this.requestUpdate();
   }
 
-  setAvailableDated() {
+  setAvailableDated(e) {
+
+    e.stopPropagation();
 
     this.topic.availability = AVAILABILITY_DATED;
     this.requestUpdate();
   }
 
   toggleShowDatePicker(e) {
+
+    e.stopPropagation();
 
     this.showShowDatePicker = e.target.checked;
     if (!e.target.checked) {
@@ -290,6 +335,8 @@ export class SakaiAddTopic extends SakaiElement {
 
   toggleLockDatePicker(e) {
 
+    e.stopPropagation();
+
     this.showLockDatePicker = e.target.checked;
     if (!e.target.checked) {
       this.topic.lockDate = undefined;
@@ -297,6 +344,8 @@ export class SakaiAddTopic extends SakaiElement {
   }
 
   toggleHideDatePicker(e) {
+
+    e.stopPropagation();
 
     this.showHideDatePicker = e.target.checked;
     if (!e.target.checked) {
@@ -316,17 +365,23 @@ export class SakaiAddTopic extends SakaiElement {
 
   _setAnonymous(e) {
 
+    e.stopPropagation();
+
     this.topic.anonymous = e.target.checked;
     this.saveWip();
   }
 
   _setAllowAnonymousPosts(e) {
 
+    e.stopPropagation();
+
     this.topic.allowAnonymousPosts = e.target.checked;
     this.saveWip();
   }
 
   _setMustPostBeforeViewing(e) {
+
+    e.stopPropagation();
 
     this.topic.mustPostBeforeViewing = e.target.checked;
     this.saveWip();
@@ -474,7 +529,12 @@ export class SakaiAddTopic extends SakaiElement {
               <div id="add-topic-groups-block">
                 ${this.groups.map(group => html`
                 <div class="add-topic-group-block">
-                  <input type="checkbox" @click=${this.toggleGroup} value="${group.reference}" ?checked=${this.topic.groups.includes(group.reference)}>${group.title}</input>
+                  <input type="checkbox"
+                      @click=${this.toggleGroup}
+                      value="${group.reference}"
+                      ?checked=${this.topic.groups.includes(group.reference)}>
+                    ${group.title}
+                  </input>
                 </div>
                 `)}
               </div>
@@ -507,7 +567,7 @@ export class SakaiAddTopic extends SakaiElement {
                     type="radio"
                     aria-labelledby="availability-dated-label"
                     name="availabilitytype"
-                    @click=${this.setAvailableDated}
+                    @click="${this.setAvailableDated}"
                     ?checked=${this.topic.availability === AVAILABILITY_DATED} />
               </div>
               <div id="availability-dated-label">${this.i18n.make_available_dated}</div>
@@ -541,7 +601,7 @@ export class SakaiAddTopic extends SakaiElement {
                   <input type="checkbox"
                       aria-labelledby="add-topic-lock-label"
                       @click=${this.toggleLockDatePicker}
-                      ?checked=${this.topic.lockDate}>
+                      ?checked=${this.showLockDatePicker}>
                 </div>
                 <div>
                   <div id="add-topic-lock-label">${this.i18n.lock}</div>
@@ -562,7 +622,7 @@ export class SakaiAddTopic extends SakaiElement {
                   <input type="checkbox"
                       aria-labelledby="add-topic-hide-label"
                       @click=${this.toggleHideDatePicker}
-                      ?checked=${this.topic.hideDate}>
+                      ?checked=${this.showHideDatePicker}>
                 </div>
                 <div>
                   <div id="add-topic-hide-label">${this.i18n.hide}</div>
@@ -591,7 +651,7 @@ export class SakaiAddTopic extends SakaiElement {
             <div>
               <input type="checkbox"
                   @click=${this.toggleShowDue}
-                  ?checked=${this.topic.dueDate}>
+                  ?checked=${this.showDue}>
             </div>
             <div>
               <div>
@@ -610,7 +670,7 @@ export class SakaiAddTopic extends SakaiElement {
                   <div>
                     <input type="checkbox"
                         @click=${this.toggleShowAcceptUntil}
-                        ?checked=${this.topic.lockDate}>
+                        ?checked=${this.showAcceptUntil}>
                   </div>
                   <div>
                     <div>

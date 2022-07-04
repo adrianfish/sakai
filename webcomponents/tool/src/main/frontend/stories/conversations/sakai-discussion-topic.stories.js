@@ -1,7 +1,7 @@
 import { html } from 'lit-html';
 import { unsafeHTML } from 'lit-html/directives/unsafe-html';
 import fetchMock from "fetch-mock";
-import { conversationsI18n } from "../i18n/conversations-i18n.js";
+import { conversationsI18n } from "./conversations-i18n.js";
 import { topic1 } from "./data/discussion-topic1.js";
 import { postStyles } from "./styles/sakai-post.js";
 

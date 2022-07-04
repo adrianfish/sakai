@@ -1,8 +1,9 @@
 import { html } from 'lit-html';
 import { unsafeHTML } from 'lit-html/directives/unsafe-html';
 import fetchMock from "fetch-mock";
-import { conversationsI18n } from "../i18n/conversations-i18n.js";
+import { conversationsI18n } from "./conversations-i18n.js";
 import { topic1 } from "./data/topic1.js";
+import { blankTopic } from "./data/blankTopic.js";
 
 import '../../js/conversations/sakai-add-topic.js';
 
@@ -10,7 +11,13 @@ export default {
   title: 'Sakai Add Topic',
   decorators: [storyFn => {
 
-    parent.portal = {locale: "en-GB", userId: "mike"};
+    parent.portal = {
+      locale: "en-GB",
+      user: {
+        id: "mike",
+        offsetFromServerMillis: 3600000,
+      }
+    }
 
     fetchMock
       .get(/sakai-ws\/rest\/i18n\/getI18nProperties.*/, conversationsI18n, {overwriteRoutes: true})
@@ -54,14 +61,13 @@ export default {
   }],
 };
 
-const availableTags = [ "pheasant", "chicken", "turkey", "bigbird" ];
-
+const availableTags = [ { id: 1, label: "pheasant"}, { id: 2, label: "chicken" }, { id: 3, label:"turkey" }, { id: 4, label: "bigbird" }];
 
 export const AddTopic = () => {
 
   return html`
-    <div>
-      <sakai-add-topic about-reference="/site/playpen" available-tags="${JSON.stringify(availableTags)}"></sakai-add-topic>
+    <div class="Mrphs-sakai-conversations">
+      <sakai-add-topic about-reference="/site/playpen" topic="${blankTopic}" tags="${JSON.stringify(availableTags)}" can-anon can-pin></sakai-add-topic>
     </div>
   `;
 };
@@ -71,7 +77,7 @@ export const UpdateTopic = () => {
 
   return html`
     <div>
-      <sakai-add-topic @topic-saved=${e => console.log(e.detail.topic)} topic="${topic1}" available-tags="${JSON.stringify(availableTags)}"></sakai-add-topic>
+      <sakai-add-topic can-anon @topic-saved=${e => console.log(e.detail.topic)} topic="${topic1}" available-tags="${JSON.stringify(availableTags)}"></sakai-add-topic>
     </div>
   `;
 };
