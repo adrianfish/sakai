@@ -23,14 +23,19 @@ package org.sakaiproject.event.impl;
 
 import java.time.Instant;
 import java.util.Date;
-import java.util.Observable;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Observer;
 
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
+import org.apache.ignite.IgniteMessaging;
+import org.apache.ignite.lang.IgniteBiPredicate;
+
 import org.sakaiproject.authz.api.SecurityAdvisor;
+import org.sakaiproject.authz.api.SecurityAdvisor.SecurityAdvice;
 import org.sakaiproject.authz.api.SecurityService;
 import org.sakaiproject.entity.api.EntityManager;
 import org.sakaiproject.entity.api.Reference;
@@ -41,12 +46,13 @@ import org.sakaiproject.event.api.LearningResourceStoreService.LRS_Statement;
 import org.sakaiproject.event.api.NotificationService;
 import org.sakaiproject.event.api.UsageSession;
 import org.sakaiproject.event.api.UsageSessionService;
-import org.sakaiproject.time.api.Time;
-import org.sakaiproject.time.api.TimeService;
+import org.sakaiproject.ignite.EagerIgniteSpringBean;
 import org.sakaiproject.tool.api.Placement;
 import org.sakaiproject.tool.api.SessionManager;
 import org.sakaiproject.tool.api.ToolManager;
 import org.sakaiproject.user.api.User;
+
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * <p>
@@ -54,235 +60,92 @@ import org.sakaiproject.user.api.User;
  * </p>
  */
 @Slf4j
-public abstract class BaseEventTrackingService implements EventTrackingService
+public class BaseEventTrackingService implements EventTrackingService
 {
-	/** An observable object helper. */
-	protected MyObservable m_observableHelper = new MyObservable();
+	@Setter
+	private EagerIgniteSpringBean ignite;
 
-	/** An observable object helper for see-it-first priority observers. */
-	protected MyObservable m_priorityObservableHelper = new MyObservable();
+	@Autowired
+	private UsageSessionService usageSessionService;
 
-	/** An observable object helper for see-only-local-events observers. */
-	protected MyObservable m_localObservableHelper = new MyObservable();
+	@Autowired
+	private SessionManager sessionManager;
 
-	protected EventDelayHandler delayHandler;
+	@Autowired
+	private SecurityService securityService;
 
-	/**********************************************************************************************************************************************************************************************************************************************************
-	 * Observable implementation
-	 *********************************************************************************************************************************************************************************************************************************************************/
+	@Autowired
+	private ToolManager toolManager;
 
-	/**
-	 * Cause this new event to get to wherever it has to go for persistence, etc.
-	 *
-	 * @param event
-	 *        The new event to post.
-	 */
-	protected abstract void postEvent(Event event);
+	@Autowired
+	private EntityManager entityManager;
 
-	/**********************************************************************************************************************************************************************************************************************************************************
-	 * Event post / flow - override
-	 *********************************************************************************************************************************************************************************************************************************************************/
+	@Setter
+	private EventDelayHandler eventDelayHandler;
 
-	/**
-	 * Send notification about a new event to observers.
-	 *
-	 * @param event
-	 *        The event to send notification about.
-	 * @param local
-	 *        True if the event originated on this server, false if it came from another server.
-	 */
-	protected void notifyObservers(Event event, boolean local)
-	{
-		// %%% inline like this, or on a new thread?
+	private IgniteMessaging messaging;
+	
+	private Map<Observer, IgniteBiPredicate> listenerMap = new HashMap<>();
 
-		if (log.isDebugEnabled()) log.debug(this + " Notification - Event: " + event);
+	public void init() {
 
-		// first, notify all priority observers
-		m_priorityObservableHelper.setChanged();
-		m_priorityObservableHelper.notifyObservers(event);
-
-		// notify the normal observers
-		m_observableHelper.setChanged();
-		m_observableHelper.notifyObservers(event);
-
-		// if the event is local, notify local observers
-		if (local)
-		{
-			m_localObservableHelper.setChanged();
-			m_localObservableHelper.notifyObservers(event);
-		}
-	}
-
-	/**********************************************************************************************************************************************************************************************************************************************************
-	 * Observer notification
-	 *********************************************************************************************************************************************************************************************************************************************************/
-
-	/**
-	 * @return the UsageSessionService collaborator.
-	 */
-	protected abstract UsageSessionService usageSessionService();
-
-	/**********************************************************************************************************************************************************************************************************************************************************
-	 * Dependencies
-	 *********************************************************************************************************************************************************************************************************************************************************/
-
-	/**
-	 * @return the SessionManager collaborator.
-	 */
-	protected abstract SessionManager sessionManager();
-
-	/**
-	 * @return the SecurityService collaborator.
-	 */
-	protected abstract SecurityService securityService();
-
-	/**
-	 * @return the ToolManager collaborator.
-	 */
-	protected abstract ToolManager toolManager();
-
-	/**
-	 * @return the EntityManager collaborator.
-	 */
-	protected abstract EntityManager entityManager();
-
-	/**
-	 * @return the TimeService collaborator.
-	 */
-	protected abstract TimeService timeService();
-
-	/**
-	 * Final initialization, once all dependencies are set.
-	 */
-	public void init()
-	{
 		log.info(this + ".init()");
+		messaging = ignite.message(ignite.cluster().forLocal());
 	}
 
-	/**********************************************************************************************************************************************************************************************************************************************************
-	 * Init and Destroy
-	 *********************************************************************************************************************************************************************************************************************************************************/
+	public void destroy() {
 
-	/**
-	 * Final cleanup.
-	 */
-	public void destroy()
-	{
 		log.info(this + ".destroy()");
 	}
 
-	/**********************************************************************************************************************************************************************************************************************************************************
-	 * EventTracking implementation
-	 *********************************************************************************************************************************************************************************************************************************************************/
+	public void postEvent(Event event) {
 
-	public void setEventDelayHandler(EventDelayHandler handler)
-	{
-		log.info("Setting the event delay handler to " + handler + " [was: " + delayHandler + "]");
-		this.delayHandler = handler;
+		messaging.send("EVENTS", event);
 	}
 
-	/**
-	 * Construct a Event object.
-	 *
-	 * @param event
-	 *        The Event id.
-	 * @param resource
-	 *        The resource reference.
-	 * @param modify
-	 *        Set to true if this event caused a resource modification, false if it was just an access.
-	 * @return A new Event object that can be used with this service.
-	 */
-	public Event newEvent(String event, String resource, boolean modify)
-	{
+	@Override
+	public Event newEvent(String event, String resource, boolean modify) {
+
 		return new BaseEvent(event, resource, modify, NotificationService.NOTI_OPTIONAL, null);
 	}
 
-	/**
-	 * Construct a Event object.
-	 *
-	 * @param event
-	 *        The Event id.
-	 * @param resource
-	 *        The resource reference.
-	 * @param modify
-	 *        Set to true if this event caused a resource modification, false if it was just an access.
-	 * @param priority
-	 *        The Event's notification priority.
-	 * @return A new Event object that can be used with this service.
-	 */
-	public Event newEvent(String event, String resource, boolean modify, int priority)
-	{
+	@Override
+	public Event newEvent(String event, String resource, boolean modify, int priority) {
+
 		return new BaseEvent(event, resource, modify, priority, null);
 	}
 
-	/**
-	 * Construct a Event object.
-	 *
-	 * @param event
-	 *        The Event id.
-	 * @param resource
-	 *        The resource reference.
-	 * @param context
-	 *        The Event's context.
-	 * @param modify
-	 *        Set to true if this event caused a resource modification, false if it was just an access.
-	 * @param priority
-	 *        The Event's notification priority.
-	 * @return A new Event object that can be used with this service.
-	 */
-	public Event newEvent(String event, String resource, String context, boolean modify, int priority)
-	{
+	@Override
+	public Event newEvent(String event, String resource, String context, boolean modify, int priority) {
+
 		return new BaseEvent(event, resource, context, modify, priority, null);
 	}
 
-	public Event newEvent(String event, String resource, String context, boolean modify, int priority, boolean isTransient)
-	{
+	@Override
+	public Event newEvent(String event, String resource, String context, boolean modify, int priority, boolean isTransient) {
+
 		return new BaseEvent(event, resource, context, modify, priority, isTransient);
 	}
 
-	/**
-	 * Construct a Event object.
-	 *
-	 * @param event
-	 *        The Event id.
-	 * @param resource
-	 *        The resource reference.
-	 * @param context
-	 *        The Event's context.
-	 * @param modify
-	 *        Set to true if this event caused a resource modification, false if it was just an access.
-	 * @param priority
-	 *        The Event's notification priority.
-	 * @return A new Event object that can be used with this service.
-	 */
-	public Event newEvent(String event, String resource, String context, boolean modify, int priority, LRS_Statement lrsStatement)
-	{
+	@Override
+	public Event newEvent(String event, String resource, String context, boolean modify, int priority, LRS_Statement lrsStatement) {
+
 		return new BaseEvent(event, resource, context, modify, priority, lrsStatement);
 	}
 
 
-	/**
-	 * Post an event
-	 *
-	 * @param event
-	 *        The event object (created with newEvent()). Note: the current session user will be used as the user responsible for the event.
-	 */
-	public void post(Event event)
-	{
+	@Override
+	public void post(Event event) {
+
 		BaseEvent be = ensureBaseEvent(event);
 		// get the session id or user id
-		String id = usageSessionService().getSessionId();
-		if (id != null)
-		{
+		String id = usageSessionService.getSessionId();
+		if (id != null) {
 			be.setSessionId(id);
-		}
-
-		// post for the session "thread" user
-		else
-		{
-			id = sessionManager().getCurrentSessionUserId();
-			if (id == null)
-			{
+		} else {
+			// post for the session "thread" user
+			id = sessionManager.getCurrentSessionUserId();
+			if (id == null) {
 				id = UNKNOWN_USER;
 			}
 
@@ -292,16 +155,9 @@ public abstract class BaseEventTrackingService implements EventTrackingService
 		postEvent(be);
 	}
 
-	/**
-	 * Post an event on behalf of a user's session
-	 *
-	 * @param event
-	 *        The event object (created with newEvent()).
-	 * @param session
-	 *        The usage session object of the user session responsible for the event.
-	 */
-	public void post(Event event, UsageSession session)
-	{
+	@Override
+	public void post(Event event, UsageSession session) {
+
 		BaseEvent be = ensureBaseEvent(event);
 		String id = UNKNOWN_USER;
 		if (session != null) id = session.getId();
@@ -311,16 +167,9 @@ public abstract class BaseEventTrackingService implements EventTrackingService
 		postEvent(be);
 	}
 
-	/**
-	 * Post an event on behalf of a user.
-	 *
-	 * @param event
-	 *        The event object (created with newEvent()).
-	 * @param user
-	 *        The User object of the user responsible for the event.
-	 */
-	public void post(Event event, User user)
-	{
+	@Override
+	public void post(Event event, User user) {
+
 		BaseEvent be = ensureBaseEvent(event);
 		String id = UNKNOWN_USER;
 		if (user != null) id = user.getId();
@@ -333,65 +182,57 @@ public abstract class BaseEventTrackingService implements EventTrackingService
 		if (be.getUserId() != null)
 		{
 			useAdvisor = true;
-			securityService().pushAdvisor(newResourceAdvisor(be.getUserId()));
+			securityService.pushAdvisor(newResourceAdvisor(be.getUserId()));
 		}
 
 		postEvent(be);
 
 		// if an advisor was used, pop it off.
 		if (useAdvisor)
-			securityService().popAdvisor();
+			securityService.popAdvisor();
 	}
 
 	@Override
-	public void delay(Event event, Instant fireTime)
-	{
+	public void delay(Event event, Instant fireTime) {
+
 		Instant now = Instant.now();
-		if (fireTime == null || fireTime.isBefore(now))
-		{
+		if (fireTime == null || fireTime.isBefore(now)) {
 			postEvent(event);
-		}
-		else
-		{
-			if (delayHandler != null)
-			{
+		} else {
+			if (eventDelayHandler != null) {
 				// Make sure there is a userid associated with the event
 
 				String id = event.getUserId();
 
-				if (id == null)
-				{
-					id = sessionManager().getCurrentSessionUserId();
+				if (id == null) {
+					id = sessionManager.getCurrentSessionUserId();
 				}
 
-				if (id == null)
-				{
+				if (id == null) {
 					id = UNKNOWN_USER;
 				}
 
-				delayHandler.createDelay(event, id, fireTime);
-			}
-			else
-			{
+				eventDelayHandler.createDelay(event, id, fireTime);
+			} else {
 				log.warn("Unable to create delayed event because delay handler is unset.  Firing now.");
 				postEvent(event);
 			}
 		}
 	}
 
-	public void cancelDelays(String resource)
-	{
-		if (delayHandler != null)
-		{
-			delayHandler.deleteDelay(resource);
+	@Override
+	public void cancelDelays(String resource) {
+
+		if (eventDelayHandler != null) {
+			eventDelayHandler.deleteDelay(resource);
 		}
 	}
 
-	public void cancelDelays(String resource, String event)
-	{
-		if (delayHandler != null)
-		{
-			delayHandler.deleteDelay(resource, event);
+	@Override
+	public void cancelDelays(String resource, String event) {
+
+		if (eventDelayHandler != null) {
+			eventDelayHandler.deleteDelay(resource, event);
 		}
 	}
 
@@ -402,15 +243,12 @@ public abstract class BaseEventTrackingService implements EventTrackingService
 	 * @param e
 	 * @return
 	 */
-	protected BaseEvent ensureBaseEvent(Event e)
-	{
+	private BaseEvent ensureBaseEvent(Event e) {
+
 		BaseEvent event = null;
-		if (e instanceof BaseEvent)
-		{
+		if (e instanceof BaseEvent) {
 			event = (BaseEvent) e;
-		}
-		else
-		{
+		} else {
 			event = new BaseEvent(e.getEvent(), e.getResource(), e.getModify(), e.getPriority(),null);
 			event.setSessionId(e.getSessionId());
 			event.setUserId(e.getUserId());
@@ -425,89 +263,68 @@ public abstract class BaseEventTrackingService implements EventTrackingService
 	 *
 	 * @param userId
 	 */
-	private SecurityAdvisor newResourceAdvisor(final String eventUserId)
-	{
+	private SecurityAdvisor newResourceAdvisor(final String eventUserId) {
+
 		// security advisor is needed if an event is refired.  the refired event is under the
 		// auspices of the job scheduler user and needs to be advised by the original user.
-		return new SecurityAdvisor()
-		{
-			public SecurityAdvice isAllowed(String userId, String function, String reference)
-			{
-				SecurityAdvice sa = SecurityAdvice.PASS;
-				if (userId.equals(eventUserId))
-					sa = SecurityAdvice.ALLOWED;
-				return sa;
-			}
+
+		return (u, p, r) -> u.equals(eventUserId) ? SecurityAdvice.ALLOWED : SecurityAdvice.PASS;
+	}
+
+	@Override
+	public void addObserver(Observer observer) {
+
+		IgniteBiPredicate handler = (nodeId, message) -> {
+
+			System.out.println("message: " + message);
+
+			observer.update(null, message);
+			return true;
 		};
+
+		messaging.localListen("EVENTS", handler);
+
+		listenerMap.put(observer, handler);
 	}
 
-	/**
-	 * Add an observer of events. The observer will be notified whenever there are new events.
-	 *
-	 * @param observer
-	 *        The class observing.
-	 */
-	public void addObserver(Observer observer)
-	{
-		// keep this observer in one list only
-		m_priorityObservableHelper.deleteObserver(observer);
-		m_localObservableHelper.deleteObserver(observer);
+	@Override
+	public void addPriorityObserver(Observer observer) {
 
-		m_observableHelper.addObserver(observer);
+		IgniteBiPredicate handler = (nodeId, message) -> {
+
+			System.out.println("message: " + message);
+
+			observer.update(null, message);
+			return true;
+		};
+
+		messaging.localListen("EVENTS", handler);
+
+		listenerMap.put(observer, handler);
 	}
 
-	/**
-	 * Add an observer of events. The observer will be notified whenever there are new events. Priority observers get notified first, before normal observers.
-	 *
-	 * @param observer
-	 *        The class observing.
-	 */
-	public void addPriorityObserver(Observer observer)
-	{
-		// keep this observer in one list only
-		m_observableHelper.deleteObserver(observer);
-		m_localObservableHelper.deleteObserver(observer);
+	@Override
+	public void addLocalObserver(Observer observer) {
 
-		m_priorityObservableHelper.addObserver(observer);
+		IgniteBiPredicate handler = (nodeId, message) -> {
+
+			System.out.println("nodeId: " + nodeId);
+			System.out.println("message: " + message);
+
+			observer.update(null, message);
+			return true;
+		};
+
+		messaging.localListen("EVENTS", handler);
+
+		listenerMap.put(observer, handler);
 	}
 
-	/**
-	 * Add an observer of events. The observer will be notified whenever there are new events. Local observers get notified only of event generated on this application server, not on those generated elsewhere.
-	 *
-	 * @param observer
-	 *        The class observing.
-	 */
-	public void addLocalObserver(Observer observer)
-	{
-		// keep this observer in one list only
-		m_observableHelper.deleteObserver(observer);
-		m_priorityObservableHelper.deleteObserver(observer);
+	@Override
+	public void deleteObserver(Observer observer) {
 
-		m_localObservableHelper.addObserver(observer);
-	}
-
-	/**
-	 * Delete an observer of events.
-	 *
-	 * @param observer
-	 *        The class observing to delete.
-	 */
-	public void deleteObserver(Observer observer)
-	{
-		m_observableHelper.deleteObserver(observer);
-		m_priorityObservableHelper.deleteObserver(observer);
-		m_localObservableHelper.deleteObserver(observer);
-	}
-
-	/**
-	 * Extend Observable to "public"ize setChanges, so we can set it. Why a helper object? Cause the service (which is observable) already 'extends' TurbineBaseService, and cannot also 'extend' Observable.
-	 */
-	protected class MyObservable extends Observable
-	{
-		public void setChanged()
-		{
-			super.setChanged();
-		}
+		IgniteBiPredicate handler = listenerMap.get(observer);
+		messaging.stopLocalListen("EVENTS", handler);
 	}
 
 	/**********************************************************************************************************************************************************************************************************************************************************
@@ -523,8 +340,7 @@ public abstract class BaseEventTrackingService implements EventTrackingService
 	 * </p>
 	 */
 	@Getter @Setter
-	protected class BaseEvent implements Event
-	{
+	private class BaseEvent implements Event {
 		/**
 		 * Be a good Serializable citizen
 		 */
@@ -575,8 +391,8 @@ public abstract class BaseEventTrackingService implements EventTrackingService
 		 * @param priority
 		 *        The Event's notification priority.
 		 */
-		public BaseEvent(String event, String resource, boolean modify, int priority, LRS_Statement lrsStatement)
-		{
+		public BaseEvent(String event, String resource, boolean modify, int priority, LRS_Statement lrsStatement) {
+
 			setEvent(event);
 			setResource(resource);
 			this.lrsStatement = lrsStatement;
@@ -585,7 +401,7 @@ public abstract class BaseEventTrackingService implements EventTrackingService
 
 			// Find the context using the reference (let the service that it belongs to parse it)
 			if (resource != null && !"".equals(resource)) {
-				Reference ref = entityManager().newReference(resource);
+				Reference ref = entityManager.newReference(resource);
 				if (ref != null) {
 					this.context = ref.getContext();
 				}
@@ -593,16 +409,15 @@ public abstract class BaseEventTrackingService implements EventTrackingService
 
 			// If we still need to find the context, try the tool placement
 			if (this.context == null) {
-				Placement placement = toolManager().getCurrentPlacement();
+				Placement placement = toolManager.getCurrentPlacement();
 				if (placement != null) {
 					this.context = placement.getContext();
 				}
 			}
 
 			// KNL-997
-			String uId = sessionManager().getCurrentSessionUserId();
-			if (uId == null)
-			{
+			String uId = sessionManager.getCurrentSessionUserId();
+			if (uId == null) {
 				uId = UNKNOWN_USER;
 			}
 			setUserId(uId);
@@ -622,8 +437,8 @@ public abstract class BaseEventTrackingService implements EventTrackingService
 		 * @param priority
 		 *        The Event's notification priority.
 		 */
-		public BaseEvent(String event, String resource, String context, boolean modify, int priority, LRS_Statement lrsStatement)
-		{
+		public BaseEvent(String event, String resource, String context, boolean modify, int priority, LRS_Statement lrsStatement) {
+
 			this(event, resource, modify, priority, lrsStatement);
 			//Use the context parameter if it's not null, otherwise default to the detected context
 			if (context != null) {
@@ -645,8 +460,8 @@ public abstract class BaseEventTrackingService implements EventTrackingService
 		 * @param priority
 		 *        The Event's notification priority.
 		 */
-		public BaseEvent(String event, String resource, String context, boolean modify, int priority)
-		{
+		public BaseEvent(String event, String resource, String context, boolean modify, int priority) {
+
 			this(event, resource, context, modify, priority, null);
 		}
 
@@ -664,8 +479,8 @@ public abstract class BaseEventTrackingService implements EventTrackingService
 		 * @param isTransient
 		 *        If true, this event will never be written to storage. It will only exist in memory.
 		 */
-		public BaseEvent(String event, String resource, String context, boolean modify, int priority, boolean isTransient)
-		{
+		public BaseEvent(String event, String resource, String context, boolean modify, int priority, boolean isTransient) {
+
 			this(event, resource, context, modify, priority);
 			this.isTransient = isTransient;
 		}
@@ -684,26 +499,21 @@ public abstract class BaseEventTrackingService implements EventTrackingService
 		 * @param priority
 		 *        The Event's notification priority.
 		 */
-		public BaseEvent(long seq, String event, String resource, String context, boolean modify, int priority)
-		{
+		public BaseEvent(long seq, String event, String resource, String context, boolean modify, int priority) {
+
 			this(event, resource, context, modify, priority);
 			this.seq = seq;
 		}
 		
-		public BaseEvent(long seq, String event, String resource, String context, boolean modify, int priority, Date eventDate)
-		{
+		public BaseEvent(long seq, String event, String resource, String context, boolean modify, int priority, Date eventDate) {
+
 			this(event, resource, context, modify, priority);
 			this.seq = seq;
 			this.time = eventDate;
 		}
 
-		/**
-		 * Access the event id string
-		 *
-		 * @return The event id string.
-		 */
-		public String getEvent()
-		{
+		@Override
+		public String getEvent() {
 			return id;
 		}
 
@@ -713,18 +523,16 @@ public abstract class BaseEventTrackingService implements EventTrackingService
 		 * @param id
 		 *        The event id string.
 		 */
-		protected void setEvent(String id)
-		{
-			if (id != null)
-			{
+		private void setEvent(String id) {
+
+			if (id != null) {
 				this.id = id;
-			}
-			else
-			{
+			} else {
 				this.id = "";
 			}
 		}
 
+		@Override
 		public boolean getModify() {
 			return modify;
 		}
@@ -735,14 +543,11 @@ public abstract class BaseEventTrackingService implements EventTrackingService
 		 * @param id
 		 *        The resource id string.
 		 */
-		protected void setResource(String id)
-		{
-			if (id != null)
-			{
+		private void setResource(String id) {
+
+			if (id != null) {
 				this.resource = id;
-			}
-			else
-			{
+			} else {
 				this.resource = "";
 			}
 		}
@@ -753,14 +558,11 @@ public abstract class BaseEventTrackingService implements EventTrackingService
 		 * @param id
 		 *        The session id string.
 		 */
-		protected void setSessionId(String id)
-		{
-			if ((id != null) && (id.length() > 0))
-			{
+		private void setSessionId(String id) {
+
+			if (id != null && id.length() > 0) {
 				this.sessionId = id;
-			}
-			else
-			{
+			} else {
 				this.sessionId = null;
 			}
 		}
@@ -771,14 +573,11 @@ public abstract class BaseEventTrackingService implements EventTrackingService
 		 * @param id
 		 *        The user id string.
 		 */
-		protected void setUserId(String id)
-		{
-			if ((id != null) && (id.length() > 0))
-			{
+		private void setUserId(String id) {
+
+			if (id != null && id.length() > 0) {
 				this.userId = id;
-			}
-			else
-			{
+			} else {
 				this.userId = null;
 			}
 		}
@@ -786,11 +585,11 @@ public abstract class BaseEventTrackingService implements EventTrackingService
 		/**
 		 * @return A representation of this event's values as a string.
 		 */
-		public String toString()
-		{
+		public String toString() {
 			return this.seq + ":" + getEvent() + "@" + getResource() + "[" + (getModify() ? "m" : "a") + ", " + getPriority() + "]";
 		}
 
+		@Override
 		public Date getEventTime() {
 			return new Date(this.time.getTime());
 		}
