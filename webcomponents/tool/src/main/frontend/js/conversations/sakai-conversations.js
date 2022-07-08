@@ -30,7 +30,6 @@ export class SakaiConversations extends SakaiElement {
       postId: { attribute: "post-id", type: String },
       baseUrl: { attribute: "base-url", type: String },
       data: { type: Object },
-      addingTopic: Boolean,
       currentTopic: { type: Object },
       topicBeingEdited: { type: Object },
       showingSettings: Boolean,
@@ -95,11 +94,12 @@ export class SakaiConversations extends SakaiElement {
 
   set state(value) {
 
+    const old = this._state;
+
     this._state = value;
 
     switch (value) {
       case STATE_ADDING_TOPIC:
-        this.addingTopic = true;
         this.showingSettings = false;
         /*
         let url = `${this.baseUrl}/addTopic`;
@@ -107,7 +107,6 @@ export class SakaiConversations extends SakaiElement {
         */
         break;
       case STATE_SETTINGS:
-        this.addingTopic = false;
         this.showingSettings = true;
         /*
         url = `${this.baseUrl}/settings`;
@@ -121,14 +120,13 @@ export class SakaiConversations extends SakaiElement {
         this.showingSettings = false;
         break;
       default:
-        this.addingTopic = false;
         /*
         url = `${this.baseURL}`;
         history.pushState({ state: STATE_NOTHING_SELECTED }, "", url);
         */
     }
 
-    this.requestUpdate();
+    this.requestUpdate("state", old);
   }
 
   get state() { return this._state; }
