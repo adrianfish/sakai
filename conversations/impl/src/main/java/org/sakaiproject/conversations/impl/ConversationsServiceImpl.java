@@ -848,7 +848,7 @@ public class ConversationsServiceImpl implements ConversationsService, Observer 
         }
         this.markPostViewed(postBean.topic, post.getId(), currentUserId);
 
-        if (!post.getDraft() && !post.getPrivatePost()
+        if (!post.getDraft() && !post.getPrivatePost() && !post.getAnonymous()
             && securityService.unlock(postBean.creator, Permissions.ROLETYPE_INSTRUCTOR.label, siteRef)) {
 
             topic.setResolved(true);
@@ -1240,13 +1240,6 @@ public class ConversationsServiceImpl implements ConversationsService, Observer 
             throw new ConversationsPermissionsException("Current user is not allowed to delete post.");
         }
 
-        if (setTopicResolved && securityService.unlock(post.getMetadata().getCreator(), Permissions.ROLETYPE_INSTRUCTOR.label, siteRef)) {
-            topicRepository.findById(post.getTopicId()).ifPresent(t -> {
-                setTopicResolved(t);
-                topicRepository.save(t);
-            });
-        }
-
         if (postRepository.countByParentPostId(postId) > 0) {
             throw new IllegalArgumentException("Post " + postId + " has children. It cannot be deleted, only hidden");
         }
@@ -1264,6 +1257,13 @@ public class ConversationsServiceImpl implements ConversationsService, Observer 
             });
         }
         postRepository.delete(post);
+
+        if (setTopicResolved && securityService.unlock(post.getMetadata().getCreator(), Permissions.ROLETYPE_INSTRUCTOR.label, siteRef)) {
+            topicRepository.findById(post.getTopicId()).ifPresent(t -> {
+                setTopicResolved(t);
+                topicRepository.save(t);
+            });
+        }
 
         postsCache.remove(topicId);
 
@@ -1520,10 +1520,12 @@ public class ConversationsServiceImpl implements ConversationsService, Observer 
 
     private void setTopicResolved(ConversationsTopic topic) {
 
-        String siteRef = "/site/" + topic.getSiteId();
+        String siteRef = siteService.siteReference(topic.getSiteId());
 
         topic.setResolved(postRepository.findByTopicId(topic.getId()).stream().anyMatch(p -> {
-            return !p.getDraft() && securityService.unlock(p.getMetadata().getCreator(), Permissions.ROLETYPE_INSTRUCTOR.label, siteRef);
+
+            return !p.getDraft() && !p.getAnonymous()
+                && securityService.unlock(p.getMetadata().getCreator(), Permissions.ROLETYPE_INSTRUCTOR.label, siteRef);
         }));
     }
 
