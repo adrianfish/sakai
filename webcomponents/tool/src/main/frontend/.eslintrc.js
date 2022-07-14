@@ -11,6 +11,7 @@ module.exports = {
     "flatpickr": "readonly",
     "jQuery": "readonly",
     "MathJax": "readonly",
+    "profile": "readonly",
   },
   "extends": "eslint:recommended",
   "parserOptions": { "ecmaVersion": 2020, "sourceType": "module" },

@@ -1,23 +1,20 @@
 import { SakaiElement } from "./sakai-element.js";
 import { html } from "./assets/lit-html/lit-html.js";
 
-<<<<<<< HEAD
-=======
 /**
- * A simple wrapper for Sakai's profile picture.
+ * A simple wrapper for Sakai's user profile picture.
  *
  * Usage:
- *
- * Renders adrian's profile picture and pops up the profile panel when clicked.
  * <sakai-user-photo user-id="adrian">
  *
- * Renders adrian's profile picture without a popup
- * <sakai-user-photo user-id="adrian" no-popup>
- *
- * Renders adrian's profile picture with a popup and some custom styles from the supplied class.
- * <sakai-user-photo user-id="adrian" classes="custom">
+ * @element sakai-user-photo
+ * @property {string} user-id - A Sakai user id
+ * @property {string} [classes] - Extra classes to style the content
+ * @property {string} [popup] By default, profile popups are off. Set this to "on" if you want them
+ * @property {boolean} [official] Set this if you want the official Sakai photo
+ * @property {string} [site-id] Set this to trigger permissions checks on the photo
+ * @property {boolean} [print] Set this to trigger the render of a print friendly img tag
  */
->>>>>>> f110af3c1e4 (SAK-47255 Commons: Move to sakai-user-photo and profile popup (#10505))
 class SakaiUserPhoto extends SakaiElement {
 
   constructor() {
@@ -25,6 +22,7 @@ class SakaiUserPhoto extends SakaiElement {
     super();
 
     this.classes = "large-thumbnail";
+    this.popup = SakaiUserPhoto.OFF;
   }
 
   static get properties() {
@@ -32,18 +30,25 @@ class SakaiUserPhoto extends SakaiElement {
     return {
       userId: { attribute: "user-id", type: String },
       classes: { type: String },
-      noPopup: { attribute: "no-popup", type: Boolean },
+      popup: { type: String },
       official: { type: Boolean },
+      siteId: { attribute: "site-id", type: String },
+      print: { type: Boolean },
     };
   }
 
-  connectedCallback() {
+  attributeChangedCallback(name, oldValue, newValue) {
 
-    super.connectedCallback();
+    super.attributeChangedCallback(name, oldValue, newValue);
 
-    this.generatedId = `sakai-user-photo-${this.userId}-${Math.floor(Math.random() * 100)}`;
+    if (this.userId) {
+      this.generatedId = `sakai-user-photo-${this.userId}-${Math.floor(Math.random() * 100)}`;
 
-    if (!this.noPopup) {
+      this.url = `/direct/profile/${this.userId}/image/${this.official ? "official" : "thumb"}${
+                   this.siteId && `?siteId=${this.siteId}`}`;
+    }
+
+    if (this.popup == SakaiUserPhoto.ON && this.generatedId) {
       this.updateComplete.then(() => {
         profile.attachPopups($(`#${this.generatedId}`));
       });
@@ -55,16 +60,24 @@ class SakaiUserPhoto extends SakaiElement {
   }
 
   render() {
+
+    if (this.print) {
+      return html`
+        <img src="${this.url}" alt="Print view only" />
+      `;
+    }
+
     return html`
       <div id="${this.generatedId}"
           data-user-id="${this.userId}"
           class="sakai-user-photo ${this.classes}"
-          style="background-image:url(/direct/profile/${this.userId}/image/${this.official ? "official" : "thumb"}) ${this.noPopup ? "" : ";cursor: pointer;"}">
-      </div>
+          style="background-image:url(${this.url}) ${this.popup === SakaiUserPhoto.ON ? ";cursor: pointer;" : ""}">
     `;
   }
 }
 
-if (!customElements.get("sakai-user-photo")) {
-  customElements.define("sakai-user-photo", SakaiUserPhoto);
-}
+SakaiUserPhoto.OFF = "off";
+SakaiUserPhoto.ON = "on";
+
+const tagName = "sakai-user-photo";
+!customElements.get(tagName) && customElements.define(tagName, SakaiUserPhoto);

@@ -4,11 +4,11 @@ import "../sakai-editor.js";
 import "../sakai-icon.js";
 import "../sakai-date-picker.js";
 import { AVAILABILITY_DATED,
-          AVAILABILITY_NOW,
-          QUESTION,
-          DISCUSSION,
-          INSTRUCTORS,
-          SITE, GROUP } from "./sakai-conversations-constants.js";
+  AVAILABILITY_NOW,
+  QUESTION,
+  DISCUSSION,
+  INSTRUCTORS,
+  SITE, GROUP } from "./sakai-conversations-constants.js";
 
 export class SakaiAddTopic extends SakaiElement {
 

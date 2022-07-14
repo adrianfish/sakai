@@ -478,7 +478,7 @@ export class SakaiGrader extends gradableDataMixin(SakaiElement) {
   }
 
   renderGraderReturned() {
-    return html`<span class="grader-returned fa fa-eye" title="${this.i18n["returned_tooltip"]}" />`;
+    return html`<span class="grader-returned fa fa-eye" title="${this.i18n.returned_tooltip}" />`;
   }
 
   render() {
@@ -515,7 +515,7 @@ export class SakaiGrader extends gradableDataMixin(SakaiElement) {
       try {
         $("#rubric-panel").dialog("destroy");
       } catch (error) {
-        console.info(this.i18n.destroy_rubric_panel_log);
+        console.info(`${this.i18n.destroy_rubric_panel_log}: ${error}`);
       }
       this.rubricShowing = false;
     }
@@ -538,11 +538,10 @@ export class SakaiGrader extends gradableDataMixin(SakaiElement) {
 
   replaceWithEditor(id) {
 
-    const editor = CKEDITOR.replace(id, {
-      toolbar: [['Bold', 'Italic', 'Underline', 'TextColor'], ['NumberedList', 'BulletedList', 'Blockquote']],
-      width,
-      height,
-      startupFocus: true
+    const editor = sakai.editor.launch(id, {
+      autosave: { delay: 10000000, messageType: "no" },
+      toolbarSet: "Basic",
+      startupFocus: true,
     });
 
     editor.on("change", () => this.modified = true);
