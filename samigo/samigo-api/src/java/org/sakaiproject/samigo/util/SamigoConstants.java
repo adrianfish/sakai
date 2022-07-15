@@ -102,6 +102,7 @@ public final class SamigoConstants {
      */
     public static final     String      NOTI_PREFS_TYPE_SAMIGO                              = "sakai:samigo";
 
+    public static final     String      TOOL_ID                                             = "sakai.samigo";
 
     /*
      * Notification Defaults

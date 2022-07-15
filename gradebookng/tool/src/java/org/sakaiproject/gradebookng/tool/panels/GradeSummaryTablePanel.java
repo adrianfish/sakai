@@ -52,6 +52,7 @@ import org.sakaiproject.gradebookng.tool.pages.GradebookPage;
 import org.sakaiproject.portal.util.PortalUtils;
 import org.sakaiproject.rubrics.api.RubricsConstants;
 import org.sakaiproject.rubrics.api.beans.AssociationTransferBean;
+import org.sakaiproject.samigo.util.SamigoConstants;
 import org.sakaiproject.grading.api.Assignment;
 import org.sakaiproject.grading.api.CategoryDefinition;
 import org.sakaiproject.grading.api.GradebookInformation;
@@ -395,49 +396,64 @@ public class GradeSummaryTablePanel extends BasePanel implements IAjaxIndicatorA
 							addInstructorAttributeOrHide(sakaiRubricButton, assignment, studentUuid, showingStudentView);
 
 							if (assignment.getExternallyMaintained()) {
-								sakaiRubricButton.add(AttributeModifier.append("tool-id", AssignmentConstants.TOOL_ID));
-								String[] bits = assignment.getExternalId().split("/");
-								if (bits != null && bits.length >= 1) {
-									String assignmentId = bits[bits.length-1];
-									String ownerId = studentUuid;
-									if (assignment.getExternalAppName().equals(assignmentService.getToolId())) {
-										try {
-											org.sakaiproject.assignment.api.model.Assignment assignmentsAssignment = assignmentService.getAssignment(assignmentId);
-											if (assignmentsAssignment.getIsGroup()) {
-												Optional<String> groupId = assignmentsAssignment.getGroups().stream().filter(g -> {
+                                sakaiRubricButton.add(AttributeModifier.append("tool-id", assignment.getExternalAppName()));
+                                String ownerId = studentUuid;
+                                switch (assignment.getExternalAppName()) {
+                                    case AssignmentConstants.TOOL_ID:
+								        String[] bits = assignment.getExternalId().split("/");
+                                        if (bits != null && bits.length >= 1) {
+                                            String assignmentId = bits[bits.length-1];
+                                            try {
+                                                org.sakaiproject.assignment.api.model.Assignment assignmentsAssignment = assignmentService.getAssignment(assignmentId);
+                                                if (assignmentsAssignment.getIsGroup()) {
+                                                    Optional<String> groupId = assignmentsAssignment.getGroups().stream().filter(g -> {
 
-													try {
-														AuthzGroup group = authzGroupService.getAuthzGroup(g);
-														return group.getMember(studentUuid) != null;
-													} catch (GroupNotDefinedException gnde) {
-														return false;
-													}
-												}).findAny();
+                                                        try {
+                                                            AuthzGroup group = authzGroupService.getAuthzGroup(g);
+                                                            return group.getMember(studentUuid) != null;
+                                                        } catch (GroupNotDefinedException gnde) {
+                                                            return false;
+                                                        }
+                                                    }).findAny();
 
-												if (groupId.isPresent()) {
-													ownerId = groupId.get();
-												} else {
-													log.error("Assignment {} is a group assignment, but {} was not in any of the groups", assignmentId, studentUuid);
-												}
-											}
-											sakaiRubricButton.add(AttributeModifier.append("entity-id", assignmentId));
-	
-											String submissionId = rubricsService.getRubricEvaluationObjectId(assignmentId, ownerId, AssignmentConstants.TOOL_ID, getCurrentSiteId());
-	                                        if (submissionId != null) {
-											    sakaiRubricButton.add(AttributeModifier.append("evaluated-item-id", submissionId));
-	                                        }
-	
-											rubricsService.getAssociationForToolAndItem(AssignmentConstants.TOOL_ID, assignmentId, getCurrentSiteId())
-												.ifPresent(assoc -> sakaiRubricButton.add(AttributeModifier.append("rubric-id", assoc.rubricId)));
-											
-										} catch (Exception e) {
-											log.error("Failed to configure rubric button for submission: {}", e.toString());
-											sakaiRubricButton.setVisible(false);
-										}
-									}
-								} else {
-									log.warn(assignment.getExternalId() + " is not a valid assignment reference");
-								}
+                                                    if (groupId.isPresent()) {
+                                                        ownerId = groupId.get();
+                                                    } else {
+                                                        log.error("Assignment {} is a group assignment, but {} was not in any of the groups", assignmentId, studentUuid);
+                                                    }
+                                                }
+                                                sakaiRubricButton.add(AttributeModifier.append("entity-id", assignmentId));
+        
+                                                String submissionId = rubricsService.getRubricEvaluationObjectId(assignmentId, ownerId, AssignmentConstants.TOOL_ID, getCurrentSiteId());
+                                                if (submissionId != null) {
+                                                    sakaiRubricButton.add(AttributeModifier.append("evaluated-item-id", submissionId));
+                                                }
+        
+                                                rubricsService.getAssociationForToolAndItem(AssignmentConstants.TOOL_ID, assignmentId, getCurrentSiteId())
+                                                    .ifPresent(assoc -> sakaiRubricButton.add(AttributeModifier.append("rubric-id", assoc.rubricId)));
+                                                
+                                            } catch (Exception e) {
+                                                log.error("Failed to configure rubric button for submission: {}", e.toString());
+                                                sakaiRubricButton.setVisible(false);
+                                            }
+                                        } else {
+                                            log.warn(assignment.getExternalId() + " is not a valid assignment reference");
+                                        }
+                                        break;
+                                    case SamigoConstants.TOOL_ID:
+                                        String assignmentId = "pub." + assignment.getExternalId() + 
+                                        sakaiRubricButton.add(AttributeModifier.append("entity-id", assignmentId));
+
+                                        String submissionId = rubricsService.getRubricEvaluationObjectId(assignmentId, ownerId, SamigoConstants.TOOL_ID, getCurrentSiteId());
+                                        if (submissionId != null) {
+                                            sakaiRubricButton.add(AttributeModifier.append("evaluated-item-id", submissionId));
+                                        }
+
+                                        rubricsService.getAssociationForToolAndItem(SamigoConstants.TOOL_ID, assignmentId, getCurrentSiteId())
+                                            .ifPresent(assoc -> sakaiRubricButton.add(AttributeModifier.append("rubric-id", assoc.rubricId)));
+                                        break;
+                                    default:
+                                }
 							} else {
 								sakaiRubricButton.add(AttributeModifier.append("tool-id", RubricsConstants.RBCS_TOOL_GRADEBOOKNG));
 								sakaiRubricButton.add(AttributeModifier.append("evaluated-item-id", assignment.getId() + "." + studentUuid));

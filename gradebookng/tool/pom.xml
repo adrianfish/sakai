@@ -118,6 +118,10 @@
 			<artifactId>entitybroker-utils</artifactId>
 		</dependency>
 		<dependency>
+			<groupId>org.sakaiproject.samigo</groupId>
+			<artifactId>samigo-api</artifactId>
+		</dependency>
+		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-beans</artifactId>
 			<scope>provided</scope> <!-- to satisfy EB and eclipse -->
