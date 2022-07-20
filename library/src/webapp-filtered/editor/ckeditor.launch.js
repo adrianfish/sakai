@@ -201,6 +201,22 @@ sakai.editor.editors.ckeditor.launch = function(targetId, config, w, h) {
         }
     }
 
+    function dataFeed(options, callback) {
+
+      const url = `/api/sites/${portal.siteId}/users?name=${encodeURIComponent(options.query)}`;
+      fetch(url, { credentials: "include" })
+      .then(r => {
+
+        if (r.ok) {
+          return r.json();
+        }
+
+        throw new Error(`Network error while getting mentions feed from http://sakaiproject.org/master/library`);
+      })
+      .then(feed => callback(feed))
+      .catch (error => console.error(error));
+    }
+
     var ckconfig = {
     //Some defaults for audio recorder
         audiorecorder : {
@@ -227,6 +243,16 @@ sakai.editor.editors.ckeditor.launch = function(targetId, config, w, h) {
         contentsCss: [(webJars+'bootstrap/3.3.7/css/bootstrap.min.css')],
 
         language: language + (country ? '-' + country.toLowerCase() : ''),
+        mentions: [{
+          feed: dataFeed,
+          minChars: 0,
+          itemTemplate: '<li data-id="{id}">' +
+            '<div class="mention-row">' + 
+            '<div class="mention-photo"><sakai-user-photo user-id="{id}" popup="off"></sakai-user-photo></div>' +
+            '<div class="mention-display-name">{displayName}</div>' +
+            '</div></li>',
+          outputTemplate: '<strong>@{eid}</strong>&nbsp;',
+        }],
         // This is used for uploading by the autorecorder plugin.
         // TODO Get this to work with elfinder.
         // TODO May be a problem after SAK-44872
@@ -293,7 +319,7 @@ sakai.editor.editors.ckeditor.launch = function(targetId, config, w, h) {
             'liststyle',
             // 'magicline',
             // 'mathjax',
-            // 'mentions',
+            'mentions',
             // 'newpage',
             // 'pagebreak',
             // 'panelbutton',
@@ -339,8 +365,8 @@ sakai.editor.editors.ckeditor.launch = function(targetId, config, w, h) {
             (sakai.editor.enableSakaiPreview ? 'sakaipreview' : 'preview'),
             (sakai.editor.enableResourceSearch ? 'resourcesearch' : ''),
             (sakai.editor.enableSakaiOpenLink ? 'sakaiopenlink' : ''),
-            `${ckeditor-extra-plugins}`,
-            `${ckeditor-a11y-extra-plugins}`
+            `sakaipreview,sakaidropdowntoolbar,sakaiopenlink,`,
+            ``
         ].join(','),
         // These two settings enable the browser's native spell checking and context menus.
         // Control-Right-Click (Windows/Linux) or Command-Right-Click (Mac) on highlighted words
@@ -350,7 +376,7 @@ sakai.editor.editors.ckeditor.launch = function(targetId, config, w, h) {
         browserContextMenuOnCtrl: true,
         
         // Fix the smileys to a single location
-        smiley_path: `/library/webjars/ckeditor4/${ckeditor.version}/plugins/smiley/images/`,
+        smiley_path: `/library/webjars/ckeditor4/4.16.1/plugins/smiley/images/`,
         
         toolbar_Basic:
         [
@@ -460,7 +486,7 @@ sakai.editor.editors.ckeditor.launch = function(targetId, config, w, h) {
 
         //These could be applicable to the basic toolbar
         CKEDITOR.plugins.addExternal('lineutils',basePath+'lineutils/', 'plugin.js');
-        CKEDITOR.plugins.addExternal('html5video',webJars+'github-com-bahriddin-ckeditor-html5-video/${ckeditor.html5video.version}/html5video/', 'plugin.js');
+        CKEDITOR.plugins.addExternal('html5video',webJars+'github-com-bahriddin-ckeditor-html5-video/1.2.1/html5video/', 'plugin.js');
         CKEDITOR.plugins.addExternal('audiorecorder',basePath+'audiorecorder/', 'plugin.js');
         CKEDITOR.plugins.addExternal('contentitem',basePath+'contentitem/', 'plugin.js');
         CKEDITOR.plugins.addExternal('sakaipreview',basePath+'sakaipreview/', 'plugin.js');
@@ -468,11 +494,11 @@ sakai.editor.editors.ckeditor.launch = function(targetId, config, w, h) {
         CKEDITOR.plugins.addExternal('sakaidropdowntoolbar', basePath+'sakaidropdowntoolbar/', 'plugin.js');
         CKEDITOR.plugins.addExternal('bt_table',basePath+'bt_table/', 'plugin.js');
         //Autosave has a dependency on notification
-        CKEDITOR.plugins.addExternal('autosave',webJars+'ckeditor-autosave/${ckeditor.autosave.version}/', 'plugin.js');
-        CKEDITOR.plugins.addExternal('wordcount',webJars+'wordcount/${ckeditor.wordcount.version}/', 'plugin.js');
+        CKEDITOR.plugins.addExternal('autosave',webJars+'ckeditor-autosave/0.18.6/', 'plugin.js');
+        CKEDITOR.plugins.addExternal('wordcount',webJars+'wordcount/1.17.9/', 'plugin.js');
         CKEDITOR.plugins.addExternal('notification',basePath+'notification/', 'plugin.js');
         // Accessibility checker has a dependency on balloonpanel
-        CKEDITOR.plugins.addExternal('a11ychecker',webJars+'a11ychecker/${ckeditor.a11ychecker.version}/', 'plugin.js');
+        CKEDITOR.plugins.addExternal('a11ychecker',webJars+'a11ychecker/1.1.1/', 'plugin.js');
         /*
            To enable after the deadline uncomment these two lines and add atd-ckeditor to toolbar
            and to extraPlugins. This also needs extra stylesheets.

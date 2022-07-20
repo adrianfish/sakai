@@ -1,0 +1,13 @@
+.mention-row {
+
+  display: flex;
+  align-items: center;
+
+  .mention-photo {
+    margin-right: 8px;
+  }
+
+  .mention-display-name {
+    font-weight: bold;
+  }
+}
