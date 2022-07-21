@@ -19,7 +19,6 @@ public class SearchRestBean {
     public String url;
     public String siteTitle;
     public String siteUrl;
-    public String creatorDisplayName;
 
     public static SearchRestBean of(SearchResult searchResult, SiteService siteService) {
 
@@ -31,7 +30,6 @@ public class SearchRestBean {
         bean.title = searchResult.getTitle();
         bean.tool = searchResult.getTool();
         bean.url = searchResult.getUrl();
-        bean.creatorDisplayName = searchResult.getCreatorDisplayName();
 
         try {
             Site site = siteService.getSite(searchResult.getSiteId());
