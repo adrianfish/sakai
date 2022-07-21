@@ -85,6 +85,7 @@
                                 <exclude>package-lock.json</exclude>
                                 <exclude>.gitignore</exclude>
                                 <exclude>.jshintrc</exclude>
+                                <exclude>.eslintrc.js</exclude>
                             </excludes>
                         </fileset>
                         <fileset>
@@ -96,25 +97,6 @@
                     </filesets>
                 </configuration>
             </plugin>
-            <!--plugin>
-                <groupId>org.sakaiproject.maven.plugins</groupId>
-                <artifactId>sakai</artifactId>
-                <version>1.4.6-SNAPSHOT</version>
-                <executions>
-                    <execution>
-                        <id>copyjs</id>
-                        <phase>compile</phase>
-                        <goals>
-                            <goal>copyjs</goal>
-                        </goals>
-                        <configuration>
-                            <sourceDir>src/main/frontend/js</sourceDir>
-                            <targetDir>src/main/frontend</targetDir>
-                            <query>version=${buildNumber}</query>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin-->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-war-plugin</artifactId>
@@ -127,6 +109,7 @@
                         package.json,
                         package-lock.json,
                         .jshintrc
+                        .eslintrc.js
                     </packagingExcludes>
                     <webResources>
                         <resource>
@@ -168,16 +151,7 @@
                             <goal>npm</goal>
                         </goals>
                         <configuration>
-                            <arguments>
-                                ci --unsafe-perm --save-dev
-                                @ckeditor/ckeditor5-dev-webpack-plugin
-                                @ckeditor/ckeditor5-dev-utils
-                                postcss-loader@3
-                                raw-loader@3
-                                style-loader@1
-                                webpack@4
-                                webpack-cli@3
-                            </arguments>
+                            <arguments>install</arguments>
                         </configuration>
                     </execution>
                     <execution>
@@ -204,33 +178,5 @@
             </plugin>
         </plugins>
     </build>
-
-    <!--profiles>
-        <profile>
-            <id>jsdev</id>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.sakaiproject.maven.plugins</groupId>
-                        <artifactId>sakai</artifactId>
-                        <version>1.4.6-SNAPSHOT</version>
-                        <executions>
-                            <execution>
-                                <id>copyjs</id>
-                                <phase>compile</phase>
-                                <goals>
-                                    <goal>copyjs</goal>
-                                </goals>
-                                <configuration combine.self="override">
-                                    <sourceDir>src/main/frontend/js</sourceDir>
-                                    <targetDir>src/main/frontend</targetDir>
-                                </configuration>
-                            </execution>
-                        </executions>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-    </profiles-->
 
 </project>
