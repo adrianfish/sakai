@@ -9,7 +9,7 @@ export class SakaiRubricStudentComment extends RubricsElement {
 
   set criterion(value) {
 
-    var oldValue = this._criterion;
+    const oldValue = this._criterion;
     this._criterion = value;
     this._criterion.comments = value.comments && value.comments.indexOf("null") === 0 ? "" : value.comments;
     this.triggerId = `criterion-comment-${value.id}-trigger`;
