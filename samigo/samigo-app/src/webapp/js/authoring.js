@@ -341,6 +341,28 @@ $( document ).ready( function() {
     $('input[name="assessmentSettingsAction\\:userOrGroup"]').change(function () {
         checkUserOrGroupRadio();
     });
+
+    const incorrectOnlyCheckbox
+        = document.getElementById("assessmentSettingsAction:correctAnswerOption:1");
+
+    const submittedAnswersCheckbox
+        = document.getElementById("assessmentSettingsAction:feedbackCheckbox11");
+
+    submittedAnswersCheckbox.addEventListener("click", e => {
+
+        if (!e.target.checked) {
+            const allAnswersCheckbox
+                = document.getElementById("assessmentSettingsAction:correctAnswerOption:0");
+            allAnswersCheckbox && allAnswersCheckbox.click();
+        }
+    });
+
+    incorrectOnlyCheckbox && (incorrectOnlyCheckbox.addEventListener("click", e => {
+
+        if (e.target.checked) {
+            submittedAnswersCheckbox.checked = true;
+        }
+    }));
 });
 
 function validationWarningSetDefault(element, value) {
