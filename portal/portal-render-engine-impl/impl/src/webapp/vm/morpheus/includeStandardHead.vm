@@ -6,6 +6,7 @@
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="manifest" href="/pwa/manifest.json">
 
         <script>
             var portal = {
@@ -74,6 +75,7 @@
         <link href="${pageWebjarsPath}fontawesome/4.7.0/css/font-awesome.min.css$!{portalCDNQuery}" rel="stylesheet">
         <script src="${pageSkinRepo}/${pageSkin}/js/lib/modernizr.js$!{portalCDNQuery}"></script>
         <script src="/library/js/sakai-message-broker.js$!{portalCDNQuery}"></script>
+        <script src="/library/js/start-pwa-serviceworker.js$!{portalCDNQuery}"></script>
         <script src="/library/js/sakai-lti-advantage.js$!{portalCDNQuery}"></script>
         <script type="module" src="/webcomponents/sakai-profile.js$!{portalCDNQuery}"></script>
         <script type="module" src="/webcomponents/sakai-pronunciation-player.js$!{portalCDNQuery}"></script>
