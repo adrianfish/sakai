@@ -638,6 +638,7 @@ public class AssignmentServiceImpl implements AssignmentService, EntityTransferr
         AssignmentReferenceReckoner.AssignmentReference referenceReckoner = AssignmentReferenceReckoner.reckoner().reference(assignmentReference).reckon();
         if (allowGradeSubmission(assignmentReference)) {
             Collection<Group> groupsAllowed = getGroupsAllowFunction(SECURE_GRADE_ASSIGNMENT_SUBMISSION, referenceReckoner.getContext(), null);
+            System.out.println(groupsAllowed);
             Assignment assignment = assignmentRepository.findAssignment(referenceReckoner.getId());
             if (assignment != null) {
                 switch (assignment.getTypeOfAccess()) {
@@ -1610,6 +1611,25 @@ public class AssignmentServiceImpl implements AssignmentService, EntityTransferr
     @Override
     public Collection<AssignmentSubmission> getGradeableSubmissions(Assignment assignment) {
 
+        String ref = AssignmentReferenceReckoner.reckoner().assignment(assignment).reckon().getReference();
+
+        if (allowGradeSubmission(ref)) {
+            // Current user has grade permissions on the site, return all of the submissions.
+            return assignment.getSubmissions();
+        }
+
+        // If the current user is a member of a group, and that group has asn.grade, then return
+        // the submissions for users in that group only.
+
+        Set<String> gradingGroupUsers = getGroupsAllowGradeAssignment(ref).stream()
+            .flatMap(group -> group.getMembers().stream().map(Member::getUserId)).collect(Collectors.toSet());
+
+        return assignment.getSubmissions().stream()
+                .filter(s -> s.getSubmitters().stream()
+                .map(ss -> ss.getSubmitter()).filter(gradingGroupUsers::contains).findAny().isPresent())
+                .collect(Collectors.toSet());
+
+        /*
         // Obtain the user ids for every group that the current user should see
         Set<String> currentUserGroups = getGroupsAllowGradeAssignment(assignmentReference(assignment.getId())).stream()
                 .flatMap(group -> group.getMembers().stream()).map(Member::getUserId).collect(Collectors.toSet());
@@ -1619,6 +1639,7 @@ public class AssignmentServiceImpl implements AssignmentService, EntityTransferr
                 .filter(submission -> !submission.getSubmitters().stream()
                 .map(AssignmentSubmissionSubmitter::getSubmitter).filter(currentUserGroups::contains)
                 .collect(Collectors.toList()).isEmpty()).collect(Collectors.toSet());
+                */
     }
 
     @Override
