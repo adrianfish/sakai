@@ -267,4 +267,8 @@ public class EmailUtil {
         }
         return null;
     }
+
+    private void addIcon(Map<String, Object> map) {
+        map.put("icon", "sakai-assignment-grades");
+    }
 }

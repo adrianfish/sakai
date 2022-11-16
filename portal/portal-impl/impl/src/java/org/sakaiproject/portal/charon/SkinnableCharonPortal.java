@@ -1117,6 +1117,9 @@ public class SkinnableCharonPortal extends HttpServlet implements Portal
 		String [] mathJaxFormat = ServerConfigurationService.getStrings("mathjax.config.format");
 		rcontext.put("mathJaxFormat", mathJaxFormat);
 
+		boolean notificationsPushEnabled = ServerConfigurationService.getBoolean("portal.notifications.push.enabled", false);
+		rcontext.put("notificationsPushEnabled", notificationsPushEnabled);
+
 		boolean debugNotifications = ServerConfigurationService.getBoolean("portal.notifications.debug", false);
 		rcontext.put("debugNotifications", debugNotifications);
 

@@ -1,10 +1,77 @@
 portal = portal || {};
 portal.notifications = portal.notifications || {};
+
+portal.notifications.pushCallbacks = new Map();
 portal.notifications.sseCallbacks = new Map();
 
-portal.notifications.debug = false;
-
 if (portal?.user?.id) {
+
+  if (portal.notifications.pushEnabled && Notification.permission === "default") {
+
+    // Permission has neither been granted or denied yet.
+
+    if (portal.notifications.debug) console.debug("No permission set");
+
+    navigator.serviceWorker.register("/api/sakai-sse-service-worker.js").then(registration => {
+
+      if (!registration.pushManager) {
+        // This must be Safari, or maybe IE3 or something :)
+        console.warn("No pushManager on this registration");
+        return;
+      }
+
+      window.addEventListener("DOMContentLoaded", () => {
+
+        if (portal.notifications.debug) console.debug("DOM loaded. Setting up permission triggers ...");
+
+        // We're using the bullhorn buttons to trigger the permission request from the user. You
+        // can only instigate a permissions request from a user action.
+        document.querySelectorAll(".portal-notifications-button").forEach(b => {
+
+          b.addEventListener("click", e => {
+
+            if (portal.notifications.debug) console.debug("Requesting notifications permission ...");
+
+            Notification.requestPermission().then(permission => {
+
+              if (permission === "granted") {
+
+                if (portal.notifications.debug) console.log("Permission granted. Subscribing ...");
+
+                // We have permission, Grab the public app server key.
+                fetch("/api/keys/sakaipush").then(r => r.text()).then(key => {
+
+                  if (portal.notifications.debug) console.log("Got the key. Subscribing for push ...");
+
+                  // Subscribe with the public key
+                  registration.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: key }).then(sub => {
+
+                    if (portal.notifications.debug) console.debug("Subscribed. Sending details to Sakai ...");
+
+                    const url = "/api/users/me/prefs/pushEndpoint";
+                    fetch(url, {
+                      credentials: "include",
+                      method: "POST",
+                      body: new URLSearchParams({ endpoint: sub.endpoint, auth: sub.toJSON().keys.auth, userKey: sub.toJSON().keys.p256dh }),
+                    })
+                    .then(r => {
+
+                      if (!r.ok) {
+                        throw new Error(`Network error while posting push endpoint: ${url}`);
+                      }
+
+                      if (portal.notifications.debug) console.debug("Subscription details sent successfully");
+                    })
+                    .catch (error => console.error(error));
+                  });
+                });
+              }
+            });
+          }, { once: true });
+        });
+      });
+    });
+  }
 
   portal.notifications.setupServiceWorkerListener = () => {
 
@@ -22,6 +89,17 @@ if (portal?.user?.id) {
         }
 
         portal.notifications.sseCallbacks.has(e.data.type) && portal.notifications.sseCallbacks.get(e.data.type)(e.data.data);
+      } else {
+
+        if (portal.notifications.debug) {
+          console.debug("PUSH MESSAGE RECEIVED");
+          console.log(e.data);
+        }
+
+        const allCallbacks = portal.notifications.pushCallbacks.get("all");
+        allCallbacks && allCallbacks.forEach(cb => cb(e.data));
+        const toolCallbacks = portal.notifications.pushCallbacks.get(e.data.tool);
+        toolCallbacks && toolCallbacks.forEach(cb => cb(e.data));
       }
     });
   };
@@ -37,6 +115,15 @@ if (portal?.user?.id) {
       if (portal.notifications.debug) console.debug(`Telling the worker we want an SSE event for ${sakaiEvent} ...`);
       worker.postMessage(sakaiEvent);
     };
+  };
+
+  portal.notifications.registerPushCallback = (toolOrAll, cb) => {
+
+    if (portal.notifications.debug) console.debug(`Registering push callback for ${toolOrAll}`);
+
+    const callbacks = portal.notifications.pushCallbacks.get(toolOrAll) || [];
+    callbacks.push(cb);
+    portal.notifications.pushCallbacks.set(toolOrAll, callbacks);
   };
 
   /**

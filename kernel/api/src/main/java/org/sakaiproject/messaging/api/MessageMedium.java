@@ -15,4 +15,4 @@
  */
 package org.sakaiproject.messaging.api;
 
-public enum MessageMedium { DIGEST, EMAIL };
+public enum MessageMedium { DIGEST, EMAIL, PUSH };

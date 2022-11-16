@@ -17,20 +17,31 @@ import org.sakaiproject.authz.api.SecurityService;
 import org.sakaiproject.component.api.ServerConfigurationService;
 import org.sakaiproject.entity.api.EntityManager;
 import org.sakaiproject.messaging.api.UserMessagingService;
+import org.sakaiproject.entity.api.ResourcePropertiesEdit;
 import org.sakaiproject.site.api.SiteService;
 import org.sakaiproject.tool.api.Session;
+import org.sakaiproject.user.api.Preferences;
+import org.sakaiproject.user.api.PreferencesEdit;
+import org.sakaiproject.user.api.PreferencesService;
 import org.sakaiproject.user.api.UserDirectoryService;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.codec.ServerSentEvent;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.time.Duration;
+
+import java.nio.file.Files;
+import java.nio.file.Paths;
 
 import javax.annotation.Resource;
 
@@ -46,6 +57,9 @@ public class EventsController extends AbstractSakaiApiController {
 	private EntityManager entityManager;
 
 	@Resource
+	private PreferencesService preferencesService;
+
+	@Resource
 	private SecurityService securityService;
 
 	@Resource(name = "org.sakaiproject.component.api.ServerConfigurationService")
@@ -59,6 +73,45 @@ public class EventsController extends AbstractSakaiApiController {
 
     @Resource
     private UserMessagingService userMessagingService;
+
+    @GetMapping("/keys/sakaipush")
+    public ResponseEntity<String> getPushKey() {
+
+        String home = serverConfigurationService.getSakaiHomePath();
+        String fileName = serverConfigurationService.getString(userMessagingService.PUSH_PUBKEY_PROPERTY, "sakai_push.key.pub");
+
+        try {
+            return ResponseEntity.ok(String.join("", Files.readAllLines(Paths.get(home, fileName))));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+    @PostMapping("/users/me/prefs/pushEndpoint")
+    public ResponseEntity setPushEndpoint(@RequestParam String endpoint, @RequestParam(required = false) String auth, @RequestParam(required = false) String userKey) {
+
+		String currentUserId = checkSakaiSession().getUserId();
+
+        log.debug("ENDPOINT: {}", endpoint);
+        log.debug("AUTH: {}", auth);
+        log.debug("KEY: {}", userKey);
+
+        try {
+            PreferencesEdit prefs = preferencesService.edit(currentUserId);
+            ResourcePropertiesEdit props = prefs.getPropertiesEdit("sakai:notifications");
+            props.addProperty("push-endpoint", endpoint);
+            if (userKey != null) {
+                props.addProperty("push-user-key", userKey);
+            }
+            if (auth != null) {
+                props.addProperty("push-auth", auth);
+            }
+            preferencesService.commit(prefs);
+        } catch (Exception e) {
+            log.error("Failed to add push-endpoint to user {}'s preferences: {}", currentUserId, e.toString());
+        }
+        return ResponseEntity.ok().build();
+    }
 
     @GetMapping("/users/{userId}/events")
     public ResponseEntity<Flux<ServerSentEvent<String>>> streamEvents() {

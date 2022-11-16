@@ -18,8 +18,22 @@ package org.sakaiproject.messaging.impl;
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.ignite.IgniteMessaging;
+import org.apache.http.HttpResponse;
 
+import org.bouncycastle.jce.ECNamedCurveTable;
+import org.bouncycastle.jce.interfaces.ECPrivateKey;
+import org.bouncycastle.jce.interfaces.ECPublicKey;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.bouncycastle.jce.spec.ECNamedCurveParameterSpec;
+
+import java.io.FileWriter;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.security.KeyPair;
+import java.security.KeyPairGenerator;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -37,6 +51,9 @@ import java.util.stream.Collectors;
 
 import org.hibernate.SessionFactory;
 import org.hibernate.criterion.Restrictions;
+import java.security.Security;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import org.sakaiproject.component.api.ServerConfigurationService;
 import org.sakaiproject.email.api.DigestService;
@@ -70,6 +87,11 @@ import org.sakaiproject.user.api.User;
 import org.sakaiproject.user.api.UserDirectoryService;
 import org.sakaiproject.user.api.UserNotDefinedException;
 import org.sakaiproject.util.ResourceLoader;
+
+import nl.martijndwars.webpush.Notification;
+import nl.martijndwars.webpush.PushService;
+import nl.martijndwars.webpush.Subscription;
+import nl.martijndwars.webpush.Utils;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -113,6 +135,11 @@ public class UserMessagingServiceImpl implements UserMessagingService, Observer 
     private List<UserNotificationHandler> handlers = new ArrayList<>();
     private Map<String, UserNotificationHandler> handlerMap = new HashMap<>();
     private ExecutorService executor;
+    private PushService pushService;
+    private String publicKey = "";
+    private boolean pushEnabled = false;
+
+    private final static ObjectMapper objectMapper = new ObjectMapper();
 
     public void init() {
 
@@ -125,7 +152,58 @@ public class UserMessagingServiceImpl implements UserMessagingService, Observer 
 
         messaging = ignite.message(ignite.cluster().forLocal());
 
+        Security.addProvider(new BouncyCastleProvider());
+
         executor = Executors.newFixedThreadPool(20);
+
+        this.pushEnabled = serverConfigurationService.getBoolean("portal.notifications.push.enabled", false);
+
+        if (pushEnabled) {
+            String home = serverConfigurationService.getSakaiHomePath();
+            String publicKeyFileName = serverConfigurationService.getString(PUSH_PUBKEY_PROPERTY, "sakai_push.key.pub");
+            Path publicKeyPath = Paths.get(home, publicKeyFileName);
+            String privateKeyFileName = serverConfigurationService.getString("portal.notifications.push.privatekey", "sakai_push.key");
+            Path privateKeyPath = Paths.get(home, privateKeyFileName);
+
+            if (Files.exists(privateKeyPath) && Files.exists(publicKeyPath)) {
+                try {
+                    publicKey = String.join("", Files.readAllLines(Paths.get(home, publicKeyFileName)));
+                    String privateKey = String.join("", Files.readAllLines(Paths.get(home, privateKeyFileName)));
+                    pushService = new PushService(publicKey, privateKey);
+                    String pushSubject = serverConfigurationService.getString("portal.notifications.push.subject", "");
+                    pushService.setSubject(pushSubject);
+                } catch (Exception e) {
+                    log.error("Failed to setup push service: {}", e.toString());
+                }
+            } else {
+                ECNamedCurveParameterSpec parameterSpec = ECNamedCurveTable.getParameterSpec("prime256v1");
+
+                try {
+                    KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("ECDH", BouncyCastleProvider.PROVIDER_NAME);
+                    keyPairGenerator.initialize(parameterSpec);
+
+                    KeyPair keyPair = keyPairGenerator.generateKeyPair();
+
+                    byte[] publicKey = Utils.encode((ECPublicKey) keyPair.getPublic());
+                    String publicKeyBase64 = Base64.getUrlEncoder().withoutPadding().encodeToString(publicKey);
+                    try (FileWriter fw = new FileWriter(publicKeyPath.toFile())) {
+                        fw.write(publicKeyBase64);
+                    }
+
+                    byte[] privateKey = Utils.encode((ECPrivateKey) keyPair.getPrivate());
+                    String privateKeyBase64 = Base64.getUrlEncoder().withoutPadding().encodeToString(privateKey);
+                    try (FileWriter fw = new FileWriter(privateKeyPath.toFile())) {
+                        fw.write(privateKeyBase64);
+                    }
+
+                    pushService = new PushService(publicKeyBase64, privateKeyBase64);
+                    String pushSubject = serverConfigurationService.getString("portal.notifications.push.subject", "");
+                    pushService.setSubject(pushSubject);
+                } catch (Exception e) {
+                    log.error("Failed to generate key pair: {}", e.toString());
+                }
+            }
+        }
     }
 
     public void destroy() {
@@ -147,6 +225,7 @@ public class UserMessagingServiceImpl implements UserMessagingService, Observer 
         private final String message;
 
         public EmailSender(User user, String subject, String message) {
+
             this.user = user;
             this.subject = subject;
             this.message = message;
@@ -246,6 +325,10 @@ public class UserMessagingServiceImpl implements UserMessagingService, Observer 
         Placement placement = toolManager.getCurrentPlacement();
         String context = placement != null ? placement.getContext() : null;
 
+        if (replacements.containsKey("icon")) {
+            replacements.put("iconClass", "si si-" + replacements.get("icon"));
+        }
+
         executor.execute(() -> {
 
             String tool = message.getTool();
@@ -285,6 +368,36 @@ public class UserMessagingServiceImpl implements UserMessagingService, Observer 
                         case DIGEST:
                             if (NotificationService.NOTI_REQUIRED == priority || noti.equals(String.valueOf(NotificationService.PREF_DIGEST))) {
                                 digestService.digest(user.getId(), template.getRenderedSubject(), template.getRenderedMessage());
+                            }
+                            break;
+                        case PUSH:
+                            if (pushEnabled) {
+                                ResourceProperties props = prefs.getProperties("sakai:notifications");
+                                String pushEndpoint = props.getProperty("push-endpoint");
+                                String pushUserKey = props.getProperty("push-user-key");
+                                String pushAuth = props.getProperty("push-auth");
+
+                                // We only push if the user has given permission for  notifications
+                                // and successfully set their subscription details
+                                if (!StringUtils.isAnyBlank(pushEndpoint, pushUserKey, pushAuth)) {
+                                    Subscription sub = new Subscription(pushEndpoint, new Subscription.Keys(pushUserKey, pushAuth));
+                                    try {
+                                        Map<String, String> jsonMap = replacements.entrySet().stream().filter(es -> {
+
+                                            String key = es.getKey();
+                                            return key.equals("title") || key.equals("url") || key.equals("iconClass");
+                                        }).collect(Collectors.toMap(es -> es.getKey(), es -> (String) es.getValue()));
+                                        jsonMap.put("tool", tool);
+
+                                        HttpResponse pushResponse = pushService.send(new Notification(sub, objectMapper.writeValueAsString(jsonMap)));
+                                        log.debug("The push response from {} returned code {} and reason {}",
+                                                pushEndpoint,
+                                                pushResponse.getStatusLine().getStatusCode(),
+                                                pushResponse.getStatusLine().getReasonPhrase());
+                                    } catch (Exception e) {
+                                        log.error("Exception while pushing notification: {}", e.toString());
+                                    }
+                                }
                             }
                             break;
                         default:

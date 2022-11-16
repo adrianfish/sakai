@@ -31,6 +31,8 @@ import org.sakaiproject.user.api.User;
  */
 public interface UserMessagingService {
 
+    public static final String PUSH_PUBKEY_PROPERTY = "portal.notifications.push.publickey";
+
     /**
      * Send a message to a set of users, via 1 to many message media. If a template is involved
      * you can supply a map of token replacements. User preferences are queried by the
