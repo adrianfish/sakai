@@ -98,6 +98,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionCallback;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
 
@@ -372,6 +373,14 @@ public class UserMessagingServiceImpl implements UserMessagingService, Observer 
                             break;
                         case PUSH:
                             if (pushEnabled) {
+                                Map<String, String> jsonMap = replacements.entrySet().stream().filter(es -> {
+
+                                    String key = es.getKey();
+                                    return key.equals("event") || key.equals("title") || key.equals("url") || key.equals("iconClass");
+                                }).collect(Collectors.toMap(es -> es.getKey(), es -> (String) es.getValue()));
+                                jsonMap.put("tool", tool);
+                                pushIfWanted(user.getId(), jsonMap);
+                                    /*
                                 ResourceProperties props = prefs.getProperties("sakai:notifications");
                                 String pushEndpoint = props.getProperty("push-endpoint");
                                 String pushUserKey = props.getProperty("push-user-key");
@@ -385,7 +394,7 @@ public class UserMessagingServiceImpl implements UserMessagingService, Observer 
                                         Map<String, String> jsonMap = replacements.entrySet().stream().filter(es -> {
 
                                             String key = es.getKey();
-                                            return key.equals("title") || key.equals("url") || key.equals("iconClass");
+                                            return key.equals("event") || key.equals("title") || key.equals("url") || key.equals("iconClass");
                                         }).collect(Collectors.toMap(es -> es.getKey(), es -> (String) es.getValue()));
                                         jsonMap.put("tool", tool);
 
@@ -398,6 +407,7 @@ public class UserMessagingServiceImpl implements UserMessagingService, Observer 
                                         log.error("Exception while pushing notification: {}", e.toString());
                                     }
                                 }
+                                */
                             }
                             break;
                         default:
@@ -466,8 +476,19 @@ public class UserMessagingServiceImpl implements UserMessagingService, Observer 
                         Optional<List<UserNotificationData>> result = handler.handleEvent(e);
                         if (result.isPresent()) {
                             result.get().forEach(bd -> {
-                                doInsert(from, bd.getTo(), event, ref, bd.getTitle(),
+                                UserNotification un = doInsert(from, bd.getTo(), event, ref, bd.getTitle(),
                                                 bd.getSiteId(), e.getEventTime(), bd.getUrl());
+
+                                un = decorateAlert(un);
+                                Map<String, String> data = new HashMap<>();
+                                data.put("event", event);
+                                data.put("fromUser", from);
+                                data.put("fromDisplayName", un.getFromDisplayName());
+                                data.put("siteTitle", un.getSiteTitle());
+                                data.put("formattedEventDate", un.getFormattedEventDate());
+                                data.put("title", bd.getTitle());
+                                data.put("url", bd.getUrl());
+                                pushIfWanted(bd.getTo(), data);
                             });
                         }
                     } else if (SiteService.EVENT_SITE_PUBLISH.equals(event)) {
@@ -498,32 +519,33 @@ public class UserMessagingServiceImpl implements UserMessagingService, Observer 
         }
     }
 
-    private void doInsert(String from, String to, String event, String ref
+    private UserNotification doInsert(String from, String to, String event, String ref
                             , String title, String siteId, Date eventDate, String url) {
 
         TransactionTemplate transactionTemplate = new TransactionTemplate(transactionManager);
 
-        transactionTemplate.execute(new TransactionCallbackWithoutResult() {
+        return transactionTemplate.execute(new TransactionCallback<UserNotification>() {
 
-            protected void doInTransactionWithoutResult(TransactionStatus status) {
+            public UserNotification doInTransaction(TransactionStatus status) {
 
-                UserNotification ba = new UserNotification();
-                ba.setFromUser(from);
-                ba.setToUser(to);
-                ba.setEvent(event);
-                ba.setRef(ref);
-                ba.setTitle(title);
-                ba.setSiteId(siteId);
-                ba.setEventDate(eventDate.toInstant());
-                ba.setUrl(url);
+                UserNotification un = new UserNotification();
+                un.setFromUser(from);
+                un.setToUser(to);
+                un.setEvent(event);
+                un.setRef(ref);
+                un.setTitle(title);
+                un.setSiteId(siteId);
+                un.setEventDate(eventDate.toInstant());
+                un.setUrl(url);
                 try {
-                    ba.setDeferred(!siteService.getSite(siteId).isPublished());
+                    un.setDeferred(!siteService.getSite(siteId).isPublished());
                 } catch (IdUnusedException iue) {
                     log.warn("Failed to find site with id {} while setting deferred to published", siteId);
                 }
 
-                sessionFactory.getCurrentSession().persist(ba);
-                send("USER#" + to, ba);
+                sessionFactory.getCurrentSession().persist(un);
+                send("USER#" + to, un);
+                return un;
             }
         });
     }
@@ -587,5 +609,31 @@ public class UserMessagingServiceImpl implements UserMessagingService, Observer 
 
     public void send(String topic, UserNotification un) {
         messaging.send(topic, un);
+    }
+
+    private void pushIfWanted(String userId, Map<String, String> data) {
+
+        if (pushEnabled) {
+            Preferences prefs = preferencesService.getPreferences(userId);
+            ResourceProperties props = prefs.getProperties("sakai:notifications");
+            String pushEndpoint = props.getProperty("push-endpoint");
+            String pushUserKey = props.getProperty("push-user-key");
+            String pushAuth = props.getProperty("push-auth");
+
+            // We only push if the user has given permission for  notifications
+            // and successfully set their subscription details
+            if (!StringUtils.isAnyBlank(pushEndpoint, pushUserKey, pushAuth)) {
+                Subscription sub = new Subscription(pushEndpoint, new Subscription.Keys(pushUserKey, pushAuth));
+                try {
+                    HttpResponse pushResponse = pushService.send(new Notification(sub, objectMapper.writeValueAsString(data)));
+                    log.debug("The push response from {} returned code {} and reason {}",
+                            pushEndpoint,
+                            pushResponse.getStatusLine().getStatusCode(),
+                            pushResponse.getStatusLine().getReasonPhrase());
+                } catch (Exception e) {
+                    log.error("Exception while pushing notification: {}", e.toString());
+                }
+            }
+        }
     }
 }

@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <link rel="manifest" href="/pwa/manifest.json" />
+    <script th:inline="javascript">
+        portal = { user: { id: [[${userId}]] }, locale: [[${locale}]], notifications: { pushEnabled: [[${pushEnabled}]], debugNotifications: [[${debugNotifications}]] } };
+    </script>
+    <script th:src="@{~/library/js/sakai-message-broker.js} + ${cdnQuery}"></script>
+    <script type="module" th:src="@{~/webcomponents/sui-notifications/sui-notifications.js} + ${cdnQuery}"></script>
+    <script src="/library/webjars/bootstrap/5.2.0/js/bootstrap.min.js"></script>
+    <link href="/library/skin/default-skin/pwa.css" rel="stylesheet">
+  </head>
+  <body>
+    <h2 class="text-center">Notifications</h2>
+    <div class="text-center my-3">
+      <span id="pwa-permission-information" th:text="#{request_permission}" class="text-center me-2">request_permission</span>
+      <button id="pwa-notifications-button" class="btn btn-primary mt-2 mt-sm-0" th:text="#{allow_notifications}">allow_notifications</button>
+    </div>
+    <div class="p-2">
+      <sui-notifications url="/direct/portal/notifications.json" push></sui-notifications>
+    </div>
+    <script th:src="@{~/pwa/js/sakai-pwa.js} + ${cdnQuery}"></script>
+  </body>
+</html>

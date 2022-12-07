@@ -4,7 +4,30 @@ portal.notifications = portal.notifications || {};
 portal.notifications.pushCallbacks = new Map();
 portal.notifications.sseCallbacks = new Map();
 
+portal.notifications.setAppBadge = number => {
+
+  if ( 'setAppBadge' in navigator ) {
+    navigator.setAppBadge(number);
+  } else {
+    console.debug('setAppBadge not available');
+  }
+}
+
+portal.notifications.clearAppBadge = () => {
+
+  if ( 'clearAppBadge' in navigator ) {
+    navigator.clearAppBadge();
+  } else {
+    console.debug("clearAppBadge not available");
+  }
+}
+
+portal.notifications.debug = true;
+
 if (portal?.user?.id) {
+
+  if (portal.notifications.debug) console.debug(`Enabled: ${portal.notifications.pushEnabled}`);
+  if (portal.notifications.debug) console.debug(`Permission: ${Notification.permission}`);
 
   if (portal.notifications.pushEnabled && Notification.permission === "default") {
 
@@ -12,7 +35,7 @@ if (portal?.user?.id) {
 
     if (portal.notifications.debug) console.debug("No permission set");
 
-    navigator.serviceWorker.register("/api/sakai-sse-service-worker.js").then(registration => {
+    navigator.serviceWorker.register("/sakai-service-worker.js").then(registration => {
 
       if (!registration.pushManager) {
         // This must be Safari, or maybe IE3 or something :)
@@ -26,7 +49,7 @@ if (portal?.user?.id) {
 
         // We're using the bullhorn buttons to trigger the permission request from the user. You
         // can only instigate a permissions request from a user action.
-        document.querySelectorAll(".portal-notifications-button").forEach(b => {
+        document.querySelectorAll(".portal-notifications-button, #pwa-notifications-button").forEach(b => {
 
           b.addEventListener("click", e => {
 
@@ -36,12 +59,12 @@ if (portal?.user?.id) {
 
               if (permission === "granted") {
 
-                if (portal.notifications.debug) console.log("Permission granted. Subscribing ...");
+                if (portal.notifications.debug) console.debug("Permission granted. Subscribing ...");
 
                 // We have permission, Grab the public app server key.
                 fetch("/api/keys/sakaipush").then(r => r.text()).then(key => {
 
-                  if (portal.notifications.debug) console.log("Got the key. Subscribing for push ...");
+                  if (portal.notifications.debug) console.debug("Got the key. Subscribing for push ...");
 
                   // Subscribe with the public key
                   registration.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: key }).then(sub => {
@@ -93,8 +116,9 @@ if (portal?.user?.id) {
 
         if (portal.notifications.debug) {
           console.debug("PUSH MESSAGE RECEIVED");
-          console.log(e.data);
+          console.debug(e.data);
         }
+        portal.notifications.setAppBadge(10);
 
         const allCallbacks = portal.notifications.pushCallbacks.get("all");
         allCallbacks && allCallbacks.forEach(cb => cb(e.data));
@@ -136,7 +160,7 @@ if (portal?.user?.id) {
 
     if (portal.notifications.debug) console.debug("Registering worker ...");
 
-    navigator.serviceWorker.register("/api/sakai-sse-service-worker.js")
+    navigator.serviceWorker.register("/sakai-service-worker.js")
       .then(registration => {
 
         const worker = registration.active;
@@ -189,7 +213,7 @@ if (portal?.user?.id) {
   portal.notifications.setup.then(() => console.debug("Notifications setup complete"));
 } else {
   // Logged out. Tell the worker to close the EventSource.
-  navigator.serviceWorker.register("/api/sakai-sse-service-worker.js").then(registration => {
+  navigator.serviceWorker.register("/sakai-service-worker.js").then(registration => {
 
     const worker = registration.active;
     if (portal.notifications.debug) console.debug("Logged out. Sending close event source signal to worker ...");

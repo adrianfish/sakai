@@ -21,17 +21,17 @@ class SuiNotifications extends SakaiElement {
 
     return {
       url: { type: String },
+      push: { type: Boolean },
     };
   }
 
-  attributeChangedCallback(name, oldValue, newValue) {
+  set url(value) {
 
-    super.attributeChangedCallback(name, oldValue, newValue);
-
-    if (this.url) {
-      this.loadInitialNotifications();
-    }
+    this._url = value;
+    this.loadInitialNotifications();
   }
+
+  get url() { return this._url; }
 
   loadInitialNotifications() {
 
@@ -52,7 +52,9 @@ class SuiNotifications extends SakaiElement {
 
       this.alerts = data.alerts || [];
       this.filterIntoToolNotifications();
+
       this.registerForNotifications();
+
       this.fireLoadedEvent();
     });
   }
@@ -61,19 +63,31 @@ class SuiNotifications extends SakaiElement {
 
     portal.notifications.setup.then(() => {
 
-      portal.notifications.registerForMessages("notifications", message => {
+      if (this.push) {
+        portal.notifications.registerPushCallback("all", data => {
 
-        this.alerts.push(message);
-        this.fireLoadedEvent();
-        this.filterIntoToolNotifications();
-      });
+          this.alerts.push(data);
+          this.fireLoadedEvent();
+          this.filterIntoToolNotifications();
+        });
+      } else {
+
+        portal.notifications.registerForMessages("notifications", message => {
+
+          this.alerts.push(message);
+          this.fireLoadedEvent();
+          this.filterIntoToolNotifications();
+        });
+      }
     });
+
   }
 
   filterIntoToolNotifications() {
 
     this.assignmentsNotifications = [];
     this.announcementNotifications = [];
+
 
     this.alerts.forEach(noti => {
 
@@ -118,6 +132,7 @@ class SuiNotifications extends SakaiElement {
           this.alerts = [];
           this.fireLoadedEvent();
           this.filterIntoToolNotifications();
+          portal.notifications.clearAppBadge();
         } else {
           console.error("Failed to clear all notifications");
         }
@@ -173,7 +188,7 @@ class SuiNotifications extends SakaiElement {
   render() {
 
     return html`
-      <div class="accordion" id="sakai-notifications-accordion">
+      <div class="accordion">
         ${this.assignmentsNotifications.length > 0 ? html`
           ${this.renderAccordion("assignments", this.assignmentsNotifications)}
         ` : ""}
