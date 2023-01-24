@@ -1690,6 +1690,12 @@
         <scope>provided</scope>
       </dependency>
       <dependency>
+        <groupId>org.sakaiproject.analytics</groupId>
+        <artifactId>sakai-analytics-api</artifactId>
+        <version>${sakai.version}</version>
+        <scope>provided</scope>
+      </dependency>
+      <dependency>
         <groupId>org.sakaiproject.announcement</groupId>
         <artifactId>sakai-announcement-api</artifactId>
         <version>${sakai.version}</version>

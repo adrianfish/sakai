@@ -1,0 +1,40 @@
+ .#{$namespace}sakai-analytics{
+
+  .anal-select-wrapper {
+    margin-bottom: 8px;
+  }
+
+  .anal-select {
+    width: 600px;
+  }
+
+  #anal-run-button {
+    margin-top: 10px;
+  }
+
+  #anal-filters-button-wrapper {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+  }
+
+  #anal-active-filters-indicator {
+    margin-left: 10px;
+    font-weight: bold;
+    color: var(--successBanner-color);
+  }
+
+  #anal-canvas-wrapper {
+    padding: 20px;
+  }
+
+  #anal-summary-grid {
+    display: grid;
+    grid-template-columns: 180px 100px;
+    margin-top: 30px;
+
+    div:nth-child(odd) {
+      font-weight: 800;
+    }
+  }
+}

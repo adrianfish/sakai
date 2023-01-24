@@ -39,6 +39,7 @@ import org.hibernate.Session;
 import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
 import org.sakaiproject.component.cover.ComponentManager;
+import org.sakaiproject.event.api.NotificationService;
 import org.sakaiproject.hibernate.HibernateCriterionUtils;
 import org.sakaiproject.service.gradebook.shared.AssessmentNotFoundException;
 import org.sakaiproject.service.gradebook.shared.AssignmentHasIllegalPointsException;
@@ -51,6 +52,7 @@ import org.sakaiproject.service.gradebook.shared.GradebookExternalAssessmentServ
 import org.sakaiproject.service.gradebook.shared.GradebookHelper;
 import org.sakaiproject.service.gradebook.shared.GradebookNotFoundException;
 import org.sakaiproject.service.gradebook.shared.GradebookService;
+import org.sakaiproject.service.gradebook.shared.GradingReferenceReckoner;
 import org.sakaiproject.service.gradebook.shared.InvalidCategoryException;
 import org.sakaiproject.site.api.Site;
 import org.sakaiproject.site.api.SiteService;
@@ -895,6 +897,12 @@ public class GradebookExternalAssessmentServiceImpl extends BaseHibernateManager
 				log.debug("About to save AssignmentGradeRecord id={}, version={}, studenttId={}, pointsEarned={}", agr.getId(),
 						agr.getVersion(), agr.getStudentId(), agr.getPointsEarned());
 				session.saveOrUpdate(agr);
+
+				String ref = GradingReferenceReckoner.reckoner()
+					.item(asn.getId())
+					.student(studentUid)
+                    .tool(asn.getExternalAppName()).reckon().getReference();
+				eventTrackingService.post(eventTrackingService.newEvent(GradebookService.EVENT_GRADED, ref, gradebookUid, true, NotificationService.NOTI_NONE));
 
 				// Sync database.
 				postUpdateGradeEvent(gradebookUid, asn.getName(), studentUid, newPointsEarned);

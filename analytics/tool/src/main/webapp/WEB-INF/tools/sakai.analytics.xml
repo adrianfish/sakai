@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+<registration>
+	<tool id="sakai.analytics"
+		title="Analytics"
+		description="Run analytics reports across Sakai">
+
+        <category name="myworkspace" />
+        <category name="course" />
+        <category name="project" />
+
+    </tool>
+</registration>
+

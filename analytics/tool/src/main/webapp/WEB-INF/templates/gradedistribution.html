@@ -1,0 +1,21 @@
+!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <link media="all" href="/library/skin/tool_base.css" rel="stylesheet" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="/library/webjars/choices.js/10.1.0/public/assets/styles/choices.min.css" />
+    <script type="module" src="/webcomponents/sakai-grade-distribution.js"></script>
+    <script src="/library/webjars/choices.js/10.1.0/public/assets/scripts/choices.min.js"></script>
+    [(${sakaiHtmlHead})]
+  </head>
+  <body>
+    <div class="portletBody">
+      <!--a th:href="@{/competencies}" th:text="#{competencies_title}">competencies_title</a-->
+      <a th:href="@{/index}" th:text="#{main_index}">main_index</a>
+      <h3 th:text="#{grade_distribution_title}">grade_distribution_title</h3>
+      <sakai-grade-distribution
+        th:attr="site-ref=${siteRef},sites=${sitesJSON},users=${usersJSON},terms=${termsJSON},departments=${departmentsJSON},subjects=${subjectsJSON}">
+      </sakai-grade-distribution>
+    </div>
+  </body>
+</html>

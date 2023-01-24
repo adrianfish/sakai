@@ -1,0 +1,15 @@
+!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <link media="all" href="/library/skin/tool_base.css" rel="stylesheet" type="text/css" />
+    [(${sakaiHtmlHead})]
+  </head>
+  <body>
+    <div class="portletBody">
+      <!--a th:href="@{/competencies}" th:text="#{competencies_title}">competencies_title</a-->
+      <h1 th:text="#{reports_title}">reports_title</h1>
+      <a th:href="@{/gradedistribution}" th:text="#{grade_distribution_title}">grade_distribution_title</a>
+    </div>
+  </body>
+</html>

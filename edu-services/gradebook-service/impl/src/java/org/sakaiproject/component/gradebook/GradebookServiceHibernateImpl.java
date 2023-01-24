@@ -76,6 +76,7 @@ import org.sakaiproject.service.gradebook.shared.GradebookPermissionService;
 import org.sakaiproject.service.gradebook.shared.GradebookSecurityException;
 import org.sakaiproject.service.gradebook.shared.GradebookService;
 import org.sakaiproject.service.gradebook.shared.GradingEventStatus;
+import org.sakaiproject.service.gradebook.shared.GradingReferenceReckoner;
 import org.sakaiproject.service.gradebook.shared.InvalidGradeException;
 import org.sakaiproject.service.gradebook.shared.SortType;
 import org.sakaiproject.service.gradebook.shared.StaleObjectModificationException;
@@ -2141,6 +2142,10 @@ public class GradebookServiceHibernateImpl extends BaseHibernateManager implemen
 			try {
 				for (final AssignmentGradeRecord assignmentGradeRecord : gradeRecordsToUpdate) {
 					getHibernateTemplate().saveOrUpdate(assignmentGradeRecord);
+					String ref = GradingReferenceReckoner.reckoner()
+						.item(gradableObjectId)
+						.student(assignmentGradeRecord.getStudentId()).reckon().getReference();
+					eventTrackingService.post(eventTrackingService.newEvent(GradebookService.EVENT_GRADED, ref, true));
 				}
 				for (final Comment comment : commentsToUpdate) {
 					getHibernateTemplate().saveOrUpdate(comment);

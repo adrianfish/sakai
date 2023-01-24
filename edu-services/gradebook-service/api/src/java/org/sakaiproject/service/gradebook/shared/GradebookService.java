@@ -62,6 +62,8 @@ public interface GradebookService extends EntityProducer {
 	public static final String REFERENCE_ROOT = "/gbassignment";
 	public static final String SAKAI_GBASSIGNMENT = "sakai:gbassignment";
 
+    public static final String EVENT_GRADED = "grading.graded";
+
 	public static final String[] validLetterGrade = { "a+", "a", "a-", "b+", "b", "b-",
 			"c+", "c", "c-", "d+", "d", "d-", "f" };
 

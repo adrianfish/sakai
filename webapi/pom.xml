@@ -60,6 +60,10 @@
             <artifactId>coursemanagement-api</artifactId>
         </dependency>
         <dependency>
+            <groupId>org.sakaiproject.analytics</groupId>
+            <artifactId>sakai-analytics-api</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.sakaiproject.announcement</groupId>
             <artifactId>sakai-announcement-api</artifactId>
         </dependency>
