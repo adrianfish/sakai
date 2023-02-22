@@ -15,9 +15,6 @@
  */
 package org.sakaiproject.grading.api;
 
-import java.util.HashMap;
-import java.util.Map;
-
 /**
  * The grading types that a gradebook could be configured as
  */
@@ -25,37 +22,7 @@ public enum GradeType {
 
     POINTS,
     PERCENTAGE,
-    LETTER;
-
-    /*
-    private int value;
-
-    GradeType(int value) {
-        this.value = value;
-    }
-    */
-
-    /**
-     * Get the value for the type
-     *
-     * @return
-     */
-    /*
-    public int getValue() {
-        return this.value;
-    }
-
-    // maintain a map of the types so we can lookup the enum based on type
-    private static Map<Integer, GradeType> map = new HashMap<>();
-
-    static {
-        for (final GradeType type : GradeType.values()) {
-            map.put(type.value, type);
-        }
-    }
-
-    public static GradeType valueOf(final int value) {
-        return map.get(value);
-    }
-    */
+    LETTER,
+    BINARY,
+    UNGRADED;
 }

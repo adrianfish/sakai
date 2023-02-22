@@ -83,6 +83,12 @@ public abstract class AbstractGradeRecord implements PersistableEntity<Long>, Se
     @Column(name = "POINTS_EARNED")
     protected Double pointsEarned;
 
+    @Column(name = "LETTER_EARNED")
+    protected String letterEarned;
+
+    @Column(name = "BINARY_EARNED")
+    protected Boolean binaryEarned;
+
     public abstract Double getGradeAsPercentage();
 
     /**

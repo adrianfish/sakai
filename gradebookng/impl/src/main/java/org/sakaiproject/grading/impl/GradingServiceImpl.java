@@ -2467,7 +2467,18 @@ public class GradingServiceImpl implements GradingService {
             // TODO: test if it's ungraded item or not. if yes, set ungraded grade for this record. if not, need validation??
         } else {
             // TODO: test if it's ungraded item or not. if yes, set ungraded grade for this record. if not, need validation??
-            gradeRecord.setPointsEarned(convertStringToDouble(score));
+            final Gradebook gradebook = this.getGradebook(gradebookUid);
+            switch (getGradebook(gradebookUid).getGradeType()) {
+                case POINTS:
+                    gradeRecord.setPointsEarned(convertStringToDouble(score));
+                    break;
+                case LETTER:
+                    gradeRecord.setLetterEarned(score);
+                    break;
+                //case SATISFACTORY:
+                //    gradeRecord.setBinaryEarned(Boolean.convertStringToDouble(score));
+                default:
+            }
         }
         gradeRecord.setGraderId(graderId);
         gradeRecord.setDateRecorded(now);
