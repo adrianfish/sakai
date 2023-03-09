@@ -245,11 +245,23 @@ public interface GradingService extends EntityProducer {
      * @param assignmentId
      * @param studentUid
      * @return Returns a GradeDefinition for the student, respecting the grade entry type for the gradebook (ie in %, letter grade, or
-     *         points format). Returns null if no grade
-     * @throws AssessmentNotFoundException
+     *         points format).
+     * @throws AssessmentNotFoundException If there is no assignment with the supplied id
      */
     public GradeDefinition getGradeDefinitionForStudentForItem(String gradebookUid,
             Long assignmentId, String studentUid)
+            throws AssessmentNotFoundException;
+
+    /**
+     *
+     * @param siteId
+     * @param assignmentId
+     * @param submitterId Either a Sakai group id, or a user id.
+     * @return Returns an optional GradeDefinition for the submitter, respecting the grade entry type for the gradebook (ie in %, letter grade, or
+     *         points format).
+     * @throws AssessmentNotFoundException If there is no assignment with the supplied id
+     */
+    public GradeDefinition getGradeDefinition(String siteId, Long assignmentId, String submitterId)
             throws AssessmentNotFoundException;
 
     /**

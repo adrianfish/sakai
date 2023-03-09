@@ -475,31 +475,37 @@ public class GradingServiceImpl implements GradingService {
     @Override
     public GradeDefinition getGradeDefinitionForStudentForItem(final String gradebookUid, final Long assignmentId, final String studentUid) {
 
-        if (gradebookUid == null || assignmentId == null || studentUid == null) {
-            throw new IllegalArgumentException("Null paraemter passed to getGradeDefinitionForStudentForItem");
+        return getGradeDefinition(gradebookUid, assignmentId, studentUid);
+    }
+
+    @Override
+    public GradeDefinition getGradeDefinition(String siteId, Long assignmentId, String submitterId) {
+
+        if (siteId == null || assignmentId == null || submitterId == null) {
+            throw new IllegalArgumentException("Null parameter passed to getGradeDefinition");
         }
 
         // studentId can be a groupId (from Assignments)
-        final boolean studentRequestingOwnScore = sessionManager.getCurrentSessionUserId().equals(studentUid)
-                || isCurrentUserFromGroup(gradebookUid, studentUid);
+        final boolean studentRequestingOwnScore = sessionManager.getCurrentSessionUserId().equals(submitterId)
+                || isCurrentUserFromGroup(siteId, submitterId);
 
-        final GradebookAssignment assignment = getAssignmentWithoutStats(gradebookUid, assignmentId);
+        final GradebookAssignment assignment = getAssignmentWithoutStats(siteId, assignmentId);
 
         if (assignment == null) {
             throw new AssessmentNotFoundException(
-                    "There is no assignment with the assignmentId " + assignmentId + " in gradebook " + gradebookUid);
+                    "There is no assignment with the assignmentId " + assignmentId + " in gradebook " + siteId);
         }
 
-        if (!studentRequestingOwnScore && !isUserAbleToViewItemForStudent(gradebookUid, assignment.getId(), studentUid)) {
+        if (!studentRequestingOwnScore && !isUserAbleToViewItemForStudent(siteId, assignment.getId(), submitterId)) {
             log.error("AUTHORIZATION FAILURE: User {} in gradebook {} attempted to retrieve grade for student {} for assignment {}",
-                    getUserUid(), gradebookUid, studentUid, assignmentId);
+                    getUserUid(), siteId, submitterId, assignmentId);
             throw new GradingSecurityException();
         }
 
         final Gradebook gradebook = assignment.getGradebook();
 
         final GradeDefinition gradeDef = new GradeDefinition();
-        gradeDef.setStudentUid(studentUid);
+        gradeDef.setStudentUid(submitterId);
         gradeDef.setGradeEntryType(gradebook.getGradeType());
         gradeDef.setGradeReleased(assignment.getReleased());
 
@@ -510,12 +516,12 @@ public class GradingServiceImpl implements GradingService {
             gradeDef.setGrade(null);
             gradeDef.setGraderUid(null);
             gradeDef.setGradeComment(null);
-            log.debug("Student {} in gradebook {} retrieving score for unreleased assignment {}", getUserUid(), gradebookUid,
+            log.debug("Student {} in gradebook {} retrieving score for unreleased assignment {}", getUserUid(), siteId,
                     assignment.getName());
         } else {
 
-            final AssignmentGradeRecord gradeRecord = getAssignmentGradeRecord(assignment, studentUid);
-            final CommentDefinition gradeComment = getAssignmentScoreComment(gradebookUid, assignmentId, studentUid);
+            final AssignmentGradeRecord gradeRecord = getAssignmentGradeRecord(assignment, submitterId);
+            final CommentDefinition gradeComment = getAssignmentScoreComment(siteId, assignmentId, submitterId);
             final String commentText = gradeComment != null ? gradeComment.getCommentText() : null;
             log.debug("gradeRecord={}", gradeRecord);
 
@@ -554,7 +560,7 @@ public class GradingServiceImpl implements GradingService {
             }
         }
 
-        log.debug("returning grade def for {}", studentUid);
+        log.debug("returning grade def for {}", submitterId);
         return gradeDef;
     }
 

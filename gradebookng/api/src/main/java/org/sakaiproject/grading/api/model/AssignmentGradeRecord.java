@@ -56,7 +56,7 @@ public class AssignmentGradeRecord extends AbstractGradeRecord implements Clonea
 
     @Lob
     @Column(name = "PRIVATE_NOTES", length = 65535)
-    private String privateNotes = Boolean.FALSE;
+    private String privateNotes;
 
     @Transient
     private transient BigDecimal earnedWeightedPercentage;
