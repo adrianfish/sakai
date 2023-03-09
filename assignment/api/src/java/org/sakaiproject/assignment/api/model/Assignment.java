@@ -223,6 +223,9 @@ public class Assignment {
     @Column(name = "MAX_GRADE_POINT")
     private Integer maxGradePoint;
 
+    @Column(name = "GRADING_ITEM_ID")
+    private Long gradingItemId;
+
     @Column(name = "SCALE_FACTOR")
     private Integer scaleFactor;
 

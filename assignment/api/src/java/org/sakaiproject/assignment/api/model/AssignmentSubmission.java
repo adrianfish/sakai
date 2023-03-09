@@ -92,8 +92,6 @@ public class AssignmentSubmission {
     @JsonManagedReference
     private Set<AssignmentSubmissionSubmitter> submitters = new HashSet<>();
 
-    //private List submissionLog;
-
     @Type(type = "org.hibernate.type.InstantType")
     @Column(name = "SUBMITTED_DATE")
     private Instant dateSubmitted;
@@ -136,9 +134,6 @@ public class AssignmentSubmission {
     @Column(name = "FEEDBACK_TEXT", length = 65535)
     private String feedbackText;
 
-    @Column(name = "GRADE", length = 32)
-    private String grade;
-
     @Column(name = "FACTOR")
     private Integer factor;
 
@@ -168,10 +163,6 @@ public class AssignmentSubmission {
 
     @Column(name = "GROUP_ID", length = 36)
     private String groupId;
-
-    @Lob
-    @Column(name = "PRIVATE_NOTES", length = 65535)
-    private String privateNotes;
 
     @Cache(usage = CacheConcurrencyStrategy.NONSTRICT_READ_WRITE)
     @ElementCollection

@@ -222,7 +222,7 @@ public class AssignmentRepositoryImpl extends BasicSerializableRepository<Assign
                     log.debug("{} to many submissions, trying more agressively", submissions.size() - removable.size());
                     // still to many lets be a little more aggressive finding those that are not returned and no grade
                     submissions.removeAll(removable);
-                    submissions.stream().filter(s -> !s.getReturned() && s.getGrade() == null).forEach(removable::add);
+                    submissions.stream().filter(s -> !s.getReturned()).forEach(removable::add);
                 }
                 if ((submissions.size() - removable.size()) > 1) {
                     log.debug("{} to many submissions, take the first submission and remove the rest", submissions.size() - removable.size());

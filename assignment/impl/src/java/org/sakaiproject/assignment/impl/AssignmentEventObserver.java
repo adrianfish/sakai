@@ -103,10 +103,12 @@ public class AssignmentEventObserver implements Observer {
                                             }
                                             if (a.getIsGroup()) {
                                                 // grades will show up as overrides for group assignments
-                                                Set<AssignmentSubmissionSubmitter> submitters = s.getSubmitters();
-                                                submitters.stream().filter(u -> studentId.equals(u.getSubmitter())).findAny().ifPresent(u -> u.setGrade(grade));
+                                                //Set<AssignmentSubmissionSubmitter> submitters = s.getSubmitters();
+                                                gradingService.setAssignmentScoreString(a.getContext(), a.getGradingItemId(), studentId, grade, assignmentService.getToolId());
+                                                //submitters.stream().filter(u -> studentId.equals(u.getSubmitter())).findAny().ifPresent(u -> u.setGrade(grade));
                                             } else {
-                                                s.setGrade(grade);
+                                                //s.get().setGrade(grade);
+                                                gradingService.setAssignmentScoreString(a.getContext(), a.getGradingItemId(), s.getGroupId(), grade, assignmentService.getToolId());
                                             }
                                             s.setGraded(true);
                                             s.setGradedBy(event.getUserId());

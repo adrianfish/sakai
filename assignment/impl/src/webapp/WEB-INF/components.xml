@@ -104,6 +104,7 @@
         <property name="assignmentService" ref="org.sakaiproject.assignment.api.AssignmentService"/>
         <property name="siteService" ref="org.sakaiproject.site.api.SiteService"/>
         <property name="userDirectoryService" ref="org.sakaiproject.user.api.UserDirectoryService"/>
+        <property name="gradingService" ref="org.sakaiproject.grading.api.GradingService"/>
         <property name="formattedText" ref="org.sakaiproject.util.api.FormattedText"/>
     </bean>
 
@@ -190,6 +191,7 @@
 
     <bean id="org.sakaiproject.assignment.api.AssignmentPeerAssessmentServiceImpl"
           class="org.sakaiproject.assignment.impl.AssignmentPeerAssessmentServiceImpl">
+        <property name="gradingService" ref="org.sakaiproject.grading.api.GradingService"/>
         <property name="sessionFactory" ref="org.sakaiproject.springframework.orm.hibernate.GlobalSessionFactory"/>
         <property name="scheduledInvocationManager" ref="org.sakaiproject.api.app.scheduler.ScheduledInvocationManager"/>
         <property name="assignmentService" ref="org.sakaiproject.assignment.api.AssignmentService"/>

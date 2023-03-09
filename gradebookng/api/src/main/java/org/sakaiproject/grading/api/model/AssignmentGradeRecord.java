@@ -22,6 +22,7 @@ import java.util.Comparator;
 import javax.persistence.Column;
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
+import javax.persistence.Lob;
 import javax.persistence.Transient;
 
 import org.sakaiproject.grading.api.GradingConstants;
@@ -52,6 +53,10 @@ public class AssignmentGradeRecord extends AbstractGradeRecord implements Clonea
 
     @Column(name = "IS_EXCLUDED_FROM_GRADE")
     private Boolean excludedFromGrade = Boolean.FALSE;
+
+    @Lob
+    @Column(name = "PRIVATE_NOTES", length = 65535)
+    private String privateNotes = Boolean.FALSE;
 
     @Transient
     private transient BigDecimal earnedWeightedPercentage;

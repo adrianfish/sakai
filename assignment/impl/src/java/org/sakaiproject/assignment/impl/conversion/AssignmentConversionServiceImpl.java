@@ -441,7 +441,7 @@ public class AssignmentConversionServiceImpl implements AssignmentConversionServ
         s.setFactor(submission.getScaled_factor());
         s.setFeedbackComment(decodeBase64(submission.getFeedbackcommentHtml()));
         s.setFeedbackText(decodeBase64(submission.getFeedbacktextHtml()));
-        s.setGrade(submission.getScaled_grade());
+        //s.setGrade(submission.getScaled_grade());
         s.setGraded(submission.getGraded());
         if (StringUtils.contains(submission.getGradedBy(), "AssignmentPeerAssessmentService")) {
             // set peer assessment back to null as the assessor id is not recorded
@@ -525,7 +525,7 @@ public class AssignmentConversionServiceImpl implements AssignmentConversionServ
                         String values[] = gradeValue.split("::", 2);
                         gradeValue = values[1];
                     }
-                    submitter.setGrade(gradeValue);
+                    //submitter.setGrade(gradeValue);
 
                     submitter.setSubmission(s);
                     submitters.add(submitter);
@@ -554,7 +554,7 @@ public class AssignmentConversionServiceImpl implements AssignmentConversionServ
             }
             submitter.setSubmitter(submitterId);
             submitter.setSubmittee(true);
-            submitter.setGrade(null);
+            //submitter.setGrade(null);
             submitter.setSubmission(s);
             submitters.add(submitter);
         }

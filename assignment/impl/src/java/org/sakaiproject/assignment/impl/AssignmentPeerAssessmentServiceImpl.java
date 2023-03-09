@@ -46,18 +46,22 @@ import org.sakaiproject.authz.api.SecurityAdvisor;
 import org.sakaiproject.authz.api.SecurityService;
 import org.sakaiproject.exception.IdUnusedException;
 import org.sakaiproject.exception.PermissionException;
+import org.sakaiproject.grading.api.GradingService;
 import org.sakaiproject.tool.api.SessionManager;
 import org.sakaiproject.user.api.User;
 import org.springframework.orm.hibernate5.HibernateCallback;
 import org.springframework.orm.hibernate5.support.HibernateDaoSupport;
 
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
+@Setter
 public class AssignmentPeerAssessmentServiceImpl extends HibernateDaoSupport implements AssignmentPeerAssessmentService {
 
     private ScheduledInvocationManager scheduledInvocationManager;
     protected AssignmentService assignmentService;
+    private GradingService gradingService;
     private SecurityService securityService = null;
     private SessionManager sessionManager;
 
@@ -432,10 +436,13 @@ public class AssignmentPeerAssessmentServiceImpl extends HibernateDaoSupport imp
             securityService.pushAdvisor(sa);
             //first check that submission exists and that it can be graded/override score
             AssignmentSubmission submission = assignmentService.getSubmission(submissionId);
+            Assignment assignment = submission.getAssignment();
+            String userId = submission.getSubmitters().stream().findFirst().map(ass -> ass.getSubmitter()).orElse("");
+            String submissionGrade = gradingService.getGradeDefinitionForStudentForItem(assignment.getContext(), assignment.getGradingItemId(), userId).getGrade();
             //only override grades that have never been graded or was last graded by this service
             //this prevents this service from overriding instructor set grades, which take precedent.
             if (submission != null && (!submission.getGraded() || StringUtils.isBlank(submission.getGradedBy()))) {
-                List<PeerAssessmentItem> items = getPeerAssessmentItems(submissionId, submission.getAssignment().getScaleFactor());
+                List<PeerAssessmentItem> items = getPeerAssessmentItems(submissionId, assignment.getScaleFactor());
                 if (items != null) {
                     //scores are stored w/o decimal points, so a score of 3.4 is stored as 34 in the DB
                     //add all the scores together and divide it by the number of scores added.  Then round.
@@ -457,20 +464,21 @@ public class AssignmentPeerAssessmentServiceImpl extends HibernateDaoSupport imp
                         totleScoreStr = totalScore.toString();
                     }
                     boolean changed = false;
-                    if ((totleScoreStr == null || "".equals(totleScoreStr)) && (submission.getGrade() == null || "".equals(submission.getGrade()))) {
+                    if ((totleScoreStr == null || "".equals(totleScoreStr)) && (submissionGrade == null || "".equals(submissionGrade))) {
                         //scores are both null, nothing changed
-                    } else if ((totleScoreStr != null && !"".equals(totleScoreStr)) && (submission.getGrade() == null || "".equals(submission.getGrade()))) {
+                    } else if ((totleScoreStr != null && !"".equals(totleScoreStr)) && (submissionGrade == null || "".equals(submissionGrade))) {
                         //one score changed, update
                         changed = true;
-                    } else if ((totleScoreStr == null || "".equals(totleScoreStr)) && (submission.getGrade() != null && !"".equals(submission.getGrade()))) {
+                    } else if ((totleScoreStr == null || "".equals(totleScoreStr)) && (submissionGrade != null && !"".equals(submissionGrade))) {
                         //one score changed, update
                         changed = true;
-                    } else if (!totleScoreStr.equals(submission.getGrade())) {
+                    } else if (!totleScoreStr.equals(submissionGrade)) {
                         changed = true;
                     }
                     if (changed) {
                         // don't set gradedBy since grading is done by peers
-                        submission.setGrade(totleScoreStr);
+                        // TODO ADRIAN
+                        //submission.setGrade(totleScoreStr);
                         submission.setGraded(true);
                         submission.setGradeReleased(false);
                         assignmentService.updateSubmission(submission);
@@ -486,30 +494,4 @@ public class AssignmentPeerAssessmentServiceImpl extends HibernateDaoSupport imp
         }
         return saved;
     }
-
-    public void setScheduledInvocationManager(
-            ScheduledInvocationManager scheduledInvocationManager) {
-        this.scheduledInvocationManager = scheduledInvocationManager;
-    }
-
-    public void setAssignmentService(AssignmentService assignmentService) {
-        this.assignmentService = assignmentService;
-    }
-
-    public SecurityService getSecurityService() {
-        return securityService;
-    }
-
-    public void setSecurityService(SecurityService securityService) {
-        this.securityService = securityService;
-    }
-
-    public SessionManager getSessionManager() {
-        return sessionManager;
-    }
-
-    public void setSessionManager(SessionManager sessionManager) {
-        this.sessionManager = sessionManager;
-    }
-
 }

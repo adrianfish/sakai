@@ -52,6 +52,7 @@ import org.sakaiproject.assignment.api.model.Assignment;
 import org.sakaiproject.assignment.api.model.AssignmentSubmission;
 import org.sakaiproject.assignment.api.model.AssignmentSubmissionSubmitter;
 import org.sakaiproject.assignment.impl.sort.AssignmentComparator;
+import org.sakaiproject.grading.api.GradingService;
 import org.sakaiproject.site.api.Group;
 import org.sakaiproject.site.api.Site;
 import org.sakaiproject.site.api.SiteService;
@@ -75,6 +76,7 @@ public class GradeSheetExporter {
 
     @Setter private AssignmentService assignmentService;
     @Setter private CandidateDetailProvider candidateDetailProvider;
+    @Setter private GradingService gradingService;
     @Setter private SiteService siteService;
     @Setter private UserDirectoryService userDirectoryService;
     @Setter private FormattedText formattedText;
@@ -233,8 +235,10 @@ public class GradeSheetExporter {
                 // begin to populate the column for this assignment, iterating through student list
                 for (AssignmentSubmission submission : assignmentService.getSubmissions(assignment)) {
                     if (isGroupAssignment) {
+                        String submissionGrade = gradingService.getGradeDefinitionForStudentForItem(context, assignment.getGradingItemId(), submission.getGroupId()).getGrade();
                         for (AssignmentSubmissionSubmitter submissionSubmitter : submission.getSubmitters()) {
                             String userId = submissionSubmitter.getSubmitter();
+                            String submitterGrade = gradingService.getGradeDefinitionForStudentForItem(context, assignment.getGradingItemId(), userId).getGrade();
                             Submitter submitter = submitterMap.get(userId);
                             SubmissionInfo submissionInfo = null;
 
@@ -249,7 +253,7 @@ public class GradeSheetExporter {
                                     submitter = new Submitter(userId, submitter);
                                 }
 
-                                if (submission.getGraded() && submission.getGrade() != null) {
+                                if (submission.getGraded() && submissionGrade != null) {
                                     // graded and released
                                     if (assignmentTypeOfGrade == Assignment.GradeType.SCORE_GRADE_TYPE) {
                                         try {
@@ -269,12 +273,12 @@ public class GradeSheetExporter {
                                             submissionInfo = new SubmissionInfo(new FloatCell(format, f), submission);
                                         } catch (Exception e) {
                                             // TODO originally
-                                            submissionInfo = new SubmissionInfo(submissionSubmitter.getGrade() == null ? submission.getGrade() : submissionSubmitter.getGrade(), submission);
+                                            submissionInfo = new SubmissionInfo(submitterGrade == null ? submissionGrade : submitterGrade, submission);
                                             log.warn("Cannot get grade for assignment submission={}, user={}", submission.getId(), userId);
                                         }
                                     } else {
                                         // String cell type
-                                        submissionInfo = new SubmissionInfo(submissionSubmitter.getGrade() == null ? submission.getGrade() : submissionSubmitter.getGrade(), submission);
+                                        submissionInfo = new SubmissionInfo(submitterGrade == null ? submissionGrade : submitterGrade, submission);
                                     }
                                 } else if (submission.getSubmitted() && submission.getDateSubmitted() != null) {
                                     // submitted, but no grade available yet
@@ -290,7 +294,10 @@ public class GradeSheetExporter {
                         if (submissionSubmitters.length == 0) {
                             continue;
                         }
+
+                        String userId = submissionSubmitters[0].getSubmitter();
                         Submitter submitter = submitterMap.get(submissionSubmitters[0].getSubmitter());
+                        String submissionGrade = gradingService.getGradeDefinitionForStudentForItem(context, assignment.getGradingItemId(), userId).getGrade();
                         SubmissionInfo submissionInfo = null;
                         if (submitter != null) {
                             // Get the user ID for this result
@@ -306,7 +313,7 @@ public class GradeSheetExporter {
                                 } else {
                                     submissionInfo = new SubmissionInfo(submissionSubmitters[0].getTimeSpent(), submission);
                                 }
-                            } else if (submission.getGraded() && submission.getGrade() != null) {
+                            } else if (submission.getGraded() && submissionGrade != null) {
                                 // graded and released
                                 String grade = assignmentService.getGradeForSubmitter(submission, submissionSubmitters[0].getSubmitter());
 

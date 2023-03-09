@@ -143,6 +143,7 @@ import org.sakaiproject.exception.TypeException;
 import org.sakaiproject.grading.api.AssessmentNotFoundException;
 import org.sakaiproject.grading.api.CategoryDefinition;
 import org.sakaiproject.grading.api.GradebookInformation;
+import org.sakaiproject.grading.api.GradeDefinition;
 import org.sakaiproject.grading.api.GradingService;
 import org.sakaiproject.messaging.api.Message;
 import org.sakaiproject.messaging.api.MessageMedium;
@@ -1515,7 +1516,13 @@ public class AssignmentServiceImpl implements AssignmentService, EntityTransferr
             eventTrackingService.post(eventTrackingService.newEvent(AssignmentConstants.EVENT_SAVE_ASSIGNMENT_SUBMISSION, reference, true));
         } else if (dateReturned == null && !submission.getReturned() && (dateSubmitted == null || submission.getDateModified().toEpochMilli() - dateSubmitted.toEpochMilli() > 1000 * 60)) {
             // make sure the last modified time is at least one minute after the submit time
-            if (!(StringUtils.trimToNull(submission.getSubmittedText()) == null && submission.getAttachments().isEmpty() && StringUtils.trimToNull(submission.getGrade()) == null && StringUtils.trimToNull(submission.getFeedbackText()) == null && StringUtils.trimToNull(submission.getFeedbackComment()) == null && submission.getFeedbackAttachments().isEmpty())) {
+            String grade = getGradeForSubmission(submission);
+            if (!(StringUtils.trimToNull(submission.getSubmittedText()) == null
+                    && submission.getAttachments().isEmpty()
+                    && StringUtils.trimToNull(grade) == null
+                    && StringUtils.trimToNull(submission.getFeedbackText()) == null
+                    && StringUtils.trimToNull(submission.getFeedbackComment()) == null
+                    && submission.getFeedbackAttachments().isEmpty())) {
                 if (submission.getGraded()) {
                 	//TODO: This should use an LRS_Group when that exists rather than firing off individual events for each LRS_Actor KNL-1560
                     for (AssignmentSubmissionSubmitter submitter : submission.getSubmitters()) {
@@ -1904,6 +1911,7 @@ public class AssignmentServiceImpl implements AssignmentService, EntityTransferr
 
         // States matching a person who can grade a submission
         if (submission.getSubmitted()) {
+            String grade = getGradeForSubmission(submission);
             if (submitTime != null) {
                 if (submission.getReturned()) {
                     if (returnTime != null && returnTime.isBefore(submitTime)) {
@@ -1924,7 +1932,7 @@ public class AssignmentServiceImpl implements AssignmentService, EntityTransferr
                         }
                     }
                 } else if (submission.getGraded()) {
-                    return StringUtils.isNotBlank(submission.getGrade()) ? SubmissionStatus.GRADED : SubmissionStatus.COMMENTED;
+                    return StringUtils.isNotBlank(grade) ? SubmissionStatus.GRADED : SubmissionStatus.COMMENTED;
                 } else {
                     return SubmissionStatus.UNGRADED;
                 }
@@ -1932,7 +1940,7 @@ public class AssignmentServiceImpl implements AssignmentService, EntityTransferr
                 if (submission.getReturned()) {
                     return SubmissionStatus.RETURNED;
                 } else if (submission.getGraded()) {
-                    return StringUtils.isNotBlank(submission.getGrade()) ? SubmissionStatus.GRADED : SubmissionStatus.COMMENTED;
+                    return StringUtils.isNotBlank(grade) ? SubmissionStatus.GRADED : SubmissionStatus.COMMENTED;
                 } else {
                     return SubmissionStatus.NO_SUBMISSION;
                 }
@@ -1944,7 +1952,8 @@ public class AssignmentServiceImpl implements AssignmentService, EntityTransferr
                     return SubmissionStatus.RETURNED;
                 } else {
                     // grade saved but not release yet, show this to graders
-                    return StringUtils.isNotBlank(submission.getGrade()) ? AssignmentConstants.SubmissionStatus.GRADED : AssignmentConstants.SubmissionStatus.COMMENTED;
+                    String grade = getGradeForSubmission(submission);
+                    return StringUtils.isNotBlank(grade) ? AssignmentConstants.SubmissionStatus.GRADED : AssignmentConstants.SubmissionStatus.COMMENTED;
                 }
             } else {
                 return SubmissionStatus.UNGRADED;
@@ -2890,13 +2899,18 @@ public class AssignmentServiceImpl implements AssignmentService, EntityTransferr
     public String getGradeForSubmitter(AssignmentSubmission submission, String submitter) {
         if (submission == null || StringUtils.isBlank(submitter)) return null;
 
-        String grade = submission.getGrade(); // start with submission grade
+        String grade = getGradeForSubmission(submission);
         Assignment assignment = submission.getAssignment();
 
         if (assignment.getIsGroup()) {
             Optional<AssignmentSubmissionSubmitter> submissionSubmitter = submission.getSubmitters().stream().filter(s -> s.getSubmitter().equals(submitter)).findAny();
             if (submissionSubmitter.isPresent()) {
-                grade = StringUtils.defaultIfBlank(submissionSubmitter.get().getGrade(), grade); // if there is a grade override use that
+                String userId = submissionSubmitter.get().getSubmitter();
+                // if there is a grade override use that
+                grade = StringUtils.defaultIfBlank(
+                        gradingService.getGradeDefinitionForStudentForItem(assignment.getContext(),
+                                                                assignment.getGradingItemId(),
+                                                                userId).getGrade(), grade);
             }
         }
 
@@ -2904,7 +2918,7 @@ public class AssignmentServiceImpl implements AssignmentService, EntityTransferr
         return getGradeDisplay(grade, assignment.getTypeOfGrade(), scale);
     }
 
-    public boolean isGradeOverridden(AssignmentSubmission submission, String submitter) {
+    public boolean isGradeOverridden(AssignmentSubmission submission, String submitterId) {
 
         Assignment assignment = submission.getAssignment();
 
@@ -2912,11 +2926,12 @@ public class AssignmentServiceImpl implements AssignmentService, EntityTransferr
             return false;
         }
 
-        Optional<AssignmentSubmissionSubmitter> submissionSubmitter
+        Optional<AssignmentSubmissionSubmitter> submitter
             = submission.getSubmitters().stream()
-                .filter(s -> s.getSubmitter().equals(submitter)).findAny();
+                .filter(s -> s.getSubmitter().equals(submitterId)).findAny();
 
-        return submissionSubmitter.isPresent() && StringUtils.isNotBlank(submissionSubmitter.get().getGrade());
+        String grade = gradingService.getGradeDefinitionForStudentForItem(assignment.getContext(), assignment.getGradingItemId(), submitterId).getGrade();
+        return submitter.isPresent() && StringUtils.isNotBlank(grade);
     }
 
     /**
@@ -3708,7 +3723,9 @@ public class AssignmentServiceImpl implements AssignmentService, EntityTransferr
                         }
                         final String latenessStatus = whenSubmissionMade(s);
 
-                        final String gradeDisplay = getGradeDisplay(s.getGrade(), s.getAssignment().getTypeOfGrade(), s.getAssignment().getScaleFactor());
+                        String grade = getGradeForSubmission(s);
+                        Assignment assignment = s.getAssignment();
+                        final String gradeDisplay = getGradeDisplay(grade, assignment.getTypeOfGrade(), assignment.getScaleFactor());
                         
                         //Adding the row
                         sheet.addRow(groupTitle, s.getGroupId(), submitters2String.toString(),
@@ -4568,15 +4585,16 @@ public class AssignmentServiceImpl implements AssignmentService, EntityTransferr
     private LRS_Result getLRS_Result(Assignment a, AssignmentSubmission s, boolean completed) {
         LRS_Result result = null;
         String decSeparator = formattedText.getDecimalSeparator();
+        String grade = getGradeForSubmission(s);
         // gradeDisplay ready to conversion to Float
-        String gradeDisplay = StringUtils.replace(getGradeDisplay(s.getGrade(), a.getTypeOfGrade(), a.getScaleFactor()), decSeparator, ".");
+        String gradeDisplay = StringUtils.replace(getGradeDisplay(grade, a.getTypeOfGrade(), a.getScaleFactor()), decSeparator, ".");
         if (Assignment.GradeType.SCORE_GRADE_TYPE == a.getTypeOfGrade() && NumberUtils.isCreatable(gradeDisplay)) { // Points
             String maxGradePointDisplay = StringUtils.replace(getMaxPointGradeDisplay(a.getScaleFactor(), a.getMaxGradePoint()), decSeparator, ".");
             result = new LRS_Result(new Float(gradeDisplay), 0.0f, new Float(maxGradePointDisplay), null);
             result.setCompletion(completed);
         } else {
             result = new LRS_Result(completed);
-            result.setGrade(getGradeDisplay(s.getGrade(), a.getTypeOfGrade(), a.getScaleFactor()));
+            result.setGrade(getGradeDisplay(grade, a.getTypeOfGrade(), a.getScaleFactor()));
         }
         return result;
     }
@@ -5074,5 +5092,14 @@ public class AssignmentServiceImpl implements AssignmentService, EntityTransferr
     @Override
     public String getContentReviewServiceName() {
         return this.contentReviewService.getServiceName();
+    }
+
+    private String getGradeForSubmission(AssignmentSubmission submission) {
+
+        Assignment assignment = submission.getAssignment();
+        String submitterId = assignment.getIsGroup() ? submission.getGroupId()
+                : submission.getSubmitters().stream().findFirst().map(ass -> ass.getSubmitter()).orElse("");
+        GradeDefinition def = gradingService.getGradeDefinitionForStudentForItem(assignment.getContext(), assignment.getGradingItemId(), submitterId);
+        return def != null ? def.getGrade() : null;
     }
 }
