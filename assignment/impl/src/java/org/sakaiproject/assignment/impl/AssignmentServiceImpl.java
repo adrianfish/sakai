@@ -2908,7 +2908,7 @@ public class AssignmentServiceImpl implements AssignmentService, EntityTransferr
                 String userId = submissionSubmitter.get().getSubmitter();
                 // if there is a grade override use that
                 grade = StringUtils.defaultIfBlank(
-                        gradingService.getGradeDefinitionForStudentForItem(assignment.getContext(),
+                        gradingService.getGradeDefinition(assignment.getContext(),
                                                                 assignment.getGradingItemId(),
                                                                 userId).getGrade(), grade);
             }
@@ -2930,7 +2930,7 @@ public class AssignmentServiceImpl implements AssignmentService, EntityTransferr
             = submission.getSubmitters().stream()
                 .filter(s -> s.getSubmitter().equals(submitterId)).findAny();
 
-        String grade = gradingService.getGradeDefinitionForStudentForItem(assignment.getContext(), assignment.getGradingItemId(), submitterId).getGrade();
+        String grade = gradingService.getGradeDefinition(assignment.getContext(), assignment.getGradingItemId(), submitterId).getGrade();
         return submitter.isPresent() && StringUtils.isNotBlank(grade);
     }
 
@@ -5099,7 +5099,7 @@ public class AssignmentServiceImpl implements AssignmentService, EntityTransferr
         Assignment assignment = submission.getAssignment();
         String submitterId = assignment.getIsGroup() ? submission.getGroupId()
                 : submission.getSubmitters().stream().findFirst().map(ass -> ass.getSubmitter()).orElse("");
-        GradeDefinition def = gradingService.getGradeDefinitionForStudentForItem(assignment.getContext(), assignment.getGradingItemId(), submitterId);
+        GradeDefinition def = gradingService.getGradeDefinition(assignment.getContext(), assignment.getGradingItemId(), submitterId);
         return def != null ? def.getGrade() : null;
     }
 }

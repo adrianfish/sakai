@@ -471,11 +471,11 @@ public class AssignmentServiceTest extends AbstractTransactionalJUnit4SpringCont
             Assert.assertEquals(groupSubmitter, getSubmission.getGroupId());
 
             GradeDefinition gradeDef = getGradeDefinition("44");
-            when(gradingService.getGradeDefinitionForStudentForItem(context, assignment.getGradingItemId(), groupSubmitter)).thenReturn(gradeDef);
+            when(gradingService.getGradeDefinition(context, assignment.getGradingItemId(), groupSubmitter)).thenReturn(gradeDef);
             Optional<AssignmentSubmissionSubmitter> optAss = submissionSubmitters.stream().filter(ass -> ass.getSubmitter().equals(submitter1)).findAny();
             Assert.assertTrue(optAss.isPresent());
             gradeDef = getGradeDefinition("22");
-            when(gradingService.getGradeDefinitionForStudentForItem(context, assignment.getGradingItemId(), optAss.get().getSubmitter())).thenReturn(gradeDef);
+            when(gradingService.getGradeDefinition(context, assignment.getGradingItemId(), optAss.get().getSubmitter())).thenReturn(gradeDef);
             assignmentService.updateSubmission(getSubmission);
             Assert.assertTrue(assignmentService.isGradeOverridden(getSubmission, submitter1));
         } catch (Exception e) {
@@ -834,7 +834,7 @@ public class AssignmentServiceTest extends AbstractTransactionalJUnit4SpringCont
         submission.setDateReturned(null);
         submission.setGraded(true);
         GradeDefinition gradeDef = getGradeDefinition("1000");
-        when(gradingService.getGradeDefinitionForStudentForItem(any(), any(), any())).thenReturn(gradeDef);
+        when(gradingService.getGradeDefinition(any(), any(), any())).thenReturn(gradeDef);
         //submission.setGrade("1000");
         assignment.setDueDate(null);
         Assert.assertEquals(AssignmentConstants.SubmissionStatus.GRADED, assignmentService.getSubmissionCanonicalStatus(submission, true));
@@ -845,7 +845,7 @@ public class AssignmentServiceTest extends AbstractTransactionalJUnit4SpringCont
         submission.setReturned(false);
         submission.setDateReturned(null);
         submission.setGraded(true);
-        when(gradingService.getGradeDefinitionForStudentForItem(any(), any(), any())).thenReturn(null);
+        when(gradingService.getGradeDefinition(any(), any(), any())).thenReturn(null);
         assignment.setDueDate(null);
         Assert.assertEquals(AssignmentConstants.SubmissionStatus.COMMENTED, assignmentService.getSubmissionCanonicalStatus(submission, true));
 
@@ -873,7 +873,7 @@ public class AssignmentServiceTest extends AbstractTransactionalJUnit4SpringCont
         submission.setReturned(true);
         submission.setDateReturned(null);
         submission.setGraded(false);
-        when(gradingService.getGradeDefinitionForStudentForItem(any(), any(), any())).thenReturn(null);
+        when(gradingService.getGradeDefinition(any(), any(), any())).thenReturn(null);
         //submission.setGrade(null);
         submissionProperties.put(AssignmentConstants.ALLOW_RESUBMIT_NUMBER, "0");
         assignment.setDueDate(null);
@@ -886,7 +886,7 @@ public class AssignmentServiceTest extends AbstractTransactionalJUnit4SpringCont
         submission.setDateReturned(null);
         submission.setGraded(true);
         gradeDef = getGradeDefinition("1000");
-        when(gradingService.getGradeDefinitionForStudentForItem(any(), any(), any())).thenReturn(gradeDef);
+        when(gradingService.getGradeDefinition(any(), any(), any())).thenReturn(gradeDef);
         assignment.setDueDate(null);
         Assert.assertEquals(AssignmentConstants.SubmissionStatus.GRADED, assignmentService.getSubmissionCanonicalStatus(submission, true));
 
@@ -896,7 +896,7 @@ public class AssignmentServiceTest extends AbstractTransactionalJUnit4SpringCont
         submission.setReturned(false);
         submission.setDateReturned(null);
         submission.setGraded(true);
-        when(gradingService.getGradeDefinitionForStudentForItem(any(), any(), any())).thenReturn(null);
+        when(gradingService.getGradeDefinition(any(), any(), any())).thenReturn(null);
         assignment.setDueDate(null);
         Assert.assertEquals(AssignmentConstants.SubmissionStatus.COMMENTED, assignmentService.getSubmissionCanonicalStatus(submission, true));
 
@@ -990,14 +990,14 @@ public class AssignmentServiceTest extends AbstractTransactionalJUnit4SpringCont
         submission.setReturned(false);
         submission.setGraded(true);
         gradeDef = getGradeDefinition("1000");
-        when(gradingService.getGradeDefinitionForStudentForItem(any(), any(), any())).thenReturn(gradeDef);
+        when(gradingService.getGradeDefinition(any(), any(), any())).thenReturn(gradeDef);
         Assert.assertEquals(AssignmentConstants.SubmissionStatus.GRADED, assignmentService.getSubmissionCanonicalStatus(submission, true));
 
         // submission not Submitted | submission Graded | submission not Returned | User can Grade | Grade not exists = COMMENTED
         submission.setSubmitted(false);
         submission.setReturned(false);
         submission.setGraded(true);
-        when(gradingService.getGradeDefinitionForStudentForItem(any(), any(), any())).thenReturn(null);
+        when(gradingService.getGradeDefinition(any(), any(), any())).thenReturn(null);
         Assert.assertEquals(AssignmentConstants.SubmissionStatus.COMMENTED, assignmentService.getSubmissionCanonicalStatus(submission, true));
 
         // submission not Submitted | submission Graded | submission not Returned | User can't Grade = IN_PROGRESS
