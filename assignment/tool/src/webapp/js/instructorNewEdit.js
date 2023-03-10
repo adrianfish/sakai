@@ -73,7 +73,7 @@ ASN_INE.togglePeerAssessment = function(element)
 {
 	//Disable the peer review area and renable the site property unless this is selected
 	var section = document.getElementById("peerAssessmentOptions");
-	section.style.display="none";
+	section.style.display = "none";
 	ASN.resizeFrame('shrink');
 	$("#site").prop("disabled", false);
 	$("#site").parent().prop("disabled", false);
@@ -115,8 +115,8 @@ ASN_INE.setGroupAssignmentRadioEnabled = function(enabled)
 
 ASN_INE.isGradeTypePoints = function()
 {
-	var select = document.getElementsByClassName("gradeScaleSelect")[0];
-	return select && select.value === "3";
+	const select = document.getElementsByClassName("gradeScaleSelect")[0];
+	return select && select.value === "0";
 };
 
 ASN_INE.handleGradeAssignmentClick = function(checkbox, selectId, pointsId)

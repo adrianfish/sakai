@@ -36,14 +36,15 @@ This section contains the options for grading this assignment, including rubrics
 		<label for="$name_GradeType">$tlang.getString("gen.grasca")</label>
 		<span class="skip">$tlang.getString("newassig.selectmessage")</span>
 		<select id="$name_GradeType"  name="$name_GradeType" title="$tlang.getString("gen.grasca")" onchange="ASN_INE.handleGradeScaleChange(this, '$name_GradePoints', '$!gradebookChoice_add', '$!gradebookChoice_associate')" class="gradeScaleSelect">
-			<option value="3" #if (1 == $value_GradeType || 3 == $value_GradeType)selected="selected"#end>$gradeTypeTable.get(3)</option>
-			<option value="2" #if (2 == $value_GradeType)selected="selected"#end>$gradeTypeTable.get(2)</option>
-			<option value="4" #if (4 == $value_GradeType)selected="selected"#end>$gradeTypeTable.get(4)</option>
-			<option value="5" #if (5 == $value_GradeType)selected="selected"#end>$gradeTypeTable.get(5)</option>
+			<option value="$pointsOrdinal" #if ($pointsOrdinal == $value_GradeType)selected="selected"#end>$tlang.getString("points")</option>
+			<option value="$letterOrdinal" #if ($letterOrdinal == $value_GradeType)selected="selected"#end>$tlang.getString("letter")</option>
+			<option value="$binaryOrdinal" #if ($binaryOrdinal == $value_GradeType)selected="selected"#end>$tlang.getString("passfail")</option>
+			<option value="$checkmarkOrdinal" #if ($checkmarkOrdinal == $value_GradeType)selected="selected"#end>$tlang.getString("check")</option>
+			<option value="$ungradedOrdinal" #if ($ungradedOrdinal == $value_GradeType)selected="selected"#end>$tlang.getString("gen.nograd")</option>
 		</select>
 	</div>
 
-	<div id="assignmentGradingPointsPanel" class="card mb-3 p-3" #if($value_GradeType != 3 && $value_GradeType != 1)style="display:none;"#end >
+	<div id="assignmentGradingPointsPanel" class="card mb-3 p-3" #if($value_GradeType != $pointsOrdinal && $value_GradeType != 1)style="display:none;"#end >
 		## enable the maxfield when it is points grade type
 		<div class="form-group form-required">
 			<label for="$name_GradePoints" class="control-label">$tlang.getString("gen.forpoi")</label>

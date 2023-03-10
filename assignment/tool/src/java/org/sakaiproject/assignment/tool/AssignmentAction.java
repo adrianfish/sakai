@@ -1378,7 +1378,11 @@ public class AssignmentAction extends PagedResourceActionII {
         context.put("withGrade", state.getAttribute(WITH_GRADES));
 
         // the grade type table
-        context.put("gradeTypeTable", gradeTypeTable());
+        context.put("ungradedOrdinal", GradeType.UNGRADED.ordinal());
+        context.put("pointsOrdinal", GradeType.POINTS.ordinal());
+        context.put("letterOrdinal", GradeType.LETTER.ordinal());
+        context.put("binaryOrdinal", GradeType.BINARY.ordinal());
+        context.put("checkmarkOrdinal", GradeType.CHECKMARK.ordinal());
 
         // set the allowSubmitByInstructor option
         context.put("allowSubmitByInstructor", assignmentService.getAllowSubmitByInstructor());
@@ -12419,21 +12423,6 @@ public class AssignmentAction extends PagedResourceActionII {
         return n;
 
     } // monthTable
-
-    /**
-     * construct a HashMap using the integer as the key and grade type String as the value
-     */
-    private Map<Integer, String> gradeTypeTable() {
-
-        Map<Integer, String> gradeTypeTable = new HashMap<>();
-        gradeTypeTable.put(1, rb.getString(AssignmentConstants.ASSN_GRADE_TYPE_NOGRADE_PROP));
-        gradeTypeTable.put(2, rb.getString(AssignmentConstants.ASSN_GRADE_TYPE_LETTER_PROP));
-        gradeTypeTable.put(3, rb.getString(AssignmentConstants.ASSN_GRADE_TYPE_POINTS_PROP));
-        gradeTypeTable.put(4, rb.getString(AssignmentConstants.ASSN_GRADE_TYPE_PASS_FAIL_PROP));
-        gradeTypeTable.put(5, rb.getString(AssignmentConstants.ASSN_GRADE_TYPE_CHECK_PROP));
-
-        return gradeTypeTable;
-    } // gradeTypeTable
 
     /**
      * construct a HashMap using the integer as the key and submission type String as the value

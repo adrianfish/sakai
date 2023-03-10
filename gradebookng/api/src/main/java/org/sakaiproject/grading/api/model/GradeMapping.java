@@ -60,7 +60,8 @@ import lombok.ToString;
  *
  */
 @Entity
-@Table(name = "GB_GRADE_MAP_T", indexes = @Index(name = "GB_GRADE_MAP_GB_IDX", columnList = "GRADEBOOK_ID"))
+//@Table(name = "GB_GRADE_MAP_T", indexes = @Index(name = "GB_GRADE_MAP_GB_IDX", columnList = "GRADEBOOK_ID"))
+@Table(name = "GB_GRADE_MAP_T")
 @DiscriminatorColumn(name = "OBJECT_TYPE_ID", discriminatorType = DiscriminatorType.INTEGER)
 @DiscriminatorValue("0")
 @ToString(onlyExplicitlyIncluded = true)

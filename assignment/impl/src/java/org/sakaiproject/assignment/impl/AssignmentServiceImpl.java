@@ -5292,6 +5292,7 @@ public class AssignmentServiceImpl implements AssignmentService, EntityTransferr
      * @param submissionRef                Any submission grade need to be updated? Do bulk update if null
      * @param updateRemoveSubmission       "update" for update submission;"remove" for remove submission
      */
+    @Transactional
     public List<String> integrateGradebook(Map<String, Object> options, String assignmentRef, String associateGradebookAssignment,
             String addUpdateRemoveAssignment, String oldAssignment_title, String newAssignment_title,
             int newAssignment_maxPoints, Instant newAssignment_dueTime, String submissionRef,
