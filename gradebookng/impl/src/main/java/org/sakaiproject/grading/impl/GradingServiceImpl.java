@@ -3890,7 +3890,7 @@ public class GradingServiceImpl implements GradingService {
     }
 
     @Override
-    public void addExternalAssessment(final String gradebookUid, final String externalId, final String externalUrl,
+    public Long addExternalAssessment(final String gradebookUid, final String externalId, final String externalUrl,
             final String title, final double points, final Date dueDate, final String externalServiceDescription, String externalData)
             throws ConflictingAssignmentNameException, ConflictingExternalIdException {
 
@@ -3910,7 +3910,6 @@ public class GradingServiceImpl implements GradingService {
         if (isAssignmentDefined(gradebookUid, title)) {
             throw new ConflictingAssignmentNameException("An assignment with that name already exists in gradebook uid=" + gradebookUid);
         }
-
 
         // name cannot contain these chars as they are reserved for special columns in import/export
         GradebookHelper.validateGradeItemName(title);
@@ -3965,6 +3964,7 @@ public class GradingServiceImpl implements GradingService {
             }
         }
 
+        return assignmentId;
     }
 
     @Override
@@ -4388,22 +4388,22 @@ public class GradingServiceImpl implements GradingService {
      * Wrapper created when category was added for assignments tool
      */
     @Override
-    public void addExternalAssessment(String gradebookUid, String externalId, String externalUrl, String title, Double points,
+    public Long addExternalAssessment(String gradebookUid, String externalId, String externalUrl, String title, Double points,
                                       Date dueDate, String externalServiceDescription, String externalData, Boolean ungraded)
             throws ConflictingAssignmentNameException, ConflictingExternalIdException, AssignmentHasIllegalPointsException {
 
-        addExternalAssessment(gradebookUid, externalId, externalUrl, title, points, dueDate, externalServiceDescription, externalData, ungraded, null);
+        return addExternalAssessment(gradebookUid, externalId, externalUrl, title, points, dueDate, externalServiceDescription, externalData, ungraded, null);
     }
 
     @Override
-    public void addExternalAssessment(final String gradebookUid, final String externalId, final String externalUrl, final String title, final Double points,
+    public Long  addExternalAssessment(final String gradebookUid, final String externalId, final String externalUrl, final String title, final Double points,
                                                    final Date dueDate, final String externalServiceDescription, String externalData, final Boolean ungraded, final Long categoryId)
             throws ConflictingAssignmentNameException, ConflictingExternalIdException, AssignmentHasIllegalPointsException {
-        addExternalAssessment(gradebookUid, externalId, externalUrl, title, points, dueDate, externalServiceDescription, externalData, ungraded, categoryId, null);
+        return addExternalAssessment(gradebookUid, externalId, externalUrl, title, points, dueDate, externalServiceDescription, externalData, ungraded, categoryId, null);
     }
 
     @Override
-    public void addExternalAssessment(final String gradebookUid, final String externalId, final String externalUrl, final String title, final Double points,
+    public Long addExternalAssessment(final String gradebookUid, final String externalId, final String externalUrl, final String title, final Double points,
                                            final Date dueDate, final String externalServiceDescription, String externalData, final Boolean ungraded, final Long categoryId, String gradableReference)
             throws ConflictingAssignmentNameException, ConflictingExternalIdException, AssignmentHasIllegalPointsException {
         // Ensure that the required strings are not empty
@@ -4504,6 +4504,8 @@ public class GradingServiceImpl implements GradingService {
                 log.error("Could not load site associated with gradebook - lineitem not created", e);
             }
         }
+
+        return assignmentId;
     }
 
     @Override

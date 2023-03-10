@@ -1207,10 +1207,6 @@ public class AssignmentServiceImpl implements AssignmentService, EntityTransferr
         // CHECK PERMISSION
         permissionCheck(SECURE_REMOVE_ASSIGNMENT, entity.getReference(), null);
 
-        // we may need to remove associated calendar events and annc, so get the basic info here
-//            ResourcePropertiesEdit pEdit = assignment.getPropertiesEdit();
-//            String context = assignment.getContext();
-
         // 1. remove associated calendar events, if exists
         removeAssociatedCalendarItem(getCalendar(assignment.getContext()), assignment);
 
@@ -1218,57 +1214,13 @@ public class AssignmentServiceImpl implements AssignmentService, EntityTransferr
         removeAssociatedAnnouncementItem(getAnnouncementChannel(assignment.getContext()), assignment);
 
         // 3. remove Gradebook items, if linked
-        removeAssociatedGradebookItem(assignment);
+        gradingService.removeAssignment(assignment.getGradingItemId());
 
         // 4. remove tags as necessary
         removeAssociatedTaggingItem(assignment);
 
-        // 5. remove assignment submissions
-//            List submissions = getSubmissions(assignment);
-//            if (submissions != null) {
-//                for (Iterator sIterator = submissions.iterator(); sIterator.hasNext(); ) {
-//                    AssignmentSubmission s = (AssignmentSubmission) sIterator.next();
-//                    String sReference = s.getReference();
-//                    try {
-//                        removeSubmission(editSubmission(sReference));
-//                    } catch (PermissionException e) {
-//                        M_log.warn("removeAssignmentAndAllReference: User does not have permission to remove submission " + sReference + " for assignment: " + assignment.getId() + e.getMessage());
-//                    } catch (InUseException e) {
-//                        M_log.warn("removeAssignmentAndAllReference: submission " + sReference + " for assignment: " + assignment.getId() + " is in use. " + e.getMessage());
-//                    } catch (IdUnusedException e) {
-//                        M_log.warn("removeAssignmentAndAllReference: submission " + sReference + " for assignment: " + assignment.getId() + " does not exist. " + e.getMessage());
-//                    }
-//                }
-//            }
-
-        // 6. remove associated content object
-//            try {
-//                removeAssignmentContent(editAssignmentContent(assignment.getContent().getReference()));
-//            } catch (AssignmentContentNotEmptyException e) {
-//                M_log.warn(" deleteAssignmentAndAllReferences(): cannot remove non-empty AssignmentContent object for assignment = " + assignment.getId() + ". " + e.getMessage());
-//            } catch (PermissionException e) {
-//                M_log.warn(" deleteAssignmentAndAllReferences(): not allowed to remove AssignmentContent object for assignment = " + assignment.getId() + ". " + e.getMessage());
-//            } catch (InUseException e) {
-//                M_log.warn(" deleteAssignmentAndAllReferences(): AssignmentContent object for assignment = " + assignment.getId() + " is in used. " + e.getMessage());
-//            } catch (IdUnusedException e) {
-//                M_log.warn(" deleteAssignmentAndAllReferences(): cannot find AssignmentContent object for assignment = " + assignment.getId() + ". " + e.getMessage());
-//            }
-
-        // 7. remove assignment
+        // 5. remove assignment
         softDeleteAssignment(assignment);
-
-        // close the edit object
-//            ((BaseAssignmentEdit) assignment).closeEdit();
-
-        // 8. remove any realm defined for this resource
-//            try {
-//                authzGroupService.removeAuthzGroup(assignment.getReference());
-//            } catch (AuthzPermissionException e) {
-//                M_log.warn(" deleteAssignment: removing realm for assignment reference=" + assignment.getReference() + " : " + e.getMessage());
-//            }
-//
-//            // track event
-//            eventTrackingService.post(eventTrackingService.newEvent(AssignmentConstants.EVENT_REMOVE_ASSIGNMENT, assignment.getReference(), true));
     }
 
     @Override
@@ -3241,17 +3193,6 @@ public class AssignmentServiceImpl implements AssignmentService, EntityTransferr
             }
         } catch (PermissionException pe) {
             log.warn("removeAssociatedTaggingItem: User does not have permission to remove tags for assignment: " + assignment.getId() + " via transferCopyEntities");
-        }
-    }
-
-    private void removeAssociatedGradebookItem(Assignment assignment) {
-
-        String context = assignment.getContext();
-        String associatedGradebookAssignment = assignment.getProperties().get(AssignmentConstants.PROP_ASSIGNMENT_ASSOCIATE_GRADEBOOK_ASSIGNMENT);
-        if (StringUtils.isNotBlank(associatedGradebookAssignment)) {
-            if (gradingService.isExternalAssignmentDefined(context, associatedGradebookAssignment)) {
-                gradingService.removeExternalAssignment(context, associatedGradebookAssignment);
-            }
         }
     }
 
@@ -5313,6 +5254,7 @@ public class AssignmentServiceImpl implements AssignmentService, EntityTransferr
         String submissionId = AssignmentReferenceReckoner.reckoner().reference(submissionRef).reckon().getId();
 
         try {
+            Assignment a = getAssignment(assignmentId);
             String gradebookUid = (String) options.get("siteId");
             if (gradebookUid == null) {
                 gradebookUid = toolManager.getCurrentPlacement().getContext();
@@ -5323,14 +5265,13 @@ public class AssignmentServiceImpl implements AssignmentService, EntityTransferr
                 boolean isAssignmentDefined = gradingService.isAssignmentDefined(gradebookUid, associateGradebookAssignment);
 
                 if (addUpdateRemoveAssignment != null) {
-                    Assignment a = getAssignment(assignmentId);
                     // add an entry into Gradebook for newly created assignment or modified assignment, and there wasn't a correspond record in gradebook yet
                     if ((addUpdateRemoveAssignment.equals(GRADEBOOK_INTEGRATION_ADD) || addUpdateRemoveAssignment.equals("update"))
                             && associateGradebookAssignment == null) {
-                        // add assignment into gradebook
                         try {
                             // add assignment to gradebook
-                            gradingService.addExternalAssessment(gradebookUid, assignmentRef, null, newAssignment_title, newAssignment_maxPoints / (double) a.getScaleFactor(), Date.from(newAssignment_dueTime), assignmentToolId, null, false, category != -1 ? category : null, assignmentRef);
+                            Long gradingItemId = gradingService.addExternalAssessment(gradebookUid, assignmentRef, null, newAssignment_title, newAssignment_maxPoints / (double) a.getScaleFactor(), Date.from(newAssignment_dueTime), assignmentToolId, null, false, category != -1 ? category : null, assignmentRef);
+                            a.setGradingItemId(gradingItemId);
                         } catch (AssignmentHasIllegalPointsException e) {
                             alerts.add(rb.getString("addtogradebook.illegalPoints"));
                             log.warn("integrateGradebook: {}", e.toString());
@@ -5362,8 +5303,6 @@ public class AssignmentServiceImpl implements AssignmentService, EntityTransferr
                         removeNonAssociatedExternalGradebookEntry((String) options.get(STATE_CONTEXT_STRING), assignmentRef, associateGradebookAssignment, gradebookUid);
                     }
                 }
-
-                Assignment a = getAssignment(assignmentId);
 
                 if (a != null) {
                     String propAddToGradebook = a.getProperties().get(NEW_ASSIGNMENT_ADD_TO_GRADEBOOK);

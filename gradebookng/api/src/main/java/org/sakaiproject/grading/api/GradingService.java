@@ -888,7 +888,7 @@ public interface GradingService extends EntityProducer {
      * @deprecated Replaced by
      *      {@link addExternalAssessment(String, String, String, String, Double, Date, String, Boolean)}
      */
-    public void addExternalAssessment(String gradebookUid, String externalId, String externalUrl,
+    public Long addExternalAssessment(String gradebookUid, String externalId, String externalUrl,
             String title, double points, Date dueDate, String externalServiceDescription, String externalData)
             throws ConflictingAssignmentNameException, ConflictingExternalIdException, AssignmentHasIllegalPointsException;
 
@@ -918,7 +918,7 @@ public interface GradingService extends EntityProducer {
      *
      *
      */
-    public void addExternalAssessment(String gradebookUid, String externalId, String externalUrl, String title, Double points,
+    public Long addExternalAssessment(String gradebookUid, String externalId, String externalUrl, String title, Double points,
                                       Date dueDate, String externalServiceDescription, String externalData, Boolean ungraded)
             throws ConflictingAssignmentNameException, ConflictingExternalIdException, AssignmentHasIllegalPointsException;
 
@@ -941,7 +941,7 @@ public interface GradingService extends EntityProducer {
      * @throws AssignmentHasIllegalPointsException
      * @throws InvalidCategoryException
      */
-    public void addExternalAssessment(String gradebookUid, String externalId, String externalUrl, String title, Double points,
+    public Long addExternalAssessment(String gradebookUid, String externalId, String externalUrl, String title, Double points,
                                       Date dueDate, String externalServiceDescription, String externalData, Boolean ungraded, Long categoryId)
             throws ConflictingAssignmentNameException, ConflictingExternalIdException, AssignmentHasIllegalPointsException, InvalidCategoryException;
 
@@ -964,7 +964,7 @@ public interface GradingService extends EntityProducer {
      * @throws AssignmentHasIllegalPointsException
      * @throws InvalidCategoryException
      */
-    public void addExternalAssessment(String gradebookUid, String externalId, String externalUrl, String title, Double points,
+    public Long addExternalAssessment(String gradebookUid, String externalId, String externalUrl, String title, Double points,
                                       Date dueDate, String externalServiceDescription, String externalData, Boolean ungraded, Long categoryId, String gradableReference)
             throws ConflictingAssignmentNameException, ConflictingExternalIdException, AssignmentHasIllegalPointsException, InvalidCategoryException;
 
