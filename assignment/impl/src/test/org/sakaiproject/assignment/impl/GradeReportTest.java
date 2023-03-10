@@ -20,6 +20,7 @@ import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Cell;
 
+import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyList;
 import static org.mockito.Mockito.anyString;
 import static org.mockito.Mockito.mock;
@@ -33,6 +34,9 @@ import org.sakaiproject.assignment.api.AssignmentService;
 import org.sakaiproject.assignment.api.model.Assignment;
 import org.sakaiproject.assignment.api.model.AssignmentSubmission;
 import org.sakaiproject.assignment.api.model.AssignmentSubmissionSubmitter;
+import org.sakaiproject.grading.api.GradeDefinition;
+import org.sakaiproject.grading.api.GradeType;
+import org.sakaiproject.grading.api.GradingService;
 import org.sakaiproject.site.api.Site;
 import org.sakaiproject.site.api.SiteService;
 import org.sakaiproject.user.api.User;
@@ -63,6 +67,7 @@ import org.junit.Assert;
 public class GradeReportTest {
 
     @Autowired private FormattedText formattedText;
+    @Autowired private GradingService gradingService;
     @Autowired private SiteService siteService;
     @Autowired private UserDirectoryService userDirectoryService;
 
@@ -96,7 +101,7 @@ public class GradeReportTest {
         assignments = new ArrayList<>();
 
         assOne = new Assignment();
-        assOne.setTypeOfGrade(Assignment.GradeType.SCORE_GRADE_TYPE);
+        assOne.setTypeOfGrade(GradeType.POINTS);
         assOne.setScaleFactor(1);
         assOne.setMaxGradePoint(10);
         assOne.setTitle("Assignment One");
@@ -109,7 +114,7 @@ public class GradeReportTest {
         assTwo = new Assignment();
         assTwo.setScaleFactor(1);
         assTwo.setMaxGradePoint(10);
-        assTwo.setTypeOfGrade(Assignment.GradeType.SCORE_GRADE_TYPE);
+        assTwo.setTypeOfGrade(GradeType.POINTS);
         assTwo.setTitle("Assignment Two");
         assTwo.setDraft(false);
         assTwo.setId("two");
@@ -123,6 +128,7 @@ public class GradeReportTest {
         exporter = new GradeSheetExporter();
         exporter.setSiteService(siteService);
         exporter.setAssignmentService(assignmentService);
+        exporter.setGradingService(gradingService);
         exporter.setUserDirectoryService(userDirectoryService);
         exporter.setRb(resourceLoader);
         exporter.setFormattedText(formattedText);
@@ -160,6 +166,8 @@ public class GradeReportTest {
 
     @Test
     public void oneSubmission() {
+
+        assOne.setGradingItemId(1L);
 
         String userSortName = "Alfred Hitchcock";
         String userDisplayId = "ahitchcock";
@@ -200,6 +208,9 @@ public class GradeReportTest {
         when(assignmentService.getSubmissions(assOne)).thenReturn(assOneSubmissions);
 
         //when(assignmentService.getGradeForSubmitter(user1SubOne, "u1")).thenReturn(user1SubOne.getGrade());
+        GradeDefinition def = new GradeDefinition();
+        def.setGrade("20");
+        when(gradingService.getGradeDefinition(any(), any(), any())).thenReturn(def);
 
         Optional<Workbook> optionalWorkbook = exporter.getGradesSpreadsheet("contextString=xyz&viewString=all");
 

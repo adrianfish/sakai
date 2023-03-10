@@ -27,5 +27,7 @@ public enum GradeType {
     PERCENTAGE,
     LETTER,
     BINARY,
-    COMMENT
+    UNGRADED,
+    CHECKMARK,
+    NONE
 }

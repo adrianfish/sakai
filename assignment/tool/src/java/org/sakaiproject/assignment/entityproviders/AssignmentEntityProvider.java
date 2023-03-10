@@ -64,6 +64,7 @@ import org.sakaiproject.entitybroker.exception.EntityNotFoundException;
 import org.sakaiproject.entitybroker.util.AbstractEntityProvider;
 import org.sakaiproject.exception.IdUnusedException;
 import org.sakaiproject.exception.PermissionException;
+import org.sakaiproject.grading.api.GradeType;
 import org.sakaiproject.grading.api.GradingService;
 import org.sakaiproject.rubrics.api.RubricsConstants;
 import org.sakaiproject.site.api.Group;
@@ -801,13 +802,15 @@ public class AssignmentEntityProvider extends AbstractEntityProvider implements 
         // A map of submissionId -> grade
         Map<String, String> grades = assignment.getSubmissions().stream().collect(Collectors.toMap(s -> s.getId(), s -> {
 
+            String submissionGrade = assignmentService.getGradeForSubmission(s);
+
             Set<AssignmentSubmissionSubmitter> submitters = s.getSubmitters();
 
             if (submitters.size() > 0) {
-                if (assignment.getTypeOfGrade() == Assignment.GradeType.PASS_FAIL_GRADE_TYPE) {
-                    return s.getGrade() == null ? AssignmentConstants.UNGRADED_GRADE_STRING : s.getGrade();
+                if (assignment.getTypeOfGrade() == GradeType.BINARY) {
+                    return submissionGrade == null ? AssignmentConstants.UNGRADED_GRADE_STRING : submissionGrade;
                 } else {
-                    return assignmentService.getGradeDisplay(s.getGrade(), assignment.getTypeOfGrade(), assignment.getScaleFactor());
+                    return assignmentService.getGradeDisplay(submissionGrade, assignment.getTypeOfGrade(), assignment.getScaleFactor());
                 }
             } else {
                 return "";
@@ -870,9 +873,9 @@ public class AssignmentEntityProvider extends AbstractEntityProvider implements 
             throw new EntityException("You don't have permission to set grades", "", HttpServletResponse.SC_FORBIDDEN);
         }
 
-        if (assignment.getTypeOfGrade() == Assignment.GradeType.SCORE_GRADE_TYPE) {
+        if (assignment.getTypeOfGrade() == GradeType.POINTS) {
             grade = assignmentToolUtils.scalePointGrade(grade, assignment.getScaleFactor(), alerts);
-        } else if (assignment.getTypeOfGrade() == Assignment.GradeType.PASS_FAIL_GRADE_TYPE && grade.equals(AssignmentConstants.UNGRADED_GRADE_STRING)) {
+        } else if (assignment.getTypeOfGrade() == GradeType.BINARY && grade.equals(AssignmentConstants.UNGRADED_GRADE_STRING)) {
             grade = null;
         }
 
@@ -885,7 +888,7 @@ public class AssignmentEntityProvider extends AbstractEntityProvider implements 
 
                 String ug = StringUtils.trimToNull((String) params.get(GRADE_SUBMISSION_GRADE + "_" + s.getSubmitter()));
                 if (ug != null && !ug.equals(AssignmentConstants.UNGRADED_GRADE_STRING)) {
-                    if (assignment.getTypeOfGrade() == Assignment.GradeType.SCORE_GRADE_TYPE) {
+                    if (assignment.getTypeOfGrade() == GradeType.POINTS) {
                         ug = assignmentToolUtils.scalePointGrade(ug, assignment.getScaleFactor(), alerts);
                     }
                     options.put(GRADE_SUBMISSION_GRADE + "_" + s.getSubmitter(), ug);
@@ -932,7 +935,7 @@ public class AssignmentEntityProvider extends AbstractEntityProvider implements 
 
         options.put("siteId", (String) params.get("siteId"));
 
-        assignmentToolUtils.gradeSubmission(submission, gradeOption, options, alerts);
+        assignmentService.gradeSubmission(submission, gradeOption, options, alerts);
 
         Set<String> activeSubmitters = site.getUsersIsAllowed(SECURE_ADD_ASSIGNMENT_SUBMISSION);
 
@@ -1533,7 +1536,7 @@ public class AssignmentEntityProvider extends AbstractEntityProvider implements 
             this.groups = a.getGroups();
             this.access = a.getTypeOfAccess().toString();
             this.instructions = a.getInstructions();
-            if (a.getTypeOfGrade() == Assignment.GradeType.SCORE_GRADE_TYPE) {
+            if (a.getTypeOfGrade() == GradeType.POINTS) {
                 this.maxGradePoint = assignmentService.getMaxPointGradeDisplay(a.getScaleFactor(), a.getMaxGradePoint());
             }
 
@@ -1580,7 +1583,7 @@ public class AssignmentEntityProvider extends AbstractEntityProvider implements 
             this.gradeScale = a.getTypeOfGrade().toString();
 
             // If grade scale is "points" we also capture the maximum points allowed.
-            if (a.getTypeOfGrade() == Assignment.GradeType.SCORE_GRADE_TYPE) {
+            if (a.getTypeOfGrade() == GradeType.POINTS) {
                 Integer scaleFactor = a.getScaleFactor() != null ? a.getScaleFactor() : assignmentService.getScaleFactor();
                 this.gradeScaleMaxPoints = assignmentService.getMaxPointGradeDisplay(scaleFactor, a.getMaxGradePoint());
             }

@@ -59,6 +59,8 @@ import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 
+import org.sakaiproject.grading.api.GradeType;
+
 /**
  * Assignment represents a specific assignment for a specific section or class.
  * <p>
@@ -218,7 +220,7 @@ public class Assignment {
 
     @Enumerated
     @Column(name = "GRADE_TYPE")
-    private GradeType typeOfGrade = GradeType.GRADE_TYPE_NONE;
+    private GradeType typeOfGrade;
 
     @Column(name = "MAX_GRADE_POINT")
     private Integer maxGradePoint;
@@ -287,15 +289,6 @@ public class Assignment {
         SINGLE_ATTACHMENT_SUBMISSION,              // 5
         EXTERNAL_TOOL_SUBMISSION,                  // 6
         VIDEO_SUBMISSION                           // 7
-    }
-
-    public enum GradeType {
-        GRADE_TYPE_NONE,      // 0
-        UNGRADED_GRADE_TYPE,  // 1
-        LETTER_GRADE_TYPE,    // 2
-        SCORE_GRADE_TYPE,     // 3
-        PASS_FAIL_GRADE_TYPE, // 4
-        CHECK_GRADE_TYPE      // 5
     }
 }
 

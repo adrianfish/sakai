@@ -52,6 +52,7 @@ import org.sakaiproject.assignment.api.model.Assignment;
 import org.sakaiproject.assignment.api.model.AssignmentSubmission;
 import org.sakaiproject.assignment.api.model.AssignmentSubmissionSubmitter;
 import org.sakaiproject.assignment.impl.sort.AssignmentComparator;
+import org.sakaiproject.grading.api.GradeType;
 import org.sakaiproject.grading.api.GradingService;
 import org.sakaiproject.site.api.Group;
 import org.sakaiproject.site.api.Site;
@@ -131,6 +132,7 @@ public class GradeSheetExporter {
             log.warn("Cannot get site context: {}, {}", params.get("contextString"), e.getMessage());
             return Optional.empty();
         }
+
 
         // select only assignments that can be graded by the current user
         List<Assignment> downloadable = assignmentService.getAssignmentsForContext(context).stream()
@@ -229,16 +231,18 @@ public class GradeSheetExporter {
             Map<Submitter, SubmissionInfo> results = new TreeMap<>();
             // the grade data portion starts from the third column, since the first two are used for user's display id and sort name
             for (Assignment assignment : downloadable) {
-                Assignment.GradeType assignmentTypeOfGrade = assignment.getTypeOfGrade();
+                System.out.println("HERE1");
+                GradeType assignmentTypeOfGrade = assignment.getTypeOfGrade();
                 boolean isAnonymousGrading = assignmentService.assignmentUsesAnonymousGrading(assignment);
                 boolean isGroupAssignment = assignment.getIsGroup();
                 // begin to populate the column for this assignment, iterating through student list
                 for (AssignmentSubmission submission : assignmentService.getSubmissions(assignment)) {
                     if (isGroupAssignment) {
-                        String submissionGrade = gradingService.getGradeDefinitionForStudentForItem(context, assignment.getGradingItemId(), submission.getGroupId()).getGrade();
+                        System.out.println("HERE2");
+                        String submissionGrade = gradingService.getGradeDefinition(context, assignment.getGradingItemId(), submission.getGroupId()).getGrade();
                         for (AssignmentSubmissionSubmitter submissionSubmitter : submission.getSubmitters()) {
                             String userId = submissionSubmitter.getSubmitter();
-                            String submitterGrade = gradingService.getGradeDefinitionForStudentForItem(context, assignment.getGradingItemId(), userId).getGrade();
+                            String submitterGrade = gradingService.getGradeDefinition(context, assignment.getGradingItemId(), userId).getGrade();
                             Submitter submitter = submitterMap.get(userId);
                             SubmissionInfo submissionInfo = null;
 
@@ -255,7 +259,7 @@ public class GradeSheetExporter {
 
                                 if (submission.getGraded() && submissionGrade != null) {
                                     // graded and released
-                                    if (assignmentTypeOfGrade == Assignment.GradeType.SCORE_GRADE_TYPE) {
+                                    if (assignmentTypeOfGrade == GradeType.POINTS) {
                                         try {
                                             // numeric cell type?
                                             int factor = submission.getAssignment().getScaleFactor();
@@ -297,7 +301,9 @@ public class GradeSheetExporter {
 
                         String userId = submissionSubmitters[0].getSubmitter();
                         Submitter submitter = submitterMap.get(submissionSubmitters[0].getSubmitter());
-                        String submissionGrade = gradingService.getGradeDefinitionForStudentForItem(context, assignment.getGradingItemId(), userId).getGrade();
+                        System.out.println("HERE2");
+                        String submissionGrade = gradingService.getGradeDefinition(context, assignment.getGradingItemId(), userId).getGrade();
+                        System.out.println("HERE3");
                         SubmissionInfo submissionInfo = null;
                         if (submitter != null) {
                             // Get the user ID for this result
@@ -317,7 +323,7 @@ public class GradeSheetExporter {
                                 // graded and released
                                 String grade = assignmentService.getGradeForSubmitter(submission, submissionSubmitters[0].getSubmitter());
 
-                                if (assignmentTypeOfGrade == Assignment.GradeType.SCORE_GRADE_TYPE) {
+                                if (assignmentTypeOfGrade == GradeType.POINTS) {
                                     try {
                                         // numeric cell type?
                                         int factor = submission.getAssignment().getScaleFactor();
@@ -386,22 +392,22 @@ public class GradeSheetExporter {
                         // Scale
                         String scaleValue = "";
                         switch (assignmentTypeOfGrade) {
-                            case CHECK_GRADE_TYPE:
+                            case CHECKMARK:
                                 scaleValue = rb.getString("check");
                                 break;
-                            case LETTER_GRADE_TYPE:
+                            case LETTER:
                                 scaleValue = "A-F";
                                 break;
-                            case PASS_FAIL_GRADE_TYPE:
+                            case BINARY:
                                 scaleValue = rb.getString("gen.pf");
                                 break;
-                            case SCORE_GRADE_TYPE:
+                            case POINTS:
                                 scaleValue = "0-"+assignmentService.getMaxPointGradeDisplay(assignment.getScaleFactor(), assignment.getMaxGradePoint());
                                 break;
-                            case UNGRADED_GRADE_TYPE:
+                            case UNGRADED:
                                 scaleValue = rb.getString("gen.nograd");
                                 break;
-                            case GRADE_TYPE_NONE:
+                            case NONE:
                             default:
                                 scaleValue = rb.getString("gen.notset");
                                 break;

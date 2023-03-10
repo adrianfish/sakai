@@ -134,6 +134,10 @@ public class AssignmentSubmission {
     @Column(name = "FEEDBACK_TEXT", length = 65535)
     private String feedbackText;
 
+    @Lob
+    @Column(name = "PRIVATE_NOTES", length = 65535)
+    private String privateNotes;
+
     @Column(name = "FACTOR")
     private Integer factor;
 

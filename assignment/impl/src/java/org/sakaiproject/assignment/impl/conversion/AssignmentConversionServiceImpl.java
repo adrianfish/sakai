@@ -73,6 +73,7 @@ import org.sakaiproject.component.api.ServerConfigurationService;
 import org.sakaiproject.site.api.SiteService;
 import org.sakaiproject.entity.api.ResourceProperties;
 import org.sakaiproject.hibernate.AssignableUUIDGenerator;
+import org.sakaiproject.grading.api.GradeType;
 import org.sakaiproject.site.api.Site;
 import org.sakaiproject.site.api.Group;
 import org.sakaiproject.util.BasicConfigItem;
@@ -360,7 +361,7 @@ public class AssignmentConversionServiceImpl implements AssignmentConversionServ
         a.setSection(assignment.getSection());
         a.setTitle(assignment.getTitle());
         a.setTypeOfAccess("site".equals(assignment.getAccess()) ? Assignment.Access.SITE : Assignment.Access.GROUP);
-        a.setTypeOfGrade(Assignment.GradeType.values()[content.getTypeofgrade()]);
+        a.setTypeOfGrade(GradeType.values()[content.getTypeofgrade()]);
         a.setTypeOfSubmission(Assignment.SubmissionType.values()[content.getSubmissiontype()]);
         a.setVisibleDate(convertStringToTime(assignment.getVisibledate()));
 

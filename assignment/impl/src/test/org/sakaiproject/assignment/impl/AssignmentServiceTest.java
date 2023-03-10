@@ -83,6 +83,7 @@ import org.sakaiproject.exception.IdUnusedException;
 import org.sakaiproject.exception.IdUsedException;
 import org.sakaiproject.exception.PermissionException;
 import org.sakaiproject.grading.api.GradeDefinition;
+import org.sakaiproject.grading.api.GradeType;
 import org.sakaiproject.grading.api.GradingService;
 import org.sakaiproject.site.api.Group;
 import org.sakaiproject.site.api.Site;
@@ -1113,36 +1114,36 @@ public class AssignmentServiceTest extends AbstractTransactionalJUnit4SpringCont
             Character ds = DecimalFormatSymbols.getInstance(locale).getDecimalSeparator();
             when(formattedText.getDecimalSeparator()).thenReturn(ds.toString());
 
-            Assert.assertEquals("0", assignmentService.getGradeDisplay("0", Assignment.GradeType.SCORE_GRADE_TYPE, null));
+            Assert.assertEquals("0", assignmentService.getGradeDisplay("0", GradeType.POINTS, null));
 
             configureScale(10, locale);
-            Assert.assertEquals(/*"0.5 or 0,5"*/"0"+ds+"5", assignmentService.getGradeDisplay("5", Assignment.GradeType.SCORE_GRADE_TYPE, 10));
-            Assert.assertEquals(/*"10.0 or 10,0"*/"10"+ds+"0", assignmentService.getGradeDisplay("100", Assignment.GradeType.SCORE_GRADE_TYPE, 10));
+            Assert.assertEquals(/*"0.5 or 0,5"*/"0"+ds+"5", assignmentService.getGradeDisplay("5", GradeType.POINTS, 10));
+            Assert.assertEquals(/*"10.0 or 10,0"*/"10"+ds+"0", assignmentService.getGradeDisplay("100", GradeType.POINTS, 10));
 
             configureScale(100, locale);
-            Assert.assertEquals(/*"0.05 or 0,05"*/"0"+ds+"05", assignmentService.getGradeDisplay("5", Assignment.GradeType.SCORE_GRADE_TYPE, 100));
-            Assert.assertEquals(/*"5.00 or 5,00"*/"5"+ds+"00", assignmentService.getGradeDisplay("500", Assignment.GradeType.SCORE_GRADE_TYPE, 100));
-            Assert.assertEquals(/*"100.00 or 100,0"*/"100"+ds+"00", assignmentService.getGradeDisplay("10000", Assignment.GradeType.SCORE_GRADE_TYPE, 100));
+            Assert.assertEquals(/*"0.05 or 0,05"*/"0"+ds+"05", assignmentService.getGradeDisplay("5", GradeType.POINTS, 100));
+            Assert.assertEquals(/*"5.00 or 5,00"*/"5"+ds+"00", assignmentService.getGradeDisplay("500", GradeType.POINTS, 100));
+            Assert.assertEquals(/*"100.00 or 100,0"*/"100"+ds+"00", assignmentService.getGradeDisplay("10000", GradeType.POINTS, 100));
 
             configureScale(1000, locale);
-            Assert.assertEquals(/*"0.005 or 0,005"*/"0"+ds+"005", assignmentService.getGradeDisplay("5", Assignment.GradeType.SCORE_GRADE_TYPE, 1000));
-            Assert.assertEquals(/*"50.000 or 50,000"*/"50"+ds+"000", assignmentService.getGradeDisplay("50000", Assignment.GradeType.SCORE_GRADE_TYPE, 1000));
+            Assert.assertEquals(/*"0.005 or 0,005"*/"0"+ds+"005", assignmentService.getGradeDisplay("5", GradeType.POINTS, 1000));
+            Assert.assertEquals(/*"50.000 or 50,000"*/"50"+ds+"000", assignmentService.getGradeDisplay("50000", GradeType.POINTS, 1000));
 
-            Assert.assertEquals("0" + ds + "00", assignmentService.getGradeDisplay("Pass", Assignment.GradeType.SCORE_GRADE_TYPE, 100));
+            Assert.assertEquals("0" + ds + "00", assignmentService.getGradeDisplay("Pass", GradeType.POINTS, 100));
         }
 
-        Assert.assertEquals("", assignmentService.getGradeDisplay("", Assignment.GradeType.UNGRADED_GRADE_TYPE, null));
-        Assert.assertEquals("No Grade", assignmentService.getGradeDisplay("gen.nograd", Assignment.GradeType.UNGRADED_GRADE_TYPE, null));
+        Assert.assertEquals("", assignmentService.getGradeDisplay("", GradeType.UNGRADED, null));
+        Assert.assertEquals("No Grade", assignmentService.getGradeDisplay("gen.nograd", GradeType.UNGRADED, null));
 
-        Assert.assertEquals("Pass", assignmentService.getGradeDisplay("pass", Assignment.GradeType.PASS_FAIL_GRADE_TYPE, null));
-        Assert.assertEquals("Fail", assignmentService.getGradeDisplay("fail", Assignment.GradeType.PASS_FAIL_GRADE_TYPE, null));
-        Assert.assertEquals("", assignmentService.getGradeDisplay("any", Assignment.GradeType.PASS_FAIL_GRADE_TYPE, null));
+        Assert.assertEquals("Pass", assignmentService.getGradeDisplay("pass", GradeType.BINARY, null));
+        Assert.assertEquals("Fail", assignmentService.getGradeDisplay("fail", GradeType.BINARY, null));
+        Assert.assertEquals("", assignmentService.getGradeDisplay("any", GradeType.BINARY, null));
 
-        Assert.assertEquals("", assignmentService.getGradeDisplay("any", Assignment.GradeType.CHECK_GRADE_TYPE, null));
-        Assert.assertEquals("Checked", assignmentService.getGradeDisplay("checked", Assignment.GradeType.CHECK_GRADE_TYPE, null));
+        Assert.assertEquals("", assignmentService.getGradeDisplay("any", GradeType.CHECKMARK, null));
+        Assert.assertEquals("Checked", assignmentService.getGradeDisplay("checked", GradeType.CHECKMARK, null));
 
-        Assert.assertEquals("", assignmentService.getGradeDisplay("", Assignment.GradeType.GRADE_TYPE_NONE, null));
-        Assert.assertEquals("self", assignmentService.getGradeDisplay("self", Assignment.GradeType.GRADE_TYPE_NONE, null));
+        Assert.assertEquals("", assignmentService.getGradeDisplay("", GradeType.NONE, null));
+        Assert.assertEquals("self", assignmentService.getGradeDisplay("self", GradeType.NONE, null));
     }
 
     @Test
@@ -1328,7 +1329,7 @@ public class AssignmentServiceTest extends AbstractTransactionalJUnit4SpringCont
             AssignmentSubmission newSubmission = createNewSubmission(context, submitterId, null);
             Assignment assignment = newSubmission.getAssignment();
             assignment.getProperties().put(AssignmentConstants.PROP_ASSIGNMENT_ASSOCIATE_GRADEBOOK_ASSIGNMENT, itemId.toString());
-            assignment.setTypeOfGrade(Assignment.GradeType.SCORE_GRADE_TYPE);
+            assignment.setTypeOfGrade(GradeType.POINTS);
             assignment.setScaleFactor(assignmentService.getScaleFactor());
 
             String assignmentRef = AssignmentReferenceReckoner.reckoner().submission(newSubmission).reckon().getReference();

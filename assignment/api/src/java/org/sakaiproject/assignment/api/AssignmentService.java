@@ -40,6 +40,7 @@ import org.sakaiproject.exception.IdInvalidException;
 import org.sakaiproject.exception.IdUnusedException;
 import org.sakaiproject.exception.IdUsedException;
 import org.sakaiproject.exception.PermissionException;
+import org.sakaiproject.grading.api.GradeType;
 import org.sakaiproject.site.api.Group;
 import org.sakaiproject.site.api.Site;
 import org.sakaiproject.timesheet.api.TimeSheetEntry;
@@ -724,11 +725,11 @@ public interface AssignmentService extends EntityProducer {
 
     /**
      * @param grade
-     * @param typeOfGrade
+     * @param typeOfGrade A grading service GradeType
      * @param scaleFactor
      * @return The grade, formatted for display
      */
-    public String getGradeDisplay(String grade, Assignment.GradeType typeOfGrade, Integer scaleFactor);
+    public String getGradeDisplay(String grade, GradeType typeOfGrade, Integer scaleFactor);
 
     /**
      * @param factor
@@ -878,4 +879,15 @@ public interface AssignmentService extends EntityProducer {
      * @return A String containing the name of the content review service
      */
     public String getContentReviewServiceName();
+
+    public String getGradeForSubmission(AssignmentSubmission submission);
+
+    public void setGradeForSubmission(AssignmentSubmission submission, String grade);
+
+    public void gradeSubmission(AssignmentSubmission submission, String gradeOption, Map<String, Object> options, List<String> alerts);
+
+    public List<String> integrateGradebook(Map<String, Object> options, String assignmentRef, String associateGradebookAssignment,
+            String addUpdateRemoveAssignment, String oldAssignment_title, String newAssignment_title,
+            int newAssignment_maxPoints, Instant newAssignment_dueTime, String submissionRef,
+            String updateRemoveSubmission, long category);
 }

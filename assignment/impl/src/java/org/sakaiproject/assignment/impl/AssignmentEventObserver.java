@@ -31,6 +31,7 @@ import org.sakaiproject.event.api.EventTrackingService;
 import org.sakaiproject.exception.IdUnusedException;
 import org.sakaiproject.exception.PermissionException;
 import org.sakaiproject.grading.api.AssessmentNotFoundException;
+import org.sakaiproject.grading.api.GradeType;
 import org.sakaiproject.grading.api.GradingService;
 import org.sakaiproject.user.api.User;
 import org.sakaiproject.user.api.UserDirectoryService;
@@ -93,7 +94,7 @@ public class AssignmentEventObserver implements Observer {
                                         if (submission.isPresent()) {
                                             AssignmentSubmission s = submission.get();
                                             final String grade;
-                                            if (Assignment.GradeType.SCORE_GRADE_TYPE.equals(a.getTypeOfGrade())) {
+                                            if (GradeType.POINTS == a.getTypeOfGrade()) {
                                                 int dec = (int) Math.log10(a.getScaleFactor());
                                                 StringBuilder scaledScore = new StringBuilder(score);
                                                 IntStream.range(0, dec).forEach(i -> scaledScore.append("0"));

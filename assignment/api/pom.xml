@@ -37,6 +37,10 @@
             <artifactId>scheduler-api</artifactId>
         </dependency>
         <dependency>
+            <groupId>org.sakaiproject.grading</groupId>
+            <artifactId>sakai-grading-api</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.hibernate</groupId>
             <artifactId>hibernate-core</artifactId>
         </dependency>
