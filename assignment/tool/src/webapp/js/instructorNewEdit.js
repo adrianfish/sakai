@@ -134,9 +134,8 @@ ASN_INE.handleGradeScaleChange = function(select, textfieldId)
 	{
 		return;
 	}
-	var pointsPanel = document.getElementById("assignmentGradingPointsPanel");
-	var isPoints = ASN_INE.isGradeTypePoints();
-	pointsPanel.style.display = isPoints ? "block" : "none";
+	const pointsPanel = document.getElementById("assignmentGradingPointsPanel");
+	const isPoints = ASN_INE.isGradeTypePoints();
 
 	if (!isPoints) // we're switching away from points which means peer assessment is not valid, so re-enable the group option
 	{

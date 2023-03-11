@@ -8426,9 +8426,9 @@ public class AssignmentAction extends PagedResourceActionII {
                 addtoGradebook = StringUtils.isNotBlank((String) state.getAttribute(NEW_ASSIGNMENT_ADD_TO_GRADEBOOK)) ? (String) state.getAttribute(NEW_ASSIGNMENT_ADD_TO_GRADEBOOK) : GRADEBOOK_INTEGRATION_NO;
             }
 
-            if (gradeType != GradeType.POINTS) {
-                addtoGradebook = GRADEBOOK_INTEGRATION_NO;
-            }
+            //if (gradeType != GradeType.POINTS) {
+            //    addtoGradebook = GRADEBOOK_INTEGRATION_NO;
+            //}
 
             long category = state.getAttribute(NEW_ASSIGNMENT_CATEGORY) != null ? (Long) state.getAttribute(NEW_ASSIGNMENT_CATEGORY) : -1;
 
@@ -9005,7 +9005,7 @@ public class AssignmentAction extends PagedResourceActionII {
                 addUpdateRemoveAssignment = "update";
             }
 
-            if (!"remove".equals(addUpdateRemoveAssignment) && gradeType == POINTS) {
+            if (!"remove".equals(addUpdateRemoveAssignment)) {
                 try {
                     addAlerts(state, assignmentService.integrateGradebook(stateToMap(state), assignmentReference, associateGradebookAssignment, addUpdateRemoveAssignment, aOldTitle, title, Integer.parseInt(gradePoints), dueTime, null, null, category));
 
