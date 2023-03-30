@@ -626,8 +626,8 @@ export class SakaiGrader extends gradableDataMixin(SakaiElement) {
             <fa-icon size="1.5em" i-class="fas microphone" path-prefix="/webcomponents/assets" style="vertical-align: middle;"></fa-icon>
             <fa-icon size="1.5em" i-class="fas video" path-prefix="/webcomponents/assets" style="vertical-align: middle;"></fa-icon>
           </div>
-          <button class="btn btn-link" @click=${this.doneWithFeedback}>${this.assignmentsI18n["gen.don"]}</button>
-          <button class="btn btn-link" @click=${this.cancelFeedback}>${this.assignmentsI18n["gen.can"]}</button>
+          <button class="btn btn-link mt-2" @click=${this.doneWithFeedback}>${this.assignmentsI18n["gen.don"]}</button>
+          <button class="btn btn-link mt-2" @click=${this.cancelFeedback}>${this.assignmentsI18n["gen.can"]}</button>
         </div>
 
         <div id="grader-feedback-attachments-block" class="grader-block grader-label">
@@ -707,8 +707,8 @@ export class SakaiGrader extends gradableDataMixin(SakaiElement) {
           <div class="sak-banner-info">${unsafeHTML(this.i18n.private_notes_tooltip)}</div>
           <div id="private-notes-unsaved-msg" class="sak-banner-error d-none">${this.i18n.unsaved_text_warning}</div>
           <div><textarea id="grader-private-notes" .value=${this.submission.privateNotes}></textarea></div>
-          <button class="btn btn-link" @click=${this.doneWithPrivateNotes}>${this.assignmentsI18n["gen.don"]}</button>
-          <button class="btn btn-link" @click=${this.cancelPrivateNotes}>${this.assignmentsI18n["gen.can"]}</button>
+          <button class="btn btn-link mt-2" @click=${this.doneWithPrivateNotes}>${this.assignmentsI18n["gen.don"]}</button>
+          <button class="btn btn-link mt-2" @click=${this.cancelPrivateNotes}>${this.assignmentsI18n["gen.can"]}</button>
         </div>
 
         <div class="text-feedback">

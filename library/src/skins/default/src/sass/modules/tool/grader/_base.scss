@@ -169,7 +169,7 @@ sakai-grader {
     }
 
     .points-input {
-      width: 60px;
+      width: 50px;
     }
 
     #grader-grade-block {
@@ -484,6 +484,7 @@ sakai-grader {
 
     #grader {
       order: 1;
+      width: 100%;
     }
 
     #grader-submitted-block {
@@ -500,6 +501,10 @@ sakai-grader {
           margin-left: 0;
         }
       }
+    }
+
+    #grader-save-buttons {
+        margin-bottom: 0;
     }
 
     #grader-save-buttons > button {

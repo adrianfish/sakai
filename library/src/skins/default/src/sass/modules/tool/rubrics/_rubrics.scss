@@ -164,6 +164,10 @@
 
 }
 @media #{$phone} {
+
+    .rubrics-tab-row {
+        display: none;
+    }
     sakai-rubric,
     sakai-rubric-readonly,
     sakai-rubric-grading,
