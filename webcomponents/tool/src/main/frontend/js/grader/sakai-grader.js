@@ -398,7 +398,7 @@ export class SakaiGrader extends gradableDataMixin(SakaiElement) {
       ${this.submission.id !== "dummy" ? html`
 
             
-      <div id="grader" class="offcanvas offcanvas-end" tabindex="-1" aria-labelledby="grader-label">
+      <aside id="grader" class="offcanvas offcanvas-end" tabindex="-1" aria-labelledby="grader-label">
 
         <div class="offcanvas-header">
           <h2 class="offcanvas-title" id="grader-label">Grader</h2>
@@ -529,41 +529,32 @@ export class SakaiGrader extends gradableDataMixin(SakaiElement) {
                 title="${this.assignmentsI18n.grading_rubric}"
                 site-id="${portal.siteId}"
                 tool-id="${this.toolId}"
-                data-bs-toggle="modal"
-                data-bs-target="#grader-rubric-modal"
+                data-bs-toggle="collapse"
+                data-bs-target="#grader-rubric-block"
+                aria-controls="grader-rubric-block"
+                aria-expanded="false"
                 entity-id="${this.entityId}"
                 evaluated-item-id="${this.submission.id}"
                 evaluated-item-owner-id="${this.submission.firstSubmitterId}">
               </sakai-rubric-grading-button>
 
-              <div id="grader-rubric-modal" class="modal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1">
-                <div class="modal-dialog modal-lg">
-                  <div class="modal-content">
-                    <div class="modal-header">
-                      <h5 class="modal-title">${this.i18n.rubric}</h5>
-                      <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <div class="modal-body">
-                      <sakai-rubric-grading
-                        site-id="${portal.siteId}"
-                        tool-id="${this.toolId}"
-                        entity-id="${this.entityId}"
-                        evaluated-item-id="${this.submission.id}"
-                        evaluated-item-owner-id="${this.submission.groupRef || this.submission.firstSubmitterId}"
-                        ?group=${this.submission.groupId}
-                        ?enable-pdf-export=${this.enablePdfExport}
-                        @total-points-updated=${this.onTotalPointsUpdated}
-                        @rubric-rating-changed=${this.onRubricRatingChanged}
-                        @rubric-ratings-changed=${this.onRubricRatingsChanged}
-                        @rubric-rating-tuned=${this.onRubricRatingTuned}
-                        @update-comment=${this.onUpdateCriterionComment}
-                      ></sakai-rubric-grading>
-                    </div>
-                    <div class="modal-footer">
-                      <button class="btn btn-link" data-bs-dismiss="modal" @click=${this.doneWithRubricDialog}>${this.assignmentsI18n["gen.don"]}</button>
-                    </div>
-                  </div>
-                </div>
+              <div id="grader-rubric-block" class="collapse ms-2">
+                <h5 class="modal-title">${this.i18n.rubric}</h5>
+                <sakai-rubric-grading
+                  site-id="${portal.siteId}"
+                  tool-id="${this.toolId}"
+                  entity-id="${this.entityId}"
+                  evaluated-item-id="${this.submission.id}"
+                  evaluated-item-owner-id="${this.submission.groupRef || this.submission.firstSubmitterId}"
+                  ?group=${this.submission.groupId}
+                  ?enable-pdf-export=${this.enablePdfExport}
+                  @total-points-updated=${this.onTotalPointsUpdated}
+                  @rubric-rating-changed=${this.onRubricRatingChanged}
+                  @rubric-ratings-changed=${this.onRubricRatingsChanged}
+                  @rubric-rating-tuned=${this.onRubricRatingTuned}
+                  @update-comment=${this.onUpdateCriterionComment}
+                ></sakai-rubric-grading>
+                <button class="btn btn-link" @click=${this.doneWithRubric}>${this.assignmentsI18n["gen.don"]}</button>
               </div>
             ` : ""}
             <!-- end hasAssociatedRubric -->
@@ -759,7 +750,7 @@ export class SakaiGrader extends gradableDataMixin(SakaiElement) {
           ${this.saveSucceeded ? html`<div class="sak-banner-success">${this.i18n.successful_save}</div>` : ""}
           ${this.saveFailed ? html`<div class="sak-banner-error">${this.i18n.failed_save}</div>` : ""}
         </div>
-      </div>` : ""}
+      </aside>` : ""}
     `;
   }
 
@@ -831,8 +822,10 @@ export class SakaiGrader extends gradableDataMixin(SakaiElement) {
     return this.submission.firstSubmitterId;
   }
 
-  doneWithRubricDialog() {
+  doneWithRubric() {
+
     this.querySelector("#grader-rubric-link").focus();
+    bootstrap.Collapse.getInstance(document.getElementById("grader-rubric-block"))?.hide();
   }
 
   replaceWithEditor(id) {

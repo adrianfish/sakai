@@ -23,6 +23,9 @@ sakai-grader {
       flex: 0 0 auto;
       text-align: center;
       text-decoration: none;
+      div button:first-child {
+        text-decoration: underline;
+      }
       button > i {
         font-size: 20px;
       }
@@ -153,6 +156,7 @@ sakai-grader {
 
   #grader {
 
+    container-type: size;
     background-color: var(--sakai-title-bar-bg-color);
 
     .draft-submission {
