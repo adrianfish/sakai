@@ -164,7 +164,7 @@ export class SakaiGrader extends gradableDataMixin(SakaiElement) {
     this.privateNotesEditor = this.replaceWithEditor("grader-private-notes");
   }
 
-  renderNav() {
+  renderTopbar() {
 
     return html`
       <div id="grader-topbar">
@@ -179,7 +179,6 @@ export class SakaiGrader extends gradableDataMixin(SakaiElement) {
               <div class="modal-body">
                 <div><label><input type="checkbox" ?disabled=${!this.hasUnsubmitted} @change=${this.submittedOnlyChanged} .checked=${this.submittedOnly} />${this.assignmentsI18n["nav.view.subsOnly"]}</label></div>
                 <div><label><input type="checkbox" ?disabled=${!this.hasUngraded} @change=${this.ungradedOnlyChanged} .checked=${this.ungradedOnly} />${this.i18n.only_ungraded}</label></div>
-                <div id="grader-settings-left-block"><label><input type="checkbox" @change=${this.graderOnLeftChanged} .checked=${this.graderOnLeft} />${this.i18n.grader_on_left}</label></div>
                 ${this.isGroupGradable ? "" : html`
                   <div class="grader-groups">
                     <span>${this.assignmentsI18n.please_select_group}</span>
@@ -244,7 +243,7 @@ export class SakaiGrader extends gradableDataMixin(SakaiElement) {
   renderGradable() {
 
     return html`
-      <div id="gradable" class="${ifDefined(this.graderOnLeft ? "on-right" : undefined)}">
+      <div id="gradable">
         ${this.submission.ltiSubmissionLaunch ? html`
           <div class="sak-banner-info">${unsafeHTML(this.i18n.lti_grade_launch_instructions)}</div>
           <sakai-lti-iframe
@@ -262,7 +261,19 @@ export class SakaiGrader extends gradableDataMixin(SakaiElement) {
          />
         ` : "" }
         ${this.submission.submittedTime || (this.submission.draft && this.submission.visible) ? html`
-          <h3>${this.assignmentsI18n["gen.subm"]}</h3>
+        <h3 class="d-inline-block">${this.assignmentsI18n["gen.subm"]}</h3>
+        ` : html`
+        <h3 class="d-inline-block">${this.i18n.no_submission}</h3>
+        `}
+        <div id="grader-link-block" class="d-inline-block float-end">
+          <button class="btn btn-link"
+              data-bs-toggle="offcanvas"
+              data-bs-target="#grader"
+              aria-controls="grader">
+          ${this.i18n.grade}
+          </button>
+        </div>
+        ${this.submission.submittedTime || (this.submission.draft && this.submission.visible) ? html`
           ${this.submittedTextMode ? html`
             <div id="grader-submitted-text-block">
               <div class="sak-banner-info">${unsafeHTML(this.i18n.inline_feedback_instruction)}</div>
@@ -386,143 +397,56 @@ export class SakaiGrader extends gradableDataMixin(SakaiElement) {
     return html`
       ${this.submission.id !== "dummy" ? html`
 
-      
-      <div id="grader" class="${this.graderOnLeft ? "on-left" : ""}">
+            
+      <div id="grader" class="offcanvas offcanvas-end" tabindex="-1" aria-labelledby="grader-label">
 
-        <div id="grader-submitted-block" class="grader-block ${this.graderOnLeft ? "on-left" : ""}">
-          <div style="display: flex;">
-            <sakai-user-photo user-id="${this._getPhotoUserId()}" classes="grader-photo" profile-popup="on"></sakai-user-photo>
-            <div class="submitted-time" style="flex: 4;">
-              ${this.submission.submittedTime || (this.submission.draft && this.submission.visible) ? html`
-                <span class="submitter-name">${this.renderSubmitter()}</span>
-                ${this.submission.draft && this.submission.visible ? html`
-                <span class="draft-submission">(${this.i18n.draft_submission})</span>
-                ` : ""}
-                <div class="submitted-time ${this.submission.draft ? "draft-time" : ""}">${this.submission.submittedTime}</div>
-                ${this.submission.late ? html`<span class="grader-late">${this.assignmentsI18n["grades.lateness.late"]}</span>` : ""}
-                ${this.submission.returned ? this.renderGraderReturned() : ""}
-              ` : html`
-                <span>${this.i18n.no_submission_for} ${this.renderSubmitter()}</span>
-                ${this.submission.returned ? this.renderGraderReturned() : ""}
-              `}
-            </div>
-          </div>
-          ${this.submission.groupId && this.submission.submittedTime ? html`<div class="grader-group-members">${this.submission.groupMembers}</div>` : ""}
-          <div class="attachments">
-            ${this.submission.submittedAttachments.length > 0 ? html`
-              <div class="attachments-header">${this.assignmentsI18n["gen.stuatt"]}:</div>
-              ${this.submission.submittedAttachments.map(r => html`
-                <div class="attachment-link"><a href="javascript;" data-url="${r.url}" @click=${this.previewAttachment}>${r.name}</a></div>
-              `)}` : ""}
-          </div>
-          <div class="timeSpent-block">
-            ${this.submission.submitters[0].timeSpent ? html`
-              <span>${this.assignmentsI18n["gen.assign.spent"]}</span>
-              <span> ${this.submission.submitters[0].timeSpent}</span>
-            ` : ""}
-          </div>
-        </div> <!-- /grader-submitted-block -->
-
-        ${this.submission.originalityShowing ? html`
-          <div>
-            <label class="grader-label grader-originality-label">
-              <span>${this.submission.originalityServiceName}</span>
-              <span>${this.assignmentsI18n["review.report"]}</span>
-            </label>
-            ${this.submission.originalitySupplies.map(result => html`
-              <div class="grader-originality-section" >
-                ${result[Submission.originalityConstants.originalityLink] !== 'Error' ? html`
-                  <a target="_blank"
-                      href="${result[Submission.originalityConstants.originalityLink]}"
-                      class="grader-originality-link">
-                    <i class="${result[Submission.originalityConstants.originalityIcon]}"></i>
-                    <span>${result[Submission.originalityConstants.originalityScore]}${this.assignmentsI18n["content_review.score_display.grader"]}</span>
-                  </a>
-                  <span>
-                    <span class="grader-originality-delimiter">${this.assignmentsI18n["content_review.delimiter"]}</span>
-                    <span>${result[Submission.originalityConstants.originalityName]}</span>
-                  </span>
-                ` : html`
-                  ${result[Submission.originalityConstants.originalityStatus] === 'true' ? html`
-                    <a href="#${result[Submission.originalityConstants.originalityKey]}"
-                        class="grader-originality-link"
-                        data-bs-toggle="collapse"
-                        role="button"
-                        aria-expanded="false"
-                        aria-controls="${result[Submission.originalityConstants.originalityKey]}">
-                      <i class="${result[Submission.originalityConstants.originalityIcon]}"></i>
-                      <span>${this.assignmentsI18n["content_review.disclosure.pending"]}</span>
-                    </a>
-                  ` : html`
-                    <a href="#${result[Submission.originalityConstants.originalityKey]}"
-                        class="grader-originality-link"
-                        data-bs-toggle="collapse"
-                        role="button"
-                        aria-expanded="false"
-                        aria-controls="${result[Submission.originalityConstants.originalityKey]}">
-                      <i class="${result[Submission.originalityConstants.originalityIcon]}"></i>
-                      <span>${this.assignmentsI18n["content_review.disclosure.error"]}</span>
-                    </a>
-                  `}
-                  <span>
-                    <span class="grader-originality-delimiter">${this.assignmentsI18n["content_review.delimiter"]}</span>
-                    <span>${result[Submission.originalityConstants.originalityName]}</span>
-                  </span>
-                  <div class="collapse grader-originality-caption" id="${result[Submission.originalityConstants.originalityKey]}">
-                    <div>${result[Submission.originalityConstants.originalityError]}</div>
-                  </div>
-                `}
-                <br />
-              </div>
-            `)}
-          </div>
-        ` : ""}
-        ${this.submission.originalityShowing ? html`
-          <div>
-            <label class="grader-label grader-originality-label"><span>${this.submission.originalityServiceName}</span><span>${this.assignmentsI18n["review.report"]}</span></label>
-            ${this.submission.originalitySupplies.map(result => html`
-              <div class="grader-originality-section" >
-                ${result[Submission.originalityConstants.originalityLink] !== 'Error' ? html`
-                  <a target="_blank"
-                      href="${result[Submission.originalityConstants.originalityLink]}"
-                      class="grader-originality-link">
-                    <i class="${result[Submission.originalityConstants.originalityIcon]}"></i>
-                    <span>${result[Submission.originalityConstants.originalityScore]}${this.assignmentsI18n["content_review.score_display.grader"]}</span>
-                  </a>
-                  <span>
-                    <span class="grader-originality-delimiter">${this.assignmentsI18n["content_review.delimiter"]}</span>
-                    <span>${result[Submission.originalityConstants.originalityName]}</span>
-                  </span>
-                ` : html`
-                  ${result[Submission.originalityConstants.originalityStatus] === 'true' ? html`
-                    <a href="#${result[Submission.originalityConstants.originalityKey]}"
-                        data-bs-toggle="collapse"
-                        role="button"
-                        aria-expanded="false"
-                        aria-controls="${result[Submission.originalityConstants.originalityKey]}"
+        <div class="offcanvas-header">
+          <h2 class="offcanvas-title" id="grader-label">Grader</h2>
+          <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+        </div>
+        <div class="offcanvas-body">
+        
+          ${this.submission.originalityShowing ? html`
+            <div>
+              <label class="grader-label grader-originality-label">
+                <span>${this.submission.originalityServiceName}</span>
+                <span>${this.assignmentsI18n["review.report"]}</span>
+              </label>
+              ${this.submission.originalitySupplies.map(result => html`
+                <div class="grader-originality-section" >
+                  ${result[Submission.originalityConstants.originalityLink] !== 'Error' ? html`
+                    <a target="_blank"
+                        href="${result[Submission.originalityConstants.originalityLink]}"
                         class="grader-originality-link">
                       <i class="${result[Submission.originalityConstants.originalityIcon]}"></i>
-                      <span>${this.assignmentsI18n["content_review.disclosure.pending"]}</span>
+                      <span>${result[Submission.originalityConstants.originalityScore]}${this.assignmentsI18n["content_review.score_display.grader"]}</span>
                     </a>
                     <span>
                       <span class="grader-originality-delimiter">${this.assignmentsI18n["content_review.delimiter"]}</span>
                       <span>${result[Submission.originalityConstants.originalityName]}</span>
                     </span>
-                    <div class="collapse grader-originality-caption" id="${result[Submission.originalityConstants.originalityKey]}">
-                      <div>
-                        <span>${this.assignmentsI18n["content_review.notYetSubmitted.grader"]}</span>
-                        <span>${this.submission.originalityServiceName}</span>
-                      </div>
-                    </div>
                   ` : html`
-                    <a href="#${result[Submission.originalityConstants.originalityKey]}"
-                        data-bs-toggle="collapse"
-                        role="button"
-                        aria-expanded="false"
-                        aria-controls="${result[Submission.originalityConstants.originalityKey]}"
-                        class="grader-originality-link">
-                      <i class="${result[Submission.originalityConstants.originalityIcon]}"></i><span>${this.assignmentsI18n["content_review.disclosure.error"]}</span>
-                    </a>
+                    ${result[Submission.originalityConstants.originalityStatus] === 'true' ? html`
+                      <a href="#${result[Submission.originalityConstants.originalityKey]}"
+                          class="grader-originality-link"
+                          data-bs-toggle="collapse"
+                          role="button"
+                          aria-expanded="false"
+                          aria-controls="${result[Submission.originalityConstants.originalityKey]}">
+                        <i class="${result[Submission.originalityConstants.originalityIcon]}"></i>
+                        <span>${this.assignmentsI18n["content_review.disclosure.pending"]}</span>
+                      </a>
+                    ` : html`
+                      <a href="#${result[Submission.originalityConstants.originalityKey]}"
+                          class="grader-originality-link"
+                          data-bs-toggle="collapse"
+                          role="button"
+                          aria-expanded="false"
+                          aria-controls="${result[Submission.originalityConstants.originalityKey]}">
+                        <i class="${result[Submission.originalityConstants.originalityIcon]}"></i>
+                        <span>${this.assignmentsI18n["content_review.disclosure.error"]}</span>
+                      </a>
+                    `}
                     <span>
                       <span class="grader-originality-delimiter">${this.assignmentsI18n["content_review.delimiter"]}</span>
                       <span>${result[Submission.originalityConstants.originalityName]}</span>
@@ -531,262 +455,310 @@ export class SakaiGrader extends gradableDataMixin(SakaiElement) {
                       <div>${result[Submission.originalityConstants.originalityError]}</div>
                     </div>
                   `}
-                `}
-                <br />
-              </div>
-            `)}
-          </div>
-        ` : ""}
-        <div id="grader-grade-block" class="grader-block">
-          ${this._renderGradeInputs(this.assignmentsI18n["gen.assign.gra"])}
-          <!-- start hasAssociatedRubric -->
-          ${this.hasAssociatedRubric === "true" ? html`
-            <sakai-rubric-grading-button
-              id="grader-rubric-link"
-              title="${this.assignmentsI18n.grading_rubric}"
-              site-id="${portal.siteId}"
-              tool-id="${this.toolId}"
-              data-bs-toggle="modal"
-              data-bs-target="#grader-rubric-modal"
-              entity-id="${this.entityId}"
-              evaluated-item-id="${this.submission.id}"
-              evaluated-item-owner-id="${this.submission.firstSubmitterId}">
-            </sakai-rubric-grading-button>
-
-            <div id="grader-rubric-modal" class="modal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1">
-              <div class="modal-dialog modal-lg">
-                <div class="modal-content">
-                  <div class="modal-header">
-                    <h5 class="modal-title">${this.i18n.rubric}</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                  </div>
-                  <div class="modal-body">
-                    <sakai-rubric-grading
-                      site-id="${portal.siteId}"
-                      tool-id="${this.toolId}"
-                      entity-id="${this.entityId}"
-                      evaluated-item-id="${this.submission.id}"
-                      evaluated-item-owner-id="${this.submission.groupRef || this.submission.firstSubmitterId}"
-                      ?group=${this.submission.groupId}
-                      ?enable-pdf-export=${this.enablePdfExport}
-                      @total-points-updated=${this.onTotalPointsUpdated}
-                      @rubric-rating-changed=${this.onRubricRatingChanged}
-                      @rubric-ratings-changed=${this.onRubricRatingsChanged}
-                      @rubric-rating-tuned=${this.onRubricRatingTuned}
-                      @update-comment=${this.onUpdateCriterionComment}
-                    ></sakai-rubric-grading>
-                  </div>
-                  <div class="modal-footer">
-                    <button class="btn btn-link" data-bs-dismiss="modal" @click=${this.doneWithRubricDialog}>${this.assignmentsI18n["gen.don"]}</button>
-                  </div>
+                  <br />
                 </div>
-              </div>
+              `)}
             </div>
           ` : ""}
-          <!-- end hasAssociatedRubric -->
-
-          ${this.submission.groupId ? html`
-            <div id="grader-overrides-wrapper">
-              <label>
-                <input type="checkbox" id="grader-override-toggle" ?checked=${this.showOverrides} @click=${e => this.showOverrides = e.target.checked} />
-                <span class="grader-overrides-label">${this.i18n.assign_grade_overrides}</span>
-              </label>
-              <div id="grader-overrides-block" style="${this.showOverrides ? "display: block" : "display: none"}">
-              ${this.submission.submitters.map(s => html`
-                <div class="grader-override">
-                  <div class="grader-overrides-display-name">${s.displayName} (${s.displayId})</div>
-                  <div>${this._renderGradeInputs(this.i18n.override_grade_with, s)}</div>
+          ${this.submission.originalityShowing ? html`
+            <div>
+              <label class="grader-label grader-originality-label"><span>${this.submission.originalityServiceName}</span><span>${this.assignmentsI18n["review.report"]}</span></label>
+              ${this.submission.originalitySupplies.map(result => html`
+                <div class="grader-originality-section" >
+                  ${result[Submission.originalityConstants.originalityLink] !== 'Error' ? html`
+                    <a target="_blank"
+                        href="${result[Submission.originalityConstants.originalityLink]}"
+                        class="grader-originality-link">
+                      <i class="${result[Submission.originalityConstants.originalityIcon]}"></i>
+                      <span>${result[Submission.originalityConstants.originalityScore]}${this.assignmentsI18n["content_review.score_display.grader"]}</span>
+                    </a>
+                    <span>
+                      <span class="grader-originality-delimiter">${this.assignmentsI18n["content_review.delimiter"]}</span>
+                      <span>${result[Submission.originalityConstants.originalityName]}</span>
+                    </span>
+                  ` : html`
+                    ${result[Submission.originalityConstants.originalityStatus] === 'true' ? html`
+                      <a href="#${result[Submission.originalityConstants.originalityKey]}"
+                          data-bs-toggle="collapse"
+                          role="button"
+                          aria-expanded="false"
+                          aria-controls="${result[Submission.originalityConstants.originalityKey]}"
+                          class="grader-originality-link">
+                        <i class="${result[Submission.originalityConstants.originalityIcon]}"></i>
+                        <span>${this.assignmentsI18n["content_review.disclosure.pending"]}</span>
+                      </a>
+                      <span>
+                        <span class="grader-originality-delimiter">${this.assignmentsI18n["content_review.delimiter"]}</span>
+                        <span>${result[Submission.originalityConstants.originalityName]}</span>
+                      </span>
+                      <div class="collapse grader-originality-caption" id="${result[Submission.originalityConstants.originalityKey]}">
+                        <div>
+                          <span>${this.assignmentsI18n["content_review.notYetSubmitted.grader"]}</span>
+                          <span>${this.submission.originalityServiceName}</span>
+                        </div>
+                      </div>
+                    ` : html`
+                      <a href="#${result[Submission.originalityConstants.originalityKey]}"
+                          data-bs-toggle="collapse"
+                          role="button"
+                          aria-expanded="false"
+                          aria-controls="${result[Submission.originalityConstants.originalityKey]}"
+                          class="grader-originality-link">
+                        <i class="${result[Submission.originalityConstants.originalityIcon]}"></i><span>${this.assignmentsI18n["content_review.disclosure.error"]}</span>
+                      </a>
+                      <span>
+                        <span class="grader-originality-delimiter">${this.assignmentsI18n["content_review.delimiter"]}</span>
+                        <span>${result[Submission.originalityConstants.originalityName]}</span>
+                      </span>
+                      <div class="collapse grader-originality-caption" id="${result[Submission.originalityConstants.originalityKey]}">
+                        <div>${result[Submission.originalityConstants.originalityError]}</div>
+                      </div>
+                    `}
+                  `}
+                  <br />
                 </div>
               `)}
-              </div>
             </div>
-          ` : "" }
-        </div>
-        <div class="feedback-label grader-label content-button-block grader-block">
-          <button id="grader-feedback-button" class="btn btn-link" data-bs-toggle="modal" data-bs-target="#feedback-modal" aria-haspopup="true" title="${this.i18n.add_feedback_tooltip}" >${this.assignmentsI18n.feedbackcomment}</button>
-          ${this.submission.feedbackComment ? html`<div class="active-indicator ${this.savedFeedbackComment ? "" : "unsaved"}" aria-label="${this.feedbackCommentPresentMsg()}" title="${this.feedbackCommentPresentMsg()}"></div>` : ""}
-        </div>
+          ` : ""}
+          <div id="grader-grade-block" class="grader-block">
+            ${this._renderGradeInputs(this.assignmentsI18n["gen.assign.gra"])}
+            <!-- start hasAssociatedRubric -->
+            ${this.hasAssociatedRubric === "true" ? html`
+              <sakai-rubric-grading-button
+                id="grader-rubric-link"
+                title="${this.assignmentsI18n.grading_rubric}"
+                site-id="${portal.siteId}"
+                tool-id="${this.toolId}"
+                data-bs-toggle="modal"
+                data-bs-target="#grader-rubric-modal"
+                entity-id="${this.entityId}"
+                evaluated-item-id="${this.submission.id}"
+                evaluated-item-owner-id="${this.submission.firstSubmitterId}">
+              </sakai-rubric-grading-button>
 
-        <div id="feedback-modal" class="modal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1">
-          <div class="modal-dialog">
-            <div class="modal-content">
-              <div class="modal-header">
-                <h5 class="modal-title">${this.assignmentsI18n.feedbackcomment}</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-              </div>
-              <div class="modal-body">
-                <div class="feedback-instruction sak-banner-info">${this.i18n.feedback_instruction}</div>
-                <div id="feedback-comment-unsaved-msg" class="feedback-instruction sak-banner-error d-none">${this.i18n.unsaved_text_warning}</div>
-                <textarea id="grader-feedback-comment" .value=${this.submission.feedbackComment}></textarea>
-                <div class="media-feedback grader-label">
-                  <span class="feedback-label">${this.i18n.recorded_feedback_label}</span>
-                  <fa-icon size="1.5em" i-class="fas microphone" path-prefix="/webcomponents/assets" style="vertical-align: middle;"></fa-icon>
-                  <fa-icon size="1.5em" i-class="fas video" path-prefix="/webcomponents/assets" style="vertical-align: middle;"></fa-icon>
-                </div>
-              </div>
-              <div class="modal-footer">
-                <button class="btn btn-link" data-bs-dismiss="modal" @click=${this.doneWithFeedbackDialog}>${this.assignmentsI18n["gen.don"]}</button>
-                <button class="btn btn-link" data-bs-dismiss="modal" @click=${this.cancelFeedbackToggle}>${this.assignmentsI18n["gen.can"]}</button>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div id="grader-feedback-attachments-block" class="grader-block grader-label">
-          ${this.submission.feedbackAttachments ? html`
-            <div class="feedback-attachments-title">${this.assignmentsI18n["download.feedback.attachment"]}</div>
-            <div class="current-feedback-attachments">
-              ${this.submission.feedbackAttachments.map(att => html`
-                <div class="feedback-attachments-row">
-                  <div class="feedback-attachment">
-                    <a href="/access${att.ref}" title="${this.i18n.feedback_attachment_tooltip}">
-                      <span>${att.name}</span>
-                    </a>
-                  </div>
-                  <div class="feedback-attachment-remove">
-                    <a data-ref="${att.ref}"
-                        @click=${this.removeAttachment}
-                        href="javascript:;">
-                      ${this.assignmentsI18n["gen.remove"]}
-                    </a>
+              <div id="grader-rubric-modal" class="modal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1">
+                <div class="modal-dialog modal-lg">
+                  <div class="modal-content">
+                    <div class="modal-header">
+                      <h5 class="modal-title">${this.i18n.rubric}</h5>
+                      <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                      <sakai-rubric-grading
+                        site-id="${portal.siteId}"
+                        tool-id="${this.toolId}"
+                        entity-id="${this.entityId}"
+                        evaluated-item-id="${this.submission.id}"
+                        evaluated-item-owner-id="${this.submission.groupRef || this.submission.firstSubmitterId}"
+                        ?group=${this.submission.groupId}
+                        ?enable-pdf-export=${this.enablePdfExport}
+                        @total-points-updated=${this.onTotalPointsUpdated}
+                        @rubric-rating-changed=${this.onRubricRatingChanged}
+                        @rubric-ratings-changed=${this.onRubricRatingsChanged}
+                        @rubric-rating-tuned=${this.onRubricRatingTuned}
+                        @update-comment=${this.onUpdateCriterionComment}
+                      ></sakai-rubric-grading>
+                    </div>
+                    <div class="modal-footer">
+                      <button class="btn btn-link" data-bs-dismiss="modal" @click=${this.doneWithRubricDialog}>${this.assignmentsI18n["gen.don"]}</button>
+                    </div>
                   </div>
                 </div>
-              `)}
-            </div>`
-          : ""}
-          <sakai-grader-file-picker button-text="${this.assignmentsI18n["gen.addatt"]}"
-              style="display: inline-block;"
-              title="${this.i18n.add_attachments_tooltip}">
-          </sakai-grader-file-picker>
-        </div>
-        ${this.submission.hasHistory ? html`
-          <div id="grader-submission-history-wrapper">
-            <div id="grader-submission-history-toggle">
-              <a href="javascript:;"
-                @click=${() => this.showingHistory = !this.showingHistory}
-                aria-label="${this.showingHistory ? this.i18n.hide_history_tooltip : this.i18n.show_history_tooltip}"
-                title="${this.showingHistory ? this.i18n.hide_history_tooltip : this.i18n.show_history_tooltip}">
-                ${this.showingHistory ? this.i18n.hide_history : this.i18n.show_history}
-              </a>
-            </div>
-            <div id="grader-submission-history" style="display: ${this.showingHistory ? "block" : "none"}">
-              ${this.submission.history.comments ? html`
-                <div id="grader-history-comments-wrapper">
-                  <div class="grader-history-title">${this.i18n.feedback_comments}</div>
-                  <div class="grader-history-block">${unsafeHTML(this.submission.history.comments)}</div>
-                </div>
-              ` : ""}
-              ${this.submission.history.grades ? html`
-                <div id="grader-history-grades-wrapper">
-                  <div class="grader-history-title">${this.i18n.previous_grades}</div>
-                  <div class="grader-history-block">${unsafeHTML(this.submission.history.grades)}</div>
-                </div>
-              ` : ""}
-            </div>
-          </div>
-        ` : ""}
-        <div class="grader-label content-button-block grader-block">
-          <button id="grader-private-notes-button"
-              class="btn btn-link"
-              data-bs-toggle="modal"
-              data-bs-target="#private-notes-modal"
-              aria-controls="private-notes-modal"
-              aria-haspopup="true"
-              title="${this.i18n.private_notes_tooltip}">
-            ${this.assignmentsI18n["note.label"]}
-          </button>
-          ${this.submission.privateNotes ? html`
-            <div class="active-indicator ${this.savedPvtNotes ? "" : "unsaved"}"
-                aria-label="${this.pvtNotePresentMsg()}"
-                title="${this.pvtNotePresentMsg()}">
-            </div>`
-          : ""}
-        </div>
+              </div>
+            ` : ""}
+            <!-- end hasAssociatedRubric -->
 
-        <div id="private-notes-modal" class="modal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1">
-          <div class="modal-dialog">
-            <div class="modal-content">
-              <div class="modal-header">
-                <h5 class="modal-title">${this.assignmentsI18n["note.label"]}</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-              </div>
-              <div class="modal-body">
-                <div class="sak-banner-info">${unsafeHTML(this.i18n.private_notes_tooltip)}</div>
-                <div id="private-notes-unsaved-msg" class="sak-banner-error d-none">${this.i18n.unsaved_text_warning}</div>
-                <div><textarea id="grader-private-notes" .value=${this.submission.privateNotes}></textarea></div>
-              </div>
-              <div class="modal-footer">
-                <button class="btn btn-link" data-bs-dismiss="modal" @click=${this.doneWithPrivateNotesDialog}>${this.assignmentsI18n["gen.don"]}</button>
-                <button class="btn btn-link" data-bs-dismiss="modal" @click=${this.cancelPrivateNotesToggle}>${this.assignmentsI18n["gen.can"]}</button>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="text-feedback">
-        </div>
-        ${this.submission.submittedTime && !this.submission.showExtension ? html`
-          <div class="resubmission-checkbox">
-            <label>
-              <input type="checkbox" .checked=${this.showResubmission} @change="${this.toggleResubmissionBlock}"/>
-              <span>${this.assignmentsI18n.allowResubmit}</span>
-            </label>
-          </div>
-          ${this.showResubmission ? html`
-            <div class="resubmission-block">
-              <span>${this.assignmentsI18n["allow.resubmit.number"]}:</span>
-              <select aria-label="${this.i18n.attempt_selector_label}"
-                  @change=${e => this.submission.resubmitsAllowed = parseInt(e.target.value)}>
-                ${Array(10).fill().map((_, i) => html`
-                  <option value="${i + 1}" .selected=${this.submission.resubmitsAllowed === (i + 1)}>${i + 1}</option>
+            ${this.submission.groupId ? html`
+              <div id="grader-overrides-wrapper">
+                <label>
+                  <input type="checkbox" id="grader-override-toggle" ?checked=${this.showOverrides} @click=${e => this.showOverrides = e.target.checked} />
+                  <span class="grader-overrides-label">${this.i18n.assign_grade_overrides}</span>
+                </label>
+                <div id="grader-overrides-block" style="${this.showOverrides ? "display: block" : "display: none"}">
+                ${this.submission.submitters.map(s => html`
+                  <div class="grader-override">
+                    <div class="grader-overrides-display-name">${s.displayName} (${s.displayId})</div>
+                    <div>${this._renderGradeInputs(this.i18n.override_grade_with, s)}</div>
+                  </div>
                 `)}
-                <option value="-1" .selected=${this.submission.resubmitsAllowed === -1}>${this.i18n.unlimited}</option>
-              </select>
-              <span>${this.assignmentsI18n["allow.resubmit.closeTime"]}:</span>
-              <sakai-date-picker
-                  epoch-millis="${this.submission.resubmitDate}"
-                  @datetime-selected=${this.resubmitDateSelected}
-                  label="${this.assignmentsI18n["allow.resubmit.closeTime"]}">
-              </sakai-date-picker>
+                </div>
+              </div>
+            ` : "" }
+          </div>
+          <div class="feedback-label grader-label content-button-block grader-block">
+            <button id="grader-feedback-button"
+                class="btn btn-link"
+                data-bs-toggle="collapse"
+                data-bs-target="#feedback-block"
+                aria-controls="feeback-block"
+                aria-expanded="false"
+                aria-label="${this.i18n.add_feedback_tooltip}"
+                title="${this.i18n.add_feedback_tooltip}">
+              ${this.assignmentsI18n.feedbackcomment}
+            </button>
+            ${this.submission.feedbackComment ? html`<div class="active-indicator ${this.savedFeedbackComment ? "" : "unsaved"}" aria-label="${this.feedbackCommentPresentMsg()}" title="${this.feedbackCommentPresentMsg()}"></div>` : ""}
+          </div>
+
+          <div id="feedback-block" class="collapse ms-2">
+            <h5>${this.assignmentsI18n.feedbackcomment}</h5>
+            <div class="feedback-instruction sak-banner-info">${this.i18n.feedback_instruction}</div>
+            <div id="feedback-comment-unsaved-msg" class="feedback-instruction sak-banner-error d-none">${this.i18n.unsaved_text_warning}</div>
+            <textarea id="grader-feedback-comment" .value=${this.submission.feedbackComment}></textarea>
+            <div class="media-feedback grader-label">
+              <span class="feedback-label">${this.i18n.recorded_feedback_label}</span>
+              <fa-icon size="1.5em" i-class="fas microphone" path-prefix="/webcomponents/assets" style="vertical-align: middle;"></fa-icon>
+              <fa-icon size="1.5em" i-class="fas video" path-prefix="/webcomponents/assets" style="vertical-align: middle;"></fa-icon>
+            </div>
+            <button class="btn btn-link" @click=${this.doneWithFeedback}>${this.assignmentsI18n["gen.don"]}</button>
+            <button class="btn btn-link" @click=${this.cancelFeedback}>${this.assignmentsI18n["gen.can"]}</button>
+          </div>
+
+          <div id="grader-feedback-attachments-block" class="grader-block grader-label">
+            ${this.submission.feedbackAttachments ? html`
+              <div class="feedback-attachments-title">${this.assignmentsI18n["download.feedback.attachment"]}</div>
+              <div class="current-feedback-attachments">
+                ${this.submission.feedbackAttachments.map(att => html`
+                  <div class="feedback-attachments-row">
+                    <div class="feedback-attachment">
+                      <a href="/access${att.ref}" title="${this.i18n.feedback_attachment_tooltip}">
+                        <span>${att.name}</span>
+                      </a>
+                    </div>
+                    <div class="feedback-attachment-remove">
+                      <a data-ref="${att.ref}"
+                          @click=${this.removeAttachment}
+                          href="javascript:;">
+                        ${this.assignmentsI18n["gen.remove"]}
+                      </a>
+                    </div>
+                  </div>
+                `)}
+              </div>`
+            : ""}
+            <sakai-grader-file-picker button-text="${this.assignmentsI18n["gen.addatt"]}"
+                style="display: inline-block;"
+                title="${this.i18n.add_attachments_tooltip}">
+            </sakai-grader-file-picker>
+          </div>
+          ${this.submission.hasHistory ? html`
+            <div id="grader-submission-history-wrapper">
+              <div id="grader-submission-history-toggle">
+                <a href="javascript:;"
+                  @click=${() => this.showingHistory = !this.showingHistory}
+                  aria-label="${this.showingHistory ? this.i18n.hide_history_tooltip : this.i18n.show_history_tooltip}"
+                  title="${this.showingHistory ? this.i18n.hide_history_tooltip : this.i18n.show_history_tooltip}">
+                  ${this.showingHistory ? this.i18n.hide_history : this.i18n.show_history}
+                </a>
+              </div>
+              <div id="grader-submission-history" style="display: ${this.showingHistory ? "block" : "none"}">
+                ${this.submission.history.comments ? html`
+                  <div id="grader-history-comments-wrapper">
+                    <div class="grader-history-title">${this.i18n.feedback_comments}</div>
+                    <div class="grader-history-block">${unsafeHTML(this.submission.history.comments)}</div>
+                  </div>
+                ` : ""}
+                ${this.submission.history.grades ? html`
+                  <div id="grader-history-grades-wrapper">
+                    <div class="grader-history-title">${this.i18n.previous_grades}</div>
+                    <div class="grader-history-block">${unsafeHTML(this.submission.history.grades)}</div>
+                  </div>
+                ` : ""}
+              </div>
             </div>
           ` : ""}
-        ` : ""}
-        ${this.submission.showExtension ? html`
-          <div id="grader-extension-section">
-            <input type="checkbox" .checked=${this.allowExtension} id="allowExtensionToggle" name="allowExtensionToggle" @change=${this.toggleExtensionBlock}" />
-            <label for="allowExtensionToggle" >${this.assignmentsI18n.allowExtension}</label>
-            ${this.allowExtension ? html`
-              <div>${this.assignmentsI18n.allowExtensionCaptionGrader}</div>
-              <div id="allowExtensionTime">
-                <label>${this.assignmentsI18n["gen.acesubunt"]}</label>
+          <div class="grader-label content-button-block grader-block">
+            <button id="grader-private-notes-button"
+                class="btn btn-link"
+                data-bs-toggle="collapse"
+                data-bs-target="#private-notes-block"
+                aria-controls="private-notes-block"
+                aria-expanded="false"
+                aria-label="${this.i18n.private_notes_tooltip}"
+                title="${this.i18n.private_notes_tooltip}">
+              ${this.assignmentsI18n["note.label"]}
+            </button>
+            ${this.submission.privateNotes ? html`
+              <div class="active-indicator ${this.savedPvtNotes ? "" : "unsaved"}"
+                  aria-label="${this.pvtNotePresentMsg()}"
+                  title="${this.pvtNotePresentMsg()}">
+              </div>`
+            : ""}
+          </div>
+
+          <div id="private-notes-block" class="collapse ms-2">
+            <h5>${this.assignmentsI18n["note.label"]}</h5>
+            <div class="sak-banner-info">${unsafeHTML(this.i18n.private_notes_tooltip)}</div>
+            <div id="private-notes-unsaved-msg" class="sak-banner-error d-none">${this.i18n.unsaved_text_warning}</div>
+            <div><textarea id="grader-private-notes" .value=${this.submission.privateNotes}></textarea></div>
+            <button class="btn btn-link" @click=${this.doneWithPrivateNotes}>${this.assignmentsI18n["gen.don"]}</button>
+            <button class="btn btn-link" @click=${this.cancelPrivateNotes}>${this.assignmentsI18n["gen.can"]}</button>
+          </div>
+
+          <div class="text-feedback">
+          </div>
+          ${this.submission.submittedTime && !this.submission.showExtension ? html`
+            <div class="resubmission-checkbox">
+              <label>
+                <input type="checkbox" .checked=${this.showResubmission} @change="${this.toggleResubmissionBlock}"/>
+                <span>${this.assignmentsI18n.allowResubmit}</span>
+              </label>
+            </div>
+            ${this.showResubmission ? html`
+              <div class="resubmission-block">
+                <span>${this.assignmentsI18n["allow.resubmit.number"]}:</span>
+                <select aria-label="${this.i18n.attempt_selector_label}"
+                    @change=${e => this.submission.resubmitsAllowed = parseInt(e.target.value)}>
+                  ${Array(10).fill().map((_, i) => html`
+                    <option value="${i + 1}" .selected=${this.submission.resubmitsAllowed === (i + 1)}>${i + 1}</option>
+                  `)}
+                  <option value="-1" .selected=${this.submission.resubmitsAllowed === -1}>${this.i18n.unlimited}</option>
+                </select>
+                <span>${this.assignmentsI18n["allow.resubmit.closeTime"]}:</span>
                 <sakai-date-picker
-                    epoch-millis="${this.submission.extensionDate}"
-                    @datetime-selected="${this.extensionDateSelected}"
-                    label="${this.assignmentsI18n["gen.acesubunt"]}">
+                    epoch-millis="${this.submission.resubmitDate}"
+                    @datetime-selected=${this.resubmitDateSelected}
+                    label="${this.assignmentsI18n["allow.resubmit.closeTime"]}">
                 </sakai-date-picker>
               </div>
             ` : ""}
+          ` : ""}
+          ${this.submission.showExtension ? html`
+            <div id="grader-extension-section">
+              <input type="checkbox" .checked=${this.allowExtension} id="allowExtensionToggle" name="allowExtensionToggle" @change=${this.toggleExtensionBlock}" />
+              <label for="allowExtensionToggle" >${this.assignmentsI18n.allowExtension}</label>
+              ${this.allowExtension ? html`
+                <div>${this.assignmentsI18n.allowExtensionCaptionGrader}</div>
+                <div id="allowExtensionTime">
+                  <label>${this.assignmentsI18n["gen.acesubunt"]}</label>
+                  <sakai-date-picker
+                      epoch-millis="${this.submission.extensionDate}"
+                      @datetime-selected="${this.extensionDateSelected}"
+                      label="${this.assignmentsI18n["gen.acesubunt"]}">
+                  </sakai-date-picker>
+                </div>
+              ` : ""}
+            </div>
+          ` : ""}
+          <div id="grader-save-buttons" class="action-button-block act">
+            <button accesskey="s"
+                class="btn btn-primary active"
+                name="save"
+                @click=${this.save}
+                ?disabled=${!this.canSave}>
+              ${this.assignmentsI18n["gen.sav"]}
+            </button>
+            <button accesskey="d"
+                class="btn btn-link"
+                name="return"
+                @click=${this.saveAndRelease}
+                ?disabled=${!this.canSave}>
+              ${this.assignmentsI18n["gen.retustud"]}
+            </button>
+            <button class="btn btn-link" accesskey="x" name="cancel" @click=${this.cancel}>${this.assignmentsI18n["gen.can"]}</button>
           </div>
-        ` : ""}
-        <div id="grader-save-buttons" class="action-button-block act">
-          <button accesskey="s"
-              class="btn btn-primary active"
-              name="save"
-              @click=${this.save}
-              ?disabled=${!this.canSave}>
-            ${this.assignmentsI18n["gen.sav"]}
-          </button>
-          <button accesskey="d"
-              class="btn btn-link"
-              name="return"
-              @click=${this.saveAndRelease}
-              ?disabled=${!this.canSave}>
-            ${this.assignmentsI18n["gen.retustud"]}
-          </button>
-          <button class="btn btn-link" accesskey="x" name="cancel" @click=${this.cancel}>${this.assignmentsI18n["gen.can"]}</button>
+          ${this.saveSucceeded ? html`<div class="sak-banner-success">${this.i18n.successful_save}</div>` : ""}
+          ${this.saveFailed ? html`<div class="sak-banner-error">${this.i18n.failed_save}</div>` : ""}
         </div>
-        ${this.saveSucceeded ? html`<div class="sak-banner-success">${this.i18n.successful_save}</div>` : ""}
-        ${this.saveFailed ? html`<div class="sak-banner-error">${this.i18n.failed_save}</div>` : ""}
       </div>` : ""}
     `;
   }
@@ -808,15 +780,44 @@ export class SakaiGrader extends gradableDataMixin(SakaiElement) {
       ${this.areSettingsInAction() ? html`
       <div class="sak-banner-warn">${this.i18n.filter_settings_warning}</div>
       ` : ""}
-      ${this.renderNav()}
+      ${this.renderTopbar()}
+      <div id="grader-submitted-block" class="grader-block">
+        <div style="display: flex;">
+          <sakai-user-photo user-id="${this._getPhotoUserId()}" classes="grader-photo" profile-popup="on"></sakai-user-photo>
+          <div class="submitted-time" style="flex: 4;">
+            ${this.submission.submittedTime || (this.submission.draft && this.submission.visible) ? html`
+              <span class="submitter-name">${this.renderSubmitter()}</span>
+              ${this.submission.draft && this.submission.visible ? html`
+              <span class="draft-submission">(${this.i18n.draft_submission})</span>
+              ` : ""}
+              <div class="submitted-time ${this.submission.draft ? "draft-time" : ""}">${this.submission.submittedTime}</div>
+              ${this.submission.late ? html`<span class="grader-late">${this.assignmentsI18n["grades.lateness.late"]}</span>` : ""}
+              ${this.submission.returned ? this.renderGraderReturned() : ""}
+            ` : html`
+              <span>${this.i18n.no_submission_for} ${this.renderSubmitter()}</span>
+              ${this.submission.returned ? this.renderGraderReturned() : ""}
+            `}
+          </div>
+        </div>
+        ${this.submission.groupId && this.submission.submittedTime ? html`<div class="grader-group-members">${this.submission.groupMembers}</div>` : ""}
+        <div class="attachments">
+          ${this.submission.submittedAttachments.length > 0 ? html`
+            <div class="attachments-header">${this.assignmentsI18n["gen.stuatt"]}:</div>
+            ${this.submission.submittedAttachments.map(r => html`
+              <div class="attachment-link"><a href="javascript;" data-url="${r.url}" @click=${this.previewAttachment}>${r.name}</a></div>
+            `)}` : ""}
+        </div>
+        <div class="timeSpent-block">
+          ${this.submission.submitters[0].timeSpent ? html`
+            <span>${this.assignmentsI18n["gen.assign.spent"]}</span>
+            <span> ${this.submission.submitters[0].timeSpent}</span>
+          ` : ""}
+        </div>
+      </div> <!-- /grader-submitted-block -->
+
       <div id="grader-container">
-        ${this.graderOnLeft ? html`
         ${this.renderGrader()}
         ${this.renderGradable()}
-        ` : html`
-        ${this.renderGradable()}
-        ${this.renderGrader()}
-        `}
       </div>
     `;
   }
@@ -872,15 +873,16 @@ export class SakaiGrader extends gradableDataMixin(SakaiElement) {
     }
   }
 
-  doneWithFeedbackDialog() {
+  doneWithFeedback() {
 
     this.submission.feedbackComment = this.feedbackCommentEditor.getData();
     this.modified = true;
     this.savedFeedbackComment = false;
     this.feedbackCommentEditor.resetDirty();
+    bootstrap.Collapse.getInstance(document.getElementById("feedback-block"))?.hide();
   }
 
-  cancelFeedbackToggle() {
+  cancelFeedback() {
 
     if (this.feedbackCommentEditor.checkDirty()) {
       if (this.confirmedNotSaveFeedback) {
@@ -888,7 +890,7 @@ export class SakaiGrader extends gradableDataMixin(SakaiElement) {
         this.feedbackCommentEditor.resetDirty();
         this.confirmedNotSaveFeedback = false;
         document.getElementById("feedback-comment-unsaved-msg").classList.add("d-none");
-        bootstrap.Modal.getInstance(document.getElementById("feedback-modal")).hide();
+        bootstrap.Collapse.getInstance(document.getElementById("feedback-block"))?.hide();
       } else {
         this.confirmedNotSaveFeedback = true;
         document.getElementById("feedback-comment-unsaved-msg").classList.remove("d-none");
@@ -899,7 +901,7 @@ export class SakaiGrader extends gradableDataMixin(SakaiElement) {
     return true;
   }
 
-  cancelPrivateNotesToggle() {
+  cancelPrivateNotes() {
 
     if (this.privateNotesEditor.checkDirty()) {
       if (this.confirmedNotSavePvtNotes) {
@@ -907,7 +909,7 @@ export class SakaiGrader extends gradableDataMixin(SakaiElement) {
         this.privateNotesEditor.resetDirty();
         this.confirmedNotSavePvtNotes = false;
         document.getElementById("private-notes-unsaved-msg").classList.add("d-none");
-        bootstrap.Modal.getInstance(document.getElementById("private-notes-modal")).hide();
+        bootstrap.Collapse.getInstance(document.getElementById("private-notes-block"))?.hide();
       } else {
         this.confirmedNotSavePvtNotes = true;
         document.getElementById("private-notes-unsaved-msg").classList.remove("d-none");
@@ -915,16 +917,16 @@ export class SakaiGrader extends gradableDataMixin(SakaiElement) {
       }
     }
 
-    this.togglePrivateNotes();
     return true;
   }
 
-  doneWithPrivateNotesDialog() {
+  doneWithPrivateNotes() {
 
     this.submission.privateNotes = this.privateNotesEditor.getData();
     this.modified = true;
     this.savedPvtNotes = false;
     this.privateNotesEditor.resetDirty();
+    bootstrap.Collapse.getInstance(document.getElementById("private-notes-block"))?.hide();
   }
 
   feedbackCommentPresentMsg() {
@@ -1359,14 +1361,6 @@ export class SakaiGrader extends gradableDataMixin(SakaiElement) {
 
     this.ungradedOnly = e.target.checked;
     this.applyFilters(e);
-  }
-
-  graderOnLeftChanged(e) {
-
-    e.stopPropagation();
-
-    this.graderOnLeft = e.target.checked;
-    this.setSetting("grader", "graderOnLeft", e.target.checked);
   }
 
   resubmitDateSelected(e) {
