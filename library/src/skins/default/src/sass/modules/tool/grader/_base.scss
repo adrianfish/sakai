@@ -45,13 +45,10 @@ sakai-grader {
   }
 
   #grader-container {
-    display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
+    display: flex;
   }
 
   #gradable {
-    grid-column: 1 / 3;
-    grid-row: 1 / 8;
     flex: 1;
     padding: 5px;
 
@@ -63,8 +60,8 @@ sakai-grader {
       margin-left: 5px;
     }
 
-    &.on-left {
-      grid-column: 2 / 4;
+    &.on-right {
+      order: 2;
     }
 
     #grader-feedback-text {
@@ -134,14 +131,8 @@ sakai-grader {
 
   #grader-submitted-block {
 
-    grid-column: 3 / 4;
-    grid-row: 1;
     padding: 10px;
     background-color: var(--sakai-title-bar-bg-color);
-
-    &.on-left {
-      grid-column: 1 / 2;
-    }
 
     .grader-photo {
       flex: 1;
@@ -158,14 +149,13 @@ sakai-grader {
   }
 
   #grader {
-    grid-column: 3 / 4;
-    grid-row: 2;
+
     flex: 0 0 auto;
     padding: 10px;
     background-color: var(--sakai-title-bar-bg-color);
 
     &.on-left {
-      grid-column: 1 / 2;
+      order: 1;
     }
 
     .draft-submission {
@@ -462,14 +452,8 @@ sakai-grader {
 
   @media #{$tablet} {
 
-    #grader-container {
-      grid-template-columns: 1fr;
-    }
-
     #grader-topbar {
       display: block;
-      grid-column: 1;
-      grid-row: 1;
 
       #grader-navigator {
         button > i {
@@ -493,34 +477,27 @@ sakai-grader {
       }
     }
 
+    #grader-container {
+      flex-direction: column;
+    }
+
+    #grader {
+      order: 1;
+    }
+
     #grader-submitted-block {
-      grid-column: 1 / 4;
-      grid-row: 2;
       margin-top: 12px;
-      &.on-left {
-        grid-column: 1 / 4;
-      }
     }
 
     #gradable {
-      grid-column: 1 / 4;
-      grid-row: 3;
+      order: 2;
       padding-bottom: 12px;
       margin-bottom: 12px;
       border-bottom: 3px solid var(--sakai-border-color);
       &.on-left {
-        grid-column: 1 / 4;
         h3:first-child {
           margin-left: 0;
         }
-      }
-    }
-
-    #grader {
-      grid-column: 1 / 4;
-      grid-row: 4;
-      &.on-left {
-        grid-column: 1 / 4;
       }
     }
 

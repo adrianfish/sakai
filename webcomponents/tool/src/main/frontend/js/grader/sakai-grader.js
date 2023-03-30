@@ -244,7 +244,7 @@ export class SakaiGrader extends gradableDataMixin(SakaiElement) {
   renderGradable() {
 
     return html`
-      <div id="gradable" class="${ifDefined(this.graderOnLeft ? "on-left" : undefined)}">
+      <div id="gradable" class="${ifDefined(this.graderOnLeft ? "on-right" : undefined)}">
         ${this.submission.ltiSubmissionLaunch ? html`
           <div class="sak-banner-info">${unsafeHTML(this.i18n.lti_grade_launch_instructions)}</div>
           <sakai-lti-iframe
@@ -386,41 +386,42 @@ export class SakaiGrader extends gradableDataMixin(SakaiElement) {
     return html`
       ${this.submission.id !== "dummy" ? html`
 
-      <div id="grader-submitted-block" class="grader-block ${this.graderOnLeft ? "on-left" : ""}">
-        <div style="display: flex;">
-          <sakai-user-photo user-id="${this._getPhotoUserId()}" classes="grader-photo" profile-popup="on"></sakai-user-photo>
-          <div class="submitted-time" style="flex: 4;">
-            ${this.submission.submittedTime || (this.submission.draft && this.submission.visible) ? html`
-              <span class="submitter-name">${this.renderSubmitter()}</span>
-              ${this.submission.draft && this.submission.visible ? html`
-              <span class="draft-submission">(${this.i18n.draft_submission})</span>
-              ` : ""}
-              <div class="submitted-time ${this.submission.draft ? "draft-time" : ""}">${this.submission.submittedTime}</div>
-              ${this.submission.late ? html`<span class="grader-late">${this.assignmentsI18n["grades.lateness.late"]}</span>` : ""}
-              ${this.submission.returned ? this.renderGraderReturned() : ""}
-            ` : html`
-              <span>${this.i18n.no_submission_for} ${this.renderSubmitter()}</span>
-              ${this.submission.returned ? this.renderGraderReturned() : ""}
-            `}
-          </div>
-        </div>
-        ${this.submission.groupId && this.submission.submittedTime ? html`<div class="grader-group-members">${this.submission.groupMembers}</div>` : ""}
-        <div class="attachments">
-          ${this.submission.submittedAttachments.length > 0 ? html`
-            <div class="attachments-header">${this.assignmentsI18n["gen.stuatt"]}:</div>
-            ${this.submission.submittedAttachments.map(r => html`
-              <div class="attachment-link"><a href="javascript;" data-url="${r.url}" @click=${this.previewAttachment}>${r.name}</a></div>
-            `)}` : ""}
-        </div>
-        <div class="timeSpent-block">
-          ${this.submission.submitters[0].timeSpent ? html`
-            <span>${this.assignmentsI18n["gen.assign.spent"]}</span>
-            <span> ${this.submission.submitters[0].timeSpent}</span>
-          ` : ""}
-        </div>
-      </div> <!-- /grader-submitted-block -->
-
+      
       <div id="grader" class="${this.graderOnLeft ? "on-left" : ""}">
+
+        <div id="grader-submitted-block" class="grader-block ${this.graderOnLeft ? "on-left" : ""}">
+          <div style="display: flex;">
+            <sakai-user-photo user-id="${this._getPhotoUserId()}" classes="grader-photo" profile-popup="on"></sakai-user-photo>
+            <div class="submitted-time" style="flex: 4;">
+              ${this.submission.submittedTime || (this.submission.draft && this.submission.visible) ? html`
+                <span class="submitter-name">${this.renderSubmitter()}</span>
+                ${this.submission.draft && this.submission.visible ? html`
+                <span class="draft-submission">(${this.i18n.draft_submission})</span>
+                ` : ""}
+                <div class="submitted-time ${this.submission.draft ? "draft-time" : ""}">${this.submission.submittedTime}</div>
+                ${this.submission.late ? html`<span class="grader-late">${this.assignmentsI18n["grades.lateness.late"]}</span>` : ""}
+                ${this.submission.returned ? this.renderGraderReturned() : ""}
+              ` : html`
+                <span>${this.i18n.no_submission_for} ${this.renderSubmitter()}</span>
+                ${this.submission.returned ? this.renderGraderReturned() : ""}
+              `}
+            </div>
+          </div>
+          ${this.submission.groupId && this.submission.submittedTime ? html`<div class="grader-group-members">${this.submission.groupMembers}</div>` : ""}
+          <div class="attachments">
+            ${this.submission.submittedAttachments.length > 0 ? html`
+              <div class="attachments-header">${this.assignmentsI18n["gen.stuatt"]}:</div>
+              ${this.submission.submittedAttachments.map(r => html`
+                <div class="attachment-link"><a href="javascript;" data-url="${r.url}" @click=${this.previewAttachment}>${r.name}</a></div>
+              `)}` : ""}
+          </div>
+          <div class="timeSpent-block">
+            ${this.submission.submitters[0].timeSpent ? html`
+              <span>${this.assignmentsI18n["gen.assign.spent"]}</span>
+              <span> ${this.submission.submitters[0].timeSpent}</span>
+            ` : ""}
+          </div>
+        </div> <!-- /grader-submitted-block -->
 
         ${this.submission.originalityShowing ? html`
           <div>
