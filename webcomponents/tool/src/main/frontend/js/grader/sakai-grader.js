@@ -603,33 +603,31 @@ export class SakaiGrader extends gradableDataMixin(SakaiElement) {
           ` : "" }
         </div>
         <div class="feedback-label grader-label content-button-block grader-block">
-          <button id="grader-feedback-button" class="btn btn-link" data-bs-toggle="modal" data-bs-target="#feedback-modal" aria-haspopup="true" title="${this.i18n.add_feedback_tooltip}" >${this.assignmentsI18n.feedbackcomment}</button>
+          <button id="grader-feedback-button"
+              class="btn btn-link"
+              data-bs-toggle="collapse"
+              data-bs-target="#feedback-block"
+              aria-controls="feedback-block"
+              aria-expanded="false"
+              aria-label="${this.i18n.add_feedback_tooltip}"
+              title="${this.i18n.add_feedback_tooltip}">
+            ${this.assignmentsI18n.feedbackcomment}
+          </button>
           ${this.submission.feedbackComment ? html`<div class="active-indicator ${this.savedFeedbackComment ? "" : "unsaved"}" aria-label="${this.feedbackCommentPresentMsg()}" title="${this.feedbackCommentPresentMsg()}"></div>` : ""}
         </div>
 
-        <div id="feedback-modal" class="modal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1">
-          <div class="modal-dialog">
-            <div class="modal-content">
-              <div class="modal-header">
-                <h5 class="modal-title">${this.assignmentsI18n.feedbackcomment}</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-              </div>
-              <div class="modal-body">
-                <div class="feedback-instruction sak-banner-info">${this.i18n.feedback_instruction}</div>
-                <div id="feedback-comment-unsaved-msg" class="feedback-instruction sak-banner-error d-none">${this.i18n.unsaved_text_warning}</div>
-                <textarea id="grader-feedback-comment" .value=${this.submission.feedbackComment}></textarea>
-                <div class="media-feedback grader-label">
-                  <span class="feedback-label">${this.i18n.recorded_feedback_label}</span>
-                  <fa-icon size="1.5em" i-class="fas microphone" path-prefix="/webcomponents/assets" style="vertical-align: middle;"></fa-icon>
-                  <fa-icon size="1.5em" i-class="fas video" path-prefix="/webcomponents/assets" style="vertical-align: middle;"></fa-icon>
-                </div>
-              </div>
-              <div class="modal-footer">
-                <button class="btn btn-link" data-bs-dismiss="modal" @click=${this.doneWithFeedbackDialog}>${this.assignmentsI18n["gen.don"]}</button>
-                <button class="btn btn-link" data-bs-dismiss="modal" @click=${this.cancelFeedbackToggle}>${this.assignmentsI18n["gen.can"]}</button>
-              </div>
-            </div>
+        <div id="feedback-block" class="collapse ms-2">
+          <h5>${this.assignmentsI18n.feedbackcomment}</h5>
+          <div class="feedback-instruction sak-banner-info">${this.i18n.feedback_instruction}</div>
+          <div id="feedback-comment-unsaved-msg" class="feedback-instruction sak-banner-error d-none">${this.i18n.unsaved_text_warning}</div>
+          <textarea id="grader-feedback-comment" .value=${this.submission.feedbackComment}></textarea>
+          <div class="media-feedback grader-label">
+            <span class="feedback-label">${this.i18n.recorded_feedback_label}</span>
+            <fa-icon size="1.5em" i-class="fas microphone" path-prefix="/webcomponents/assets" style="vertical-align: middle;"></fa-icon>
+            <fa-icon size="1.5em" i-class="fas video" path-prefix="/webcomponents/assets" style="vertical-align: middle;"></fa-icon>
           </div>
+          <button class="btn btn-link" @click=${this.doneWithFeedback}>${this.assignmentsI18n["gen.don"]}</button>
+          <button class="btn btn-link" @click=${this.cancelFeedback}>${this.assignmentsI18n["gen.can"]}</button>
         </div>
 
         <div id="grader-feedback-attachments-block" class="grader-block grader-label">
@@ -688,10 +686,11 @@ export class SakaiGrader extends gradableDataMixin(SakaiElement) {
         <div class="grader-label content-button-block grader-block">
           <button id="grader-private-notes-button"
               class="btn btn-link"
-              data-bs-toggle="modal"
-              data-bs-target="#private-notes-modal"
-              aria-controls="private-notes-modal"
-              aria-haspopup="true"
+              data-bs-toggle="collapse"
+              data-bs-target="#private-notes-block"
+              aria-controls="private-notes-block"
+              aria-expanded="false"
+              aria-label="${this.i18n.private_notes_tooltip}"
               title="${this.i18n.private_notes_tooltip}">
             ${this.assignmentsI18n["note.label"]}
           </button>
@@ -703,24 +702,13 @@ export class SakaiGrader extends gradableDataMixin(SakaiElement) {
           : ""}
         </div>
 
-        <div id="private-notes-modal" class="modal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1">
-          <div class="modal-dialog">
-            <div class="modal-content">
-              <div class="modal-header">
-                <h5 class="modal-title">${this.assignmentsI18n["note.label"]}</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-              </div>
-              <div class="modal-body">
-                <div class="sak-banner-info">${unsafeHTML(this.i18n.private_notes_tooltip)}</div>
-                <div id="private-notes-unsaved-msg" class="sak-banner-error d-none">${this.i18n.unsaved_text_warning}</div>
-                <div><textarea id="grader-private-notes" .value=${this.submission.privateNotes}></textarea></div>
-              </div>
-              <div class="modal-footer">
-                <button class="btn btn-link" data-bs-dismiss="modal" @click=${this.doneWithPrivateNotesDialog}>${this.assignmentsI18n["gen.don"]}</button>
-                <button class="btn btn-link" data-bs-dismiss="modal" @click=${this.cancelPrivateNotesToggle}>${this.assignmentsI18n["gen.can"]}</button>
-              </div>
-            </div>
-          </div>
+        <div id="private-notes-block" class="collapse ms-2">
+          <h5>${this.assignmentsI18n["note.label"]}</h5>
+          <div class="sak-banner-info">${unsafeHTML(this.i18n.private_notes_tooltip)}</div>
+          <div id="private-notes-unsaved-msg" class="sak-banner-error d-none">${this.i18n.unsaved_text_warning}</div>
+          <div><textarea id="grader-private-notes" .value=${this.submission.privateNotes}></textarea></div>
+          <button class="btn btn-link" @click=${this.doneWithPrivateNotes}>${this.assignmentsI18n["gen.don"]}</button>
+          <button class="btn btn-link" @click=${this.cancelPrivateNotes}>${this.assignmentsI18n["gen.can"]}</button>
         </div>
 
         <div class="text-feedback">
@@ -872,15 +860,16 @@ export class SakaiGrader extends gradableDataMixin(SakaiElement) {
     }
   }
 
-  doneWithFeedbackDialog() {
+  doneWithFeedback() {
 
     this.submission.feedbackComment = this.feedbackCommentEditor.getData();
     this.modified = true;
     this.savedFeedbackComment = false;
     this.feedbackCommentEditor.resetDirty();
+    bootstrap.Collapse.getInstance(document.getElementById("feedback-block"))?.hide();
   }
 
-  cancelFeedbackToggle() {
+  cancelFeedback() {
 
     if (this.feedbackCommentEditor.checkDirty()) {
       if (this.confirmedNotSaveFeedback) {
@@ -888,7 +877,6 @@ export class SakaiGrader extends gradableDataMixin(SakaiElement) {
         this.feedbackCommentEditor.resetDirty();
         this.confirmedNotSaveFeedback = false;
         document.getElementById("feedback-comment-unsaved-msg").classList.add("d-none");
-        bootstrap.Modal.getInstance(document.getElementById("feedback-modal")).hide();
       } else {
         this.confirmedNotSaveFeedback = true;
         document.getElementById("feedback-comment-unsaved-msg").classList.remove("d-none");
@@ -896,10 +884,12 @@ export class SakaiGrader extends gradableDataMixin(SakaiElement) {
       }
     }
 
+    bootstrap.Collapse.getInstance(document.getElementById("feedback-block"))?.hide();
+
     return true;
   }
 
-  cancelPrivateNotesToggle() {
+  cancelPrivateNotes() {
 
     if (this.privateNotesEditor.checkDirty()) {
       if (this.confirmedNotSavePvtNotes) {
@@ -907,7 +897,6 @@ export class SakaiGrader extends gradableDataMixin(SakaiElement) {
         this.privateNotesEditor.resetDirty();
         this.confirmedNotSavePvtNotes = false;
         document.getElementById("private-notes-unsaved-msg").classList.add("d-none");
-        bootstrap.Modal.getInstance(document.getElementById("private-notes-modal")).hide();
       } else {
         this.confirmedNotSavePvtNotes = true;
         document.getElementById("private-notes-unsaved-msg").classList.remove("d-none");
@@ -915,16 +904,18 @@ export class SakaiGrader extends gradableDataMixin(SakaiElement) {
       }
     }
 
-    this.togglePrivateNotes();
+    bootstrap.Collapse.getInstance(document.getElementById("private-notes-block"))?.hide();
+
     return true;
   }
 
-  doneWithPrivateNotesDialog() {
+  doneWithPrivateNotes() {
 
     this.submission.privateNotes = this.privateNotesEditor.getData();
     this.modified = true;
     this.savedPvtNotes = false;
     this.privateNotesEditor.resetDirty();
+    bootstrap.Collapse.getInstance(document.getElementById("private-notes-block"))?.hide();
   }
 
   feedbackCommentPresentMsg() {

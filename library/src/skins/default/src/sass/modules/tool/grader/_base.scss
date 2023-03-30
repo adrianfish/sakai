@@ -153,6 +153,7 @@ sakai-grader {
     flex: 0 0 auto;
     padding: 10px;
     background-color: var(--sakai-title-bar-bg-color);
+    width: 400px;
 
     &.on-left {
       order: 1;
