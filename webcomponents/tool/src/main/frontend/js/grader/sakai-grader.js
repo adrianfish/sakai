@@ -771,7 +771,7 @@ export class SakaiGrader extends gradableDataMixin(SakaiElement) {
       <div id="grader-submitted-block" class="grader-block">
         <div style="display: flex;" class="mb-3">
           <sakai-user-photo user-id="${this._getPhotoUserId()}" classes="grader-photo" profile-popup="on"></sakai-user-photo>
-          <div class="submitted-time" style="flex: 4;">
+          <div style="flex: 4;">
             ${this.submission.submittedTime || (this.submission.draft && this.submission.visible) ? html`
               <span class="submitter-name">${this.renderSubmitter()}</span>
               ${this.submission.draft && this.submission.visible ? html`
@@ -795,7 +795,9 @@ export class SakaiGrader extends gradableDataMixin(SakaiElement) {
           ${this.submission.submittedAttachments.length > 0 ? html`
             <div class="attachments-header">${this.assignmentsI18n["gen.stuatt"]}:</div>
             ${this.submission.submittedAttachments.map(r => html`
-              <div class="attachment-link"><a href="javascript;" data-url="${r.url}" @click=${this.previewAttachment}>${r.name}</a></div>
+              <div class="attachment-link">
+                <button type="button" class="btn btn-transparent text-decoration-underline" data-url="${r.url}" @click=${this.previewAttachment}>${r.name}</button>
+              </div>
             `)}` : ""}
         </div>
         <div class="timeSpent-block">

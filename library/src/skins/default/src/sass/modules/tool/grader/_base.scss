@@ -66,11 +66,6 @@ sakai-grader {
       margin-top: 0.75em;
     }
 
-    #grader-submitted-text-block {
-      margin-left: 5px;
-    }
-
-
     #grader-feedback-text {
       padding-bottom: 8px;
       border-bottom: 1px var(--sakai-border-color) solid;
@@ -137,9 +132,8 @@ sakai-grader {
   }
 
   #grader-submitted-block {
-
-    padding: 10px;
-    background-color: var(--sakai-title-bar-bg-color);
+    margin-top: 10px;
+    margin-left: 5px;
 
     #grader-submitted-label {
       margin-top: 5px;
@@ -155,7 +149,6 @@ sakai-grader {
       float: left;
       background-position: 50%;
       background-size: auto 100%;
-      //border-radius: 0;
       margin-right: 10px;
     }
   }
@@ -363,7 +356,7 @@ sakai-grader {
   }
 
   .submitted-time {
-    font-size: 14px;
+    font-size: 12px;
     font-weight: 550;
   }
 
@@ -373,7 +366,9 @@ sakai-grader {
 
   .attachments-header {
     margin-top: 7px;
-    font-weight: bold;
+    font-size: 14px;
+    font-weight: 550;
+    margin-bottom: 5px;
   }
 
   .attachment-link {
