@@ -539,7 +539,6 @@ export class SakaiGrader extends gradableDataMixin(SakaiElement) {
               </sakai-rubric-grading-button>
 
               <div id="grader-rubric-block" class="collapse ms-2">
-                <h5 class="modal-title">${this.i18n.rubric}</h5>
                 <sakai-rubric-grading
                   site-id="${portal.siteId}"
                   tool-id="${this.toolId}"
