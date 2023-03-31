@@ -63,7 +63,7 @@ export class SakaiRubricSummary extends rubricsApiMixin(RubricsElement) {
           </div>
         ` : html`
           ${this.criteria.map((c) => html`
-            <div>
+            <div class="mb-2">
               <div class="card">
                 <div class="card text-center bg-light">
                   <h4>
