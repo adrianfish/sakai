@@ -265,11 +265,11 @@ export class SakaiGrader extends gradableDataMixin(SakaiElement) {
         <h3 class="d-inline-block">${this.i18n.no_submission}</h3>
         `}
         <div id="grader-link-block" class="d-inline-block float-end">
-          <button class="btn btn-link"
+          <button class="btn btn-primary active"
               data-bs-toggle="offcanvas"
               data-bs-target="#grader"
               aria-controls="grader">
-          ${this.i18n.grade}
+          ${this.i18n.grade_submission}
           </button>
         </div>
         ${this.submission.submittedTime || (this.submission.draft && this.submission.visible) ? html`
@@ -772,30 +772,26 @@ export class SakaiGrader extends gradableDataMixin(SakaiElement) {
         <div style="display: flex;" class="mb-3">
           <sakai-user-photo user-id="${this._getPhotoUserId()}" classes="grader-photo" profile-popup="on"></sakai-user-photo>
           <div style="flex: 4;">
-            ${this.submission.submittedTime || (this.submission.draft && this.submission.visible) ? html`
-              <span class="submitter-name">${this.renderSubmitter()}</span>
-              ${this.submission.draft && this.submission.visible ? html`
-              <span class="draft-submission">(${this.i18n.draft_submission})</span>
-              ` : html`
-              <div id="grader-submitted-label">${this.i18n.submitted}</div>
-              `}
+            <span class="submitter-name">${this.renderSubmitter()}</span>
+            ${this.submission.draft && this.submission.visible ? html`
+            <span class="draft-submission">(${this.i18n.draft_submission})</span>
             ` : html`
-              <span>${this.i18n.no_submission_for} ${this.renderSubmitter()}</span>
-              ${this.submission.returned ? this.renderGraderReturned() : ""}
+              ${this.submission.submittedTime ? html`
+              <div id="grader-submitted-label">${this.i18n.submitted}</div>
+              ` : ""}
             `}
           </div>
         </div>
         <div class="d-flex align-items-center">
           <div class="submitted-time ${this.submission.draft ? "draft-time" : ""}">${this.submission.submittedTime}</div>
-          ${this.submission.late ? html`<div class="grader-late ms-1">${this.assignmentsI18n["grades.lateness.late"]}</div>` : ""}
+          ${this.submission.late ? html`<div class="grader-late ms-2">${this.assignmentsI18n["grades.lateness.late"]}</div>` : ""}
           ${this.submission.returned ? this.renderGraderReturned() : ""}
         </div>
         ${this.submission.groupId && this.submission.submittedTime ? html`<div class="grader-group-members">${this.submission.groupMembers}</div>` : ""}
         <div class="attachments">
           ${this.submission.submittedAttachments.length > 0 ? html`
-            <div class="attachments-header">${this.assignmentsI18n["gen.stuatt"]}:</div>
             ${this.submission.submittedAttachments.map(r => html`
-              <div class="attachment-link">
+              <div>
                 <button type="button" class="btn btn-transparent text-decoration-underline" data-url="${r.url}" @click=${this.previewAttachment}>${r.name}</button>
               </div>
             `)}` : ""}
@@ -1119,7 +1115,11 @@ export class SakaiGrader extends gradableDataMixin(SakaiElement) {
       this.submission = submission;
       this.totalGraded = this.submissions.filter(s => s.graded).length;
       this.saveSucceeded = true;
-      setTimeout(() => this.saveSucceeded = false, 2000);
+      setTimeout(() => {
+
+        this.saveSucceeded = false;
+        bootstrap.Offcanvas.getInstance(document.getElementById("grader")).hide();
+      }, 500);
     }).catch(e => {
 
       console.error(`Failed to save grade for submission ${this.submission.id}: ${e}`);
