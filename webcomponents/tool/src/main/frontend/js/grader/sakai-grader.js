@@ -195,7 +195,6 @@ export class SakaiGrader extends gradableDataMixin(SakaiElement) {
 
         <div id="grader-title-block">
           <div class="fw-bold">
-            <div class="course-title fs-6 fw-lighter">${unsafeHTML(portal.siteTitle)}</div>
             <div class="assessment-title fs-5">${this.gradableTitle}</div>
           </div>
         </div>
