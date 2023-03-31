@@ -590,7 +590,6 @@ export class SakaiGrader extends gradableDataMixin(SakaiElement) {
           </div>
 
           <div id="feedback-block" class="collapse ms-2">
-            <h5>${this.assignmentsI18n.feedbackcomment}</h5>
             <div class="feedback-instruction sak-banner-info">${this.i18n.feedback_instruction}</div>
             <div id="feedback-comment-unsaved-msg" class="feedback-instruction sak-banner-error d-none">${this.i18n.unsaved_text_warning}</div>
             <textarea id="grader-feedback-comment" .value=${this.submission.feedbackComment}></textarea>
@@ -676,7 +675,6 @@ export class SakaiGrader extends gradableDataMixin(SakaiElement) {
           </div>
 
           <div id="private-notes-block" class="collapse ms-2">
-            <h5>${this.assignmentsI18n["note.label"]}</h5>
             <div class="sak-banner-info">${unsafeHTML(this.i18n.private_notes_tooltip)}</div>
             <div id="private-notes-unsaved-msg" class="sak-banner-error d-none">${this.i18n.unsaved_text_warning}</div>
             <div><textarea id="grader-private-notes" .value=${this.submission.privateNotes}></textarea></div>
@@ -1175,6 +1173,8 @@ export class SakaiGrader extends gradableDataMixin(SakaiElement) {
       }
       default:
     }
+
+    bootstrap.Offcanvas.getInstance(document.getElementById("grader")).hide();
   }
 
   clearSubmission() {
