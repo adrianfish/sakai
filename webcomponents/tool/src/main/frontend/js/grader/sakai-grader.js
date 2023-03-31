@@ -758,7 +758,7 @@ export class SakaiGrader extends gradableDataMixin(SakaiElement) {
   }
 
   renderGraderReturned() {
-    return html`<span class="grader-returned fa fa-eye" title="${this.i18n.returned_tooltip}" />`;
+    return html`<div class="ms-2"><span class="grader-returned fa fa-eye" title="${this.i18n.returned_tooltip}" /></div>`;
   }
 
   render() {
@@ -769,22 +769,26 @@ export class SakaiGrader extends gradableDataMixin(SakaiElement) {
       ` : ""}
       ${this.renderTopbar()}
       <div id="grader-submitted-block" class="grader-block">
-        <div style="display: flex;">
+        <div style="display: flex;" class="mb-3">
           <sakai-user-photo user-id="${this._getPhotoUserId()}" classes="grader-photo" profile-popup="on"></sakai-user-photo>
           <div class="submitted-time" style="flex: 4;">
             ${this.submission.submittedTime || (this.submission.draft && this.submission.visible) ? html`
               <span class="submitter-name">${this.renderSubmitter()}</span>
               ${this.submission.draft && this.submission.visible ? html`
               <span class="draft-submission">(${this.i18n.draft_submission})</span>
-              ` : ""}
-              <div class="submitted-time ${this.submission.draft ? "draft-time" : ""}">${this.submission.submittedTime}</div>
-              ${this.submission.late ? html`<span class="grader-late">${this.assignmentsI18n["grades.lateness.late"]}</span>` : ""}
-              ${this.submission.returned ? this.renderGraderReturned() : ""}
+              ` : html`
+              <div id="grader-submitted-label">${this.i18n.submitted}</div>
+              `}
             ` : html`
               <span>${this.i18n.no_submission_for} ${this.renderSubmitter()}</span>
               ${this.submission.returned ? this.renderGraderReturned() : ""}
             `}
           </div>
+        </div>
+        <div class="d-flex align-items-center">
+          <div class="submitted-time ${this.submission.draft ? "draft-time" : ""}">${this.submission.submittedTime}</div>
+          ${this.submission.late ? html`<div class="grader-late ms-1">${this.assignmentsI18n["grades.lateness.late"]}</div>` : ""}
+          ${this.submission.returned ? this.renderGraderReturned() : ""}
         </div>
         ${this.submission.groupId && this.submission.submittedTime ? html`<div class="grader-group-members">${this.submission.groupMembers}</div>` : ""}
         <div class="attachments">
@@ -1338,7 +1342,8 @@ export class SakaiGrader extends gradableDataMixin(SakaiElement) {
           this.submission.feedbackAttachments.splice(this.submission.feedbackAttachments.findIndex(fa => fa.ref === ref), 1);
           this.requestUpdate();
         }
-      }).catch(error => console.error(`Failed to remove attachment on server: ${error}`));
+      })
+      .catch (error => console.error(`Failed to remove attachment on server: ${error}`));
     }
   }
 

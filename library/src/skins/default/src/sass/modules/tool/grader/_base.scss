@@ -70,6 +70,7 @@ sakai-grader {
       margin-left: 5px;
     }
 
+
     #grader-feedback-text {
       padding-bottom: 8px;
       border-bottom: 1px var(--sakai-border-color) solid;
@@ -139,6 +140,11 @@ sakai-grader {
 
     padding: 10px;
     background-color: var(--sakai-title-bar-bg-color);
+
+    #grader-submitted-label {
+      margin-top: 5px;
+      color: var(--successBanner-color);
+    }
 
     .grader-photo {
       flex: 1;
@@ -357,9 +363,8 @@ sakai-grader {
   }
 
   .submitted-time {
-    font-style: italic;
-    display: flex;
-    flex-direction: column;
+    font-size: 14px;
+    font-weight: 550;
   }
 
   .draft-time {
@@ -439,7 +444,7 @@ sakai-grader {
   }
 
   .grader-returned {
-    font-size: 24px;
+    font-size: 18px;
     font-weight: bold;
     color: var(--successBanner-color);
     margin-top: auto;
