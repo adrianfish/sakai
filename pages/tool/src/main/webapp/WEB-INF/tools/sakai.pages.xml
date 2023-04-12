@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
 <registration>
-	<tool id="sakai.conversations"
-		title="Conversations"
-		description="Create question and answer forums and threaded discussions">
+	<tool id="sakai.pages"
+		title="Pages"
+		description="Sakai Pages">
 
         <category name="course" />
         <category name="project" />
