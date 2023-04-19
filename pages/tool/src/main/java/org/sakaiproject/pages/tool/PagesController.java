@@ -24,6 +24,7 @@ import org.sakaiproject.tool.api.SessionManager;
 import org.sakaiproject.tool.api.ToolManager;
 import org.sakaiproject.pages.tool.exception.MissingSessionException;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -31,18 +32,16 @@ import org.springframework.web.bind.annotation.PathVariable;
 
 import javax.servlet.http.HttpServletRequest;
 
-import javax.annotation.Resource;
-
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Controller
 public class PagesController {
 
-	@Resource
+	@Autowired
 	private SessionManager sessionManager;
 
-	@Resource
+	@Autowired
 	private ToolManager toolManager;
 
 	@GetMapping(value = {"/", "/index"})
@@ -52,6 +51,7 @@ public class PagesController {
 
         loadModel(model, request);
         model.addAttribute("state", "STATE_NOTHING_SELECTED");
+        model.addAttribute("toolName", toolManager.getCurrentPlacement().getTitle());
         return "index";
 	}
 
