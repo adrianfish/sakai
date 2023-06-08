@@ -74,6 +74,7 @@
                                 <include>**</include>
                             </includes>
                             <excludes>
+                                <exclude>bundle-entry-points/**</exclude>
                                 <exclude>js/**</exclude>
                                 <exclude>stories/**</exclude>
                                 <exclude>storybook-resources/**</exclude>
@@ -112,6 +113,7 @@
                             <directory>src/main/frontend</directory>
                             <excludes>
                                 <exclude>js/**</exclude>
+                                <exclude>bundle-entry-points/**</exclude>
                                 <exclude>node_modules/**</exclude>
                                 <exclude>stories/**</exclude>
                                 <exclude>.storybook/**</exclude>
@@ -155,6 +157,15 @@
                         </goals>
                         <configuration>
                             <arguments>run eslint</arguments>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>bundle</id>
+                        <goals>
+                            <goal>npm</goal>
+                        </goals>
+                        <configuration>
+                            <arguments>run bundle</arguments>
                         </configuration>
                     </execution>
                     <execution>

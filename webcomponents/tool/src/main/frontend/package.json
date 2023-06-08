@@ -8,6 +8,7 @@
     "storybook": "npm install --force && empathise install --assets-directory=js/assets && start-storybook -p 6006 -s ./storybook-resources",
     "build-storybook": "build-storybook",
     "eslint": "eslint js",
+    "bundle": "esbuild bundle-entry-points/* --bundle --outdir=bundles",
     "analyze": "lit-analyzer --strict --quiet js/conversations/*.js"
   },
   "keywords": [],
@@ -31,12 +32,14 @@
   },
   "devDependencies": {
     "@adrianfish/empathise": "^0.1.10",
+    "@sakai-ui/sakai-notifications": "file:../../../../../../sakai-ui/packages/sakai-notifications",
     "@storybook/addon-actions": "^6.3.7",
     "@storybook/addon-cssresources": "6.2.9",
     "@storybook/addon-essentials": "^6.3.7",
     "@storybook/addon-links": "^6.3.7",
     "@storybook/web-components": "^6.3.7",
     "babel-loader": "^8.1.0",
+    "esbuild": "^0.17.19",
     "eslint": "^7.31.0",
     "eslint-plugin-html": "^6.2.0",
     "eslint-plugin-lit": "^1.6.1",
