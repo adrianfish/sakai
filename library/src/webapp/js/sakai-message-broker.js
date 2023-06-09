@@ -12,7 +12,7 @@ portal.notifications.setAppBadge = number => {
   } else {
     console.debug('setAppBadge not available');
   }
-}
+};
 
 portal.notifications.clearAppBadge = () => {
 
@@ -21,69 +21,7 @@ portal.notifications.clearAppBadge = () => {
   } else {
     console.debug("clearAppBadge not available");
   }
-}
-
-portal.notifications.setupPush = () => {
-
-  return new Promise((resolve, reject) => {
-
-    navigator.serviceWorker.register("/sakai-service-worker.js").then(registration => {
-
-      if (!registration.pushManager) {
-        // This must be Safari, or maybe IE3 or something equally crap
-        console.warn("No pushManager on this registration");
-        resolve();
-      }
-
-      if (portal.notifications.debug) console.debug("Requesting notifications permission ...");
-
-      Notification.requestPermission().then(permission => {
-
-        if (permission === "granted") {
-
-          if (portal.notifications.debug) console.debug("Permission granted. Subscribing ...");
-
-          // We have permission, Grab the public app server key.
-          fetch("/api/keys/sakaipush").then(r => r.text()).then(key => {
-
-            if (portal.notifications.debug) console.debug("Got the key. Subscribing for push ...");
-
-            // Subscribe with the public key
-            registration.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: key }).then(sub => {
-
-              if (portal.notifications.debug) console.debug("Subscribed. Sending details to Sakai ...");
-
-              const url = "/api/users/me/prefs/pushEndpoint";
-              fetch(url, {
-                credentials: "include",
-                method: "POST",
-                body: new URLSearchParams({ endpoint: sub.endpoint, auth: sub.toJSON().keys.auth, userKey: sub.toJSON().keys.p256dh }),
-              })
-              .then(r => {
-
-                if (!r.ok) {
-                  throw new Error(`Network error while posting push endpoint: ${url}`);
-                }
-
-                if (portal.notifications.debug) console.debug("Subscription details sent successfully");
-
-                resolve();
-              })
-              .catch (error => {
-
-                console.error(error);
-                reject();
-              });
-            });
-          });
-        } else {
-          resolve();
-        }
-      }, () => reject());
-    }, () => reject());
-  });
 };
-
 
 if (portal?.user?.id) {
 
