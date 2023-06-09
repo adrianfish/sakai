@@ -36,7 +36,7 @@ if (portal?.user?.id) {
 
     portal.notifications.debug && console.debug("No permission set or user changed");
 
-    navigator.serviceWorker.register("/api/sakai-service-worker.js").then(registration => {
+    navigator.serviceWorker.register("/sakai-service-worker.js").then(registration => {
 
       if (portal.notifications.debug) console.debug("DOM loaded. Setting up permission triggers ...");
 
