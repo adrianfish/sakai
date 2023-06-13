@@ -154,7 +154,7 @@ if (portal?.user?.id) {
 
     portal.notifications.debug && console.debug("Registering worker ...");
 
-    navigator.serviceWorker.register("/api/sakai-service-worker.js")
+    navigator.serviceWorker.register("/sakai-service-worker.js")
       .then(registration => {
 
         const worker = registration.active;
