@@ -33,7 +33,9 @@
   "devDependencies": {
     "@adrianfish/empathise": "^0.1.10",
     "@sakai-ui/sakai-notifications": "file:../../../../../../sakai-ui/packages/sakai-notifications",
+    "@sakai-ui/sakai-profile": "file:../../../../../../sakai-ui/packages/sakai-profile",
     "@sakai-ui/sakai-pwa": "file:../../../../../../sakai-ui/packages/sakai-pwa",
+    "@sakai-ui/sakai-user-photo": "file:../../../../../../sakai-ui/packages/sakai-user-photo",
     "@storybook/addon-actions": "^6.3.7",
     "@storybook/addon-cssresources": "6.2.9",
     "@storybook/addon-essentials": "^6.3.7",

@@ -102,6 +102,7 @@ $input-border: var(--sakai-border-color);
 @import "base/responsive";
 @import "base/icons";
 
+@import "modules/pwa/pwa";
 @import "modules/tool/portal/portal";
 @import "modules/notifications/notifications";
 @import "modules/profile-popup/profile-popup";

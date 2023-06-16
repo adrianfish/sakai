@@ -23,6 +23,9 @@ portal.notifications.clearAppBadge = () => {
   }
 };
 
+console.log(portal.user.id);
+console.log(portal.notifications);
+
 if (portal?.user?.id) {
 
   const lastSubscribedUser = localStorage.getItem("last-sakai-user");
@@ -36,19 +39,17 @@ if (portal?.user?.id) {
 
     portal.notifications.debug && console.debug("No permission set or user changed");
 
+    console.log("about to register");
+
     navigator.serviceWorker.register("/sakai-service-worker.js").then(registration => {
 
-      if (portal.notifications.debug) console.debug("DOM loaded. Setting up permission triggers ...");
-
       if (differentUser) {
-        registration.pushManager.getSubscription().then(subscription => {
-
-          subscription.unsubscribe().then(successful => {
-
-            portal.notifications.subscribeIfPermitted(registration);
-          });
-        });
+        registration.pushManager.getSubscription().then(subscription => subscription.unsubscribe());
       }
+
+      portal.notifications.callSubscribeIfPermitted = () => {
+        return portal.notifications.subscribeIfPermitted(registration);
+      };
 
       window.addEventListener("DOMContentLoaded", () => {
 
@@ -71,47 +72,51 @@ if (portal?.user?.id) {
 
     portal.notifications.debug && console.debug("Requesting notifications permission ...");
 
-    Notification.requestPermission().then(permission => {
+    return new Promise(resolve => {
 
-      if (permission === "granted") {
+      Notification.requestPermission().then(permission => {
 
-        portal.notifications.debug && console.debug("Permission granted. Subscribing ...");
+        if (permission === "granted") {
 
-        // We have permission, Grab the public app server key.
-        fetch("/api/keys/sakaipush").then(r => r.text()).then(key => {
+          portal.notifications.debug && console.debug("Permission granted. Subscribing ...");
 
-          portal.notifications.debug && console.debug("Got the key. Subscribing for push ...");
+          // We have permission, Grab the public app server key.
+          fetch("/api/keys/sakaipush").then(r => r.text()).then(key => {
 
-          // Subscribe with the public key
-          registration.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: key }).then(sub => {
+            portal.notifications.debug && console.debug("Got the key. Subscribing for push ...");
 
-            portal.notifications.debug && console.debug("Subscribed. Sending details to Sakai ...");
+            // Subscribe with the public key
+            registration.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: key }).then(sub => {
 
-            const params = {
-              endpoint: sub.endpoint,
-              auth: sub.toJSON().keys.auth,
-              userKey: sub.toJSON().keys.p256dh,
-              browserFingerprint: getBrowserFingerprint(),
-            };
+              portal.notifications.debug && console.debug("Subscribed. Sending details to Sakai ...");
 
-            const url = "/api/users/me/prefs/pushEndpoint";
-            fetch(url, {
-              credentials: "include",
-              method: "POST",
-              body: new URLSearchParams(params),
-            })
-            .then(r => {
+              const params = {
+                endpoint: sub.endpoint,
+                auth: sub.toJSON().keys.auth,
+                userKey: sub.toJSON().keys.p256dh,
+                browserFingerprint: getBrowserFingerprint(),
+              };
 
-              if (!r.ok) {
-                throw new Error(`Network error while posting push endpoint: ${url}`);
-              }
+              const url = "/api/users/me/prefs/pushEndpoint";
+              fetch(url, {
+                credentials: "include",
+                method: "POST",
+                body: new URLSearchParams(params),
+              })
+              .then(r => {
 
-              portal.notifications.debug && console.debug("Subscription details sent successfully");
-            })
-            .catch (error => console.error(error));
+                if (!r.ok) {
+                  throw new Error(`Network error while posting push endpoint: ${url}`);
+                }
+
+                portal.notifications.debug && console.debug("Subscription details sent successfully");
+              })
+              .catch (error => console.error(error))
+              .finally(() => resolve());
+            });
           });
-        });
-      }
+        }
+      });
     });
   };
 
