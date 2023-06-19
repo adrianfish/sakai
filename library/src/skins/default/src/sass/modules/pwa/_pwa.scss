@@ -1,3 +1,40 @@
-sakai-notifications li.toast {
-  --bs-toast-max-width: 95%;
+sakai-pwa {
+
+  #pwa-header {
+
+    background-color: rgba(var(--bs-primary-rgb), 1.0) !important;
+    height: 5em;
+
+    #pwa-menu-button {
+
+      > span {
+        color: white;
+        font-size: 2.5rem;
+      }
+    }
+
+    #pwa-header-logo img {
+      width: 10.7rem;
+      height: auto;
+    }
+
+    #profile-image {
+      width: 2.5rem;
+      height: auto;
+    }
+  }
+
+  #pwa-menu {
+    .offcanvas-header {
+      height: 5rem;
+    }
+    #pwa-menu-label {
+      font-size: 2.5em;
+    }
+  }
+
+  sakai-notifications li.toast {
+    --bs-toast-max-width: 95%;
+  }
 }
+
