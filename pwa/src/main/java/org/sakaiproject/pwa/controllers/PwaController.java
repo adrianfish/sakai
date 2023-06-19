@@ -91,25 +91,16 @@ public class PwaController {
 
         String userId = sessionManager.getCurrentSessionUserId();
 
-        if (StringUtils.isBlank(userId)) {
-            Session session = sessionManager.getCurrentSession();
-            session.setAttribute(Tool.HELPER_DONE_URL, Web.returnUrl(req, ""));
-            return new ModelAndView("redirect:" + serverConfigurationService.getServerUrl() + "/portal/xlogin", "balls", model);
-        }
-
-        String locale = preferencesService.getLocale(userId).toString();
-
         boolean notificationsPushEnabled
             = serverConfigurationService.getBoolean("portal.notifications.push.enabled", false);
 
-        boolean debugNotifications
-            = serverConfigurationService.getBoolean("portal.notifications.debug", false);
-
         model.addAttribute("pushEnabled", notificationsPushEnabled);
-        model.addAttribute("debugNotifications", debugNotifications);
         model.addAttribute("userId", userId);
-        model.addAttribute("locale", preferencesService.getLocale(userId).toString());
         model.addAttribute("cdnQuery", PortalUtils.getCDNQuery());
+
+        if (StringUtils.isNotBlank(userId)) {
+            model.addAttribute("locale", preferencesService.getLocale(userId).toString());
+        }
 
         return new ModelAndView("index", "balls", model);
     }
