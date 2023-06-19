@@ -17,6 +17,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import org.sakaiproject.authz.api.SecurityService;
 import org.sakaiproject.component.api.ServerConfigurationService;
+import org.sakaiproject.portal.api.PortalService;
 import org.sakaiproject.portal.util.PortalUtils;
 import org.sakaiproject.site.api.Site;
 import org.sakaiproject.site.api.SiteService;
@@ -28,6 +29,8 @@ import org.sakaiproject.user.api.UserDirectoryService;
 import org.sakaiproject.user.api.UserNotDefinedException;
 import org.sakaiproject.util.ResourceLoader;
 import org.sakaiproject.util.Web;
+
+import org.sakaiproject.event.cover.UsageSessionService;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -109,5 +112,13 @@ public class PwaController {
         model.addAttribute("cdnQuery", PortalUtils.getCDNQuery());
 
         return new ModelAndView("index", "balls", model);
+    }
+
+    @GetMapping(value = "/logout")
+    public ModelAndView logout(Model model, HttpServletRequest req) {
+
+        UsageSessionService.logout();
+
+        return index(model, req);
     }
 }

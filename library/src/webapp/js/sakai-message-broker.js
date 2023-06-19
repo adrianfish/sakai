@@ -23,15 +23,10 @@ portal.notifications.clearAppBadge = () => {
   }
 };
 
-console.log(portal.user.id);
-console.log(portal.notifications);
-
 if (portal?.user?.id) {
 
   const lastSubscribedUser = localStorage.getItem("last-sakai-user");
   const differentUser = lastSubscribedUser && lastSubscribedUser !== portal.user.id;
-
-  localStorage.setItem("last-sakai-user", portal.user.id);
 
   if (portal.notifications.pushEnabled && (Notification.permission === "default" || differentUser)) {
 
@@ -39,12 +34,13 @@ if (portal?.user?.id) {
 
     portal.notifications.debug && console.debug("No permission set or user changed");
 
-    console.log("about to register");
+    console.debug("about to register");
 
     navigator.serviceWorker.register("/sakai-service-worker.js").then(registration => {
 
       if (differentUser) {
-        registration.pushManager.getSubscription().then(subscription => subscription.unsubscribe());
+        console.debug("Different user. Removing the current subscription ...");
+        registration.pushManager.getSubscription().then(subscription => subscription && subscription.unsubscribe());
       }
 
       portal.notifications.callSubscribeIfPermitted = () => {
@@ -110,6 +106,7 @@ if (portal?.user?.id) {
                 }
 
                 portal.notifications.debug && console.debug("Subscription details sent successfully");
+                localStorage.setItem("last-sakai-user", portal.user.id);
               })
               .catch (error => console.error(error))
               .finally(() => resolve());
