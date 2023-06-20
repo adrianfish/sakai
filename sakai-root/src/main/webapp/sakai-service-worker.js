@@ -7,6 +7,13 @@ self.messageClients = async message => {
   clients && clients.forEach(c => c.postMessage(message));
 };
 
+self.addEventListener("message", event => {
+
+  if (event.data === "CLEAR CACHE") {
+    caches.delete("sakai-assets");
+  }
+});
+
 // We just pass push events straight onto the clients.
 self.addEventListener("push", event => self.messageClients(event.data.json()));
 
@@ -34,28 +41,49 @@ self.addEventListener("pushsubscriptionchange", event => {
   });
 }, false);
 
+self.addEventListener("install", async event => {
+
+  event.waitUntil(
+    caches
+      .open("sakai-assets")
+      .then(cache =>
+        cache.addAll([
+          "/pwa/",
+          "/library/skin/default-skin/pwa.css",
+          "/library/js/sakai-message-broker.js",
+          "/library/webjars/bootstrap/5.2.0/js/bootstrap.bundle.min.js",
+          "/webcomponents/assets/get-browser-fingerprint/src/index.js",
+          "/webcomponents/bundles/pwa.js",
+        ])
+      )
+  );
+});
+
 self.addEventListener("fetch", async event => {
 
-  console.log(event.request);
-  if (event.request.method === 'GET') {
-  }
+    console.debug(`Trying to get ${event.request.url} from the cache ...`);
 
-  // if we are offline, go to the cache directly
-  /*
-  if (event.request.method === 'GET') {
+    // Prevent the default, and handle the request ourselves.
+    event.respondWith(
+      (async () => {
+        // Try to get the response from a cache.
+        const cache = await caches.open("sakai-assets");
+        const cachedResponse = await cache.match(event.request);
 
-    event.respondWith(caches.open("sakai-assets").then(cache => {
+        if (cachedResponse) {
+          event.waitUntil(cache.add(event.request));
+          return cachedResponse;
+        }
 
-      cache.match(event.request).then(cachedResp => {
+        return fetch(event.request).then(fetchedResp => {
 
-        return cachedResp || fetch(event.request.url).then(fetchedResp => {
-
+          if (event.request.method === "GET" && event.request.url.match(/notifications\.json/)) {
             cache.put(event.request, fetchedResp.clone());
-            return fetchedResp;
-          });
-      });
-    }));
-  }
-  */
+          }
+          return fetchedResp;
+        });
+      })()
+    );
+  //}
 });
 
