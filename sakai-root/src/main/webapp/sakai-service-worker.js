@@ -9,13 +9,18 @@ self.messageClients = async message => {
 
 self.addEventListener("message", event => {
 
-  if (event.data === "CLEAR CACHE") {
+  if (event.data === "LOGOUT") {
     caches.delete("sakai-assets");
+    navigator.clearAppBadge();
   }
 });
 
 // We just pass push events straight onto the clients.
-self.addEventListener("push", event => self.messageClients(event.data.json()));
+self.addEventListener("push", event => {
+
+  navigator.setAppBadge();
+  self.messageClients(event.data.json());
+});
 
 self.addEventListener("pushsubscriptionchange", event => {
 
@@ -43,6 +48,8 @@ self.addEventListener("pushsubscriptionchange", event => {
 
 self.addEventListener("install", async event => {
 
+  console.debug("INSTALL");
+
   event.waitUntil(
     caches
       .open("sakai-assets")
@@ -61,29 +68,28 @@ self.addEventListener("install", async event => {
 
 self.addEventListener("fetch", async event => {
 
-    console.debug(`Trying to get ${event.request.url} from the cache ...`);
+  console.debug(`Trying to get ${event.request.url} from the cache ...`);
 
-    // Prevent the default, and handle the request ourselves.
-    event.respondWith(
-      (async () => {
-        // Try to get the response from a cache.
-        const cache = await caches.open("sakai-assets");
-        const cachedResponse = await cache.match(event.request);
+  // Prevent the default, and handle the request ourselves.
+  event.respondWith(
+    (async () => {
+      // Try to get the response from a cache.
+      const cache = await caches.open("sakai-assets");
+      const cachedResponse = await cache.match(event.request);
 
-        if (cachedResponse) {
-          event.waitUntil(cache.add(event.request));
-          return cachedResponse;
+      if (cachedResponse) {
+        event.waitUntil(cache.add(event.request));
+        return cachedResponse;
+      }
+
+      return fetch(event.request).then(fetchedResp => {
+
+        if (event.request.method === "GET" && event.request.url.match(/notifications\.json/)) {
+          cache.put(event.request, fetchedResp.clone());
         }
-
-        return fetch(event.request).then(fetchedResp => {
-
-          if (event.request.method === "GET" && event.request.url.match(/notifications\.json/)) {
-            cache.put(event.request, fetchedResp.clone());
-          }
-          return fetchedResp;
-        });
-      })()
-    );
-  //}
+        return fetchedResp;
+      });
+    })()
+  );
 });
 
