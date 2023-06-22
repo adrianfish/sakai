@@ -56,6 +56,8 @@ self.addEventListener("install", async event => {
       .then(cache =>
         cache.addAll([
           "/pwa/",
+          "/library/skin/default-skin/images/sakaiLogo.png",
+          "/library/skin/default-skin/fonts/bootstrap-icons.woff2",
           "/library/skin/default-skin/pwa.css",
           "/library/js/sakai-message-broker.js",
           "/library/webjars/bootstrap/5.2.0/js/bootstrap.bundle.min.js",
@@ -84,7 +86,8 @@ self.addEventListener("fetch", async event => {
 
       return fetch(event.request).then(fetchedResp => {
 
-        if (event.request.method === "GET" && event.request.url.match(/notifications\.json/)) {
+        if (event.request.method === "GET" && (event.request.url.match(/notifications\.json/)
+                                                || event.request.url.match(/profile.*thumb$/))) {
           cache.put(event.request, fetchedResp.clone());
         }
         return fetchedResp;

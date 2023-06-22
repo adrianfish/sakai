@@ -1,6 +1,11 @@
 portal = portal || {};
 portal.notifications = portal.notifications || {};
 
+console.log("HERE1");
+if ("serviceWorker" in navigator) {
+  console.log("ServiceWorker is supported");
+}
+
 portal.notifications.pushCallbacks = new Map();
 
 portal.notifications.setAppBadge = number => {
@@ -26,6 +31,21 @@ if (portal?.user?.id) {
   const lastSubscribedUser = localStorage.getItem("last-sakai-user");
   const differentUser = lastSubscribedUser && lastSubscribedUser !== portal.user.id;
 
+  navigator.serviceWorker.register("/sakai-service-worker.js").then(registration => {
+
+    console.log("HERE2");
+
+    if (differentUser) {
+      console.debug("Different user. Removing the current subscription ...");
+
+      if (registration.pushManager) {
+        registration.pushManager.getSubscription().then(subscription => subscription && subscription.unsubscribe());
+      }
+    }
+  });
+
+  console.log(window.Notification);
+
   if (portal.notifications.pushEnabled && (Notification.permission === "default" || differentUser)) {
 
     // Permission has neither been granted or denied yet.
@@ -35,11 +55,6 @@ if (portal?.user?.id) {
     console.debug("about to register");
 
     navigator.serviceWorker.register("/sakai-service-worker.js").then(registration => {
-
-      if (differentUser) {
-        console.debug("Different user. Removing the current subscription ...");
-        registration.pushManager.getSubscription().then(subscription => subscription && subscription.unsubscribe());
-      }
 
       portal.notifications.callSubscribeIfPermitted = () => {
         return portal.notifications.subscribeIfPermitted(registration);
