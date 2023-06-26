@@ -44,7 +44,7 @@ if (portal?.user?.id) {
     }
   });
 
-  console.log(window.Notification);
+  console.log(Notification.permission);
 
   if (portal.notifications.pushEnabled && (Notification.permission === "default" || differentUser)) {
 
@@ -77,56 +77,74 @@ if (portal?.user?.id) {
     });
   }
 
+  portal.notifications.checkNotificationPromise = () => {
+
+    try {
+      Notification.requestPermission().then();
+    } catch (e) {
+      return false;
+    }
+
+    return true;
+  };
+
   portal.notifications.subscribeIfPermitted = registration => {
 
     console.debug("Requesting notifications permission ...");
 
     return new Promise(resolve => {
 
-      Notification.requestPermission().then(permission => {
+      if (portal.notifications.checkNotificationPromise()) {
+        Notification.requestPermission().then(permission => {
 
-        if (permission === "granted") {
+          if (permission === "granted") {
 
-          console.debug("Permission granted. Subscribing ...");
+            console.debug("Permission granted. Subscribing ...");
 
-          // We have permission, Grab the public app server key.
-          fetch("/api/keys/sakaipush").then(r => r.text()).then(key => {
+            // We have permission, Grab the public app server key.
+            fetch("/api/keys/sakaipush").then(r => r.text()).then(key => {
 
-            console.debug("Got the key. Subscribing for push ...");
+              console.debug("Got the key. Subscribing for push ...");
 
-            // Subscribe with the public key
-            registration.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: key }).then(sub => {
+              // Subscribe with the public key
+              registration.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: key }).then(sub => {
 
-              console.debug("Subscribed. Sending details to Sakai ...");
+                console.debug("Subscribed. Sending details to Sakai ...");
 
-              const params = {
-                endpoint: sub.endpoint,
-                auth: sub.toJSON().keys.auth,
-                userKey: sub.toJSON().keys.p256dh,
-                browserFingerprint: getBrowserFingerprint(),
-              };
+                const params = {
+                  endpoint: sub.endpoint,
+                  auth: sub.toJSON().keys.auth,
+                  userKey: sub.toJSON().keys.p256dh,
+                  browserFingerprint: getBrowserFingerprint(),
+                };
 
-              const url = "/api/users/me/prefs/pushEndpoint";
-              fetch(url, {
-                credentials: "include",
-                method: "POST",
-                body: new URLSearchParams(params),
-              })
-              .then(r => {
+                const url = "/api/users/me/prefs/pushEndpoint";
+                fetch(url, {
+                  credentials: "include",
+                  method: "POST",
+                  body: new URLSearchParams(params),
+                })
+                .then(r => {
 
-                if (!r.ok) {
-                  throw new Error(`Network error while posting push endpoint: ${url}`);
-                }
+                  if (!r.ok) {
+                    throw new Error(`Network error while posting push endpoint: ${url}`);
+                  }
 
-                console.debug("Subscription details sent successfully");
-                localStorage.setItem("last-sakai-user", portal.user.id);
-              })
-              .catch (error => console.error(error))
-              .finally(() => resolve());
+                  console.debug("Subscription details sent successfully");
+                  localStorage.setItem("last-sakai-user", portal.user.id);
+                })
+                .catch (error => console.error(error))
+                .finally(() => resolve());
+              });
             });
-          });
-        }
-      });
+          }
+        });
+      } else {
+        Notification.requestPermission(permission => {
+
+          console.log(permission);
+        });
+      }
     });
   };
 
