@@ -18,6 +18,8 @@ self.addEventListener("message", event => {
 // We just pass push events straight onto the clients.
 self.addEventListener("push", event => {
 
+  console.log("PUSH");
+
   //navigator.setAppBadge();
   self.messageClients(event.data.json());
 });

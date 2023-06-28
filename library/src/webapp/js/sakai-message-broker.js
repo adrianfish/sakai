@@ -33,8 +33,6 @@ if (portal?.user?.id) {
 
   navigator.serviceWorker.register("/sakai-service-worker.js").then(registration => {
 
-    console.log("HERE2");
-
     if (differentUser) {
       console.debug("Different user. Removing the current subscription ...");
 
@@ -43,8 +41,6 @@ if (portal?.user?.id) {
       }
     }
   });
-
-  console.log(Notification.permission);
 
   if (portal.notifications.pushEnabled && (Notification.permission === "default" || differentUser)) {
 
@@ -79,11 +75,15 @@ if (portal?.user?.id) {
 
   portal.notifications.subscribeIfPermitted = registration => {
 
-    console.log("Requesting notifications permission ...");
-
     return new Promise(resolve => {
 
+      console.log("Requesting notifications permission ...");
+
       Notification.requestPermission().then(permission => {
+
+        console.log("HDSDFSDSDSD");
+
+        console.log(permission);
 
         if (permission === "granted") {
 
@@ -126,7 +126,8 @@ if (portal?.user?.id) {
             });
           });
         }
-      });
+      })
+      .catch (error => console.error(error));
     });
   };
 
