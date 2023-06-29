@@ -3,14 +3,22 @@
  */
 self.messageClients = async message => {
 
-  const clients = await self.clients.matchAll({ includeUncontrolled: true });
-  clients && clients.forEach(c => c.postMessage(message));
+  return new Promise(async resolve => {
+
+    const clients = await self.clients.matchAll({ includeUncontrolled: true });
+    clients && clients.forEach(c => c.postMessage(message));
+    resolve();
+  });
 };
 
 self.addEventListener("message", event => {
 
   if (event.data === "LOGOUT") {
     caches.delete("sakai-assets");
+    if (self.registration.pushManager) {
+      self.registration.pushManager.getSubscription().then(subscription => subscription && subscription.unsubscribe());
+    }
+    self.registration.unregister();
     navigator.clearAppBadge();
   }
 });
@@ -18,10 +26,11 @@ self.addEventListener("message", event => {
 // We just pass push events straight onto the clients.
 self.addEventListener("push", event => {
 
-  console.log("PUSH");
+  const json = event.data.json();
 
-  //navigator.setAppBadge();
-  self.messageClients(event.data.json());
+  event.waitUntil(self.registration.showNotification(json.title));
+
+  event.waitUntil(self.messageClients(json));
 });
 
 self.addEventListener("pushsubscriptionchange", event => {
@@ -49,8 +58,6 @@ self.addEventListener("pushsubscriptionchange", event => {
 }, false);
 
 self.addEventListener("install", async event => {
-
-  console.debug("INSTALL");
 
   event.waitUntil(
     caches

@@ -110,4 +110,11 @@ public interface UserMessagingService {
      * @param auth The browser push service supplied userKey
      */
     public void subscribeToPush(String endpoint, String auth, String userKey, String browserFingerprint);
+
+    /**
+     * Unsubscribe the specified browser from the push service.
+     *
+     * @param browserFingerprint
+     */
+    public void unsubscribeFromPush(String browserFingerprint);
 }

@@ -1,11 +1,6 @@
 portal = portal || {};
 portal.notifications = portal.notifications || {};
 
-console.log("HERE1");
-if ("serviceWorker" in navigator) {
-  console.log("ServiceWorker is supported");
-}
-
 portal.notifications.pushCallbacks = new Map();
 
 portal.notifications.setAppBadge = number => {
@@ -26,23 +21,50 @@ portal.notifications.clearAppBadge = () => {
   }
 };
 
+portal.notifications.logout = () => {
+
+  const params = {
+    browserFingerprint: getBrowserFingerprint(),
+  };
+
+  const url = "/api/users/me/pushEndpoint/delete";
+  fetch(url, {
+    credentials: "include",
+    method: "POST",
+    body: new URLSearchParams(params),
+  })
+  .then(r => {
+
+    if (!r.ok) {
+      throw new Error(`Network error while deleting push endpoint: ${url}`);
+    }
+
+    console.debug("Push endpoint details deleted successfully");
+  })
+  .catch (error => console.error(error));
+
+  navigator.serviceWorker.ready.then(reg => reg.active.postMessage("LOGOUT"));
+};
+
 if (portal?.user?.id) {
 
   const lastSubscribedUser = localStorage.getItem("last-sakai-user");
   const differentUser = lastSubscribedUser && lastSubscribedUser !== portal.user.id;
+  localStorage.setItem("last-sakai-user", portal.user.id);
 
-  navigator.serviceWorker.register("/sakai-service-worker.js").then(registration => {
+
+  navigator.serviceWorker.register("/sakai-service-worker.js").then(reg => {
 
     if (differentUser) {
       console.debug("Different user. Removing the current subscription ...");
 
-      if (registration.pushManager) {
-        registration.pushManager.getSubscription().then(subscription => subscription && subscription.unsubscribe());
+      if (reg.pushManager) {
+        reg.pushManager.getSubscription().then(subscription => subscription && subscription.unsubscribe());
       }
     }
   });
 
-  if (portal.notifications.pushEnabled && (Notification.permission === "default" || differentUser)) {
+  if (portal.notifications.pushEnabled) {
 
     // Permission has neither been granted or denied yet.
 
@@ -50,11 +72,9 @@ if (portal?.user?.id) {
 
     console.debug("about to register");
 
-    navigator.serviceWorker.register("/sakai-service-worker.js").then(registration => {
+    navigator.serviceWorker.register("/sakai-service-worker.js").then(reg => {
 
-      portal.notifications.callSubscribeIfPermitted = () => {
-        return portal.notifications.subscribeIfPermitted(registration);
-      };
+      portal.notifications.callSubscribeIfPermitted = () => portal.notifications.subscribeIfPermitted(reg);
 
       window.addEventListener("DOMContentLoaded", () => {
 
@@ -66,36 +86,48 @@ if (portal?.user?.id) {
 
           b.addEventListener("click", e => {
 
-            portal.notifications.subscribeIfPermitted(registration);
+            portal.notifications.subscribeIfPermitted(reg);
           }, { once: true });
         });
       });
     });
   }
 
-  portal.notifications.subscribeIfPermitted = registration => {
+  portal.notifications.urlB64ToUint8Array = base64String => {
+
+    const padding = "=".repeat((4 - (base64String.length % 4)) % 4);
+    const base64 = (base64String + padding)
+      .replace(/\-/g, "+")
+      .replace(/_/g, "/");
+    const rawData = window.atob(base64);
+    const outputArray = new Uint8Array(rawData.length);
+    for (let i = 0; i < rawData.length; ++i) {
+      outputArray[i] = rawData.charCodeAt(i);
+    }
+    return outputArray;
+  };
+
+  portal.notifications.subscribeIfPermitted = reg => {
 
     return new Promise(resolve => {
 
-      console.log("Requesting notifications permission ...");
+      if (Notification.permission !== "default") {
+        resolve();
+      } else {
+        console.debug("Requesting notifications permission ...");
 
-      Notification.requestPermission().then(permission => {
+        Notification.requestPermission().then(permission => {
 
-        console.log("HDSDFSDSDSD");
+          if (Notification.permission === "granted") {
 
-        console.log(permission);
-
-        if (permission === "granted") {
-
-          console.debug("Permission granted. Subscribing ...");
-
-          // We have permission, Grab the public app server key.
-          fetch("/api/keys/sakaipush").then(r => r.text()).then(key => {
-
-            console.debug("Got the key. Subscribing for push ...");
+            console.debug("Permission granted. Subscribing ...");
 
             // Subscribe with the public key
-            registration.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: key }).then(sub => {
+            reg.pushManager.subscribe({
+              userVisibleOnly: true,
+              applicationServerKey: portal.notifications.urlB64ToUint8Array(portal.notifications.applicationServerKey)
+            })
+            .then(sub => {
 
               console.debug("Subscribed. Sending details to Sakai ...");
 
@@ -106,7 +138,7 @@ if (portal?.user?.id) {
                 browserFingerprint: getBrowserFingerprint(),
               };
 
-              const url = "/api/users/me/prefs/pushEndpoint";
+              const url = "/api/users/me/pushEndpoint";
               fetch(url, {
                 credentials: "include",
                 method: "POST",
@@ -119,15 +151,14 @@ if (portal?.user?.id) {
                 }
 
                 console.debug("Subscription details sent successfully");
-                localStorage.setItem("last-sakai-user", portal.user.id);
               })
               .catch (error => console.error(error))
               .finally(() => resolve());
             });
-          });
-        }
-      })
-      .catch (error => console.error(error));
+          }
+        })
+        .catch (error => console.error(error));
+      }
     });
   };
 
@@ -138,8 +169,6 @@ if (portal?.user?.id) {
     // When the worker's EventSource receives an event it will message us (the client). This
     // code looks up the matching callback and calls it.
     navigator.serviceWorker.addEventListener('message', e => {
-
-      console.log(e.data);
 
       const allCallbacks = portal.notifications.pushCallbacks.get("all");
       allCallbacks && allCallbacks.forEach(cb => cb(e.data));
@@ -168,9 +197,11 @@ if (portal?.user?.id) {
     console.debug("Registering worker ...");
 
     navigator.serviceWorker.register("/sakai-service-worker.js")
-      .then(registration => {
+      .then(reg => {
 
-        const worker = registration.active;
+        fetch("/api/keys/sakaipush").then(r => r.text()).then(key => portal.notifications.applicationServerKey = key);
+
+        const worker = reg.active;
 
         if (worker) {
 
@@ -184,11 +215,11 @@ if (portal?.user?.id) {
 
           // Not active. We'll listen for an update then hook things up.
 
-          registration.addEventListener("updatefound", () => {
+          reg.addEventListener("updatefound", () => {
 
             console.debug("Worker updated. Waiting for state change ...");
 
-            const installingWorker = registration.installing;
+            const installingWorker = reg.installing;
 
             installingWorker.addEventListener("statechange", e => {
 

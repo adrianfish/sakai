@@ -178,9 +178,8 @@ public class UserMessagingServiceImpl implements UserMessagingService, Observer 
                 try {
                     publicKey = String.join("", Files.readAllLines(Paths.get(home, publicKeyFileName)));
                     String privateKey = String.join("", Files.readAllLines(Paths.get(home, privateKeyFileName)));
-                    pushService = new PushService(publicKey, privateKey);
                     String pushSubject = serverConfigurationService.getString("portal.notifications.push.subject", "");
-                    pushService.setSubject(pushSubject);
+                    pushService = new PushService(publicKey, privateKey, pushSubject);
                 } catch (Exception e) {
                     log.error("Failed to setup push service: {}", e.toString());
                 }
@@ -205,9 +204,8 @@ public class UserMessagingServiceImpl implements UserMessagingService, Observer 
                         fw.write(privateKeyBase64);
                     }
 
-                    pushService = new PushService(publicKeyBase64, privateKeyBase64);
                     String pushSubject = serverConfigurationService.getString("portal.notifications.push.subject", "");
-                    pushService.setSubject(pushSubject);
+                    pushService = new PushService(publicKeyBase64, privateKeyBase64, pushSubject);
                 } catch (Exception e) {
                     log.error("Failed to generate key pair: {}", e.toString());
                 }
@@ -628,6 +626,19 @@ public class UserMessagingServiceImpl implements UserMessagingService, Observer 
         ps.setFingerprint(browserFingerprint);
 
         pushSubscriptionRepository.save(ps);
+    }
+
+    @Transactional
+    public void unsubscribeFromPush(String browserFingerprint) {
+
+        String userId = sessionManager.getCurrentSessionUserId();
+
+        if (StringUtils.isBlank(userId)) {
+            log.warn("No current user");
+            return;
+        }
+
+        pushSubscriptionRepository.deleteByFingerprint(browserFingerprint);
     }
 
     private void push(UserNotification un) {

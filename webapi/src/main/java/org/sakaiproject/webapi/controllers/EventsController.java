@@ -52,7 +52,7 @@ public class EventsController extends AbstractSakaiApiController {
         }
     }
 
-    @PostMapping("/users/me/prefs/pushEndpoint")
+    @PostMapping("/users/me/pushEndpoint")
     public ResponseEntity setPushEndpoint(@RequestParam String endpoint,
                                             @RequestParam(required = false) String auth,
                                             @RequestParam(required = false) String userKey,
@@ -61,6 +61,16 @@ public class EventsController extends AbstractSakaiApiController {
 		checkSakaiSession();
 
         userMessagingService.subscribeToPush(endpoint, auth, userKey, browserFingerprint);
+
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/users/me/pushEndpoint/delete")
+    public ResponseEntity deletePushEndpoint(@RequestParam String browserFingerprint) {
+
+		checkSakaiSession();
+
+        userMessagingService.unsubscribeFromPush(browserFingerprint);
 
         return ResponseEntity.ok().build();
     }
