@@ -68,10 +68,7 @@ public class EventsController extends AbstractSakaiApiController {
     @PostMapping("/users/me/pushEndpoint/delete")
     public ResponseEntity deletePushEndpoint(@RequestParam String browserFingerprint) {
 
-		checkSakaiSession();
-
         userMessagingService.unsubscribeFromPush(browserFingerprint);
-
         return ResponseEntity.ok().build();
     }
 }

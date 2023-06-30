@@ -1,3 +1,8 @@
+console.debug("Registering sakai-service-worker ...");
+navigator.serviceWorker.register("/sakai-service-worker.js").then(reg => {
+  console.debug("sakai-service-worker registered");
+});
+
 portal = portal || {};
 portal.notifications = portal.notifications || {};
 
@@ -23,15 +28,11 @@ portal.notifications.clearAppBadge = () => {
 
 portal.notifications.logout = () => {
 
-  const params = {
-    browserFingerprint: getBrowserFingerprint(),
-  };
-
   const url = "/api/users/me/pushEndpoint/delete";
   fetch(url, {
     credentials: "include",
     method: "POST",
-    body: new URLSearchParams(params),
+    body: new URLSearchParams({ browserFingerprint: getBrowserFingerprint() }),
   })
   .then(r => {
 
@@ -52,28 +53,29 @@ if (portal?.user?.id) {
   const differentUser = lastSubscribedUser && lastSubscribedUser !== portal.user.id;
   localStorage.setItem("last-sakai-user", portal.user.id);
 
-
-  navigator.serviceWorker.register("/sakai-service-worker.js").then(reg => {
-
-    if (differentUser) {
-      console.debug("Different user. Removing the current subscription ...");
+  // If the logged in user has changed, we should resubscribe this device
+  if (differentUser) {
+    console.debug("Different user. Removing the current subscription ...");
+    navigator.serviceWorker.register("/sakai-service-worker.js").then(reg => {
 
       if (reg.pushManager) {
         reg.pushManager.getSubscription().then(subscription => subscription && subscription.unsubscribe());
       }
-    }
-  });
+    });
+  }
 
-  if (portal.notifications.pushEnabled) {
+  if (portal.notifications.pushEnabled && Notification.permission === "default") {
 
     // Permission has neither been granted or denied yet.
 
-    console.debug("No permission set or user changed");
+    console.debug("No permission set");
 
     console.debug("about to register");
 
     navigator.serviceWorker.register("/sakai-service-worker.js").then(reg => {
 
+      // We set this up for other parts of the code to call, without needing to register
+      // the service worker first. We capture the registration in the closure.
       portal.notifications.callSubscribeIfPermitted = () => portal.notifications.subscribeIfPermitted(reg);
 
       window.addEventListener("DOMContentLoaded", () => {
@@ -93,6 +95,7 @@ if (portal?.user?.id) {
     });
   }
 
+  /*
   portal.notifications.urlB64ToUint8Array = base64String => {
 
     const padding = "=".repeat((4 - (base64String.length % 4)) % 4);
@@ -106,6 +109,7 @@ if (portal?.user?.id) {
     }
     return outputArray;
   };
+  */
 
   portal.notifications.subscribeIfPermitted = reg => {
 
@@ -125,7 +129,8 @@ if (portal?.user?.id) {
             // Subscribe with the public key
             reg.pushManager.subscribe({
               userVisibleOnly: true,
-              applicationServerKey: portal.notifications.urlB64ToUint8Array(portal.notifications.applicationServerKey)
+              //applicationServerKey: portal.notifications.urlB64ToUint8Array(portal.notifications.applicationServerKey),
+              applicationServerKey: portal.notifications.applicationServerKey,
             })
             .then(sub => {
 

@@ -14,11 +14,11 @@ self.messageClients = async message => {
 self.addEventListener("message", event => {
 
   if (event.data === "LOGOUT") {
-    caches.delete("sakai-assets");
+    //caches.delete("sakai-assets");
     if (self.registration.pushManager) {
       self.registration.pushManager.getSubscription().then(subscription => subscription && subscription.unsubscribe());
     }
-    self.registration.unregister();
+    //self.registration.unregister();
     navigator.clearAppBadge();
   }
 });
@@ -57,6 +57,8 @@ self.addEventListener("pushsubscriptionchange", event => {
   });
 }, false);
 
+// The "install" event listener. Cache enough stuff to make the pwa available offline. Look at
+// the "fetch" event listener to see the code which compliments this, the fetch proxy code.
 self.addEventListener("install", async event => {
 
   event.waitUntil(
@@ -84,15 +86,19 @@ self.addEventListener("fetch", async event => {
   // Prevent the default, and handle the request ourselves.
   event.respondWith(
     (async () => {
-      // Try to get the response from a cache.
+
+      // Check the cache
       const cache = await caches.open("sakai-assets");
       const cachedResponse = await cache.match(event.request);
 
       if (cachedResponse) {
+        // We have a cached copy so return it. But first kick off a cache refresh so the latest
+        // is pulled and cached asynchronously.
         event.waitUntil(cache.add(event.request));
         return cachedResponse;
       }
 
+      // Not in the cache. Fetch it and cache if needed.
       return fetch(event.request).then(fetchedResp => {
 
         if (event.request.method === "GET" && (event.request.url.match(/notifications\.json/)
@@ -104,4 +110,3 @@ self.addEventListener("fetch", async event => {
     })()
   );
 });
-
