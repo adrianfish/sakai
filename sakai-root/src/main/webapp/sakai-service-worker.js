@@ -102,7 +102,8 @@ self.addEventListener("fetch", async event => {
       return fetch(event.request).then(fetchedResp => {
 
         if (event.request.method === "GET" && (event.request.url.match(/notifications\.json/)
-                                                || event.request.url.match(/profile.*thumb$/))) {
+                                                || event.request.url.match(/profile.*thumb$/)
+                                                || event.request.url.match(/resourcebundle/))) {
           cache.put(event.request, fetchedResp.clone());
         }
         return fetchedResp;
