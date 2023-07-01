@@ -60,7 +60,7 @@ public class PushSubscription implements PersistableEntity<Long> {
     @Column(name = "AUTH", length = 255, nullable = false)
     private String auth;
 
-    @Column(name = "ENDPOINT", length = 255, nullable = false)
+    @Column(name = "ENDPOINT", length = 1024, nullable = false)
     private String endpoint;
 
     @Column(name = "FINGERPRINT", length = 255, nullable = false, unique = true)
