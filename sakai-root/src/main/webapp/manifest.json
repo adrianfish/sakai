@@ -3,23 +3,26 @@
   "name": "Sakai PWA",
   "icons": [
     {
-      "src": "favicon.ico",
-      "sizes": "64x64 32x32 24x24 16x16",
-      "type": "image/x-icon"
+      "src": "images/sakaiger-180x180.png",
+      "type": "image/png",
+      "sizes": "180x180",
+      "purpose": "any"
     },
     {
-      "src": "images/sakaiger.png",
+      "src": "images/sakaiger-192x192.png",
       "type": "image/png",
-      "sizes": "192x192"
+      "sizes": "192x192",
+      "purpose": "any"
     },
     {
-      "src": "images/sakaiger.png",
+      "src": "images/sakaiger-512x512.png",
       "type": "image/png",
-      "sizes": "512x512"
+      "sizes": "512x512",
+      "purpose": "any"
     }
   ],
   "id": "/pwa/index.html",
-  "start_url": "/pwa/index.html",
+  "start_url": "pwa/index.html",
   "display": "standalone",
   "theme_color": "#000000",
   "background_color": "#ffffff"

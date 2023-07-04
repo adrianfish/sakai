@@ -14,12 +14,9 @@ self.messageClients = async message => {
 self.addEventListener("message", event => {
 
   if (event.data === "LOGOUT") {
-    //caches.delete("sakai-assets");
     if (self.registration.pushManager) {
       self.registration.pushManager.getSubscription().then(subscription => subscription && subscription.unsubscribe());
     }
-    //self.registration.unregister();
-    navigator.clearAppBadge();
   }
 });
 
@@ -28,7 +25,9 @@ self.addEventListener("push", event => {
 
   const json = event.data.json();
 
-  event.waitUntil(self.registration.showNotification(json.title));
+  if (self.registration.showNotification) {
+    event.waitUntil(self.registration.showNotification(json.title));
+  }
 
   event.waitUntil(self.messageClients(json));
 });

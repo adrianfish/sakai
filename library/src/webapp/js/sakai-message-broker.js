@@ -46,58 +46,67 @@ navigator.serviceWorker.register("/sakai-service-worker.js").then(reg => {
     });
   };
 
+  portal.notifications.subscribe = reg => {
+
+    // Subscribe with the public key
+    reg.pushManager.subscribe({
+      userVisibleOnly: true,
+      //applicationServerKey: portal.notifications.urlB64ToUint8Array(portal.notifications.applicationServerKey),
+      applicationServerKey: portal.notifications.applicationServerKey,
+    })
+    .then(sub => {
+
+      console.debug("Subscribed. Sending details to Sakai ...");
+
+      const params = {
+        endpoint: sub.endpoint,
+        auth: sub.toJSON().keys.auth,
+        userKey: sub.toJSON().keys.p256dh,
+        browserFingerprint: getBrowserFingerprint(),
+      };
+
+      const url = "/api/users/me/pushEndpoint";
+      fetch(url, {
+        credentials: "include",
+        method: "POST",
+        body: new URLSearchParams(params),
+      })
+      .then(r => {
+
+        if (!r.ok) {
+          throw new Error(`Network error while posting push endpoint: ${url}`);
+        }
+
+        console.debug("Subscription details sent successfully");
+      })
+      .catch (error => console.error(error))
+      .finally(() => resolve());
+    });
+
+  };
+
   portal.notifications.subscribeIfPermitted = reg => {
 
     return new Promise(resolve => {
 
-      if (Notification.permission !== "default") {
+      if (window.Notification && Notification.permission !== "default") {
         resolve();
       } else {
         console.debug("Requesting notifications permission ...");
 
-        Notification.requestPermission().then(permission => {
+        if (window.Notification) {
+          Notification.requestPermission().then(permission => {
 
-          if (Notification.permission === "granted") {
+            if (Notification.permission === "granted") {
 
-            console.debug("Permission granted. Subscribing ...");
-
-            // Subscribe with the public key
-            reg.pushManager.subscribe({
-              userVisibleOnly: true,
-              //applicationServerKey: portal.notifications.urlB64ToUint8Array(portal.notifications.applicationServerKey),
-              applicationServerKey: portal.notifications.applicationServerKey,
-            })
-            .then(sub => {
-
-              console.debug("Subscribed. Sending details to Sakai ...");
-
-              const params = {
-                endpoint: sub.endpoint,
-                auth: sub.toJSON().keys.auth,
-                userKey: sub.toJSON().keys.p256dh,
-                browserFingerprint: getBrowserFingerprint(),
-              };
-
-              const url = "/api/users/me/pushEndpoint";
-              fetch(url, {
-                credentials: "include",
-                method: "POST",
-                body: new URLSearchParams(params),
-              })
-              .then(r => {
-
-                if (!r.ok) {
-                  throw new Error(`Network error while posting push endpoint: ${url}`);
-                }
-
-                console.debug("Subscription details sent successfully");
-              })
-              .catch (error => console.error(error))
-              .finally(() => resolve());
-            });
-          }
-        })
-        .catch (error => console.error(error));
+              console.debug("Permission granted. Subscribing ...");
+              portal.notifications.subscribe(reg);
+            }
+          })
+          .catch (error => console.error(error));
+        } else {
+          portal.notifications.subscribe(reg);
+        }
       }
     });
   };
