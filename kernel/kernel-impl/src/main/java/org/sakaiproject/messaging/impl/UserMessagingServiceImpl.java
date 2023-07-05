@@ -17,7 +17,6 @@ package org.sakaiproject.messaging.impl;
 
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.ignite.IgniteMessaging;
 import org.apache.http.HttpResponse;
 
 import org.bouncycastle.jce.ECNamedCurveTable;
@@ -67,12 +66,10 @@ import org.sakaiproject.event.api.Event;
 import org.sakaiproject.event.api.EventTrackingService;
 import org.sakaiproject.event.api.NotificationService;
 import org.sakaiproject.exception.IdUnusedException;
-import org.sakaiproject.ignite.EagerIgniteSpringBean;
 import org.sakaiproject.messaging.api.model.UserNotification;
 import org.sakaiproject.messaging.api.UserNotificationData;
 import org.sakaiproject.messaging.api.UserNotificationHandler;
 import org.sakaiproject.messaging.api.Message;
-import org.sakaiproject.messaging.api.MessageListener;
 import org.sakaiproject.messaging.api.MessageMedium;
 import org.sakaiproject.messaging.api.model.PushSubscription;
 import org.sakaiproject.messaging.api.model.UserNotification;
@@ -121,7 +118,6 @@ public class UserMessagingServiceImpl implements UserMessagingService, Observer 
     @Autowired private EmailTemplateService emailTemplateService;
     @Autowired private EntityManager entityManager;
     @Autowired private EventTrackingService eventTrackingService;
-    @Autowired private EagerIgniteSpringBean ignite;
     @Autowired private PreferencesService preferencesService;
     @Autowired private PushSubscriptionRepository pushSubscriptionRepository;
     @Autowired private ServerConfigurationService serverConfigurationService;
@@ -138,7 +134,6 @@ public class UserMessagingServiceImpl implements UserMessagingService, Observer 
     @Qualifier("org.sakaiproject.springframework.orm.hibernate.GlobalTransactionManager")
     @Autowired private PlatformTransactionManager transactionManager;
 
-    private IgniteMessaging messaging;
     private List<UserNotificationHandler> handlers = new ArrayList<>();
     private Map<String, UserNotificationHandler> handlerMap = new HashMap<>();
     private ExecutorService executor;
@@ -160,8 +155,6 @@ public class UserMessagingServiceImpl implements UserMessagingService, Observer 
         }
 
         objectMapper.registerModule(new JavaTimeModule());
-
-        messaging = ignite.message(ignite.cluster().forLocal());
 
         Security.addProvider(new BouncyCastleProvider());
 
@@ -591,20 +584,6 @@ public class UserMessagingServiceImpl implements UserMessagingService, Observer 
         return notification;
     }
 
-
-    public void listen(String topic, MessageListener listener) {
-
-        messaging.localListen(topic, (nodeId, message) -> {
-
-            listener.read(decorateNotification((UserNotification) message));
-            return true;
-        });
-    }
-
-    public void send(String topic, UserNotification un) {
-        messaging.send(topic, un);
-    }
-
     @Transactional
     public void subscribeToPush(String endpoint, String auth, String userKey, String browserFingerprint) {
 
@@ -654,6 +633,8 @@ public class UserMessagingServiceImpl implements UserMessagingService, Observer 
             if (!StringUtils.isAnyBlank(pushEndpoint, pushUserKey, pushAuth)) {
                 Subscription sub = new Subscription(pushEndpoint, new Subscription.Keys(pushUserKey, pushAuth));
                 try {
+                    long unread = userNotificationRepository.countByToUserAndViewed(un.getToUser(), false);
+                    un.setUnreadCount(unread);
                     HttpResponse pushResponse = pushService.send(new Notification(sub, objectMapper.writeValueAsString(un)));
                     log.debug("The push response from {} returned code {} and reason {}",
                             pushEndpoint,

@@ -45,6 +45,19 @@ public class UserNotificationRepositoryImpl extends SpringCrudRepositoryImpl<Use
         return session.createQuery(query).list();
     }
 
+    @Transactional(readOnly = true)
+    public Long countByToUserAndViewed(String userId, boolean viewed) {
+
+        Session session = sessionFactory.getCurrentSession();
+
+        CriteriaBuilder cb = session.getCriteriaBuilder();
+        CriteriaQuery<Long> query = cb.createQuery(Long.class);
+        Root<UserNotification> un = query.from(UserNotification.class);
+        query.select(cb.count(un));
+        query.where(cb.and(cb.equal(un.get("deferred"), false), cb.equal(un.get("toUser"), userId), cb.equal(un.get("viewed"), viewed)));
+        return session.createQuery(query).getSingleResult();
+    }
+
     @Transactional
     public int deleteByToUserAndDeferred(String userId, boolean deferred) {
 

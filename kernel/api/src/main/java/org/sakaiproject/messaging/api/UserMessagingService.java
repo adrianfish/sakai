@@ -59,9 +59,6 @@ public interface UserMessagingService {
      */
     boolean importTemplateFromResourceXmlFile(String templateResource, String templateRegistrationKey);
 
-    public void listen(String topic, MessageListener listener);
-    public void send(String topic, UserNotification ba);
-
     /**
      * @return the list of notifications for the current user
      */
