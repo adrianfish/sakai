@@ -30,6 +30,7 @@ self.addEventListener("push", event => {
   }
 
   event.waitUntil(self.messageClients(json));
+
 });
 
 self.addEventListener("pushsubscriptionchange", event => {
