@@ -31,7 +31,7 @@ self.addEventListener("push", event => {
 
   event.waitUntil(self.messageClients(json));
 
-  navigator.setAppBadge(json.unreadCount);
+  navigator.setAppBadge(parseInt(json.unreadCount) || 1);
 });
 
 self.addEventListener("pushsubscriptionchange", event => {
