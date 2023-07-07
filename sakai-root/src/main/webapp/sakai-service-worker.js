@@ -1,3 +1,25 @@
+// The "install" event listener. Cache enough stuff to make the pwa available offline. Look at
+// the "fetch" event listener to see the code which compliments this, the fetch proxy code.
+self.addEventListener("install", async event => {
+
+  event.waitUntil(
+    caches
+      .open("sakai-assets")
+      .then(cache =>
+        cache.addAll([
+          "/pwa/",
+          "/library/skin/default-skin/images/sakaiLogo.png",
+          "/library/skin/default-skin/fonts/bootstrap-icons.woff2",
+          "/library/skin/default-skin/pwa.css",
+          "/library/js/sakai-message-broker.js",
+          "/library/webjars/bootstrap/5.2.0/js/bootstrap.bundle.min.js",
+          "/webcomponents/assets/get-browser-fingerprint/src/index.js",
+          "/webcomponents/bundles/pwa.js",
+        ])
+      )
+  );
+});
+
 /**
  * Message all the client windows or tabs of this worker
  */
@@ -57,28 +79,6 @@ self.addEventListener("pushsubscriptionchange", event => {
     .catch(error => console.error(error));
   });
 }, false);
-
-// The "install" event listener. Cache enough stuff to make the pwa available offline. Look at
-// the "fetch" event listener to see the code which compliments this, the fetch proxy code.
-self.addEventListener("install", async event => {
-
-  event.waitUntil(
-    caches
-      .open("sakai-assets")
-      .then(cache =>
-        cache.addAll([
-          "/pwa/",
-          "/library/skin/default-skin/images/sakaiLogo.png",
-          "/library/skin/default-skin/fonts/bootstrap-icons.woff2",
-          "/library/skin/default-skin/pwa.css",
-          "/library/js/sakai-message-broker.js",
-          "/library/webjars/bootstrap/5.2.0/js/bootstrap.bundle.min.js",
-          "/webcomponents/assets/get-browser-fingerprint/src/index.js",
-          "/webcomponents/bundles/pwa.js",
-        ])
-      )
-  );
-});
 
 self.addEventListener("fetch", async event => {
 

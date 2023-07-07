@@ -1,22 +1,6 @@
 portal = portal || {};
 portal.notifications = portal.notifications || {};
 
-/*
-portal.notifications.urlB64ToUint8Array = base64String => {
-
-  const padding = "=".repeat((4 - (base64String.length % 4)) % 4);
-  const base64 = (base64String + padding)
-    .replace(/\-/g, "+")
-    .replace(/_/g, "/");
-  const rawData = window.atob(base64);
-  const outputArray = new Uint8Array(rawData.length);
-  for (let i = 0; i < rawData.length; ++i) {
-    outputArray[i] = rawData.charCodeAt(i);
-  }
-  return outputArray;
-};
-*/
-
 portal.notifications.pushCallbacks = new Map();
 
 portal.notifications.registerPushCallback = (toolOrAll, cb) => {
@@ -46,12 +30,11 @@ navigator.serviceWorker.register("/sakai-service-worker.js").then(reg => {
     });
   };
 
-  portal.notifications.subscribe = reg => {
+  portal.notifications.subscribe = (reg, resolve) => {
 
     // Subscribe with the public key
     reg.pushManager.subscribe({
       userVisibleOnly: true,
-      //applicationServerKey: portal.notifications.urlB64ToUint8Array(portal.notifications.applicationServerKey),
       applicationServerKey: portal.notifications.applicationServerKey,
     })
     .then(sub => {
@@ -82,7 +65,6 @@ navigator.serviceWorker.register("/sakai-service-worker.js").then(reg => {
       .catch (error => console.error(error))
       .finally(() => resolve());
     });
-
   };
 
   portal.notifications.subscribeIfPermitted = reg => {
@@ -100,12 +82,12 @@ navigator.serviceWorker.register("/sakai-service-worker.js").then(reg => {
             if (Notification.permission === "granted") {
 
               console.debug("Permission granted. Subscribing ...");
-              portal.notifications.subscribe(reg);
+              portal.notifications.subscribe(reg, resolve);
             }
           })
           .catch (error => console.error(error));
         } else {
-          portal.notifications.subscribe(reg);
+          portal.notifications.subscribe(reg, resolve);
         }
       }
     });
@@ -204,10 +186,12 @@ portal.notifications.onLogin = () => {
 
           if (subscription) {
             subscription.unsubscribe().then(success => {
-              portal.notifications.callSubscribeIfPermitted();
+              //portal.notifications.callSubscribeIfPermitted();
+              portal.notifications.subscribe(reg, () => {});
             });
           } else {
-            portal.notifications.callSubscribeIfPermitted();
+            //portal.notifications.callSubscribeIfPermitted();
+            portal.notifications.subscribe(reg, () => {});
           }
         });
       }
