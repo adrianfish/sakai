@@ -91,6 +91,7 @@
                 <module>oauth</module>
                 <module>pasystem</module>
                 <module>plus</module>
+                <module>pages</module>
                 <module>podcasts</module>
                 <module>polls</module>
                 <module>portal</module>

@@ -20,6 +20,13 @@
     <deploy.target>shared</deploy.target>
   </properties>
 
+  <dependencies>
+    <dependency>
+      <groupId>org.hibernate</groupId>
+      <artifactId>hibernate-core</artifactId>
+    </dependency>
+  </dependencies>
+
   <build>
     <resources>
       <resource>

@@ -7,26 +7,20 @@
                            http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd
                            http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
 
-
   <context:component-scan base-package="org.sakaiproject.pages" />
   <tx:annotation-driven transaction-manager="org.sakaiproject.springframework.orm.hibernate.GlobalTransactionManager" />
 
-  <!--bean id="pagesHibernateMappings"
+  <bean id="org.sakaiproject.springframework.orm.hibernate.impl.AdditionalHibernateMappings.pages"
         class="org.sakaiproject.springframework.orm.hibernate.impl.AdditionalHibernateMappingsImpl">
     <property name="annotatedClasses">
       <list>
-        <value>org.sakaiproject.pages.api.model.ConversationsComment</value>
+        <value>org.sakaiproject.pages.api.model.PagesPage</value>
       </list>
     </property>
-  </bean-->
-
-  <!--bean id="org.sakaiproject.util.ResourceLoader.pages"
-        class="org.sakaiproject.util.ResourceLoader">
-    <constructor-arg value="pages"/>
-  </bean-->
+  </bean>
 
   <bean id="org.sakaiproject.pages.api.PagesService"
-      class="org.sakaiproject.pages.impl.PagesServiceImpl" init-method="init">
+      class="org.sakaiproject.pages.impl.PagesServiceImpl">
   </bean>
 
 </beans>

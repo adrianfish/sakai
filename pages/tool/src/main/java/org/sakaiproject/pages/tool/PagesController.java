@@ -50,13 +50,13 @@ public class PagesController {
         checkSakaiSession();
 
         loadModel(model, request);
-        model.addAttribute("state", "STATE_NOTHING_SELECTED");
-        model.addAttribute("toolName", toolManager.getCurrentPlacement().getTitle());
+
         return "index";
 	}
 
     private void loadModel(Model model, HttpServletRequest request) {
 
+        model.addAttribute("cdnQuery", PortalUtils.getCDNQuery());
         model.addAttribute("sakaiHtmlHead", (String) request.getAttribute("sakai.html.head"));
     }
 

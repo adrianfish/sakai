@@ -3,12 +3,12 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
     <link media="all" href="/library/skin/tool_base.css" rel="stylesheet" type="text/css" />
+    <script type="module" th:src="@{~/webcomponents/pages/sakai-pages.js} + ${cdnQuery}"></script>
     [(${sakaiHtmlHead})]
   </head>
   <body>
     <div class="portletBody">
-      <h1 th:text="${toolName}">toolName</h1>
-      <p th:text="#{pages.hello_world}">hello_world</p>
+      <sakai-pages></sakai-pages>
     </div>
   </body>
 </html>
