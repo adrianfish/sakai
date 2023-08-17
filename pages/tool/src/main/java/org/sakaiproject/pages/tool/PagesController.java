@@ -51,6 +51,9 @@ public class PagesController {
 
         loadModel(model, request);
 
+        Placement placement = toolManager.getCurrentPlacement();
+        model.addAttribute("siteId", placement.getContext());
+
         return "index";
 	}
 
