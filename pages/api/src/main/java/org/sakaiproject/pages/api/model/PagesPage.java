@@ -1,6 +1,7 @@
 package org.sakaiproject.pages.api.model;
 
 import javax.persistence.Column;
+import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.Lob;
@@ -8,6 +9,7 @@ import javax.persistence.Table;
 
 import org.hibernate.annotations.GenericGenerator;
 
+@Entity
 @Table(name = "PAGES_PAGE")
 public class PagesPage {
 
@@ -24,6 +26,6 @@ public class PagesPage {
     @Lob
     private String contents;
 
-    @Column(name = "PARENT_PAGE")
-    private String parentPage;
+    @Column(name = "PARENT_PAGE_ID", length = 36)
+    private String parentPageId;
 }

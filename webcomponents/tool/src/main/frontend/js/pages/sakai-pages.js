@@ -3,11 +3,19 @@ import { SakaiElement } from "../sakai-element.js";
 
 export class SakaiPages extends SakaiElement {
 
+  constructor() {
+
+    super();
+
+    this.loadTranslations("pages").then(i18n => this._i18n = i18n);
+  }
+
   static get properties() {
 
     return {
       siteId: { attribute: "site-id", type: String },
       _topLevelPages: { attribute: false, type: Array},
+      _i18n: { attribute: false, type: Object },
     };
   }
 
@@ -29,10 +37,15 @@ export class SakaiPages extends SakaiElement {
     // Get the initial load of JSON data. This will include the top level pages for the site.
   }
 
+  shouldUpdate() {
+    return this._i18n;
+  }
+
   render() {
 
     return html`
       <h1>Welcome to the Pages tool at ${this.siteId} !</h1>
+      <h2>${this._i18n["pages.hello_world"]}</h2>
     `;
   }
 }
