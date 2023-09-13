@@ -25,14 +25,28 @@ export class SakaiPages extends SakaiElement {
 
     this._siteId = value;
 
-    this._getInitialData();
+    this._getData();
 
     this.requestUpdate("siteId", oldValue);
   }
 
   get siteId() { return this._siteId; }
 
-  _getInitialData() {
+  _getData() {
+
+    fetch(`/api/sites/${this.siteId}/pages`, { credentials: "include" })
+    .then(r => {
+
+      if (r.ok) {
+        return r.json();
+      }
+
+      throw new Error("asdfasdf");
+    })
+    .then(data => {
+
+      console.log(data);
+    });
 
     // Get the initial load of JSON data. This will include the top level pages for the site.
   }

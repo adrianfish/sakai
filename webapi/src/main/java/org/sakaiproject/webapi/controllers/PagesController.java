@@ -16,6 +16,8 @@ package org.sakaiproject.webapi.controllers;
 import org.sakaiproject.pages.api.PageTransferBean;
 import org.sakaiproject.pages.api.PagesService;
 
+import org.sakaiproject.webapi.beans.PagesRestBean;
+
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.Link;
 import org.springframework.http.MediaType;
@@ -36,17 +38,22 @@ import lombok.extern.slf4j.Slf4j;
 @RestController
 public class PagesController extends AbstractSakaiApiController {
 
-	@Resource
-	private PagesService pagesService;
+	//@Resource
+	//private PagesService pagesService;
 
-    /*
 	@GetMapping(value = "/sites/{siteId}/pages", produces = MediaType.APPLICATION_JSON_VALUE)
-    public EntityModel<List<PageTransferBean>> getSitePages(@PathVariable String siteId) throws PagesPermissionsException {
+    public EntityModel<PagesRestBean> getSitePages(@PathVariable String siteId) {
 
 		String currentUserId = checkSakaiSession().getUserId();
-        return null;
+
+        PagesRestBean pagesRestBean = new PagesRestBean();
+        pagesRestBean.siteId = siteId;
+        pagesRestBean.userId = currentUserId;
+
+        List<Link> links = new ArrayList<>();
+        links.add(Link.of("/api/sites/" + siteId + "/pages", "addPage"));
+        return EntityModel.of(pagesRestBean, links);
     }
-    */
 
     /*
     private EntityModel entityModelForPageTransferBean(PageTransferBean pageBean) {
