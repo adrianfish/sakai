@@ -8,6 +8,7 @@ import "@sakai-ui/sakai-notifications/sakai-notifications.js";
 
 import imagesLoaded from "imagesloaded";
 globalThis.imagesLoaded = imagesLoaded;
+
 import Sortable from "sortablejs";
 globalThis.Sortable = Sortable;
 
