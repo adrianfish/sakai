@@ -9,6 +9,7 @@ import "@sakai-ui/sakai-calendar/sakai-calendar.js";
 
 import imagesLoaded from "imagesloaded";
 globalThis.imagesLoaded = imagesLoaded;
+
 import Sortable from "sortablejs";
 globalThis.Sortable = Sortable;
 
