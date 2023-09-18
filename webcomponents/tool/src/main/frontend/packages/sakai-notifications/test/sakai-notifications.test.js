@@ -2,6 +2,7 @@ import "../sakai-notifications.js";
 import { html } from "lit";
 import * as data from "./data.js";
 import { expect, fixture, aTimeout, waitUntil } from "@open-wc/testing";
+import { stub } from "sinon";
 import fetchMock from "fetch-mock/esm/client";
 
 describe("sakai-notifications tests", () => {
