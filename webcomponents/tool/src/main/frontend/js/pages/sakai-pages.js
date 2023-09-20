@@ -16,6 +16,7 @@ export class SakaiPages extends SakaiElement {
       siteId: { attribute: "site-id", type: String },
       _topLevelPages: { attribute: false, type: Array},
       _i18n: { attribute: false, type: Object },
+      _addPageUrl: { attribute: false, type: String },
     };
   }
 
@@ -46,9 +47,16 @@ export class SakaiPages extends SakaiElement {
     .then(data => {
 
       console.log(data);
+
+      this._addPageUrl = data.links.find(link => link.rel === "addPage")?.href;
     });
 
     // Get the initial load of JSON data. This will include the top level pages for the site.
+  }
+
+  _addPage(e) {
+
+    console.log("clicked");
   }
 
   shouldUpdate() {
@@ -58,8 +66,15 @@ export class SakaiPages extends SakaiElement {
   render() {
 
     return html`
-      <h1>Welcome to the Pages tool at ${this.siteId} !</h1>
-      <h2>${this._i18n["pages.hello_world"]}</h2>
+      <div class="d-flex justify-content-between">
+        <div>Pages</div>
+
+        ${this._addPageUrl ? html`
+          <div>
+            <button type="button" @click=${this._addPage} class="btn btn-icon"><i class="bi bi-window-plus"></i></button>
+          </div>
+        ` : ""}
+      </div>
     `;
   }
 }
