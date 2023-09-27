@@ -1,11 +1,14 @@
 import { html } from "../assets/lit-element/lit-element.js";
 import { SakaiElement } from "../sakai-element.js";
+import "../sakai-editor.js";
 
 export class SakaiPages extends SakaiElement {
 
   constructor() {
 
     super();
+
+    this._state = "PAGES";
 
     this.loadTranslations("pages").then(i18n => this._i18n = i18n);
   }
@@ -17,6 +20,7 @@ export class SakaiPages extends SakaiElement {
       _topLevelPages: { attribute: false, type: Array},
       _i18n: { attribute: false, type: Object },
       _addPageUrl: { attribute: false, type: String },
+      _state: { attribute: false, type: String },
     };
   }
 
@@ -54,9 +58,42 @@ export class SakaiPages extends SakaiElement {
     // Get the initial load of JSON data. This will include the top level pages for the site.
   }
 
-  _addPage(e) {
+  _addPage() {
 
     console.log("clicked");
+
+    this._state = "ADD_PAGE";
+  }
+
+  _savePage() {
+
+    console.log("save");
+  }
+
+  _cancelAddPage() {
+
+    this._state = "PAGES";
+  }
+
+  _renderAddPage() {
+
+    return html`
+      <div class="mb-4">
+        <h1 class="d-inline">${this._i18n.add_page_header}</h1>
+      </div>
+      <div>${this._i18n.add_page_title_label}</div>
+      <div>
+        <input id="pages-title-input" type="text">
+      </div>
+      <div class="mt-3">${this._i18n.add_page_content_label}</div>
+      <div>
+        <sakai-editor></sakai-editor>
+      </div>
+      <div class="mt-2">
+        <button type="button" @click=${this._savePage} class="btn btn-primary">${this._i18n.save}</button>
+        <button type="button" @click=${this._cancelAddPage} class="btn btn-secondary">${this._i18n.cancel}</button>
+      </div>
+    `;
   }
 
   shouldUpdate() {
@@ -66,15 +103,26 @@ export class SakaiPages extends SakaiElement {
   render() {
 
     return html`
-      <div class="d-flex justify-content-between">
-        <div>Pages</div>
-
-        ${this._addPageUrl ? html`
+      ${this._state === "PAGES" ? html`
+        <div class="d-flex justify-content-between">
           <div>
-            <button type="button" @click=${this._addPage} class="btn btn-icon"><i class="bi bi-window-plus"></i></button>
+            <h1 class="d-inline">${this._i18n.pages_header}</h1>
           </div>
-        ` : ""}
-      </div>
+
+          ${this._addPageUrl ? html`
+            <div>
+              <button type="button"
+                  @click=${this._addPage}
+                  class="btn btn-icon">
+                <i class="si si-add"></i>
+                <span class="ms-2">${this._i18n.add_page_header}</span>
+              </button>
+            </div>
+          ` : ""}
+        </div>
+      ` : ""}
+
+      ${this._state === "ADD_PAGE" ? this._renderAddPage() : ""}
     `;
   }
 }
