@@ -498,7 +498,7 @@ public class RubricsServiceImpl implements RubricsService, EntityProducer, Entit
                 criterion.setDescription(c.getDescription());
                 criterion.setWeight(c.getWeight());
                 criterion.setRatings(c.getRatings().stream()
-                        .map(r -> new Rating(null, r.getTitle(), r.getDescription(), r.getPoints(), criterion))
+                        .map(r -> new Rating(null, r.getTitle(), r.getDescription(), r.getFeedback(), r.getQuality(), r.getPoints(), criterion))
                         .collect(Collectors.toList()));
                 return criterion;
             }).collect(Collectors.toList()));
@@ -578,6 +578,18 @@ public class RubricsServiceImpl implements RubricsService, EntityProducer, Entit
         rubric.getCriteria().removeIf(c -> c.getId().equals(criterionId));
 
         rubricRepository.save(updateRubricMaxPoints(rubric));
+    }
+
+    public Optional<RatingTransferBean> getRating(Long ratingId) {
+
+        String currentUserId = sessionManager.getCurrentSessionUserId();
+
+        if (StringUtils.isBlank(currentUserId)) {
+            throw new SecurityException("You must logged in to get a rating");
+        }
+
+        return ratingRepository.findById(ratingId).map(r -> Optional.of(new RatingTransferBean(r)))
+            .orElse(Optional.<RatingTransferBean>empty());
     }
 
     public RatingTransferBean updateRating(RatingTransferBean bean, String siteId) {

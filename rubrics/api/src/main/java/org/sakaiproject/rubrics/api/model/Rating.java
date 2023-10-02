@@ -56,6 +56,12 @@ public class Rating implements PersistableEntity<Long>, Serializable {
     @Lob
     private String description;
 
+    @Column(length = 255)
+    private String feedback;
+
+    @Column(length = 255)
+    private String quality;
+
     @Column(nullable = false)
     private Double points;
 

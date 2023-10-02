@@ -72,6 +72,9 @@ public class Criterion implements PersistableEntity<Long>, Serializable {
     @Lob
     private String description;
 
+    @Column(length = 255)
+    private String category;
+
     private Float weight = 0F;
 
     @EqualsAndHashCode.Exclude

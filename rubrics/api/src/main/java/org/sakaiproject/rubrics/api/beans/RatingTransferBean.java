@@ -27,14 +27,20 @@ public class RatingTransferBean {
     private Long id;
     private Long criterionId;
     private String description;
+    private String feedback;
+    private String quality;
     private Double points;
     private Double weightedPoints;
     private String title;
+    private String uri;
 
     public RatingTransferBean(Rating rating) {
+
         id = rating.getId();
         criterionId = rating.getCriterion().getId();
         description = rating.getDescription();
+        feedback = rating.getFeedback();
+        quality = rating.getQuality();
         points = rating.getPoints();
         weightedPoints = 0D;
         title = rating.getTitle();

@@ -30,15 +30,18 @@ public class CriterionTransferBean {
     private Long id;
     private String title;
     private String description;
+    private String category;
     private Float weight;
     private List<RatingTransferBean> ratings = new ArrayList<>();
     private String ownerId;
     private boolean isNew;
+    private String uri;
 
     public CriterionTransferBean(Criterion criterion) {
         id = criterion.getId();
         title = criterion.getTitle();
         description = criterion.getDescription();
+        category = criterion.getCategory();
         weight = criterion.getWeight();
         ratings = criterion.getRatings().stream().map(RatingTransferBean::new).collect(Collectors.toList());
     }

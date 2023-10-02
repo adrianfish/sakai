@@ -74,36 +74,36 @@ public class RubricsRestController extends AbstractSakaiApiController {
     private SessionManager sessionManager;
 
     @GetMapping(value = "/sites/{siteId}/rubrics", produces = MediaType.APPLICATION_JSON_VALUE)
-    List<EntityModel<RubricTransferBean>> getRubricsForSite(@PathVariable String siteId) {
+    List<RubricTransferBean> getRubricsForSite(@PathVariable String siteId) {
 
         checkSakaiSession();
 
-        return rubricsService.getRubricsForSite(siteId).stream().map(b -> entityModelForRubricBean(b)).collect(Collectors.toList());
+        return rubricsService.getRubricsForSite(siteId);
     }
 
     @GetMapping(value = "/rubrics/shared", produces = MediaType.APPLICATION_JSON_VALUE)
-    List<EntityModel<RubricTransferBean>> getSharedRubrics() {
+    List<RubricTransferBean> getSharedRubrics() {
 
         checkSakaiSession();
 
-        return rubricsService.getSharedRubrics().stream().map(b -> entityModelForRubricBean(b)).collect(Collectors.toList());
+        return rubricsService.getSharedRubrics();
     }
 
     @GetMapping(value = "/sites/{siteId}/rubrics/default", produces = MediaType.APPLICATION_JSON_VALUE)
-    EntityModel<RubricTransferBean> getDefaultRubric(@PathVariable String siteId) {
+    RubricTransferBean getDefaultRubric(@PathVariable String siteId) {
 
         checkSakaiSession();
 
-        return entityModelForRubricBean(rubricsService.createDefaultRubric(siteId));
+        return rubricsService.createDefaultRubric(siteId);
     }
 
     //@PreAuthorize("canCopy(#sourceId, 'Rubric')")
     @GetMapping(value = "/sites/{siteId}/rubrics/{sourceId}/copyToSite", produces = MediaType.APPLICATION_JSON_VALUE)
-    EntityModel<RubricTransferBean> copyRubricToSite(@PathVariable String siteId, @PathVariable Long sourceId) throws Exception {
+    RubricTransferBean copyRubricToSite(@PathVariable String siteId, @PathVariable Long sourceId) throws Exception {
 
         checkSakaiSession();
 
-        return entityModelForRubricBean(rubricsService.copyRubricToSite(sourceId, siteId));
+        return rubricsService.copyRubricToSite(sourceId, siteId);
     }
 
     @PostMapping(value = "/sites/{siteId}/rubrics/{rubricId}/criteria/{criterionId}/title")
@@ -157,12 +157,16 @@ public class RubricsRestController extends AbstractSakaiApiController {
 	}
 
     @GetMapping(value = "/sites/{siteId}/rubrics/{rubricId}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<EntityModel<RubricTransferBean>> getRubric(@PathVariable String siteId, @PathVariable Long rubricId) throws Exception {
+    public ResponseEntity<RubricTransferBean> getRubric(@PathVariable String siteId, @PathVariable Long rubricId) throws Exception {
 
         checkSakaiSession();
 
         return rubricsService.getRubric(rubricId)
-            .map(b -> ResponseEntity.ok(entityModelForRubricBean(b)))
+            .map(b -> {
+
+                b.setUri("/sites/" + siteId + "/rubrics/" + rubricId);
+                return ResponseEntity.ok(b);
+            })
             .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
@@ -324,6 +328,20 @@ public class RubricsRestController extends AbstractSakaiApiController {
         return entityModelForCriterionBean(rubricsService.copyCriterion(rubricId, sourceId));
     }
 
+    @GetMapping(value = "/sites/{siteId}/criteria/{criterionId}",
+                    produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<CriterionTransferBean> getCriterion(@PathVariable String siteId, @PathVariable Long criterionId) throws Exception {
+
+        checkSakaiSession();
+
+        return rubricsService.getCriterion(criterionId, siteId).map(criterion -> {
+
+            criterion.setUri("/sites/" + siteId + "/criteria/" + criterionId);
+            return ResponseEntity.ok(criterion);
+        }).orElseGet(() -> ResponseEntity.notFound().build());
+    }
+
+
     @PatchMapping(value = "/sites/{siteId}/rubrics/{rubricId}/criteria/{criterionId}",
                     consumes = "application/json-patch+json",
                     produces = MediaType.APPLICATION_JSON_VALUE)
@@ -356,7 +374,18 @@ public class RubricsRestController extends AbstractSakaiApiController {
             .orElseGet(() -> ResponseEntity.badRequest().build());
     }
 
-    //@PreAuthorize("canCopy(#sourceId, 'Rating')")
+    @GetMapping(value = "/sites/{siteId}/rubrics/ratings/{ratingId}")
+    ResponseEntity<RatingTransferBean> getRating(@PathVariable String siteId, @PathVariable Long ratingId) {
+
+        checkSakaiSession();
+
+        return rubricsService.getRating(ratingId).map(r -> {
+
+            r.setUri("/sites/" + siteId + "/rubrics/ratings/" + ratingId);
+            return ResponseEntity.ok(r);
+        }).orElse(ResponseEntity.notFound().build());
+    }
+
     @PostMapping(value = "/sites/{siteId}/rubrics/{rubricId}/criteria/{criterionId}/ratings/{ratingId}")
     ResponseEntity saveRating(@PathVariable String siteId, @PathVariable Long rubricId, @RequestBody RatingTransferBean ratingBean) {
 
@@ -390,23 +419,6 @@ public class RubricsRestController extends AbstractSakaiApiController {
 
         return ResponseEntity.ok().headers(h -> h.setContentDisposition(contentDisposition))
                 .body(rubricsService.createPdf(siteId, rubricId, toolId, itemId, evaluatedItemId));
-    }
-
-    private EntityModel<RubricTransferBean> entityModelForRubricBean(RubricTransferBean rubricBean) {
-
-        List<Link> links = new ArrayList<>();
-        /*
-        links.add(Link.of(topicBean.url, "self"));
-        links.add(Link.of(topicBean.url + "/bookmarked", "bookmark"));
-        links.add(Link.of(topicBean.url + "/posts/markpostsviewed", "markpostsviewed"));
-        if (topicBean.canPin) links.add(Link.of(topicBean.url + "/pinned", "pin"));
-        if (topicBean.canPost) links.add(Link.of(topicBean.url + "/posts", "post"));
-        if (topicBean.canDelete) links.add(Link.of(topicBean.url, "delete"));
-        if (topicBean.canReact) links.add(Link.of(topicBean.url + "/reactions", "react"));
-        if (topicBean.canModerate) links.add(Link.of(topicBean.url + "/locked", "lock"));
-        if (topicBean.canModerate) links.add(Link.of(topicBean.url + "/hidden", "hide"));
-        */
-        return EntityModel.of(rubricBean, links);
     }
 
     private EntityModel<CriterionTransferBean> entityModelForCriterionBean(CriterionTransferBean criterionBean) {

@@ -42,9 +42,12 @@ public class RubricTransferBean {
     private Boolean shared;
     private String siteTitle;
     private String title;
+    private String description = "";
     private Boolean weighted;
+    private String uri;
 
     public RubricTransferBean(Rubric rubric) {
+
         id = rubric.getId();
         created = rubric.getCreated();
         creatorId = rubric.getCreatorId();

@@ -84,6 +84,8 @@ public interface RubricsService {
 
     void sortCriterionRatings(Long criteriaId, List<Long> sortedRatingIds);
 
+    Optional<RatingTransferBean> getRating(Long ratingId);
+
     /**
      * This method is used for updating a Criterion's values it should not be used to create a new Criterion
      * as it will not correctly update it's mapped entities
