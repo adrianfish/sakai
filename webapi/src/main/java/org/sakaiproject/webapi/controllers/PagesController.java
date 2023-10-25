@@ -23,6 +23,8 @@ import org.springframework.hateoas.Link;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Resource;
@@ -53,6 +55,16 @@ public class PagesController extends AbstractSakaiApiController {
         List<Link> links = new ArrayList<>();
         links.add(Link.of("/api/sites/" + siteId + "/pages", "addPage"));
         return EntityModel.of(pagesRestBean, links);
+    }
+
+    @PostMapping(value = "/sites/{siteId}/pages", produces = MediaType.APPLICATION_JSON_VALUE)
+    public PageTransferBean createPage(@RequestBody PageTransferBean pageTransferBean) {
+
+        System.out.println(pageTransferBean.title);
+        System.out.println(pageTransferBean.content);
+
+        checkSakaiSession();
+        return null;
     }
 
     /*

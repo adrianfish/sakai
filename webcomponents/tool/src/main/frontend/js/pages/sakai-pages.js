@@ -11,13 +11,15 @@ export class SakaiPages extends SakaiElement {
     this._state = "PAGES";
 
     this.loadTranslations("pages").then(i18n => this._i18n = i18n);
+
+    this._templatePageBean = { title: "", content: "", spurious: "bacon" };
   }
 
   static get properties() {
 
     return {
       siteId: { attribute: "site-id", type: String },
-      _topLevelPages: { attribute: false, type: Array},
+      _topLevelPages: { attribute: false, type: Array },
       _i18n: { attribute: false, type: Object },
       _addPageUrl: { attribute: false, type: String },
       _state: { attribute: false, type: String },
@@ -50,8 +52,6 @@ export class SakaiPages extends SakaiElement {
     })
     .then(data => {
 
-      console.log(data);
-
       this._addPageUrl = data.links.find(link => link.rel === "addPage")?.href;
     });
 
@@ -67,12 +67,32 @@ export class SakaiPages extends SakaiElement {
 
   _savePage() {
 
-    console.log("save");
+    console.log(this._templatePageBean);
+
+    fetch(`/api/sites/${this.siteId}/pages`, {
+      method: "POST",
+      credentials: "include",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(this._templatePageBean)
+    })
+    .then(r => {
+    })
+    .catch(error => console.error(error));
   }
 
   _cancelAddPage() {
 
     this._state = "PAGES";
+  }
+
+  _updateTitle(e) {
+    this._templatePageBean.title = e.target.value;
+  }
+
+  _updateContent(e) {
+
+    console.log(e);
+    this._templatePageBean.content = e.detail.content;
   }
 
   _renderAddPage() {
@@ -83,11 +103,11 @@ export class SakaiPages extends SakaiElement {
       </div>
       <div>${this._i18n.add_page_title_label}</div>
       <div>
-        <input id="pages-title-input" type="text">
+        <input id="pages-title-input" type="text" @keyup=${this._updateTitle}>
       </div>
       <div class="mt-3">${this._i18n.add_page_content_label}</div>
       <div>
-        <sakai-editor></sakai-editor>
+        <sakai-editor @changed=${this._updateContent}></sakai-editor>
       </div>
       <div class="mt-2">
         <button type="button" @click=${this._savePage} class="btn btn-primary">${this._i18n.save}</button>
