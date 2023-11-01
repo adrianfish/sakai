@@ -102,7 +102,6 @@
         <dependency>
             <groupId>org.sakaiproject.pages</groupId>
             <artifactId>sakai-pages-api</artifactId>
-            <version>24-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.sakaiproject.common</groupId>

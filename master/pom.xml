@@ -2074,6 +2074,12 @@
         <scope>provided</scope>
       </dependency>
       <dependency>
+        <groupId>org.sakaiproject.pages</groupId>
+        <artifactId>sakai-pages-api</artifactId>
+        <version>${sakai.version}</version>
+        <scope>provided</scope>
+      </dependency>
+      <dependency>
         <groupId>org.sakaiproject.cardgame</groupId>
         <artifactId>sakai-card-game-api</artifactId>
         <version>${sakai.version}</version>

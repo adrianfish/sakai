@@ -9,14 +9,21 @@ import javax.persistence.Table;
 
 import org.hibernate.annotations.GenericGenerator;
 
+import org.sakaiproject.springframework.data.PersistableEntity;
+
+import lombok.Getter;
+import lombok.Setter;
+
 @Entity
 @Table(name = "PAGES_PAGE")
-public class PagesPage {
+@Setter
+public class PagesPage implements PersistableEntity<String> {
 
     @Id
     @Column(name = "ID", nullable = false, length = 36)
     @GeneratedValue(generator = "uuid")
     @GenericGenerator(name = "uuid", strategy = "uuid2")
+    @Getter
     private String id;
 
     @Column(name = "TITLE", nullable = false, length = 255)

@@ -21,6 +21,12 @@
     </property>
   </bean>
 
+  <bean id="org.sakaiproject.pages.api.repository.PageRepository"
+      class="org.sakaiproject.pages.impl.repository.PageRepositoryImpl">
+    <!-- ADDED SINCE LAST LESSON -->
+    <property name="sessionFactory" ref="org.sakaiproject.springframework.orm.hibernate.GlobalSessionFactory" />
+  </bean>
+
   <bean id="org.sakaiproject.pages.api.PagesService"
       class="org.sakaiproject.pages.impl.PagesServiceImpl">
   </bean>

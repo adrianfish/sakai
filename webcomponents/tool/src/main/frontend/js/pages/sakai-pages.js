@@ -76,6 +76,10 @@ export class SakaiPages extends SakaiElement {
       body: JSON.stringify(this._templatePageBean)
     })
     .then(r => {
+
+      if (r.ok) {
+        console.log("ok");
+      }
     })
     .catch(error => console.error(error));
   }
