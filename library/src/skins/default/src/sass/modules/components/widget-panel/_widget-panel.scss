@@ -1,0 +1,37 @@
+sakai-widget-panel {
+
+  display: block;
+  width: var(--sakai-widget-panel-width);
+  background-color: var(--sakai-tool-bg-color);
+
+  #add-button {
+    text-align: right;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    sakai-icon {
+      color: var(--sakai-widget-panel-add-button-color, green);
+    }
+  }
+  a {
+    color: var(--link-color);
+  }
+  #add-text {
+    display: inline-block;
+    font-weight: bold;
+    color: var(--sakai-widget-panel-add-text-color);
+    font-size: var(--sakai-widget-panel-add-text-size, 14px);
+    margin-left: 6px;
+  }
+  .faded {
+    pointer-events: none;
+    opacity: 0.4;
+  }
+
+  #grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(var(--sakai-widget-panel-min-widget-width, 350px), 1fr));
+    grid-gap: var(--sakai-widget-panel-gutter-width, 1rem);
+  }
+}

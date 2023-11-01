@@ -1,4 +1,5 @@
-import { html, css, LitElement } from '../assets/lit-element/lit-element.js';
+import { html } from '../assets/lit-element/lit-element.js';
+import { SakaiElement } from "./sakai-element.js";
 import { ifDefined } from '../assets/lit-html/directives/if-defined.js';
 import { repeat } from '../assets/lit-html/directives/repeat.js';
 import "./sakai-dashboard-widget.js";
@@ -8,9 +9,8 @@ import "./sakai-grades-widget.js";
 import "./sakai-announcements-widget.js";
 import "./sakai-forums-widget.js";
 import "./sakai-widget-picker.js";
-import { loadProperties } from "../sakai-i18n.js";
 
-export class SakaiWidgetPanel extends LitElement {
+export class SakaiWidgetPanel extends SakaiElement {
 
   static get properties() {
 
@@ -19,20 +19,21 @@ export class SakaiWidgetPanel extends LitElement {
       userId: { attribute: "user-id", type: String },
       widgetIds: { attribute: "widget-ids", type: Array },
       layout: { type: Array },
-      i18n: Object,
       state: String,
       editing: { type: Boolean },
       widgets: { type: Array },
       columns: { type: Number },
+      _i18n: { attribute: false, type: Object },
     };
   }
 
   constructor() {
 
     super();
+
     this.columns = 2;
     this.state = "view";
-    loadProperties("widgetpanel").then(r => this.i18n = r);
+    this.loadTranslations("widgetpanel").then(r => this._i18n = r);
   }
 
   set widgetIds(value) {
@@ -65,7 +66,7 @@ export class SakaiWidgetPanel extends LitElement {
   get layout() { return this._layout; }
 
   shouldUpdate() {
-    return this.i18n;
+    return this._i18n;
   }
 
   fireChanged() {
@@ -276,10 +277,10 @@ export class SakaiWidgetPanel extends LitElement {
           <div>
             <a href="javascript:;"
                 @click=${this.showWidgetPicker}
-                title="${this.i18n.add_a_widget}"
-                aria-label="${this.i18n.add_a_widget}">
+                title="${this._i18n.add_a_widget}"
+                aria-label="${this._i18n.add_a_widget}">
               <sakai-icon type="add" size="small"></sakai-icon>
-              <div id="add-text">${this.i18n.add_a_widget}</div>
+              <div id="add-text">${this._i18n.add_a_widget}</div>
             </a>
           </div>
         </div>
@@ -290,47 +291,6 @@ export class SakaiWidgetPanel extends LitElement {
           ${this.getWidget(w)}
         `)}
       </div>
-    `;
-  }
-
-  static get styles() {
-
-    return css`
-      :host {
-        display: block;
-        width: var(--sakai-widget-panel-width);
-        background-color: var(--sakai-tool-bg-color);
-      }
-      #add-button {
-        text-align: right;
-        margin-bottom: 10px;
-        display: flex;
-        align-items: center;
-        justify-content: flex-end;
-      }
-      #add-button sakai-icon {
-        color: var(--sakai-widget-panel-add-button-color, green);
-      }
-      a {
-        color: var(--link-color);
-      }
-      #add-text {
-        display: inline-block;
-        font-weight: bold;
-        color: var(--sakai-widget-panel-add-text-color);
-        font-size: var(--sakai-widget-panel-add-text-size, 14px);
-        margin-left: 6px;
-      }
-      .faded {
-        pointer-events: none;
-        opacity: 0.4;
-      }
-
-      #grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(var(--sakai-widget-panel-min-widget-width, 350px), 1fr));
-        grid-gap: var(--sakai-widget-panel-gutter-width, 1rem);
-      }
     `;
   }
 }

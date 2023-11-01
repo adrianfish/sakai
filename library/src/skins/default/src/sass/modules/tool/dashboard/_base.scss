@@ -8,6 +8,88 @@ html {
     --sakai-motd-message-font-size: 12px;
 }
 
+#home-dashboard-container {
+
+  padding: var(--sakai-dashboard-container-padding);
+  font-family: var(--sakai-font-family);
+  background-color: var(--sakai-tool-bg-color);
+  #welcome-and-edit-block {
+    display: flex;
+    #welcome {
+      flex: 1;
+      font-size: var(--sakai-dashboard-welcome-font-size);
+    }
+    #edit-block {
+      flex: 1;
+      text-align:right;
+
+      div {
+        display: inline-block;
+      }
+    }
+  }
+  #toolbar {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 20px;
+
+    #add-worksite {
+      flex: 0;
+      display: flex;
+      justify-content: space-between;
+      text-align: center;
+      white-space: nowrap;
+
+      div {
+        flex: 1;
+      }
+      sakai-icon {
+        margin-right: 10px;
+      }
+    }
+  }
+  #motd {
+    border-radius: var(--sakai-course-card-border-radius);
+    background-color: var(--sakai-motd-bg-color);
+    font-size: var(--sakai-motd-font-size);
+    font-weight: var(--sakai-motd-font-weight);
+    border: solid 1px #e0e0e0;
+    padding: var(--sakai-motd-padding);
+    margin-top: var(--sakai-motd-margin-top);
+
+    #motd-title-block {
+      display: flex;
+      align-items: center;
+    }
+
+    #motd-title {
+      margin-right: 14px;
+    }
+    #motd-message {
+      font-size: var(--sakai-motd-message-font-size);
+      margin-top: 30px;
+      padding-left: 20px;
+    }
+  }
+
+  #courses-and-widgets {
+    display: flex;
+    margin-top: 30px;
+
+    #courses {
+      flex: 0;
+      margin-right: 20px;
+    }
+    #widgets {
+      flex: 1;
+
+      sakai-widget-panel {
+        width: 100%;
+      }
+    }
+  }
+}
+
 #course-dashboard-container {
     padding: var(--sakai-dashboard-container-padding);
     background-color: var(--sakai-tool-bg-color);
