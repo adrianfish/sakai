@@ -9,6 +9,7 @@ import "./sakai-rubric-criterion-rating-edit.js";
 import { SharingChangeEvent } from "./sharing-change-event.js";
 import { Sortable } from "/webcomponents/assets/sortablejs/modular/sortable.esm.js";
 import { tr } from "./sakai-rubrics-language.js";
+import "../sakai-sorter.js";
 
 export class SakaiRubricCriteria extends RubricsElement {
 
@@ -88,14 +89,16 @@ export class SakaiRubricCriteria extends RubricsElement {
     this.querySelectorAll(".cr-table").forEach(cr => {
 
       const sortable = new Sortable(cr, sortableOptions);
-      cr.querySelectorAll(".rating-item").forEach(li => this._setupSortable(li, sortable, true));
+      //cr.querySelectorAll(".rating-item").forEach(li => this._setupSortable(li, sortable, true));
     });
 
+    /*
     sortableOptions.onUpdate = (e) => this._handleSortedCriteria(e);
     sortableOptions.draggable = ".criterion-row";
 
     const sortable = new Sortable(this.querySelector(".criterion"), sortableOptions);
     this.querySelectorAll(".criterion-row").forEach(li => this._setupSortable(li, sortable));
+    */
 
     if (changedProperties.has("criteria")) {
       this.criteriaMap = new Map(this.criteria.map(c => [c.id, c]));
@@ -115,23 +118,26 @@ export class SakaiRubricCriteria extends RubricsElement {
     `;
   }
 
+  _reordered(e) {
+
+    //console.log(e.detail);
+
+    //console.log(this.criteriaMap);
+
+    this.criteria = e.detail.map(id => this.criteriaMap.get(parseInt(id)));
+    //console.log(this.criteria);
+  }
+
   render() {
 
     return html`
+      <sakai-sorter @reordered=${this._reordered}>
       <div data-rubric-id="${this.rubricId}" class="criterion style-scope sakai-rubric-criterion">
       ${repeat(this.criteria, c => c.id, c => html`
         ${this.isCriterionGroup(c) ? html`
           <div id="criterion_row_${c.id}" data-criterion-id="${c.id}" data-sortable-id="${c.id}" class="criterion-row criterion-group">
             <div class="criterion-detail criterion-title">
               <h4 class="criterion-title">
-                <span tabindex="0"
-                    data-criterion-id="${c.id}"
-                    data-sortable-id="${c.id}"
-                    title="${tr("drag_order")}"
-                    aria-label="${tr("drag_to_reorder_label")}"
-                    aria-describedby="rubrics-reorder-info"
-                    class="reorder-icon si si-drag-handle fs-2">
-                </span>
                 ${c.title}
                 <sakai-rubric-criterion-edit
                     id="criterion-edit-${c.id}"
@@ -156,15 +162,6 @@ export class SakaiRubricCriteria extends RubricsElement {
           <div id="criterion_row_${c.id}" data-criterion-id="${c.id}" data-sortable-id="${c.id}" class="criterion-row">
             <div class="criterion-detail">
               <h4 class="criterion-title d-flex align-items-center">
-                <div>
-                  <span tabindex="0"
-                      title="${tr("drag_order")}"
-                      data-criterion-id="${c.id}"
-                      data-sortable-id="${c.id}"
-                      aria-label="${tr("drag_to_reorder_label")}"
-                      class="reorder-icon si si-drag-handle fs-3">
-                  </span>
-                </div>
                 <div class="ms-1">${c.title}</div>
                 <div>
                   <sakai-rubric-criterion-edit
@@ -282,6 +279,7 @@ export class SakaiRubricCriteria extends RubricsElement {
         `}
       `)}
       </div>
+      </sakai-sorter>
       ${this.weighted ? html`
         <div class="weighted-grade-info">
           <div class="total-data">
