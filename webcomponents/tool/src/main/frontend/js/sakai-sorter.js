@@ -7,15 +7,15 @@ export class SakaiSorter extends LitElement {
     super();
   }
 
-  getDragAfterElement(container, y) {
+  _getDragAfterElement(container, coord) {
 
     const notDraggedCards =
-      [...container.querySelectorAll(":not(.dragging)")];
+      [...container.querySelectorAll("[draggable='true']:not(.dragging)")];
 
     return notDraggedCards.reduce((closest, child) => {
 
       const box = child.getBoundingClientRect();
-      const offset = y - box.top - box.height / 2;
+      const offset = coord - box.top - box.height / 2;
       if (offset < 0 && offset > closest.offset) {
         return { offset, element: child };
       } else {
@@ -24,35 +24,41 @@ export class SakaiSorter extends LitElement {
     }, { offset: Number.NEGATIVE_INFINITY }).element
   }
 
-  updated() {
+  firstUpdated() {
 
     const container = this.shadowRoot.querySelector("slot").assignedNodes().find(n => n.nodeType === Node.ELEMENT_NODE);
 
     container.addEventListener("dragover", e => {
 
-      const draggedElement = document.querySelector(".dragging")
+      e.preventDefault();
 
-      const afterElement = this.getDragAfterElement(container, e.clientY);
+      const afterElement = this._getDragAfterElement(container, e.clientY);
       if (afterElement == undefined) {
-        container.appendChild(draggedElement) // add to the end
+        container.appendChild(this.draggingElement) // add to the end
       } else {
-        container.insertBefore(draggedElement, afterElement)
+        container.insertBefore(this.draggingElement, afterElement)
       }
     });
-
-    console.log(container);
 
     container.querySelectorAll("*").forEach(sortable => {
 
       if (sortable.nodeType === Node.ELEMENT_NODE) {
+
+        sortable.setAttribute("draggable", "true");
+
+        const dragHandle = document.createElement("span");
+        dragHandle.classList.add("bi", "bi-grid");
+        sortable.insertBefore(dragHandle, sortable.firstChild)
+
         sortable.addEventListener("dragstart", e => {
 
+          e.dataTransfer.setData('text/plain', 'handle');
           this.draggingElement = e.target;
           sortable.classList.add("dragging");
         });
 
         sortable.addEventListener("dragend", e => {
-          sortable.classList.remove("dragging");
+          e.target.classList.remove("dragging");
         });
       }
     });
