@@ -21,4 +21,6 @@ import org.sakaiproject.pages.api.model.PagesPage;
 import org.sakaiproject.springframework.data.SpringCrudRepository;
 
 public interface PageRepository extends SpringCrudRepository<PagesPage, String> {
+
+    public List<PagesPage> findBySiteId(String siteId);
 }

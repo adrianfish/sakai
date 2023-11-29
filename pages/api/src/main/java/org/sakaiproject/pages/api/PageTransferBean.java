@@ -7,14 +7,26 @@ public class PageTransferBean {
     public String id;
     public String title;
     public String content;
+    public String siteId;
 
     public PagesPage asPage() {
 
         PagesPage page = new PagesPage();
 
         page.setTitle(this.title);
-        page.setContents(this.content);
+        page.setContent(this.content);
+        page.setSiteId(this.siteId);
 
         return page;
+    }
+
+    public static PageTransferBean of(PagesPage page) {
+
+        PageTransferBean bean = new PageTransferBean();
+        bean.id = page.getId();
+        bean.title = page.getTitle();
+        bean.content = page.getContent();
+        bean.siteId = page.getSiteId();
+        return bean;
     }
 }

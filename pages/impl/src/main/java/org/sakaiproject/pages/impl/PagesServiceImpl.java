@@ -7,6 +7,9 @@ import org.sakaiproject.pages.api.repository.PageRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 public class PagesServiceImpl implements PagesService {
 
     @Autowired PageRepository pageRepository;
@@ -14,5 +17,10 @@ public class PagesServiceImpl implements PagesService {
     public void savePage(PageTransferBean bean) {
 
         pageRepository.save(bean.asPage());
+    }
+
+    public List<PageTransferBean> getPagesForSite(String siteId) {
+
+        return pageRepository.findBySiteId(siteId).stream().map(PageTransferBean::of).collect(Collectors.toList());
     }
 }

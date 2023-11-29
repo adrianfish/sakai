@@ -16,6 +16,7 @@ import lombok.Setter;
 
 @Entity
 @Table(name = "PAGES_PAGE")
+@Getter
 @Setter
 public class PagesPage implements PersistableEntity<String> {
 
@@ -29,10 +30,10 @@ public class PagesPage implements PersistableEntity<String> {
     @Column(name = "TITLE", nullable = false, length = 255)
     private String title;
 
-    @Column(name = "CONTENTS", nullable = false, length = 65535)
+    @Column(name = "CONTENT", nullable = false, length = 65535)
     @Lob
-    private String contents;
+    private String content;
 
-    @Column(name = "PARENT_PAGE_ID", length = 36)
-    private String parentPageId;
+    @Column(name = "SITE_ID", length = 36)
+    private String siteId;
 }

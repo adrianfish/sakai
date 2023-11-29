@@ -28,6 +28,8 @@ import static org.mockito.Mockito.*;
 
 import lombok.extern.slf4j.Slf4j;
 
+import java.util.List;
+
 import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;
@@ -47,7 +49,7 @@ public class PagesServiceTests extends AbstractTransactionalJUnit4SpringContextT
     private String user2 = "user2";
     private User user2User = null;
 
-    String siteId = "playpen";
+    private String siteId = "playpen";
 
     @Before
     public void setup() {
@@ -68,12 +70,13 @@ public class PagesServiceTests extends AbstractTransactionalJUnit4SpringContextT
         PageTransferBean pageBean = new PageTransferBean();
         pageBean.title = "eggs";
         pageBean.content = "beans";
+        pageBean.siteId = siteId;
         pagesService.savePage(pageBean);
 
-        /*
-        List<PageTransferBean> pages = pagesService.getAllPages();
+        List<PageTransferBean> pages = pagesService.getPagesForSite(siteId);
         assertEquals(1, pages.size());
 
+        /*
         pagesService.savePage();
 
         pages = pagesService.getAllPages();
