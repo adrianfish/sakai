@@ -14,9 +14,9 @@ public class PagesServiceImpl implements PagesService {
 
     @Autowired PageRepository pageRepository;
 
-    public void savePage(PageTransferBean bean) {
+    public PageTransferBean savePage(PageTransferBean bean) {
 
-        pageRepository.save(bean.asPage());
+        return PageTransferBean.of(pageRepository.save(bean.asPage()));
     }
 
     public List<PageTransferBean> getPagesForSite(String siteId) {

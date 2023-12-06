@@ -71,7 +71,14 @@ public class PagesServiceTests extends AbstractTransactionalJUnit4SpringContextT
         pageBean.title = "eggs";
         pageBean.content = "beans";
         pageBean.siteId = siteId;
-        pagesService.savePage(pageBean);
+        assertNull(pageBean.id);
+
+        PageTransferBean savedBean = pagesService.savePage(pageBean);
+
+        assertNotNull(savedBean.id);
+        assertEquals(pageBean.title, savedBean.title);
+        assertEquals(pageBean.content, savedBean.content);
+        assertEquals(pageBean.siteId, savedBean.siteId);
 
         List<PageTransferBean> pages = pagesService.getPagesForSite(siteId);
         assertEquals(1, pages.size());

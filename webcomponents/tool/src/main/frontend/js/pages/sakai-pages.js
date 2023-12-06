@@ -1,19 +1,9 @@
 import { html } from "../assets/lit-element/lit-element.js";
+import { unsafeHTML } from "../assets/lit-html/directives/unsafe-html.js"
 import { SakaiElement } from "../sakai-element.js";
 import "../sakai-editor.js";
 
 export class SakaiPages extends SakaiElement {
-
-  constructor() {
-
-    super();
-
-    this._state = "PAGES";
-
-    this.loadTranslations("pages").then(i18n => this._i18n = i18n);
-
-    this._templatePageBean = { title: "", content: "", spurious: "bacon" };
-  }
 
   static get properties() {
 
@@ -23,7 +13,21 @@ export class SakaiPages extends SakaiElement {
       _i18n: { attribute: false, type: Object },
       _addPageUrl: { attribute: false, type: String },
       _state: { attribute: false, type: String },
+      _pages: { attribute: false, type: Array },
     };
+  }
+
+  constructor() {
+
+    super();
+
+    this._state = "PAGES";
+
+    this._pages = [];
+
+    this.loadTranslations("pages").then(i18n => this._i18n = i18n);
+
+    this._templatePageBean = { siteId: "", title: "", content: "" };
   }
 
   set siteId(value) {
@@ -41,33 +45,32 @@ export class SakaiPages extends SakaiElement {
 
   _getData() {
 
-    fetch(`/api/sites/${this.siteId}/pages`, { credentials: "include" })
+    // Get the initial load of JSON data. This will include the top level pages for the site.
+
+    const url = `/api/sites/${this.siteId}/pages`;
+    fetch(url, { credentials: "include" })
     .then(r => {
 
       if (r.ok) {
         return r.json();
       }
 
-      throw new Error("asdfasdf");
+      throw new Error(`Network error whilst getting initial data from ${url}`);
     })
     .then(data => {
 
+      this._pages = data.pages;
       this._addPageUrl = data.links.find(link => link.rel === "addPage")?.href;
-    });
+    })
+    .catch(error => console.error(error));
 
-    // Get the initial load of JSON data. This will include the top level pages for the site.
   }
 
-  _addPage() {
-
-    console.log("clicked");
-
-    this._state = "ADD_PAGE";
-  }
+  _addPage() { this._state = "ADD_PAGE"; }
 
   _savePage() {
 
-    console.log(this._templatePageBean);
+    this._templatePageBean.siteId = this.siteId;
 
     fetch(`/api/sites/${this.siteId}/pages`, {
       method: "POST",
@@ -78,25 +81,25 @@ export class SakaiPages extends SakaiElement {
     .then(r => {
 
       if (r.ok) {
-        console.log("ok");
+        return r.json();
       }
+    })
+    .then(page => {
+
+      this._pages.push(page);
+      this._state = "PAGES";
     })
     .catch(error => console.error(error));
   }
 
-  _cancelAddPage() {
+  _cancelAddPage() { this._state = "PAGES"; }
 
-    this._state = "PAGES";
-  }
+  _updateTitle(e) { this._templatePageBean.title = e.target.value; }
 
-  _updateTitle(e) {
-    this._templatePageBean.title = e.target.value;
-  }
+  _updateContent(e) { this._templatePageBean.content = e.detail.content; }
 
-  _updateContent(e) {
-
-    console.log(e);
-    this._templatePageBean.content = e.detail.content;
+  shouldUpdate() {
+    return this._i18n;
   }
 
   _renderAddPage() {
@@ -120,10 +123,6 @@ export class SakaiPages extends SakaiElement {
     `;
   }
 
-  shouldUpdate() {
-    return this._i18n;
-  }
-
   render() {
 
     return html`
@@ -143,6 +142,17 @@ export class SakaiPages extends SakaiElement {
               </button>
             </div>
           ` : ""}
+        </div>
+
+        <!-- PAGES TABLE STARTS HERE -->
+        <div>
+          <table>
+          <tbody>
+          ${this._pages.map(page => html`
+            <tr><td>${page.title}</td><td>${unsafeHTML(page.content)}</td></tr>
+          `)}
+          </tbody>
+          </table>
         </div>
       ` : ""}
 

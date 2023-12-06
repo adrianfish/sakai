@@ -50,6 +50,7 @@ public class PagesController extends AbstractSakaiApiController {
         PagesRestBean pagesRestBean = new PagesRestBean();
         pagesRestBean.siteId = siteId;
         pagesRestBean.userId = currentUserId;
+        pagesRestBean.pages = pagesService.getPagesForSite(siteId);
 
         List<Link> links = new ArrayList<>();
         links.add(Link.of("/api/sites/" + siteId + "/pages", "addPage"));
@@ -59,13 +60,9 @@ public class PagesController extends AbstractSakaiApiController {
     @PostMapping(value = "/sites/{siteId}/pages", produces = MediaType.APPLICATION_JSON_VALUE)
     public PageTransferBean createPage(@RequestBody PageTransferBean pageTransferBean) {
 
-        System.out.println(pageTransferBean.title);
-        System.out.println(pageTransferBean.content);
-
         checkSakaiSession();
 
-        pagesService.savePage(pageTransferBean);
-        return null;
+        return pagesService.savePage(pageTransferBean);
     }
 
     /*

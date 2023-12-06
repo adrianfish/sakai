@@ -7,7 +7,7 @@ public interface PagesService {
     /**
      * Saves a page. Tests if the page exists already
      */
-    public void savePage(PageTransferBean page);
+    public PageTransferBean savePage(PageTransferBean page);
 
     public List<PageTransferBean> getPagesForSite(String siteId);
 }
