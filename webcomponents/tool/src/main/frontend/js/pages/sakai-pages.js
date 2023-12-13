@@ -59,6 +59,8 @@ export class SakaiPages extends SakaiElement {
     })
     .then(data => {
 
+      console.log(data);
+
       this._pages = data.pages;
       this._addPageUrl = data.links.find(link => link.rel === "addPage")?.href;
     })
@@ -97,6 +99,16 @@ export class SakaiPages extends SakaiElement {
   _updateTitle(e) { this._templatePageBean.title = e.target.value; }
 
   _updateContent(e) { this._templatePageBean.content = e.detail.content; }
+
+  _editPage(e) {
+
+    console.log(e.target.dataset.pageId);
+  }
+
+  _deletePage(e) {
+
+    console.log(e.target.dataset.pageId);
+  }
 
   shouldUpdate() {
     return this._i18n;
@@ -146,10 +158,22 @@ export class SakaiPages extends SakaiElement {
 
         <!-- PAGES TABLE STARTS HERE -->
         <div>
-          <table>
+          <table class="table table-striped table-bordered table-hover">
+          <thead>
+            <tr>
+              <th>Title</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
           <tbody>
           ${this._pages.map(page => html`
-            <tr><td>${page.title}</td><td>${unsafeHTML(page.content)}</td></tr>
+            <tr>
+              <td>${page.title}</td>
+              <td>
+                <button type="button" class="btn btn-link" data-page-id="${page.id}" @click=${this._editPage}><i class="si si-edit pe-none"></i></button>
+                <button type="button" class="btn btn-link" data-page-id="${page.id}" @click=${this._deletePage}><i class="si si-trash pe-none"></i></button>
+              </td>
+            </tr>
           `)}
           </tbody>
           </table>
