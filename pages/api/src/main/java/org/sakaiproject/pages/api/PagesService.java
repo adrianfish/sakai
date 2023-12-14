@@ -9,5 +9,5 @@ public interface PagesService {
      */
     public PageTransferBean savePage(PageTransferBean page);
 
-    public List<PageTransferBean> getPagesForSite(String siteId);
+    public List<PageTransferBean> getPagesForSite(String siteId, boolean populate);
 }

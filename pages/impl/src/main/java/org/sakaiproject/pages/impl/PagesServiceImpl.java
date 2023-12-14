@@ -19,8 +19,15 @@ public class PagesServiceImpl implements PagesService {
         return PageTransferBean.of(pageRepository.save(bean.asPage()));
     }
 
-    public List<PageTransferBean> getPagesForSite(String siteId) {
+    public List<PageTransferBean> getPagesForSite(String siteId, boolean populate) {
 
-        return pageRepository.findBySiteId(siteId).stream().map(PageTransferBean::of).collect(Collectors.toList());
+        return pageRepository.findBySiteId(siteId).stream().map(page -> {
+
+            PageTransferBean bean = PageTransferBean.of(page);
+            if (!populate) {
+                bean.content = "";
+            }
+            return bean;
+        }).collect(Collectors.toList());
     }
 }

@@ -139,7 +139,7 @@ export class SakaiPages extends SakaiElement {
 
     return html`
       ${this._state === "PAGES" ? html`
-        <div class="d-flex justify-content-between">
+        <div class="d-flex justify-content-between mb-3">
           <div>
             <h1 class="d-inline">${this._i18n.pages_header}</h1>
           </div>
@@ -157,25 +157,35 @@ export class SakaiPages extends SakaiElement {
         </div>
 
         <!-- PAGES TABLE STARTS HERE -->
-        <div>
+        <div class="table-responsive">
           <table class="table table-striped table-bordered table-hover">
-          <thead>
-            <tr>
-              <th>Title</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-          ${this._pages.map(page => html`
-            <tr>
-              <td>${page.title}</td>
-              <td>
-                <button type="button" class="btn btn-link" data-page-id="${page.id}" @click=${this._editPage}><i class="si si-edit pe-none"></i></button>
-                <button type="button" class="btn btn-link" data-page-id="${page.id}" @click=${this._deletePage}><i class="si si-trash pe-none"></i></button>
-              </td>
-            </tr>
-          `)}
-          </tbody>
+            <thead>
+              <tr>
+                <th>Title</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+            ${this._pages.map(page => html`
+              <tr>
+                <td>${page.title}</td>
+                <td style="width: 140px;">
+                  <button type="button"
+                      class="btn btn-link"
+                      data-page-id="${page.id}"
+                      @click=${this._editPage}>
+                    <i class="si si-edit pe-none"></i>
+                  </button>
+                  <button type="button"
+                      class="btn btn-link"
+                      data-page-id="${page.id}"
+                      @click=${this._deletePage}>
+                    <i class="si si-trash pe-none"></i>
+                  </button>
+                </td>
+              </tr>
+            `)}
+            </tbody>
           </table>
         </div>
       ` : ""}

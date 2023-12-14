@@ -50,7 +50,7 @@ public class PagesController extends AbstractSakaiApiController {
         PagesRestBean pagesRestBean = new PagesRestBean();
         pagesRestBean.siteId = siteId;
         pagesRestBean.userId = currentUserId;
-        pagesRestBean.pages = pagesService.getPagesForSite(siteId, /* sparse */ true);
+        pagesRestBean.pages = pagesService.getPagesForSite(siteId, /* populate */ false);
 
         List<Link> links = new ArrayList<>();
         links.add(Link.of("/api/sites/" + siteId + "/pages", "addPage"));
