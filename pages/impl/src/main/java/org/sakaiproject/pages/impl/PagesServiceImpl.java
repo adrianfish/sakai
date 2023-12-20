@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class PagesServiceImpl implements PagesService {
@@ -21,6 +22,8 @@ public class PagesServiceImpl implements PagesService {
 
     public List<PageTransferBean> getPagesForSite(String siteId, boolean populate) {
 
+        // TODO: Add some bloody security
+
         return pageRepository.findBySiteId(siteId).stream().map(page -> {
 
             PageTransferBean bean = PageTransferBean.of(page);
@@ -29,5 +32,12 @@ public class PagesServiceImpl implements PagesService {
             }
             return bean;
         }).collect(Collectors.toList());
+    }
+
+    public Optional<PageTransferBean> getPage(String siteId, String pageId) {
+
+        // TODO: Add some bloody security
+
+        return pageRepository.findById(pageId).map(PageTransferBean::of);
     }
 }

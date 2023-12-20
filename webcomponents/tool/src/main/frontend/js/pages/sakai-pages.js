@@ -1,5 +1,4 @@
 import { html } from "../assets/lit-element/lit-element.js";
-import { unsafeHTML } from "../assets/lit-html/directives/unsafe-html.js"
 import { SakaiElement } from "../sakai-element.js";
 import "../sakai-editor.js";
 
@@ -28,6 +27,8 @@ export class SakaiPages extends SakaiElement {
     this.loadTranslations("pages").then(i18n => this._i18n = i18n);
 
     this._templatePageBean = { siteId: "", title: "", content: "" };
+
+    this._pageBeingEdited = { ...this._templatePagebean };
   }
 
   set siteId(value) {
@@ -102,7 +103,23 @@ export class SakaiPages extends SakaiElement {
 
   _editPage(e) {
 
-    console.log(e.target.dataset.pageId);
+    const pageId = e.target.dataset.pageId;
+
+    const url = `/api/sites/${this.siteId}/pages/${pageId}`;
+    fetch(url, { credentials: "include" })
+    .then(r => {
+
+      if (r.ok) {
+        return r.json();
+      }
+      throw new Error(`Network error whilst getting page data from ${url}`);
+    })
+    .then(page => {
+
+      this._pageBeingEdited = page;
+      this._state = "ADD_PAGE";
+    })
+    .catch(error => console.error(error));
   }
 
   _deletePage(e) {
@@ -122,11 +139,11 @@ export class SakaiPages extends SakaiElement {
       </div>
       <div>${this._i18n.add_page_title_label}</div>
       <div>
-        <input id="pages-title-input" type="text" @keyup=${this._updateTitle}>
+        <input id="pages-title-input" type="text" @keyup=${this._updateTitle} .value=${this._pageBeingEdited.title}>
       </div>
       <div class="mt-3">${this._i18n.add_page_content_label}</div>
       <div>
-        <sakai-editor @changed=${this._updateContent}></sakai-editor>
+        <sakai-editor @changed=${this._updateContent} content="${this._pageBeingEdited.content}"></sakai-editor>
       </div>
       <div class="mt-2">
         <button type="button" @click=${this._savePage} class="btn btn-primary">${this._i18n.save}</button>

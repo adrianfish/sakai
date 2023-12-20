@@ -28,8 +28,11 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import org.springframework.http.ResponseEntity;
+
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -63,6 +66,20 @@ public class PagesController extends AbstractSakaiApiController {
         checkSakaiSession();
 
         return pagesService.savePage(pageTransferBean);
+    }
+
+	@GetMapping(value = "/sites/{siteId}/pages/{pageId}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<PageTransferBean> getSitePage(@PathVariable String siteId, @PathVariable String pageId) {
+
+        checkSakaiSession();
+
+        Optional<PageTransferBean> optBean = pagesService.getPage(siteId, pageId);
+
+        if (!optBean.isPresent()) {
+            return ResponseEntity.notFound().build();
+        }
+
+        return ResponseEntity.ok(optBean.get());
     }
 
     /*

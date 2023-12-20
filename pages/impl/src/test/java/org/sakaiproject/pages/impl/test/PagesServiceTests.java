@@ -29,6 +29,7 @@ import static org.mockito.Mockito.*;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
+import java.util.Optional;
 
 import static org.junit.Assert.*;
 import org.junit.Before;
@@ -80,15 +81,44 @@ public class PagesServiceTests extends AbstractTransactionalJUnit4SpringContextT
         assertEquals(pageBean.content, savedBean.content);
         assertEquals(pageBean.siteId, savedBean.siteId);
 
-        List<PageTransferBean> pages = pagesService.getPagesForSite(siteId);
+        List<PageTransferBean> pages = pagesService.getPagesForSite(siteId, true);
         assertEquals(1, pages.size());
+    }
 
-        /*
-        pagesService.savePage();
+    @Test
+    public void getPagesForSite() {
 
-        pages = pagesService.getAllPages();
-        assertEquals(2, pages.size());
-        */
+        PageTransferBean pageBean = new PageTransferBean();
+        pageBean.title = "eggs";
+        pageBean.content = "beans";
+        pageBean.siteId = siteId;
+
+        PageTransferBean savedBean = pagesService.savePage(pageBean);
+        List<PageTransferBean> pages = pagesService.getPagesForSite(siteId, true);
+        assertEquals(pageBean.content, pages.get(0).content);
+
+        pages = pagesService.getPagesForSite(siteId, false);
+        assertEquals("", pages.get(0).content);
+    }
+
+    @Test
+    public void getPage() {
+
+        PageTransferBean pageBean = new PageTransferBean();
+        pageBean.title = "eggs";
+        pageBean.content = "beans";
+        pageBean.siteId = siteId;
+
+        PageTransferBean savedBean = pagesService.savePage(pageBean);
+
+        Optional<PageTransferBean> retrievedBeanOpt = pagesService.getPage(siteId, savedBean.id);
+        assertTrue(retrievedBeanOpt.isPresent());
+
+        assertEquals(pageBean.title, retrievedBeanOpt.get().title);
+        assertEquals(pageBean.content, retrievedBeanOpt.get().content);
+
+        retrievedBeanOpt = pagesService.getPage(siteId, "bob");
+        assertFalse(retrievedBeanOpt.isPresent());
     }
 }
 
