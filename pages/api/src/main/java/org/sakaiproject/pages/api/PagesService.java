@@ -13,4 +13,6 @@ public interface PagesService {
     public List<PageTransferBean> getPagesForSite(String siteId, boolean populate);
 
     public Optional<PageTransferBean> getPage(String siteId, String pageId);
+
+    public void deletePage(String pageId, String siteId);
 }

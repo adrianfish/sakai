@@ -51,6 +51,8 @@ public class PagesServiceTests extends AbstractTransactionalJUnit4SpringContextT
     private User user2User = null;
 
     private String siteId = "playpen";
+    private String title = "eggs";
+    private String content = "beans";
 
     @Before
     public void setup() {
@@ -68,10 +70,8 @@ public class PagesServiceTests extends AbstractTransactionalJUnit4SpringContextT
     @Test
     public void savePage() {
 
-        PageTransferBean pageBean = new PageTransferBean();
-        pageBean.title = "eggs";
-        pageBean.content = "beans";
-        pageBean.siteId = siteId;
+        PageTransferBean pageBean = getPageTransferBean();
+
         assertNull(pageBean.id);
 
         PageTransferBean savedBean = pagesService.savePage(pageBean);
@@ -83,15 +83,30 @@ public class PagesServiceTests extends AbstractTransactionalJUnit4SpringContextT
 
         List<PageTransferBean> pages = pagesService.getPagesForSite(siteId, true);
         assertEquals(1, pages.size());
+
+        savedBean.content = "beans and sauce";
+        PageTransferBean updatedBean = pagesService.savePage(savedBean);
+
+        assertNotNull(updatedBean.id);
+        assertEquals(savedBean.id, updatedBean.id);
+        assertEquals(savedBean.title, updatedBean.title);
+        assertEquals(savedBean.content, updatedBean.content);
+        assertEquals(savedBean.siteId, updatedBean.siteId);
+
+        pages = pagesService.getPagesForSite(siteId, true);
+        assertEquals(1, pages.size());
+
+        PageTransferBean returnedBean = pages.get(0);
+        assertEquals(returnedBean.id, updatedBean.id);
+        assertEquals(returnedBean.title, updatedBean.title);
+        assertEquals(returnedBean.content, updatedBean.content);
+        assertEquals(returnedBean.siteId, updatedBean.siteId);
     }
 
     @Test
     public void getPagesForSite() {
 
-        PageTransferBean pageBean = new PageTransferBean();
-        pageBean.title = "eggs";
-        pageBean.content = "beans";
-        pageBean.siteId = siteId;
+        PageTransferBean pageBean = getPageTransferBean();
 
         PageTransferBean savedBean = pagesService.savePage(pageBean);
         List<PageTransferBean> pages = pagesService.getPagesForSite(siteId, true);
@@ -104,10 +119,7 @@ public class PagesServiceTests extends AbstractTransactionalJUnit4SpringContextT
     @Test
     public void getPage() {
 
-        PageTransferBean pageBean = new PageTransferBean();
-        pageBean.title = "eggs";
-        pageBean.content = "beans";
-        pageBean.siteId = siteId;
+        PageTransferBean pageBean = getPageTransferBean();
 
         PageTransferBean savedBean = pagesService.savePage(pageBean);
 
@@ -119,6 +131,31 @@ public class PagesServiceTests extends AbstractTransactionalJUnit4SpringContextT
 
         retrievedBeanOpt = pagesService.getPage(siteId, "bob");
         assertFalse(retrievedBeanOpt.isPresent());
+    }
+
+    @Test
+    public void deletePage() {
+
+        PageTransferBean pageBean = getPageTransferBean();
+
+        PageTransferBean savedBean = pagesService.savePage(pageBean);
+
+        List<PageTransferBean> pages = pagesService.getPagesForSite(siteId, true);
+        assertEquals(1, pages.size());
+
+        pagesService.deletePage(savedBean.id, siteId);
+
+        pages = pagesService.getPagesForSite(siteId, true);
+        assertEquals(0, pages.size());
+    }
+
+    private PageTransferBean getPageTransferBean() {
+
+        PageTransferBean pageBean = new PageTransferBean();
+        pageBean.title = title;
+        pageBean.content = content;
+        pageBean.siteId = siteId;
+        return pageBean;
     }
 }
 

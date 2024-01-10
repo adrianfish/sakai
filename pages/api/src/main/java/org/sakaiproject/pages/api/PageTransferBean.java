@@ -13,6 +13,7 @@ public class PageTransferBean {
 
         PagesPage page = new PagesPage();
 
+        page.setId(this.id);
         page.setTitle(this.title);
         page.setContent(this.content);
         page.setSiteId(this.siteId);

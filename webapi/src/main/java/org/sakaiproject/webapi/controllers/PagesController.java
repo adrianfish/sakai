@@ -22,9 +22,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.Link;
 import org.springframework.http.MediaType;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -81,6 +83,26 @@ public class PagesController extends AbstractSakaiApiController {
 
         return ResponseEntity.ok(optBean.get());
     }
+
+    @PutMapping(value = "/sites/{siteId}/pages/{pageId}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<PageTransferBean> updateSitePage(@PathVariable String siteId, @PathVariable String pageId, @RequestBody PageTransferBean pageTransferBean) {
+
+        checkSakaiSession();
+
+        return ResponseEntity.ok(pagesService.savePage(pageTransferBean));
+    }
+
+    @DeleteMapping(value = "/sites/{siteId}/pages/{pageId}")
+    public ResponseEntity deleteSitePage(@PathVariable String siteId, @PathVariable String pageId) {
+
+        checkSakaiSession();
+
+        pagesService.deletePage(pageId, siteId);
+
+        return ResponseEntity.ok().build();
+    }
+
+
 
     /*
     private EntityModel entityModelForPageTransferBean(PageTransferBean pageBean) {

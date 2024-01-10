@@ -13,6 +13,7 @@ export class SakaiPages extends SakaiElement {
       _addPageUrl: { attribute: false, type: String },
       _state: { attribute: false, type: String },
       _pages: { attribute: false, type: Array },
+      _pageBeingEdited: { attribute: false, type: Object },
     };
   }
 
@@ -28,7 +29,7 @@ export class SakaiPages extends SakaiElement {
 
     this._templatePageBean = { siteId: "", title: "", content: "" };
 
-    this._pageBeingEdited = { ...this._templatePagebean };
+    this._pageBeingEdited = { ...this._templatePageBean };
   }
 
   set siteId(value) {
@@ -60,8 +61,6 @@ export class SakaiPages extends SakaiElement {
     })
     .then(data => {
 
-      console.log(data);
-
       this._pages = data.pages;
       this._addPageUrl = data.links.find(link => link.rel === "addPage")?.href;
     })
@@ -73,33 +72,42 @@ export class SakaiPages extends SakaiElement {
 
   _savePage() {
 
-    this._templatePageBean.siteId = this.siteId;
+    this._pageBeingEdited.siteId = this.siteId;
+    
+    const isNew = !this._pageBeingEdited.id;
 
-    fetch(`/api/sites/${this.siteId}/pages`, {
-      method: "POST",
+    const url = `/api/sites/${this.siteId}/pages${isNew ? "" : `/${this._pageBeingEdited.id}`}`;
+    fetch(url, {
+      method: isNew ? "POST" : "PUT",
       credentials: "include",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(this._templatePageBean)
+      body: JSON.stringify(this._pageBeingEdited)
     })
     .then(r => {
 
       if (r.ok) {
         return r.json();
       }
+      throw new Error(`Network error while saving page at ${url}`);
     })
     .then(page => {
 
-      this._pages.push(page);
-      this._state = "PAGES";
+      const index = this._pages.findIndex(p => p.id === page.id);
+      if (index !== -1) {
+        this._pages.splice(index, 1, page);
+      } else {
+        this._pages.push(page);
+      }
+      this._state = "PAGES"; // This will trigger an update
     })
     .catch(error => console.error(error));
   }
 
   _cancelAddPage() { this._state = "PAGES"; }
 
-  _updateTitle(e) { this._templatePageBean.title = e.target.value; }
+  _updateTitle(e) { this._pageBeingEdited.title = e.target.value; }
 
-  _updateContent(e) { this._templatePageBean.content = e.detail.content; }
+  _updateContent(e) { this._pageBeingEdited.content = e.detail.content; }
 
   _editPage(e) {
 
@@ -124,7 +132,23 @@ export class SakaiPages extends SakaiElement {
 
   _deletePage(e) {
 
-    console.log(e.target.dataset.pageId);
+    const pageId = e.target.dataset.pageId;
+
+    const url = `/api/sites/${this.siteId}/pages/${pageId}`;
+    fetch(url, { method: "DELETE", credentials: "include" })
+    .then(r => {
+
+      if (r.ok) {
+        const index = this._pages.findIndex(p => p.id === pageId);
+        this._pages.splice(index, 1);
+
+        // We need to request an update because lit only watches the array instance, not the contents
+        this.requestUpdate();
+      } else {
+        throw new Error(`Network error whilst getting page data from ${url}`);
+      }
+    })
+    .catch(error => console.error(error));
   }
 
   shouldUpdate() {

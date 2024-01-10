@@ -17,6 +17,8 @@ public class PagesServiceImpl implements PagesService {
 
     public PageTransferBean savePage(PageTransferBean bean) {
 
+        System.out.println(bean.asPage().getId());
+
         return PageTransferBean.of(pageRepository.save(bean.asPage()));
     }
 
@@ -39,5 +41,10 @@ public class PagesServiceImpl implements PagesService {
         // TODO: Add some bloody security
 
         return pageRepository.findById(pageId).map(PageTransferBean::of);
+    }
+
+    public void deletePage(String pageId, String siteId) {
+
+        pageRepository.deleteById(pageId);
     }
 }
