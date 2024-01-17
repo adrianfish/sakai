@@ -1,4 +1,5 @@
 import { html } from "../assets/lit-element/lit-element.js";
+import { unsafeHTML } from "../assets/lit-html/directives/unsafe-html.js";
 import { SakaiElement } from "../sakai-element.js";
 import "../sakai-editor.js";
 
@@ -14,6 +15,7 @@ export class SakaiPages extends SakaiElement {
       _state: { attribute: false, type: String },
       _pages: { attribute: false, type: Array },
       _pageBeingEdited: { attribute: false, type: Object },
+      _pageBeingViewed: { attribute: false, type: Object },
     };
   }
 
@@ -70,10 +72,33 @@ export class SakaiPages extends SakaiElement {
 
   _addPage() { this._state = "ADD_PAGE"; }
 
+  _viewPage(e) {
+
+    const pageId = e.target.dataset.pageId;
+
+    const url = `/api/sites/${this.siteId}/pages/${pageId}`;
+    fetch(url, { credentials: "include" })
+    .then(r => {
+
+      if (r.ok) {
+        return r.json();
+      }
+      throw new Error(`Network error whilst getting page data from ${url}`);
+    })
+    .then(page => {
+
+      this._pageBeingViewed = page;
+      this._state = "VIEW_PAGE";
+    })
+    .catch(error => console.error(error));
+  }
+
+  _viewPages() { this._state = "PAGES"; }
+
   _savePage() {
 
     this._pageBeingEdited.siteId = this.siteId;
-    
+
     const isNew = !this._pageBeingEdited.id;
 
     const url = `/api/sites/${this.siteId}/pages${isNew ? "" : `/${this._pageBeingEdited.id}`}`;
@@ -176,6 +201,17 @@ export class SakaiPages extends SakaiElement {
     `;
   }
 
+  _renderViewPage() {
+
+    return html`
+      <h1>${this._pageBeingViewed.title}</h1>
+      <div>${unsafeHTML(this._pageBeingViewed.content)}</div>
+      <div class="mt-2">
+        <button type="button" class="btn btn-secondary" @click=${this._viewPages}>Done</button>
+      </div>
+    `;
+  }
+
   render() {
 
     return html`
@@ -202,14 +238,21 @@ export class SakaiPages extends SakaiElement {
           <table class="table table-striped table-bordered table-hover">
             <thead>
               <tr>
-                <th>Title</th>
-                <th>Actions</th>
+                <th>${this._i18n.title}</th>
+                <th>${this._i18n.actions}</th>
               </tr>
             </thead>
             <tbody>
             ${this._pages.map(page => html`
               <tr>
-                <td>${page.title}</td>
+                <td>
+                  <button type="button"
+                      class="btn btn-link"
+                      data-page-id="${page.id}"
+                      @click=${this._viewPage}>
+                    ${page.title}
+                  </button>
+                </td>
                 <td style="width: 140px;">
                   <button type="button"
                       class="btn btn-link"
@@ -232,6 +275,7 @@ export class SakaiPages extends SakaiElement {
       ` : ""}
 
       ${this._state === "ADD_PAGE" ? this._renderAddPage() : ""}
+      ${this._state === "VIEW_PAGE" ? this._renderViewPage() : ""}
     `;
   }
 }

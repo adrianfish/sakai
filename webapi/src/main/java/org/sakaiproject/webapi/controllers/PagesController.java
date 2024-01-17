@@ -102,8 +102,6 @@ public class PagesController extends AbstractSakaiApiController {
         return ResponseEntity.ok().build();
     }
 
-
-
     /*
     private EntityModel entityModelForPageTransferBean(PageTransferBean pageBean) {
 
