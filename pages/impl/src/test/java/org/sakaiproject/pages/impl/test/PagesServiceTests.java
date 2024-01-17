@@ -15,8 +15,11 @@
  */
 package org.sakaiproject.pages.impl.test;
 
+import org.sakaiproject.authz.api.SecurityService;
+import org.sakaiproject.pages.api.PagesPermissionException;
 import org.sakaiproject.pages.api.PagesService;
 import org.sakaiproject.pages.api.PageTransferBean;
+import org.sakaiproject.pages.api.Permissions;
 import org.sakaiproject.user.api.User;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,6 +45,7 @@ import org.junit.runner.RunWith;
 public class PagesServiceTests extends AbstractTransactionalJUnit4SpringContextTests {
 
     @Autowired private PagesService pagesService;
+    @Autowired private SecurityService securityService;
 
     private String instructor = "instructor";
     private User instructorUser = null;
@@ -65,14 +69,20 @@ public class PagesServiceTests extends AbstractTransactionalJUnit4SpringContextT
 
         user2User = mock(User.class);
         when(user2User.getDisplayName()).thenReturn(user2);
+
+        reset(securityService);
     }
 
     @Test
-    public void savePage() {
+    public void savePage() throws PagesPermissionException {
 
         PageTransferBean pageBean = getPageTransferBean();
 
         assertNull(pageBean.id);
+
+        assertThrows(PagesPermissionException.class, () -> pagesService.savePage(pageBean));
+
+        when(securityService.unlock(Permissions.ADD_PAGE, "/site/" + siteId)).thenReturn(true);
 
         PageTransferBean savedBean = pagesService.savePage(pageBean);
 
@@ -104,7 +114,9 @@ public class PagesServiceTests extends AbstractTransactionalJUnit4SpringContextT
     }
 
     @Test
-    public void getPagesForSite() {
+    public void getPagesForSite() throws PagesPermissionException {
+
+        when(securityService.unlock(Permissions.ADD_PAGE, "/site/" + siteId)).thenReturn(true);
 
         PageTransferBean pageBean = getPageTransferBean();
 
@@ -117,7 +129,9 @@ public class PagesServiceTests extends AbstractTransactionalJUnit4SpringContextT
     }
 
     @Test
-    public void getPage() {
+    public void getPage() throws PagesPermissionException {
+
+        when(securityService.unlock(Permissions.ADD_PAGE, "/site/" + siteId)).thenReturn(true);
 
         PageTransferBean pageBean = getPageTransferBean();
 
@@ -134,7 +148,9 @@ public class PagesServiceTests extends AbstractTransactionalJUnit4SpringContextT
     }
 
     @Test
-    public void deletePage() {
+    public void deletePage() throws PagesPermissionException {
+
+        when(securityService.unlock(Permissions.ADD_PAGE, "/site/" + siteId)).thenReturn(true);
 
         PageTransferBean pageBean = getPageTransferBean();
 
@@ -142,6 +158,10 @@ public class PagesServiceTests extends AbstractTransactionalJUnit4SpringContextT
 
         List<PageTransferBean> pages = pagesService.getPagesForSite(siteId, true);
         assertEquals(1, pages.size());
+
+        assertThrows(PagesPermissionException.class, () -> pagesService.deletePage(savedBean.id, siteId));
+
+        when(securityService.unlock(Permissions.DELETE_PAGE, "/site/" + siteId)).thenReturn(true);
 
         pagesService.deletePage(savedBean.id, siteId);
 

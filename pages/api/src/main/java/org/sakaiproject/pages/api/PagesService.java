@@ -8,11 +8,11 @@ public interface PagesService {
     /**
      * Saves a page. Tests if the page exists already
      */
-    public PageTransferBean savePage(PageTransferBean page);
+    public PageTransferBean savePage(PageTransferBean page) throws PagesPermissionException;
 
     public List<PageTransferBean> getPagesForSite(String siteId, boolean populate);
 
     public Optional<PageTransferBean> getPage(String siteId, String pageId);
 
-    public void deletePage(String pageId, String siteId);
+    public void deletePage(String pageId, String siteId) throws PagesPermissionException;
 }
