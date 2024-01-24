@@ -14,6 +14,7 @@
 package org.sakaiproject.webapi.controllers;
 
 import org.sakaiproject.pages.api.PageTransferBean;
+import org.sakaiproject.pages.api.PagesPermissionException;
 import org.sakaiproject.pages.api.PagesService;
 
 import org.sakaiproject.webapi.beans.PagesRestBean;
@@ -21,6 +22,7 @@ import org.sakaiproject.webapi.beans.PagesRestBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.Link;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -63,11 +65,16 @@ public class PagesController extends AbstractSakaiApiController {
     }
 
     @PostMapping(value = "/sites/{siteId}/pages", produces = MediaType.APPLICATION_JSON_VALUE)
-    public PageTransferBean createPage(@RequestBody PageTransferBean pageTransferBean) {
+    public ResponseEntity<PageTransferBean> createPage(@RequestBody PageTransferBean pageTransferBean) {
 
         checkSakaiSession();
 
-        return pagesService.savePage(pageTransferBean);
+        try {
+            return ResponseEntity.ok(pagesService.savePage(pageTransferBean));
+        } catch (PagesPermissionException ppe) {
+            log.error("createPage rest endpoint accessed without permission: {}", ppe.toString());
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
     }
 
 	@GetMapping(value = "/sites/{siteId}/pages/{pageId}", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -89,7 +96,12 @@ public class PagesController extends AbstractSakaiApiController {
 
         checkSakaiSession();
 
-        return ResponseEntity.ok(pagesService.savePage(pageTransferBean));
+        try {
+            return ResponseEntity.ok(pagesService.savePage(pageTransferBean));
+        } catch (PagesPermissionException ppe) {
+            log.error("updateSitePage rest endpoint accessed without permission: {}", ppe.toString());
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
     }
 
     @DeleteMapping(value = "/sites/{siteId}/pages/{pageId}")
@@ -97,9 +109,13 @@ public class PagesController extends AbstractSakaiApiController {
 
         checkSakaiSession();
 
-        pagesService.deletePage(pageId, siteId);
-
-        return ResponseEntity.ok().build();
+        try {
+            pagesService.deletePage(pageId, siteId);
+            return ResponseEntity.ok().build();
+        } catch (PagesPermissionException ppe) {
+            log.error("updateSitePage rest endpoint accessed without permission: {}", ppe.toString());
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
     }
 
     /*

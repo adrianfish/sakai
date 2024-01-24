@@ -11,6 +11,7 @@ describe("sakai-pages tests", () => {
   fetchMock
     .get(data.i18nUrl, data.i18n, { overwriteRoutes: true })
     .get(data.pagesUrl, data.pagesDataForStudent, { overwriteRoutes: true })
+    .delete(data.page1Url, {}, { overwriteRoutes: true })
     .get("*", 500, { overwriteRoutes: true });
 
   it ("renders for student correctly", async () => {
@@ -38,6 +39,20 @@ describe("sakai-pages tests", () => {
 
     // This should only appear for instructors, the add page button icon
     await waitUntil(() => el.querySelector("i.si-add"), "Add page button not displayed");
+  });
+
+  it ("prompts the user to confirm deletion of a page", async () => {
+
+    fetchMock
+      .get(data.pagesUrl, data.pagesDataForInstructor, { overwriteRoutes: true });
+
+    let el = await fixture(html`
+      <sakai-pages site-id="${data.siteId}"></sakai-pages>
+    `);
+
+    await waitUntil(() => el.querySelector("button.delete-page-button"), "Delete page button not displayed");
+
+    el.querySelector("button.delete-page-button").click();
   });
 
   it ("is accessible", async () => {

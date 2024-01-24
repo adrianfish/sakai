@@ -15,7 +15,9 @@ export const siteId = "xyz";
 
 export const pagesUrl= `/api/sites/${siteId}/pages`;
 
-const page1 = { title: "Eggs" };
+const page1 = { id: "page1", title: "Eggs" };
+
+export const page1Url= `/api/sites/${siteId}/pages/${page1.id}`;
 
 const pages = [ page1 ];
 

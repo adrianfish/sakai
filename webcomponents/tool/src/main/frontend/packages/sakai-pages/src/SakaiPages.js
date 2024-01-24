@@ -5,19 +5,17 @@ import "@sakai-ui/sakai-editor/sakai-editor.js";
 
 export class SakaiPages extends SakaiElement {
 
-  static get properties() {
+  static properties = {
 
-    return {
-      siteId: { attribute: "site-id", type: String },
-      _topLevelPages: { attribute: false, type: Array },
-      _i18n: { attribute: false, type: Object },
-      _addPageUrl: { attribute: false, type: String },
-      _state: { attribute: false, type: String },
-      _pages: { attribute: false, type: Array },
-      _pageBeingEdited: { attribute: false, type: Object },
-      _pageBeingViewed: { attribute: false, type: Object },
-    };
-  }
+    siteId: { attribute: "site-id", type: String },
+    _topLevelPages: { attribute: false, type: Array },
+    _i18n: { attribute: false, type: Object },
+    _addPageUrl: { attribute: false, type: String },
+    _state: { attribute: false, type: String },
+    _pages: { attribute: false, type: Array },
+    _pageBeingEdited: { attribute: false, type: Object },
+    _pageBeingViewed: { attribute: false, type: Object },
+  };
 
   constructor() {
 
@@ -259,7 +257,7 @@ export class SakaiPages extends SakaiElement {
                     <i class="si si-edit pe-none"></i>
                   </button>
                   <button type="button"
-                      class="btn btn-link"
+                      class="btn btn-link delete-page-button"
                       data-page-id="${page.id}"
                       @click=${this._deletePage}>
                     <i class="si si-trash pe-none"></i>
