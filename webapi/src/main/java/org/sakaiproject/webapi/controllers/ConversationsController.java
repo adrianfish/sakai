@@ -54,6 +54,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -153,7 +154,16 @@ public class ConversationsController extends AbstractSakaiApiController {
         return conversationsService.getSiteStats(siteId, from, to, (Integer) options.get("page"), (String) options.get("sort"));
     }
 
-	@PostMapping(value = "/sites/{siteId}/topics", produces = MediaType.APPLICATION_JSON_VALUE)
+	@GetMapping(value = "/sites/{siteId}/conversations/topics", produces = MediaType.APPLICATION_JSON_VALUE)
+    public List<Map<String, String>> getTopics(@PathVariable String siteId) throws ConversationsPermissionsException {
+
+		checkSakaiSession();
+
+        return conversationsService.getTopicsForSite(siteId).stream()
+            .map(t -> Map.of("reference", t.reference, "title", t.title)).collect(Collectors.toList());
+    }
+
+	@PostMapping(value = "/sites/{siteId}/conversations/topics", produces = MediaType.APPLICATION_JSON_VALUE)
     public EntityModel createTopic(@PathVariable String siteId, @RequestBody TopicTransferBean topicBean) throws ConversationsPermissionsException {
 
 		checkSakaiSession();
@@ -163,7 +173,16 @@ public class ConversationsController extends AbstractSakaiApiController {
         return entityModelForTopicBean(conversationsService.saveTopic(topicBean, true));
     }
 
-	@PutMapping(value = "/sites/{siteId}/topics/{topicId}", produces = MediaType.APPLICATION_JSON_VALUE)
+	@GetMapping(value = "/sites/{siteId}/conversations/topics/{topicId}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public EntityModel<TopicTransferBean> getTopic(@PathVariable String siteId, @PathVariable String topicId) {
+
+		checkSakaiSession();
+
+        return conversationsService.getTopic(topicId).map(t -> entityModelForTopicBean(t))
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Topic not found"));
+    }
+
+	@PutMapping(value = "/sites/{siteId}/conversations/topics/{topicId}", produces = MediaType.APPLICATION_JSON_VALUE)
     public EntityModel updateTopic(@PathVariable String siteId, @PathVariable String topicId, @RequestBody TopicTransferBean topicBean) throws ConversationsPermissionsException {
 
 		checkSakaiSession();
@@ -173,7 +192,7 @@ public class ConversationsController extends AbstractSakaiApiController {
         return entityModelForTopicBean(conversationsService.saveTopic(topicBean, true));
     }
 
-	@DeleteMapping(value = "/sites/{siteId}/topics/{topicId}")
+	@DeleteMapping(value = "/sites/{siteId}/conversations/topics/{topicId}")
     public ResponseEntity deleteTopic(@PathVariable String topicId) throws ConversationsPermissionsException, UserNotDefinedException {
 
 		checkSakaiSession();
@@ -181,7 +200,7 @@ public class ConversationsController extends AbstractSakaiApiController {
         return new ResponseEntity(HttpStatus.OK);
 	}
 
-	@PostMapping(value = "/sites/{siteId}/topics/{topicId}/pinned")
+	@PostMapping(value = "/sites/{siteId}/conversations/topics/{topicId}/pinned")
     public ResponseEntity pinTopic(@PathVariable String siteId, @PathVariable String topicId, @RequestBody Boolean pinned) throws ConversationsPermissionsException {
 
 		checkSakaiSession();
@@ -190,7 +209,7 @@ public class ConversationsController extends AbstractSakaiApiController {
         return new ResponseEntity(HttpStatus.OK);
     }
 
-	@PostMapping(value = "/sites/{siteId}/topics/{topicId}/bookmarked")
+	@PostMapping(value = "/sites/{siteId}/conversations/topics/{topicId}/bookmarked")
     public ResponseEntity bookmarkTopic(@PathVariable String siteId, @PathVariable String topicId, @RequestBody Boolean bookmarked) throws ConversationsPermissionsException {
 
 		checkSakaiSession();
@@ -199,7 +218,7 @@ public class ConversationsController extends AbstractSakaiApiController {
         return new ResponseEntity(HttpStatus.OK);
     }
 
-	@PostMapping(value = "/sites/{siteId}/topics/{topicId}/hidden")
+	@PostMapping(value = "/sites/{siteId}/conversations/topics/{topicId}/hidden")
     public ResponseEntity hideTopic(@PathVariable String siteId, @PathVariable String topicId, @RequestBody Boolean hidden) throws ConversationsPermissionsException {
 
 		checkSakaiSession();
@@ -208,7 +227,7 @@ public class ConversationsController extends AbstractSakaiApiController {
         return new ResponseEntity(HttpStatus.OK);
     }
 
-	@PostMapping(value = "/sites/{siteId}/topics/{topicId}/locked", produces = MediaType.APPLICATION_JSON_VALUE)
+	@PostMapping(value = "/sites/{siteId}/conversations/topics/{topicId}/locked", produces = MediaType.APPLICATION_JSON_VALUE)
     public EntityModel lockTopic(@PathVariable String siteId, @PathVariable String topicId, @RequestBody Boolean locked) throws ConversationsPermissionsException {
 
 		checkSakaiSession();
@@ -216,7 +235,7 @@ public class ConversationsController extends AbstractSakaiApiController {
         return entityModelForTopicBean(conversationsService.lockTopic(topicId, locked, true));
     }
 
-	@PostMapping(value = "/sites/{siteId}/topics/{topicId}/reactions", produces = MediaType.APPLICATION_JSON_VALUE)
+	@PostMapping(value = "/sites/{siteId}/conversations/topics/{topicId}/reactions", produces = MediaType.APPLICATION_JSON_VALUE)
     public Map<Reaction, Integer> postTopicReactions(@PathVariable String topicId, @RequestBody Map<Reaction, Boolean> reactions) throws ConversationsPermissionsException {
 
 		checkSakaiSession();
@@ -224,7 +243,7 @@ public class ConversationsController extends AbstractSakaiApiController {
         return conversationsService.saveTopicReactions(topicId, reactions);
     }
 
-	@GetMapping(value = "/sites/{siteId}/topics/{topicId}/upvote")
+	@GetMapping(value = "/sites/{siteId}/conversations/topics/{topicId}/upvote")
     public ResponseEntity upvoteTopic(@PathVariable String siteId, @PathVariable String topicId) throws ConversationsPermissionsException {
 
 		checkSakaiSession();
@@ -232,7 +251,7 @@ public class ConversationsController extends AbstractSakaiApiController {
         return new ResponseEntity(HttpStatus.OK);
     }
 
-	@GetMapping(value = "/sites/{siteId}/topics/{topicId}/unupvote")
+	@GetMapping(value = "/sites/{siteId}/conversations/topics/{topicId}/unupvote")
     public ResponseEntity unUpvoteTopic(@PathVariable String siteId, @PathVariable String topicId) throws ConversationsPermissionsException {
 
 		checkSakaiSession();
@@ -240,7 +259,7 @@ public class ConversationsController extends AbstractSakaiApiController {
         return new ResponseEntity(HttpStatus.OK);
     }
 
-	@PostMapping(value = "/sites/{siteId}/topics/{topicId}/posts/markpostsviewed")
+	@PostMapping(value = "/sites/{siteId}/conversations/topics/{topicId}/posts/markpostsviewed")
     public ResponseEntity markPostsViewed(@PathVariable String topicId, @RequestBody Set<String> postIds) throws ConversationsPermissionsException {
 
 		checkSakaiSession();
@@ -267,7 +286,7 @@ public class ConversationsController extends AbstractSakaiApiController {
         return EntityModel.of(topicBean, links);
     }
 
-	@PostMapping(value = "/sites/{siteId}/topics/{topicId}/posts", produces = MediaType.APPLICATION_JSON_VALUE)
+	@PostMapping(value = "/sites/{siteId}/conversations/topics/{topicId}/posts", produces = MediaType.APPLICATION_JSON_VALUE)
     public EntityModel<PostTransferBean> createPost(@PathVariable String siteId, @PathVariable String topicId, @RequestBody PostTransferBean postBean) throws ConversationsPermissionsException {
 
         checkSakaiSession();
@@ -276,7 +295,7 @@ public class ConversationsController extends AbstractSakaiApiController {
         return entityModelForPostBean(conversationsService.savePost(postBean, true));
     }
 
-	@GetMapping(value = "/sites/{siteId}/topics/{topicId}/posts", produces = MediaType.APPLICATION_JSON_VALUE)
+	@GetMapping(value = "/sites/{siteId}/conversations/topics/{topicId}/posts", produces = MediaType.APPLICATION_JSON_VALUE)
     public List<EntityModel<PostTransferBean>> getTopicPosts(
             @PathVariable String siteId,
             @PathVariable String topicId,
@@ -289,7 +308,7 @@ public class ConversationsController extends AbstractSakaiApiController {
             .map(pb -> entityModelForPostBean(pb)).collect(Collectors.toList());
     }
 
-	@PutMapping(value = "/sites/{siteId}/topics/{topicId}/posts/{postId}", produces = MediaType.APPLICATION_JSON_VALUE)
+	@PutMapping(value = "/sites/{siteId}/conversations/topics/{topicId}/posts/{postId}", produces = MediaType.APPLICATION_JSON_VALUE)
     public EntityModel<PostTransferBean> updatePost(@PathVariable String siteId, @PathVariable String topicId, @PathVariable String postId, @RequestBody PostTransferBean postBean) throws ConversationsPermissionsException {
 
 		checkSakaiSession();
@@ -299,7 +318,7 @@ public class ConversationsController extends AbstractSakaiApiController {
         return entityModelForPostBean(conversationsService.savePost(postBean, true));
     }
 
-	@DeleteMapping(value = "/sites/{siteId}/topics/{topicId}/posts/{postId}", produces = MediaType.APPLICATION_JSON_VALUE)
+	@DeleteMapping(value = "/sites/{siteId}/conversations/topics/{topicId}/posts/{postId}", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity deletePost(@PathVariable String siteId, @PathVariable String topicId, @PathVariable String postId) throws ConversationsPermissionsException {
 
 		checkSakaiSession();
@@ -308,7 +327,7 @@ public class ConversationsController extends AbstractSakaiApiController {
         return ResponseEntity.ok().build();
     }
 
-	@GetMapping(value = "/sites/{siteId}/topics/{topicId}/posts/{postId}/upvote")
+	@GetMapping(value = "/sites/{siteId}/conversations/topics/{topicId}/posts/{postId}/upvote")
     public ResponseEntity upvotePost(@PathVariable String siteId, @PathVariable String topicId, @PathVariable String postId) throws ConversationsPermissionsException {
 
 		checkSakaiSession();
@@ -316,7 +335,7 @@ public class ConversationsController extends AbstractSakaiApiController {
         return new ResponseEntity(HttpStatus.OK);
     }
 
-	@GetMapping(value = "/sites/{siteId}/topics/{topicId}/posts/{postId}/unupvote")
+	@GetMapping(value = "/sites/{siteId}/conversations/topics/{topicId}/posts/{postId}/unupvote")
     public ResponseEntity unUpvotePost(@PathVariable String siteId, @PathVariable String postId) throws ConversationsPermissionsException {
 
 		checkSakaiSession();
@@ -324,7 +343,7 @@ public class ConversationsController extends AbstractSakaiApiController {
         return new ResponseEntity(HttpStatus.OK);
     }
 
-	@PostMapping(value = "/sites/{siteId}/topics/{topicId}/posts/{postId}/reactions", produces = MediaType.APPLICATION_JSON_VALUE)
+	@PostMapping(value = "/sites/{siteId}/conversations/topics/{topicId}/posts/{postId}/reactions", produces = MediaType.APPLICATION_JSON_VALUE)
     public Map<Reaction, Integer> postPostReactions(@PathVariable String topicId, @PathVariable String postId, @RequestBody Map<Reaction, Boolean> reactions) throws ConversationsPermissionsException {
 
 		checkSakaiSession();
@@ -332,7 +351,7 @@ public class ConversationsController extends AbstractSakaiApiController {
         return conversationsService.savePostReactions(topicId, postId, reactions);
     }
 
-	@PostMapping(value = "/sites/{siteId}/topics/{topicId}/posts/{postId}/locked", produces = MediaType.APPLICATION_JSON_VALUE)
+	@PostMapping(value = "/sites/{siteId}/conversations/topics/{topicId}/posts/{postId}/locked", produces = MediaType.APPLICATION_JSON_VALUE)
     public EntityModel<PostTransferBean> lockPost(@PathVariable String siteId, @PathVariable String topicId, @PathVariable String postId, @RequestBody Boolean locked) throws ConversationsPermissionsException {
 
 		checkSakaiSession();
@@ -340,7 +359,7 @@ public class ConversationsController extends AbstractSakaiApiController {
         return entityModelForPostBean(conversationsService.lockPost(siteId, topicId, postId, locked));
     }
 
-	@PostMapping(value = "/sites/{siteId}/topics/{topicId}/posts/{postId}/hidden")
+	@PostMapping(value = "/sites/{siteId}/conversations/topics/{topicId}/posts/{postId}/hidden")
     public ResponseEntity hidePost(@PathVariable String siteId, @PathVariable String topicId, @PathVariable String postId, @RequestBody Boolean hidden) throws ConversationsPermissionsException {
 
 		checkSakaiSession();
@@ -353,7 +372,7 @@ public class ConversationsController extends AbstractSakaiApiController {
 
         List<Link> links = new ArrayList<>();
         links.add(Link.of(postBean.url, "self"));
-        links.add(Link.of("/api/sites/" + postBean.siteId + "/topics/" + postBean.topic + "/posts", "reply"));
+        links.add(Link.of("/api/sites/" + postBean.siteId + "/conversations/topics/" + postBean.topic + "/posts", "reply"));
         if (postBean.canDelete) links.add(Link.of(postBean.url, "delete"));
         if (postBean.canDelete) links.add(Link.of(postBean.url + "/restore", "restore"));
         if (postBean.canReact) links.add(Link.of(postBean.url + "/reactions", "react"));
@@ -378,7 +397,7 @@ public class ConversationsController extends AbstractSakaiApiController {
         }
     }
 
-	@PostMapping(value = "/sites/{siteId}/topics/{topicId}/posts/{postId}/comments", produces = MediaType.APPLICATION_JSON_VALUE)
+	@PostMapping(value = "/sites/{siteId}/conversations/topics/{topicId}/posts/{postId}/comments", produces = MediaType.APPLICATION_JSON_VALUE)
     public CommentTransferBean createComment(@PathVariable String siteId, @PathVariable String topicId, @PathVariable String postId, @RequestBody CommentTransferBean commentBean) throws ConversationsPermissionsException  {
 
 		checkSakaiSession();
@@ -387,7 +406,7 @@ public class ConversationsController extends AbstractSakaiApiController {
         return conversationsService.saveComment(commentBean);
     }
 
-	@PutMapping(value = "/sites/{siteId}/topics/{topicId}/posts/{postId}/comments/{commentId}", produces = MediaType.APPLICATION_JSON_VALUE)
+	@PutMapping(value = "/sites/{siteId}/conversations/topics/{topicId}/posts/{postId}/comments/{commentId}", produces = MediaType.APPLICATION_JSON_VALUE)
     public CommentTransferBean updateComment(@PathVariable String siteId, @PathVariable String topicId, @PathVariable String postId, @PathVariable String commentId, @RequestBody CommentTransferBean commentBean) throws ConversationsPermissionsException  {
 
 		checkSakaiSession();
@@ -398,7 +417,7 @@ public class ConversationsController extends AbstractSakaiApiController {
         return conversationsService.saveComment(commentBean);
     }
 
-	@DeleteMapping(value = "/sites/{siteId}/topics/{topicId}/posts/{postId}/comments/{commentId}")
+	@DeleteMapping(value = "/sites/{siteId}/conversations/topics/{topicId}/posts/{postId}/comments/{commentId}")
     public ResponseEntity deleteComment(@PathVariable String siteId, @PathVariable String commentId) throws ConversationsPermissionsException  {
 
 		checkSakaiSession();

@@ -289,8 +289,20 @@ public class ConversationsServiceImpl implements ConversationsService, EntityTra
         return decorateTopicBean(blankTopic, null, currentUserId, getSettingsForSite(siteId));
     }
 
-    public Optional<TopicTransferBean> getTopic(String topicId) throws ConversationsPermissionsException {
-        return topicRepository.findById(topicId).map(TopicTransferBean::of);
+    @Override
+    public Optional<TopicTransferBean> getTopic(String topicId) {
+
+        String currentUserId = sessionManager.getCurrentSessionUserId();
+
+        return topicRepository.findById(topicId).map(t -> {
+
+            try {
+                return decorateTopicBean(TopicTransferBean.of(t), null, currentUserId, getSettingsForSite(t.getSiteId()));
+            } catch (Exception e) {
+                log.warn("Failed to get settings for site {} : {}", t.getSiteId(), e.toString());
+            }
+            return null;
+        });
     }
 
     public boolean currentUserCanViewTopic(ConversationsTopic topic) {
@@ -1903,7 +1915,7 @@ public class ConversationsServiceImpl implements ConversationsService, EntityTra
             }
         }
 
-        topicBean.url = "/api/sites/" + topicBean.siteId + "/topics/" + topicBean.id;
+        topicBean.url = "/api/sites/" + topicBean.siteId + "/conversations/topics/" + topicBean.id;
         getTopicPortalUrl(topicBean.id).ifPresent(portalUrl -> topicBean.portalUrl = portalUrl);
         topicBean.reference = ConversationsReferenceReckoner.reckoner().siteId(topicBean.siteId).type("t").id(topicBean.id).reckon().getReference();
 
@@ -2022,7 +2034,7 @@ public class ConversationsServiceImpl implements ConversationsService, EntityTra
             });
         }
 
-        postBean.url = "/api/sites/" + siteId + "/topics/" + topic.getId() + "/posts/" + postBean.id;
+        postBean.url = "/api/sites/" + siteId + "/conversations/topics/" + topic.getId() + "/posts/" + postBean.id;
         getPostPortalUrl(topic.getId(), postBean.id).ifPresent(portalUrl -> postBean.portalUrl = portalUrl);
         postBean.reference = ConversationsReferenceReckoner.reckoner().siteId(siteId).type("p").id(postBean.id).reckon().getReference();
 

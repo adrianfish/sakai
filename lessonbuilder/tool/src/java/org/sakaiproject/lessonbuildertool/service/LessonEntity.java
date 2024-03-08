@@ -26,6 +26,7 @@ package org.sakaiproject.lessonbuildertool.service;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.Map;
@@ -43,8 +44,8 @@ import org.sakaiproject.lessonbuildertool.tool.beans.SimplePageBean;
  */
 public interface LessonEntity {
 
-    public void setNextEntity(LessonEntity e);
-    public LessonEntity getNextEntity();
+    void setNextEntity(LessonEntity e);
+    LessonEntity getNextEntity();
 
     // can't put it here, but we need a zero-arg constuctor
     // that produces an instance with no usable information in it
@@ -110,7 +111,7 @@ public interface LessonEntity {
 
     // properties of entities
     public String getTitle();
-    public String getDescription();
+    String getDescription();
     public String getUrl();
     // Returns a note to display near the link for editors (i.e. like Deleted)
     default public String getEditNote() {
@@ -118,19 +119,22 @@ public interface LessonEntity {
     }
     public Date getDueDate();
     // for forums, where we have a hiearchy of topics
-    public int getLevel();
+    int getLevel();
     // for forums, where some levels in hierarchy are aggregate and shouldn't be chosen
-    public boolean isUsable();
+    boolean isUsable();
+
     // only assignments
     public int getTypeOfGrade();
     default public int getSubmissionType() {
         return 0;
     }
-    public boolean showAdditionalLink();
+
+    boolean showAdditionalLink();
 
     // submission
-    public LessonSubmission getSubmission(String user);
-    public int getSubmissionCount(String user);
+    LessonSubmission getSubmission(String user);
+
+    int getSubmissionCount(String user);
 
     // calls to original tool. they take the bean as an argument so they can get to
     // the current site and tool, and cache information
@@ -163,11 +167,12 @@ public interface LessonEntity {
 
     // return the list of groups if the item is only accessible to specific groups
     // null if it's accessible to the whole site.
-    public Collection<String> getGroups(boolean nocache);
+    Collection<String> getGroups(boolean nocache);
 
     // set the item to be accessible only to the specific groups.
     // null to make it accessible to the whole site
-    public void setGroups(Collection<String> groups);
+    default void setGroups(Collection<String> groups) {
+    }
 
     // for saved XML. used for objectid property. It's data
     // about the Sakai object in the old site that we need
@@ -195,5 +200,5 @@ public interface LessonEntity {
     public void setSimplePageBean(SimplePageBean simplePageBean); 
 
 	// Let an entity know that it is about to be shown - optional
-	public void preShowItem(SimplePageItem simplePageItem);
+	void preShowItem(SimplePageItem simplePageItem);
 }

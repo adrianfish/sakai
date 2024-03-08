@@ -42,7 +42,6 @@ public class LessonItemRestBean {
     private String format;
     private String html;
 
-
     @JsonIgnore
     public boolean isCreatable() {
         boolean requiredFieldsPresent = ObjectUtils.allNotNull(

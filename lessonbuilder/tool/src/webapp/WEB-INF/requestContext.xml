@@ -16,7 +16,7 @@
             <property name="targetBeanName" value="sakaiFCKTextEvolver" />
     </bean>
 	<!-- <alias name="sakaiFCKTextEvolver" alias="richTextEvolver"/> -->
-   
+
        <bean id="fieldDateTransit" parent="beanExploder">
                 <property name="factory">
                         <bean
@@ -57,8 +57,9 @@
 		<property name="richTextEvolver" ref="richTextEvolver" />
 		<property name="imageToMimeMap" ref="org.sakaiproject.lessonbuildertool.util.ImageToMimeMap"/>
 		<property name="formattedText" ref="org.sakaiproject.util.api.FormattedText" />
+		<property name="entityManager" ref="org.sakaiproject.entity.api.EntityManager" />
 	</bean>
-	
+
 	<bean class="org.sakaiproject.lessonbuildertool.tool.producers.ReorderProducer" >
 		<property name="messageLocator" ref="messageLocator"/>
 		<property name="showPageProducer" ref="showPageProducer"/>
@@ -92,7 +93,7 @@
 		<property name="assignmentEntity" ref="org.sakaiproject.lessonbuildertool.service.AssignmentEntity"/>
 		<property name="localeGetter" ref="requestLocaleProxy" />
 	</bean>
-	
+
 	<bean class="org.sakaiproject.lessonbuildertool.tool.producers.ForumPickerProducer" >
 		<property name="messageLocator" ref="messageLocator"/>
 		<property name="simplePageBean" ref="simplePageBean"
@@ -111,9 +112,18 @@
  		</property>
  		<property name="bltiEntity" ref="org.sakaiproject.lessonbuildertool.service.BltiEntity"/>
 		<property name="localeGetter" ref="requestLocaleProxy" />
+  </bean>
+
+  <bean class="org.sakaiproject.lessonbuildertool.tool.producers.ConversationsTopicPickerProducer" >
+		<property name="messageLocator" ref="messageLocator"/>
+		<property name="simplePageBean" ref="simplePageBean" />
+		<property name="simplePageToolDao">
+			<ref bean="org.sakaiproject.lessonbuildertool.model.SimplePageToolDao" />
+		</property>
+		<property name="localeGetter" ref="requestLocaleProxy" />
  	</bean>
 
- 	<bean name="ltiImportItemProducer" 
+	<bean name="ltiImportItemProducer"
 		class="org.sakaiproject.lessonbuildertool.tool.producers.LtiImportItemProducer" init-method="init">
  		<property name="messageLocator" ref="messageLocator"/>
  		<property name="simplePageBean" ref="simplePageBean" />
@@ -126,7 +136,7 @@
  	</bean>
 
 
-	<bean name="org.sakaiproject.lessonbuildertool.tool.producers.PagePickerProducer" 
+	<bean name="org.sakaiproject.lessonbuildertool.tool.producers.PagePickerProducer"
 	      class="org.sakaiproject.lessonbuildertool.tool.producers.PagePickerProducer" >
 		<property name="messageLocator" ref="messageLocator"/>
 		<property name="simplePageBean" ref="simplePageBean" />
@@ -187,7 +197,7 @@
 		<property name="localeGetter" ref="requestLocaleProxy" />
 		<property name="contentHostingService" ref="org.sakaiproject.content.api.ContentHostingService" />
 	</bean>
-	
+
  	 <bean class="org.sakaiproject.lessonbuildertool.tool.producers.PermissionsHelperProducer" >
 		<property name="messageLocator" ref="messageLocator"/>
 		<property name="sessionManager" ref="org.sakaiproject.tool.api.SessionManager" />
@@ -199,7 +209,7 @@
 
     <bean class="org.sakaiproject.lessonbuildertool.tool.producers.ReloadPageProducer" >
     </bean>
-    
+
     <bean class="org.sakaiproject.lessonbuildertool.tool.producers.CommentGradingPaneProducer" >
 		<property name="simplePageBean" ref="simplePageBean" />
 		<property name="simplePageToolDao">
@@ -210,7 +220,7 @@
     	<property name="messageLocator" ref="messageLocator"/>
 	<property name="localeGetter" ref="requestLocaleProxy" />
     </bean>
-    
+
     <bean class="org.sakaiproject.lessonbuildertool.tool.producers.QuestionGradingPaneProducer" >
 		<property name="simplePageBean" ref="simplePageBean" />
 		<property name="simplePageToolDao">
@@ -242,7 +252,7 @@
 		<property name="simplePageBean" ref="simplePageBean" />
 		<property name="localeGetter" ref="requestLocaleProxy" />
     </bean>
-    
+
     <bean class="org.sakaiproject.lessonbuildertool.tool.producers.CommentsProducer" >
     	<property name="messageLocator" ref="messageLocator"/>
 	<property name="localeGetter" ref="requestLocaleProxy" />
@@ -251,7 +261,7 @@
 			<ref bean="org.sakaiproject.lessonbuildertool.model.SimplePageToolDao" />
 		</property>
     </bean>
-    
+
 	<bean class="org.sakaiproject.lessonbuildertool.tool.producers.PeerEvalStatsProducer" >
     	<property name="simplePageToolDao">
 			<ref bean="org.sakaiproject.lessonbuildertool.model.SimplePageToolDao" />
@@ -322,7 +332,7 @@
 		<property name="taskService" ref="org.sakaiproject.tasks.api.TaskService"/>
 		<property name="archiveService" ref="org.sakaiproject.archive.api.ArchiveService"/>
 	</bean>
-	
+
 	<!-- Over-riding the CommonsMultipartResolver to have multiple files incoming under the same form input name  -->
 	<bean id="commonsMultipartResolver" class="org.sakaiproject.lessonbuildertool.resolver.MultiCommonsMultipartResolver">
 	</bean>

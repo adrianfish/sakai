@@ -46,6 +46,7 @@ import org.sakaiproject.component.cover.ServerConfigurationService;
 import org.sakaiproject.content.api.ContentHostingService;
 import org.sakaiproject.content.api.ContentCollection;
 import org.sakaiproject.content.api.ContentResource;
+import org.sakaiproject.entity.api.EntityManager;
 import org.sakaiproject.entity.api.ResourceProperties;
 import org.sakaiproject.event.api.UsageSession;
 import org.sakaiproject.event.cover.UsageSessionService;
@@ -154,6 +155,7 @@ public class ShowPageProducer implements ViewComponentProducer, DefaultView, Nav
 	private FormatAwareDateInputEvolver dateevolver;
 	@Setter private UserTimeService userTimeService;
 	@Setter private FormattedText formattedText;
+	@Setter private EntityManager entityManager;
 	private HttpServletRequest httpServletRequest;
 	private HttpServletResponse httpServletResponse;
 	// have to do it here because we need it in urlCache. It has to happen before Spring initialization
@@ -1299,7 +1301,8 @@ public class ShowPageProducer implements ViewComponentProducer, DefaultView, Nav
 						|| i.getType() == SimplePageItem.QUESTION || i.getType() == SimplePageItem.PEEREVAL || i.getType() == SimplePageItem.RESOURCE_FOLDER
 					        || i.getType() == SimplePageItem.CHECKLIST || i.getType() == SimplePageItem.FORUM_SUMMARY
 					        || i.getType() == SimplePageItem.BREAK || i.getType() == SimplePageItem.ANNOUNCEMENTS
-					        || i.getType() == SimplePageItem.CALENDAR || i.getType() == SimplePageItem.TWITTER );
+					        || i.getType() == SimplePageItem.CALENDAR || i.getType() == SimplePageItem.TWITTER
+					        || i.getType() == SimplePageItem.EMBEDDED);
 				// (i.getType() == SimplePageItem.PAGE &&
 				// "button".equals(i.getFormat())))
 
@@ -1333,6 +1336,7 @@ public class ShowPageProducer implements ViewComponentProducer, DefaultView, Nav
 				case SimplePageItem.ANNOUNCEMENTS: itemClassName += "announcementsType"; break;
 				case SimplePageItem.CALENDAR: itemClassName += "calendar"; break;
 				case SimplePageItem.CHECKLIST: itemClassName += "checklistType"; break;
+				case SimplePageItem.EMBEDDED: itemClassName += "embeddedType"; break;
 				}
 
 				Map<String,Object> ltiContent = null;
@@ -1631,7 +1635,7 @@ public class ShowPageProducer implements ViewComponentProducer, DefaultView, Nav
 						    }
 						} else if (i.getType() == SimplePageItem.FORUM) {
 							UIOutput.make(tableRow, "extra-info");
-							UIOutput.make(tableRow, "type", "8");
+							UIOutput.make(tableRow, "type", Integer.valueOf(i.getType()).toString());
 							LessonEntity forum = forumEntity.getEntity(i.getSakaiId());
 							if (forum != null) {
 								String editUrl = forum.editItemUrl(simplePageBean);
@@ -3484,6 +3488,11 @@ public class ShowPageProducer implements ViewComponentProducer, DefaultView, Nav
 						UIOutput.make(tableRow, "twitter-td");
 						UILink.make(tableRow, "edit-twitter", (String) null, "");
 					}
+				}else if(i.getType() == SimplePageItem.EMBEDDED) {
+					entityManager.getEntity(i.getSakaiId()).ifPresent(entity -> {
+						UIOutput.make(tableRow, "itemSpan");
+						UIVerbatim.make(tableRow, "content", entity.getMarkup());
+					});
 				} else {
 					// remaining type must be a block of HTML
 					UIOutput.make(tableRow, "itemSpan");
@@ -4258,6 +4267,9 @@ public class ShowPageProducer implements ViewComponentProducer, DefaultView, Nav
 
 		    UIOutput.make(tofill, "forum-li");
 		    createToolBarLink(ForumPickerProducer.VIEW_ID, tofill, "add-forum", "simplepage.forum-descrip", currentPage, "simplepage.forum.tooltip");
+
+		    UIOutput.make(tofill, "conversations-topic-li");
+		    createToolBarLink(ConversationsTopicPickerProducer.VIEW_ID, tofill, "add-conversation-topic", "simplepage.conversations-topic.picker", currentPage, "simplepage.conversations-topic.tooltip");
 
 		    UIOutput.make(tofill, "checklist-li");
 		    createToolBarLink(ChecklistProducer.VIEW_ID, tofill, "add-checklist", "simplepage.checklist", currentPage, "simplepage.checklist");

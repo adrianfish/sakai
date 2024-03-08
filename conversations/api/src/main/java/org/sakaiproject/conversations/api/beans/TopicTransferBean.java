@@ -109,6 +109,11 @@ public class TopicTransferBean implements Entity {
     public double gradingPoints;
     public long gradingCategory;
 
+    /**
+     * From Entity
+     */
+    public String markup;
+
     public static TopicTransferBean of(ConversationsTopic topic) {
 
         TopicTransferBean topicBean = new TopicTransferBean();
@@ -148,6 +153,8 @@ public class TopicTransferBean implements Entity {
 
         topicBean.hiddenByDate = topic.getHideDate() != null ? topic.getHideDate().isBefore(now) : false;
         topicBean.lockedByDate = topic.getLockDate() != null ? topic.getLockDate().isBefore(now) : false;
+
+        topicBean.markup = "<sakai-topic topic-id=\"" + topicBean.id + "\"></sakai-topic>";
 
         return topicBean;
     }

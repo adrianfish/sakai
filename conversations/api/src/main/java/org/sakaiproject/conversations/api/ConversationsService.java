@@ -68,7 +68,7 @@ public interface ConversationsService extends EntityProducer {
     public static final String POSTS_CACHE_NAME = "conversationsPostsCache";
 
     TopicTransferBean getBlankTopic(String siteId) throws ConversationsPermissionsException;
-    Optional<TopicTransferBean> getTopic(String siteId) throws ConversationsPermissionsException;
+    Optional<TopicTransferBean> getTopic(String siteId);
     boolean currentUserCanViewTopic(ConversationsTopic topic);
     List<TopicTransferBean> getTopicsForSite(String siteId) throws ConversationsPermissionsException;
     Optional<String> getTopicPortalUrl(String topicId);

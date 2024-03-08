@@ -261,7 +261,7 @@ simplePageBean.addForumSummary,
     <property name="messageLocator" ref="messageLocator"/>
     <property name="simplePageToolDao" ref="org.sakaiproject.lessonbuildertool.model.SimplePageToolDao" />
   </bean>
-  
+
   <bean id="org.sakaiproject.lessonbuildertool.service.SamigoEntity"
 	class="org.sakaiproject.lessonbuildertool.service.SamigoEntity"
         init-method="init"

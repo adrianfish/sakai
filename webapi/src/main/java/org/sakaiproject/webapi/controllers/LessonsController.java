@@ -48,6 +48,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -267,6 +268,28 @@ public class LessonsController extends AbstractSakaiApiController {
         return ResponseEntity.ok(updatedPageItems.stream()
                 .map(LessonItemRestBean::of)
                 .collect(Collectors.toList()));
+    }
+
+    @PostMapping(value = "/sites/{siteId}/lessons/pages/{pageId}/embedded-items")
+    public ResponseEntity createEmbeddedItems(@PathVariable String siteId, @PathVariable Long pageId, @RequestBody List<Map<String, String>> items) {
+
+        checkSakaiSession();
+
+        int sequence = 1;
+        for (Map<String, String> item : items) {
+            LessonItemRestBean restBean = LessonItemRestBean.builder()
+                .pageId(pageId)
+                .type(SimplePageItem.EMBEDDED)
+                .contentRef(item.get("reference"))
+                .title(item.get("title"))
+                .sequence(sequence++).build();
+
+            if (!createLessonItem(restBean)) {
+                throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Failed to create lesson item");
+            }
+        }
+
+        return ResponseEntity.ok().build();
     }
 
     private boolean createLessonItem(LessonItemRestBean lessonItem) {

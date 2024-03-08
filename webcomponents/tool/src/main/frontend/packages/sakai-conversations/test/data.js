@@ -66,6 +66,7 @@ export const discussionTopic = {
   canEdit: true,
   canDelete: true,
   canViewStatistics: true,
+  reference: "/conversations/topics/topic1",
 };
 
 export const questionTopic = {
@@ -76,6 +77,7 @@ export const questionTopic = {
   type: constants.QUESTION,
   title: "Test Question",
   message: "This is a test question",
+  reference: "/conversations/topics/topic2",
   links,
 };
 

@@ -104,4 +104,8 @@ public interface Entity
 	default Element toXml(Document doc, Stack<Element> stack) {
         return null;
     }
+
+	default String getMarkup() {
+        return null;
+    }
 }

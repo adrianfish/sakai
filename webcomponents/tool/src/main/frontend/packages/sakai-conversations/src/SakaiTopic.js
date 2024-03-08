@@ -15,6 +15,7 @@ export class SakaiTopic extends reactionsAndUpvotingMixin(SakaiElement) {
   static properties = {
 
     topic: { type: Object },
+    topicId: { attribute: "topic-id", type: String },
     postId: { attribute: "post-id", type: String },
     isInstructor: { attribute: "is-instructor", type: Boolean },
     canViewAnonymous: { attribute: "can-view-anonymous", type: Boolean },
@@ -105,6 +106,31 @@ export class SakaiTopic extends reactionsAndUpvotingMixin(SakaiElement) {
   }
 
   get topic() { return this._topic; }
+
+  set topicId(value) {
+
+    this._topicId = value;
+
+    this._getTopic();
+  }
+
+  get topicId() { return this._topicId; }
+
+  _getTopic() {
+
+    const url = `/api/sites/${this.siteId}/conversations/topics/${this.topicId}`;
+    fetch(url)
+    .then(r => {
+
+      if (r.ok) {
+        return r.json();
+      }
+
+      throw new Error(`Network error while loading topic from ${url}`);
+    })
+    .then(topic => this.topic = topic)
+    .catch (error => console.error(error));
+  }
 
   _markPostsViewed(postIds) {
 
