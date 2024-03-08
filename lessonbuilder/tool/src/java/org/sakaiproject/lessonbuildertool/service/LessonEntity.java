@@ -26,6 +26,7 @@ package org.sakaiproject.lessonbuildertool.service;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.Map;
@@ -43,8 +44,12 @@ import org.sakaiproject.lessonbuildertool.tool.beans.SimplePageBean;
  */
 public interface LessonEntity {
 
-    public void setNextEntity(LessonEntity e);
-    public LessonEntity getNextEntity();
+    default void setNextEntity(LessonEntity e) {
+    }
+
+    default LessonEntity getNextEntity() {
+        return null;
+    }
 
     // can't put it here, but we need a zero-arg constuctor
     // that produces an instance with no usable information in it
@@ -74,6 +79,7 @@ public interface LessonEntity {
     public final static int TYPE_JFORUM_FORUM=24;   // jforum forum, shouldn't be in database
     public final static int TYPE_JFORUM_TOPIC=25;   // only topic should be in database as items
     public final static int TYPE_YAFT_TOPIC=26;   // only topic should be in database as items
+    public final static int TYPE_CONVERSATIONS_TOPIC=27;
 
     // 3x is blti, etc
     public final static int TYPE_BLTI=31;
@@ -110,23 +116,38 @@ public interface LessonEntity {
 
     // properties of entities
     public String getTitle();
-    public String getDescription();
+    default String getDescription() {
+        return "";
+    }
     public String getUrl();
     public Date getDueDate();
     // for forums, where we have a hiearchy of topics
-    public int getLevel();
+    default int getLevel() {
+        return 1;
+    }
     // for forums, where some levels in hierarchy are aggregate and shouldn't be chosen
-    public boolean isUsable();
+    default boolean isUsable() {
+        return true;
+    }
+
     // only assignments
     public int getTypeOfGrade();
     default public int getSubmissionType() {
         return 0;
     }
-    public boolean showAdditionalLink();
+
+    default boolean showAdditionalLink() {
+        return false;
+    }
 
     // submission
-    public LessonSubmission getSubmission(String user);
-    public int getSubmissionCount(String user);
+    default LessonSubmission getSubmission(String user) {
+        return null;
+    }
+
+    default int getSubmissionCount(String user) {
+        return 0;
+    }
 
     // calls to original tool. they take the bean as an argument so they can get to
     // the current site and tool, and cache information
@@ -159,11 +180,14 @@ public interface LessonEntity {
 
     // return the list of groups if the item is only accessible to specific groups
     // null if it's accessible to the whole site.
-    public Collection<String> getGroups(boolean nocache);
+    default Collection<String> getGroups(boolean nocache) {
+        return Collections.EMPTY_LIST;
+    }
 
     // set the item to be accessible only to the specific groups.
     // null to make it accessible to the whole site
-    public void setGroups(Collection<String> groups);
+    default void setGroups(Collection<String> groups) {
+    }
 
     // for saved XML. used for objectid property. It's data
     // about the Sakai object in the old site that we need
@@ -191,5 +215,6 @@ public interface LessonEntity {
     public void setSimplePageBean(SimplePageBean simplePageBean); 
 
 	// Let an entity know that it is about to be shown - optional
-	public void preShowItem(SimplePageItem simplePageItem);
+	default void preShowItem(SimplePageItem simplePageItem) {
+    }
 }

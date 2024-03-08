@@ -261,6 +261,12 @@ simplePageBean.addForumSummary,
     <property name="messageLocator" ref="messageLocator"/>
     <property name="simplePageToolDao" ref="org.sakaiproject.lessonbuildertool.model.SimplePageToolDao" />
   </bean>
+
+  <bean id="org.sakaiproject.lessonbuildertool.service.ConversationsTopicEntity"
+      class="org.sakaiproject.lessonbuildertool.service.ConversationsTopicEntity">
+    <property name="authzGroupService"><ref bean="org.sakaiproject.authz.api.AuthzGroupService"/></property>
+    <property name="messageLocator" ref="messageLocator"/>
+  </bean>
   
   <bean id="org.sakaiproject.lessonbuildertool.service.SamigoEntity"
 	class="org.sakaiproject.lessonbuildertool.service.SamigoEntity"

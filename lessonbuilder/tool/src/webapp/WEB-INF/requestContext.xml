@@ -110,6 +110,16 @@
  		</property>
  		<property name="bltiEntity" ref="org.sakaiproject.lessonbuildertool.service.BltiEntity"/>
 		<property name="localeGetter" ref="requestLocaleProxy" />
+  </bean>
+
+  <bean class="org.sakaiproject.lessonbuildertool.tool.producers.ConversationsTopicPickerProducer" >
+ 		<property name="messageLocator" ref="messageLocator"/>
+ 		<property name="simplePageBean" ref="simplePageBean" />
+ 		<property name="simplePageToolDao">
+ 			<ref bean="org.sakaiproject.lessonbuildertool.model.SimplePageToolDao" />
+ 		</property>
+ 		<property name="topicEntity" ref="org.sakaiproject.lessonbuildertool.service.ConversationsTopicEntity"/>
+		<property name="localeGetter" ref="requestLocaleProxy" />
  	</bean>
 
  	<bean name="ltiImportItemProducer" 

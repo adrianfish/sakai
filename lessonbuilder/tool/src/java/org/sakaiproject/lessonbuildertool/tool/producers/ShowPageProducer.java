@@ -4294,6 +4294,9 @@ public class ShowPageProducer implements ViewComponentProducer, DefaultView, Nav
 		    UIOutput.make(tofill, "forum-li");
 		    createToolBarLink(ForumPickerProducer.VIEW_ID, tofill, "add-forum", "simplepage.forum-descrip", currentPage, "simplepage.forum.tooltip");
 
+		    UIOutput.make(tofill, "conversations-topic-li");
+		    createToolBarLink(ConversationsTopicPickerProducer.VIEW_ID, tofill, "add-conversation-topic", "simplepage.conversations-topic-descrip", currentPage, "simplepage.conversations-topic.tooltip");
+
 		    UIOutput.make(tofill, "checklist-li");
 		    createToolBarLink(ChecklistProducer.VIEW_ID, tofill, "add-checklist", "simplepage.checklist", currentPage, "simplepage.checklist");
 

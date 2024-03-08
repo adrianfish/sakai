@@ -80,6 +80,10 @@
             <artifactId>messageforums-api</artifactId>
         </dependency>
         <dependency>
+            <groupId>org.sakaiproject.conversations</groupId>
+            <artifactId>sakai-conversations-api</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.sakaiproject.msgcntr</groupId>
             <artifactId>messageforums-hbm</artifactId>
         </dependency>
