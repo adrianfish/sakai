@@ -28,7 +28,8 @@
   </bean>
 
   <bean id="org.sakaiproject.pages.api.PagesService"
-      class="org.sakaiproject.pages.impl.PagesServiceImpl">
+      class="org.sakaiproject.pages.impl.PagesServiceImpl"
+      init-method="init">
   </bean>
 
 </beans>

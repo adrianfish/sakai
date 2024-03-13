@@ -121,6 +121,9 @@ export class SakaiPages extends SakaiElement {
       } else {
         this._pages.push(page);
       }
+
+      this._pageBeingEdited = { ...this._templatePageBean };
+
       this._state = "PAGES"; // This will trigger an update
     })
     .catch(error => console.error(error));
@@ -154,6 +157,10 @@ export class SakaiPages extends SakaiElement {
   }
 
   _deletePage(e) {
+
+    if (!confirm("Are you sure you want to delete this page?")) {
+      return false;
+    }
 
     const pageId = e.target.dataset.pageId;
 
@@ -229,45 +236,49 @@ export class SakaiPages extends SakaiElement {
           ` : ""}
         </div>
 
-        <!-- PAGES TABLE STARTS HERE -->
-        <div class="table-responsive">
-          <table class="table table-striped table-bordered table-hover">
-            <thead>
-              <tr>
-                <th>${this._i18n.title}</th>
-                <th>${this._i18n.actions}</th>
-              </tr>
-            </thead>
-            <tbody>
-            ${this._pages.map(page => html`
-              <tr>
-                <td>
-                  <button type="button"
-                      class="btn btn-link"
-                      data-page-id="${page.id}"
-                      @click=${this._viewPage}>
-                    ${page.title}
-                  </button>
-                </td>
-                <td style="width: 140px;">
-                  <button type="button"
-                      class="btn btn-link"
-                      data-page-id="${page.id}"
-                      @click=${this._editPage}>
-                    <i class="si si-edit pe-none"></i>
-                  </button>
-                  <button type="button"
-                      class="btn btn-link delete-page-button"
-                      data-page-id="${page.id}"
-                      @click=${this._deletePage}>
-                    <i class="si si-trash pe-none"></i>
-                  </button>
-                </td>
-              </tr>
-            `)}
-            </tbody>
-          </table>
-        </div>
+        ${this._pages?.length ? html`
+          <!-- PAGES TABLE STARTS HERE -->
+          <div class="table-responsive">
+            <table class="table table-striped table-bordered table-hover">
+              <thead>
+                <tr>
+                  <th>${this._i18n.title}</th>
+                  <th>${this._i18n.actions}</th>
+                </tr>
+              </thead>
+              <tbody>
+              ${this._pages.map(page => html`
+                <tr>
+                  <td>
+                    <button type="button"
+                        class="btn btn-link"
+                        data-page-id="${page.id}"
+                        @click=${this._viewPage}>
+                      ${page.title}
+                    </button>
+                  </td>
+                  <td style="width: 140px;">
+                    <button type="button"
+                        class="btn btn-link"
+                        data-page-id="${page.id}"
+                        @click=${this._editPage}>
+                      <i class="si si-edit pe-none"></i>
+                    </button>
+                    <button type="button"
+                        class="btn btn-link delete-page-button"
+                        data-page-id="${page.id}"
+                        @click=${this._deletePage}>
+                      <i class="si si-trash pe-none"></i>
+                    </button>
+                  </td>
+                </tr>
+              `)}
+              </tbody>
+            </table>
+          </div>
+          ` : html`
+            <h4>No pages</h4>
+          `}
       ` : ""}
 
       ${this._state === "ADD_PAGE" ? this._renderAddPage() : ""}

@@ -40,8 +40,6 @@ import java.util.Optional;
 
 import lombok.extern.slf4j.Slf4j;
 
-/**
- */
 @Slf4j
 @RestController
 public class PagesController extends AbstractSakaiApiController {
