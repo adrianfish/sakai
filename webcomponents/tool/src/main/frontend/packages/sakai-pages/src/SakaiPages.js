@@ -1,7 +1,8 @@
-import { html } from "lit";
+import { html, nothing } from "lit";
 import { unsafeHTML } from "lit-html/directives/unsafe-html.js";
 import { SakaiElement } from "@sakai-ui/sakai-element";
 import "@sakai-ui/sakai-editor/sakai-editor.js";
+//import "@sakai-ui/sakai-permissions/sakai-permissions.js";
 
 export class SakaiPages extends SakaiElement {
 
@@ -69,6 +70,13 @@ export class SakaiPages extends SakaiElement {
   }
 
   _addPage() { this._state = "ADD_PAGE"; }
+
+  _showPermissions() {
+
+    import("@sakai-ui/sakai-permissions/sakai-permissions.js").then(() => {
+      this._state = "PERMISSIONS";
+    });
+  }
 
   _viewPage(e) {
 
@@ -181,6 +189,8 @@ export class SakaiPages extends SakaiElement {
     .catch(error => console.error(error));
   }
 
+  _permissionsComplete() { this._state = "PAGES"; }
+
   shouldUpdate() { return this._i18n; }
 
   _renderAddPage() {
@@ -224,16 +234,23 @@ export class SakaiPages extends SakaiElement {
             <h1 class="d-inline">${this._i18n.pages_header}</h1>
           </div>
 
-          ${this._addPageUrl ? html`
-            <div>
+          <div>
+            ${this._addPageUrl ? html`
+                <button type="button"
+                    @click=${this._addPage}
+                    class="btn btn-icon">
+                  <i class="si si-add"></i>
+                  <span class="ms-2">${this._i18n.add_page_header}</span>
+                </button>
+            ` : nothing}
+
               <button type="button"
-                  @click=${this._addPage}
-                  class="btn btn-icon">
-                <i class="si si-add"></i>
-                <span class="ms-2">${this._i18n.add_page_header}</span>
+                  @click=${this._showPermissions}
+                  class="btn btn-icon ms-2">
+                <i class="si si-kebob"></i>
               </button>
-            </div>
-          ` : ""}
+          </div>
+
         </div>
 
         ${this._pages?.length ? html`
@@ -279,10 +296,17 @@ export class SakaiPages extends SakaiElement {
           ` : html`
             <h4>No pages</h4>
           `}
-      ` : ""}
+      ` : nothing}
 
-      ${this._state === "ADD_PAGE" ? this._renderAddPage() : ""}
-      ${this._state === "VIEW_PAGE" ? this._renderViewPage() : ""}
+      ${this._state === "ADD_PAGE" ? this._renderAddPage() : nothing}
+      ${this._state === "VIEW_PAGE" ? this._renderViewPage() : nothing}
+      ${this._state === "PERMISSIONS" ? html`
+        <sakai-permissions
+            tool="sakai.pages"
+            @permissions-complete=${this._permissionsComplete}
+            fire-event>
+        </sakai-permissions>
+      ` : nothing}
     `;
   }
 }
