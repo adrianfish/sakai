@@ -1,0 +1,48 @@
+{
+  "name": "@sakai-ui/sakai-pwa",
+  "version": "3.0.6",
+  "description": "",
+  "license": "ECL-2.0",
+  "author": "Adrian Fish <adrian.r.fish@gmail.com>",
+  "homepage": "https://github.com/sakaiproject/sakai-ui/",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/sakaiproject/sakai",
+    "directory": "webcomponents/tool/src/main/frontend/packages/sakai-pwa"
+  },
+  "main": "index.js",
+  "module": "index.js",
+  "files": [
+    "*.js",
+    "sakai-pwa.js",
+    "sakai-account-panel.js",
+    "src"
+  ],
+  "scripts": {
+    "lint:fix": "eslint src --fix",
+    "test": "web-test-runner --coverage"
+  },
+  "keywords": [
+    "Sakai"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "exports": {
+    ".": "./index.js",
+    "./sakai-pwa.js": "./sakai-pwa.js"
+  },
+  "dependencies": {
+    "@sakai-ui/sakai-element": "file:../sakai-element",
+    "@sakai-ui/sakai-login": "file:../sakai-login",
+    "@sakai-ui/sakai-notifications": "file:../sakai-notifications",
+    "@sakai-ui/sakai-portal-utils": "file:../sakai-portal-utils",
+    "lit": "^3.0.2"
+  },
+  "devDependencies": {
+    "@open-wc/testing": "^3.1.7",
+    "@web/test-runner": "^0.15.0",
+    "eslint": "^8.53.0",
+    "fetch-mock": "^9.11.0"
+  }
+}

@@ -2,6 +2,8 @@ import { css, html, nothing } from "lit";
 import { unsafeHTML } from "lit/directives/unsafe-html.js";
 import { SakaiPageableElement } from "@sakai-ui/sakai-pageable-element";
 import "@sakai-ui/sakai-icon/sakai-icon.js";
+import { Signal } from "signal-polyfill";
+import { loggedOut } from "@sakai-ui/sakai-signals";
 import { sakaiFormatDistance } from "@sakai-ui/sakai-date-fns";
 import * as constants from "./sakai-tasks-constants.js";
 
@@ -25,7 +27,31 @@ export class SakaiTasks extends SakaiPageableElement {
     this._canUpdateSite = false;
     this._currentFilter = constants.CURRENT;
     this.loadTranslations("tasks").then(r => this._i18n = r);
+
+    this.logoutWatcher = new Signal.subtle.Watcher(() => {
+
+      if (this.siteId) return;
+
+      queueMicrotask(() => {
+
+        if (loggedOut.get() === 1) {
+          caches.open(this.cacheName).then(c => c.delete("/api/users/me/tasks"));
+        }
+
+        this.logoutWatcher.watch();
+      });
+    });
+
+    this.logoutWatcher.watch(loggedOut);
   }
+
+  /*
+  _userChanged() {
+
+    console.log(this._user.locale);
+    this.loadTranslations({ bundle: "tasks", lang: this._user.locale }).then(r => this._i18n = r);
+  }
+  */
 
   set data(value) {
 
@@ -75,6 +101,10 @@ export class SakaiTasks extends SakaiPageableElement {
             import("../sakai-tasks-create-task.js"),
             import("@lion/dialog/define"),
           ]);
+        }
+
+        if (this.cacheName && !this.siteId) {
+          caches.open(this.cacheName).then(c => c.put(url, Response.json(response)));
         }
 
         this._canUpdateSite = response.canUpdateSite;
@@ -334,7 +364,7 @@ export class SakaiTasks extends SakaiPageableElement {
         ${this.dataPage.filter(t => t.visible).map((t, i) => html`
           <div class="priority-block priority_${t.priority} cell ${i % 2 === 0 ? "even" : "odd"}">
             <div tabindex="0" title="${this._i18n[`priority_${t.priority}_tooltip`]}" aria-label="${this._i18n[`priority_${t.priority}_tooltip`]}">
-              <sakai-icon size="small" type="priority"></sakai-icon>
+              <i class="si si-flag"></i>
             </div>
           </div>
           <div class="task-block cell ${i % 2 === 0 ? "even" : "odd"}">
@@ -363,7 +393,7 @@ export class SakaiTasks extends SakaiPageableElement {
                   @click=${this.editTask}
                   title="${this._i18n.edit}"
                   aria-label="${this._i18n.edit}">
-                <sakai-icon type="edit" size="small"></sakai-icon>
+                <i class="si si-edit"></i>
               </a>
             </div>
               ${t.softDeleted ? html`
@@ -373,7 +403,7 @@ export class SakaiTasks extends SakaiPageableElement {
                       @click=${this.deleteTask}
                       title="${this._i18n.hard_delete}"
                       aria-label="${this._i18n.hard_delete}">
-                    <sakai-icon type="delete" size="small"></sakai-icon>
+                    <i class="si si-trash"></i>
                   </a>
                 </div>
                 <div class="restore">
@@ -392,7 +422,7 @@ export class SakaiTasks extends SakaiPageableElement {
                       @click=${this.softDeleteTask}
                       title="${this._i18n.soft_delete}"
                       aria-label="${this._i18n.soft_delete}">
-                    <sakai-icon type="delete" size="small"></sakai-icon>
+                    <i class="si si-trash"></i>
                   </a>
                 </div>
               `}
@@ -403,7 +433,7 @@ export class SakaiTasks extends SakaiPageableElement {
                 <a href="${t.url}"
                     title="${this._i18n.task_url}"
                     aria-label="${this._i18n.task_url}">
-                  <sakai-icon type="right" size="small"></sakai-icon>
+                  <i class="si si-right"></i>
                 </a>
               </div>
             ` : nothing }
@@ -430,19 +460,6 @@ export class SakaiTasks extends SakaiPageableElement {
         margin-top: 8px;
         margin-bottom: 10px;
       }
-        sakai-icon[type="add"] {
-          padding: 3px 3px 2px 0;
-          vertical-align: middle;
-          color: var(--button-primary-text-color);
-        }
-        .add-task-button {
-          margin-left: 1px;
-          background-color: var(--button-primary-background);
-          color: var(--button-primary-text-color);
-          border: 0px solid var(--button-primary-border-color);
-          border-radius: 2px;
-        }
-
       #controls {
         display: flex;
         margin-bottom: 10px;

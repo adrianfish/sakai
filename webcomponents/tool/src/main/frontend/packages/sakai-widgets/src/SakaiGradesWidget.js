@@ -1,7 +1,7 @@
 import { html } from "lit";
 import { ifDefined } from "lit/directives/if-defined.js";
 import { SakaiDashboardWidget } from "./SakaiDashboardWidget.js";
-import "@sakai-ui/sakai-grades";
+import "@sakai-ui/sakai-grades/sakai-grades.js";
 
 export class SakaiGradesWidget extends SakaiDashboardWidget {
 
@@ -19,8 +19,8 @@ export class SakaiGradesWidget extends SakaiDashboardWidget {
       <sakai-grades
         user-id="${ifDefined(this.userId ? this.userId : undefined)}"
         site-id="${ifDefined(this.siteId ? this.siteId : undefined)}"
-        secret
-      >
+        cache-name="${ifDefined(this.cacheName)}"
+        secret>
       </sakai-grades>
     `;
   }

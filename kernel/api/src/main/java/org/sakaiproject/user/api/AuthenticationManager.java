@@ -21,21 +21,34 @@
 
 package org.sakaiproject.user.api;
 
+import java.util.Map;
+import java.util.Optional;
+
+import com.webauthn4j.credential.CredentialRecord;
+
 /**
  * <p>
  * AuthenticationManager provides authentication of end-users.
  * </p>
  */
-public interface AuthenticationManager
-{
-	/**
-	 * Attempt to authenticate a user by the given evidence. Success produces the authenticated user id. Failure throws an exception.
-	 * 
-	 * @param e
-	 *        The collected evidence to authenticate.
-	 * @return The authentication information if authenticated.
-	 * @throws AuthenticationException
-	 *         if the evidence is not understood or not valid.
-	 */
-	Authentication authenticate(Evidence e) throws AuthenticationException;
+public interface AuthenticationManager {
+
+    /**
+     * Attempt to authenticate a user by the given evidence. Success produces the authenticated user id. Failure throws an exception.
+     * 
+     * @param e
+     *        The collected evidence to authenticate.
+     * @return The authentication information if authenticated.
+     * @throws AuthenticationException
+     *         if the evidence is not understood or not valid.
+     */
+    Authentication authenticate(Evidence e) throws AuthenticationException;
+
+    default void registerWebAuthnCredential(CredentialRecord credentialRecord) {
+        return;
+    }
+
+	default Optional<Map<String, Object>> getWebAuthnCredential(byte[] credentialId) {
+		return null;
+	}
 }

@@ -1,0 +1,90 @@
+sakai-pwa {
+
+  height: 100dvh;
+
+  display: grid;
+  grid-template-columns: 1fr;
+  grid-template-rows: auto 1fr auto;
+  grid-template-areas:
+    'header'
+    'main'
+    'footer';
+
+  #pwa-header {
+
+    grid-area: header;
+
+    background-color: rgba(var(--bs-primary-rgb), 1.0) !important;
+
+    #pwa-header-logo img {
+      width: 26vw;
+      height: auto;
+    }
+  }
+
+  #pwa-main {
+    grid-area: main;
+    overflow: auto;
+  }
+
+  #pwa-footer {
+
+    grid-area: footer;
+    color: white;
+    button, a {
+      position: relative;
+      color: white;
+      i {
+        font-size: 24px;
+      }
+    }
+
+    #profile-image {
+      width: 40px;
+    }
+
+    .portal-notifications-indicator {
+      background-color: red;
+      position: absolute;
+      top: 10px;
+      right: 23%;
+    }
+  }
+
+  .offcanvas {
+    background-color: var(--sakai-background-color-2);
+    .offcanvas-header {
+      background-color: var(--sakai-offcanvas-header-bg);
+      color: var(--sakai-offcanvas-header-color);
+      .btn-close {
+        background: transparent url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%23fff'%3e%3cpath d='M.293.293a1 1 0 011.414 0L8 6.586 14.293.293a1 1 0 111.414 1.414L9.414 8l6.293 6.293a1 1 0 01-1.414 1.414L8 9.414l-6.293 6.293a1 1 0 01-1.414-1.414L6.586 8 .293 1.707a1 1 0 010-1.414z'/%3e%3c/svg%3e") center/1em auto no-repeat;
+      }
+    }
+  }
+
+  sakai-notifications li.toast {
+    --bs-toast-max-width: 95%;
+  }
+
+  .portal-header-logo {
+    height: var(--portal-header-height);
+  }
+
+  .offcanvas .offcanvas-header {
+    background-color: var(--sakai-offcanvas-header-bg);
+    color: var(--sakai-offcanvas-header-color);
+  }
+
+  @include media-breakpoint-up(md) {
+    .portal-header-logo {
+      width: var(--portal-nav-sidebar-width);
+    }
+  }
+
+  @media screen and (max-width: 560px) {
+    .portal-header-logo img {
+      width: 26vw;
+      height: auto;
+    }
+  }
+}
