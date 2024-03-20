@@ -176,9 +176,8 @@ public class UserMessagingServiceImpl implements UserMessagingService, Observer 
                 try {
                     publicKey = String.join("", Files.readAllLines(Paths.get(home, publicKeyFileName)));
                     String privateKey = String.join("", Files.readAllLines(Paths.get(home, privateKeyFileName)));
-                    pushService = new PushService(publicKey, privateKey);
                     String pushSubject = serverConfigurationService.getString("portal.notifications.push.subject", "");
-                    pushService.setSubject(pushSubject);
+                    pushService = new PushService(publicKey, privateKey, pushSubject);
                 } catch (Exception e) {
                     log.error("Failed to setup push service: {}", e.toString());
                 }
@@ -203,9 +202,8 @@ public class UserMessagingServiceImpl implements UserMessagingService, Observer 
                         fw.write(privateKeyBase64);
                     }
 
-                    pushService = new PushService(publicKeyBase64, privateKeyBase64);
                     String pushSubject = serverConfigurationService.getString("portal.notifications.push.subject", "");
-                    pushService.setSubject(pushSubject);
+                    pushService = new PushService(publicKeyBase64, privateKeyBase64, pushSubject);
                 } catch (Exception e) {
                     log.error("Failed to generate key pair: {}", e.toString());
                 }
@@ -614,6 +612,12 @@ public class UserMessagingServiceImpl implements UserMessagingService, Observer 
         pushSubscriptionRepository.save(ps);
     }
 
+
+    @Transactional
+    public void unsubscribeFromPush(String browserFingerprint) {
+        pushSubscriptionRepository.deleteByFingerprint(browserFingerprint);
+    }
+
     public void sendTestNotification() {
 
         String userId = sessionManager.getCurrentSessionUserId();
@@ -646,6 +650,8 @@ public class UserMessagingServiceImpl implements UserMessagingService, Observer 
             if (!StringUtils.isAnyBlank(pushEndpoint, pushUserKey, pushAuth)) {
                 Subscription sub = new Subscription(pushEndpoint, new Subscription.Keys(pushUserKey, pushAuth));
                 try {
+                    long unread = userNotificationRepository.countByToUserAndViewed(un.getToUser(), false);
+                    un.setUnreadCount(unread);
                     HttpResponse pushResponse = pushService.send(new Notification(sub, objectMapper.writeValueAsString(un)));
                     log.debug("The push response from {} returned code {} and reason {}",
                             pushEndpoint,

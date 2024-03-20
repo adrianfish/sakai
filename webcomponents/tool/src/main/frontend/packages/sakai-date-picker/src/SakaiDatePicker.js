@@ -44,6 +44,7 @@ export class SakaiDatePicker extends SakaiElement {
     if (value) {
       this._epochMillis = value;
       const instant = Temporal.Instant.fromEpochMilliseconds(value);
+      console.log(`Timezone: ${getTimezone()}`);
       const zonedDateTime = instant.toZonedDateTimeISO(getTimezone());
       this.isoDate = zonedDateTime.toString().substring(0, 16);
     } else {

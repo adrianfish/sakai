@@ -2,7 +2,10 @@ import { SakaiElement } from "@sakai-ui/sakai-element";
 import { html, nothing } from "lit";
 import { unsafeHTML } from "lit/directives/unsafe-html.js";
 import "@sakai-ui/sakai-user-photo/sakai-user-photo.js";
-import { callSubscribeIfPermitted, NOT_PUSH_CAPABLE, pushSetupComplete, registerPushCallback } from "@sakai-ui/sakai-push-utils";
+import { callSubscribeIfPermitted,
+          NOT_PUSH_CAPABLE,
+          pushSetupComplete,
+          registerPushCallback } from "@sakai-ui/sakai-push-utils";
 import { getServiceName } from "@sakai-ui/sakai-portal-utils";
 import { NOTIFICATIONS, PUSH_DENIED_INFO, PUSH_INTRO, PUSH_SETUP_INFO } from "./states.js";
 import { markNotificationsViewed } from "./utils.js";
@@ -16,6 +19,7 @@ export class SakaiNotifications extends SakaiElement {
     firefoxInfoUrl: { attribute: "firefox-info-url", type: String },
     safariInfoUrl: { attribute: "safari-info-url", type: String },
     edgeInfoUrl: { attribute: "edge-info-url", type: String },
+    deferLoad: { attribute: "defer-load", type: Boolean },
     _state: { state: true },
     _highlightTestButton: { state: true },
     _i18n: { state: true },
@@ -49,19 +53,23 @@ export class SakaiNotifications extends SakaiElement {
       this._browserInfoUrl = this.edgeInfoUrl;
     }
 
-    this._i18nLoaded.then(() => this._loadInitialNotifications());
+    console.log("connected");
+
+    if (!this.deferLoad) {
+      this._i18nLoaded.then(() => this.loadNotifications());
+    }
   }
 
-  _loadInitialNotifications(register = true) {
+  loadNotifications(register = true) {
 
-    console.debug("_loadInitialNotifications");
+    console.debug("loadNotifications");
 
     fetch(this.url, {
       credentials: "include",
       cache: "no-cache",
       headers: { "Content-Type": "application/json" },
     })
-    .then(r => {
+    .then (r => {
 
       if (r.ok) {
         return r.json();
@@ -83,9 +91,11 @@ export class SakaiNotifications extends SakaiElement {
 
     console.debug("registerForNotifications");
 
+    if (Notification.permission !== "granted") return;
+
     pushSetupComplete.then(() => {
 
-      if (Notification.permission !== "granted") return;
+      caches.open("sakai-v1").then(cache => cache.put("/api/users/me/notifications", Response.json(this.notifications)));
 
       registerPushCallback("notifications", message => {
 
@@ -93,6 +103,10 @@ export class SakaiNotifications extends SakaiElement {
         this._fireLoadedEvent();
         this._decorateNotification(message);
         this._filterIntoToolNotifications(false);
+
+        if (message.event !== "test.notification") {
+          caches.open("sakai-v1").then(cache => cache.put("/api/users/me/notifications", Response.json(this.notifications)));
+        }
       });
     })
     .catch(error => {
@@ -109,10 +123,10 @@ export class SakaiNotifications extends SakaiElement {
 
     this.notifications.forEach(noti => {
 
-      decorate && this._decorateNotification(noti);
-
       // Grab the first section of the event. This is the tool event prefix.
       const toolEventPrefix = noti.event.substring(0, noti.event.indexOf("."));
+
+      decorate && this._decorateProfileNotification(noti);
 
       if (!this._filteredNotifications.has(toolEventPrefix)) {
         this._filteredNotifications.set(toolEventPrefix, []);
@@ -216,9 +230,9 @@ export class SakaiNotifications extends SakaiElement {
 
   _fireLoadedEvent() {
 
-    const unviewed = this.notifications.filter(n => !n.viewed).length;
+    const unviewed = this.notifications.filter(n => n.event !== "test.notification" && !n.viewed).length;
     this.dispatchEvent(new CustomEvent("notifications-loaded", { detail: { count: unviewed }, bubbles: true }));
-    navigator.setAppBadge && navigator.setAppBadge(unviewed);
+    navigator.setAppBadge?.(unviewed);
   }
 
   _clearNotification(e) {
@@ -234,6 +248,7 @@ export class SakaiNotifications extends SakaiElement {
           this.notifications.splice(index, 1);
           this._fireLoadedEvent();
           this._filterIntoToolNotifications(false);
+          caches.open("sakai-v1").then(cache => cache.put("/api/users/me/notifications", Response.json(this.notifications)));
         } else {
           throw new Error(`Network error while clearing notification at ${url}`);
         }
@@ -252,6 +267,7 @@ export class SakaiNotifications extends SakaiElement {
           this._fireLoadedEvent();
           this._filterIntoToolNotifications();
           this.dispatchEvent(new CustomEvent("notifications-cleared", { bubbles: true }));
+          caches.open("sakai-v1").then(cache => cache.put("/api/users/me/notifications", Response.json([])));
         } else {
           throw new Error(`Network error while clearing all notifications at ${url}`);
         }
@@ -259,7 +275,7 @@ export class SakaiNotifications extends SakaiElement {
       .catch(error => console.error(error));
   }
 
-  _clearTestNotifications() {
+  clearTestNotifications() {
 
     this.notifications = [ ...this.notifications.filter(n => !n.event.startsWith("test")) ];
     this._filterIntoToolNotifications();
@@ -274,6 +290,7 @@ export class SakaiNotifications extends SakaiElement {
           this.notifications?.forEach(a => a.viewed = true);
           this.requestUpdate();
           this._fireLoadedEvent();
+          caches.open("sakai-v1").then(cache => cache.put("/api/users/me/notifications", Response.json(this.notifications)));
         } else {
           throw new Error("Network error while marking all notifications viewed");
         }
@@ -318,7 +335,7 @@ export class SakaiNotifications extends SakaiElement {
           this._state = PUSH_DENIED_INFO;
           break;
         case "granted":
-          this._loadInitialNotifications(true);
+          this.loadNotifications(true);
           this._highlightTestButton = true;
           break;
       }
@@ -419,7 +436,7 @@ export class SakaiNotifications extends SakaiElement {
           <div>
             <button type="button"
                 class="btn btn-link shadow-sm ms-2 mb-2"
-                @click=${this._clearTestNotifications}>
+                @click=${this.clearTestNotifications}>
               ${this._i18n.clear}
             </button>
           </div>
@@ -510,7 +527,7 @@ export class SakaiNotifications extends SakaiElement {
 
             ${Notification.permission !== "granted" && this._online ? html`
               <button class="btn btn-secondary btn-sm me-2"
-                  @click=${this._loadInitialNotifications}>
+                  @click=${this.loadNotifications}>
                 ${this._i18n.update}
               </button>
             ` : nothing}

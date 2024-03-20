@@ -1,6 +1,6 @@
 import { html } from "lit";
 import { ifDefined } from "lit/directives/if-defined.js";
-import "@sakai-ui/sakai-calendar";
+import "@sakai-ui/sakai-calendar/sakai-calendar.js";
 import { loadProperties } from "@sakai-ui/sakai-i18n";
 import { SakaiDashboardWidget } from "./SakaiDashboardWidget.js";
 

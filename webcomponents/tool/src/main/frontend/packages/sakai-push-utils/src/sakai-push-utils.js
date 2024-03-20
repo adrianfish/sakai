@@ -4,8 +4,21 @@ import { getUserId } from "@sakai-ui/sakai-portal-utils";
 export const NOT_PUSH_CAPABLE = "NOT_PUSH_CAPABLE";
 
 const pushCallbacks = new Map();
+const pushPermissionRequestCompletedCallbacks = [];
+
+export const registerPushPermissionRequestCompletedCallback = cb => {
+  pushPermissionRequestCompletedCallbacks.push(cb);
+};
 
 const serviceWorkerPath = "/sakai-service-worker.js";
+
+document.addEventListener("DOMContentLoaded", () => {
+
+  if (getUserId() && Notification?.permission !== "granted") {
+    document.querySelectorAll(".portal-notifications-indicator").forEach(b => b.classList.add("d-none"));
+    document.querySelectorAll(".portal-notifications-no-permissions-indicator").forEach(b => b.classList.remove("d-none"));
+  }
+});
 
 const subscribe = (reg, resolve) => {
 
@@ -42,6 +55,8 @@ const subscribe = (reg, resolve) => {
         }
 
         console.debug("Subscription details sent successfully");
+
+        document.querySelectorAll(".portal-notifications-no-permissions-indicator").forEach(b => b.classList.add("d-none"));
       })
       .catch (error => console.error(error))
       .finally(() => resolve("granted"));
@@ -102,12 +117,18 @@ const setupServiceWorkerListener = () => {
   navigator.serviceWorker.addEventListener("message", serviceWorkerMessageListener);
 };
 
-const checkUserChangedThenSet = userId => {
+export const checkUserChangedThenSet = userId => {
 
   if (!userId) return false;
 
   const lastSubscribedUser = localStorage.getItem("last-sakai-user");
-  const differentUser = !lastSubscribedUser || lastSubscribedUser !== portal.user.id;
+  const differentUser = !lastSubscribedUser || lastSubscribedUser !== userId;
+
+  if (differentUser) {
+    // New user logged in. Make sure to remove the user specific stuff from the cache.
+    caches.open("sakai-v1").then(cache => cache.delete("/api/users/me/notifications"));
+    caches.open("sakai-v1").then(cache => cache.delete("/api/keys/sakaipush"));
+  }
 
   localStorage.setItem("last-sakai-user", userId);
 
@@ -214,3 +235,46 @@ if (checkUserChangedThenSet(getUserId())) {
     });
   });
 }
+
+export const onLogin = userId => {
+
+  console.debug(`onLogin(${userId})`);
+
+  caches.open("sakai-v1").then(cache => cache.add("/pwa/"));
+
+  const differentUser = checkUserChangedThenSet(userId);
+
+  // If the logged in user has changed, we should resubscribe this device
+  if (differentUser) {
+
+    console.debug("The user has changed. Unsubscribing the previous user ...");
+
+    navigator.serviceWorker.register("/sakai-service-worker.js").then(reg => {
+
+      reg?.pushManager.getSubscription().then(sub => {
+
+        if (sub) {
+          sub.unsubscribe().finally(() => {
+
+            if (Notification?.permission === "granted" && differentUser) {
+              subscribeIfPermitted(reg);
+            }
+          });
+        } else if (Notification?.permission === "granted" && differentUser) {
+          subscribeIfPermitted(reg);
+        }
+      });
+    });
+  }
+};
+
+export const logout = () => {
+
+  caches.open("sakai-v1").then(cache => {
+
+    cache.delete("/api/users/me/notifications").then(successful => successful && navigator.setAppBadge?.(0));
+    cache.delete("/pwa/");
+  });
+
+  navigator.serviceWorker.ready.then(reg => reg.active.postMessage("LOGOUT"));
+};

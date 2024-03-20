@@ -18,6 +18,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import org.sakaiproject.event.api.UsageSessionService;
 import org.sakaiproject.site.api.SiteService;
+import org.sakaiproject.time.api.TimeService;
 import org.sakaiproject.tool.api.Session;
 import org.sakaiproject.tool.api.SessionManager;
 import org.sakaiproject.user.api.Authentication;
@@ -30,6 +31,7 @@ import org.sakaiproject.user.api.User;
 import org.sakaiproject.user.api.UserDirectoryService;
 import org.sakaiproject.user.api.UserNotDefinedException;
 
+import org.springframework.http.MediaType;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -37,6 +39,10 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.Collections;
+import java.util.Map;
+import java.util.TimeZone;
 
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
@@ -49,7 +55,6 @@ import javax.annotation.Resource;
 @Slf4j
 @RestController
 public class LoginController extends AbstractSakaiApiController {
-
 
 	@Resource
 	private SiteService siteService;
@@ -66,8 +71,11 @@ public class LoginController extends AbstractSakaiApiController {
     @Resource
     private AuthenticationManager authenticationManager;
 
-	@GetMapping("/login")
-    public String login(@RequestParam String username, @RequestParam String password, HttpServletRequest request, HttpServletResponse response) throws AuthenticationException {
+    @Resource
+    private TimeService timeService;
+
+	@GetMapping(value = "/login", produces = MediaType.APPLICATION_JSON_VALUE)
+    public Map<String, String> login(@RequestParam String username, @RequestParam String password, HttpServletRequest request, HttpServletResponse response) throws AuthenticationException {
 
         String cookieName = "JSESSIONID";
         boolean displayModJkWarning = true;
@@ -112,7 +120,7 @@ public class LoginController extends AbstractSakaiApiController {
 
             Cookie c = new Cookie(cookieName, s.getId() + "." + suffix);
             c.setPath("/");
-            c.setMaxAge(-1);
+            c.setMaxAge(2630000);
             if (System.getProperty(RequestFilter.SAKAI_COOKIE_DOMAIN) != null) {
                 c.setDomain(System.getProperty(RequestFilter.SAKAI_COOKIE_DOMAIN));
             }
@@ -125,7 +133,21 @@ public class LoginController extends AbstractSakaiApiController {
             }
 
             log.debug("/api/login username={} ip={} session={}", username, ipAddress, s.getId());
-            return s.getId();
+
+            try {
+                User user = userDirectoryService.getUser(s.getUserId());
+                TimeZone userTz = timeService.getLocalTimeZone();
+                return Map.of("userId", user.getId(), "userName", user.getEid(), "userDisplayName", user.getDisplayName(), "userTimezone", userTz.getID());
+            } catch (UserNotDefinedException unde) {
+                return Collections.EMPTY_MAP;
+            }
         }
 	}
+
+	@GetMapping("/logout")
+    public void logout() throws AuthenticationException {
+
+        System.out.println("LOGOUT");
+        usageSessionService.logout();
+    }
 }

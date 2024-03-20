@@ -43,6 +43,7 @@
     "@sakai-ui/sakai-picture-changer": "file:packages/sakai-picture-changer",
     "@sakai-ui/sakai-portal-utils": "file:packages/sakai-portal-utils",
     "@sakai-ui/sakai-pronunciation-player": "file:packages/sakai-pronunciation-player",
+    "@sakai-ui/sakai-pwa": "file:packages/sakai-pwa",
     "@sakai-ui/sakai-rubrics": "file:packages/sakai-rubrics",
     "@sakai-ui/sakai-search": "file:packages/sakai-search",
     "@sakai-ui/sakai-submission-messager": "file:packages/sakai-submission-messager",

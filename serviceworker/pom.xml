@@ -5,11 +5,7 @@
   <parent>
     <groupId>org.sakaiproject</groupId>
     <artifactId>master</artifactId>
-<<<<<<< HEAD
     <version>25-SNAPSHOT</version>
-=======
-    <version>24-SNAPSHOT</version>
->>>>>>> d89bcafa61d (SAK-49287 Notifications. Improved push permissions workflow)
     <relativePath>../master/pom.xml</relativePath>
   </parent>
 
