@@ -1,9 +1,10 @@
 import { css, html, nothing } from "lit";
 import { ifDefined } from "lit/directives/if-defined.js";
-import "@sakai-ui/sakai-icon";
 import { SakaiPageableElement } from "@sakai-ui/sakai-pageable-element";
 import { SakaiSitePicker } from "@sakai-ui/sakai-site-picker";
 import "@sakai-ui/sakai-site-picker/sakai-site-picker.js";
+import { Signal } from "signal-polyfill";
+import { loggedOut } from "@sakai-ui/sakai-signals";
 import {
   TITLE_A_TO_Z,
   TITLE_Z_TO_A,
@@ -22,6 +23,27 @@ export class SakaiAnnouncements extends SakaiPageableElement {
 
     this.showPager = true;
     this.loadTranslations("announcements");
+
+    this.logoutWatcher = new Signal.subtle.Watcher(() => {
+
+      if (this.siteId) return;
+
+      queueMicrotask(() => {
+
+        if (loggedOut.get() === 1) {
+          caches.open(this.cacheName).then(c => c.delete("/api/users/me/announcements"));
+        }
+
+        this.logoutWatcher.watch();
+      });
+    });
+
+    this.logoutWatcher.watch(loggedOut);
+  }
+
+  _userChanged() {
+
+    this.loadTranslations({ bundle: "announcements", lang: this._user.locale }).then(r => this._i18n = r);
   }
 
   async loadAllData() {
@@ -35,14 +57,18 @@ export class SakaiAnnouncements extends SakaiPageableElement {
         if (r.ok) {
           return r.json();
         }
-        throw new Error(`Failed to get announcements from ${url}`);
 
+        throw new Error(`Failed to get announcements from ${url}`);
       })
       .then(data => {
 
         this.data = data.announcements;
         this.data.forEach(a => a.visible = true);
         !this.siteId && (this._sites = data.sites);
+
+        if (this.cacheName && !this.siteId) {
+          caches.open(this.cacheName).then(c => c.put(url, Response.json(this.data)));
+        }
       })
       .catch (error => console.error(error));
   }
@@ -152,7 +178,7 @@ export class SakaiAnnouncements extends SakaiPageableElement {
       ${this.dataPage.filter(a => a.visible).map((a, i) => html`
         <div class="title cell ${i % 2 === 0 ? "even" : "odd"}">
           ${a.highlighted ? html`
-          <sakai-icon type="favourite" size="small"></sakai-icon>
+          <i class="si si-star-fill"></i>
           ` : nothing}
           <span class="${ifDefined(a.highlighted ? "highlighted" : undefined)}">${a.subject}</span>
         </div>
@@ -163,7 +189,7 @@ export class SakaiAnnouncements extends SakaiPageableElement {
           <a href="${a.url}"
               title="${this._i18n.url_tooltip}"
               aria-label="${this._i18n.url_tooltip}">
-            <sakai-icon type="right" size="small"></sakai-icon>
+            <i class="si si-right"></i>
           </a>
         </div>
       `)}

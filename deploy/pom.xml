@@ -578,6 +578,17 @@
             <scope>compile</scope>
         </dependency>
 
+        <dependency>
+            <groupId>com.webauthn4j</groupId>
+            <artifactId>webauthn4j-core</artifactId>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.webauthn4j</groupId>
+            <artifactId>webauthn4j-util</artifactId>
+            <scope>compile</scope>
+        </dependency>
+
         <!-- Samigo shared dependencies -->
         <dependency>
             <groupId>org.apache.commons</groupId>

@@ -2,6 +2,8 @@ import { SakaiElement } from "@sakai-ui/sakai-element";
 import { html, nothing } from "lit";
 import { ifDefined } from "lit/directives/if-defined.js";
 import { getSiteId } from "@sakai-ui/sakai-portal-utils";
+import { Signal } from "signal-polyfill";
+import { loggedOut } from "@sakai-ui/sakai-signals";
 import "@sakai-ui/sakai-profile/sakai-profile.js";
 
 /**
@@ -30,7 +32,6 @@ export class SakaiUserPhoto extends SakaiElement {
     blank: { type: Boolean },
     label: { type: String },
     print: { type: Boolean },
-    online: { type: Boolean },
     url: { state: true },
   };
 
@@ -40,6 +41,22 @@ export class SakaiUserPhoto extends SakaiElement {
 
     this.classes = "large-thumbnail";
     this.profilePopup = SakaiUserPhoto.OFF;
+
+    this.logoutWatcher = new Signal.subtle.Watcher(() => {
+
+      queueMicrotask(() => {
+
+        if (loggedOut.get() === 0) {
+          console.log(`Logout detected. Updating image at ${this.url}`);
+          caches.open("sakai-v1").then(c => { c.delete(this.url); c.add(this.url); });
+        }
+
+        this.logoutWatcher.watch();
+      });
+    });
+
+    this.logoutWatcher.watch(loggedOut);
+
   }
 
   close() {
@@ -55,6 +72,10 @@ export class SakaiUserPhoto extends SakaiElement {
         this.url = `/direct/profile/${this.userId}/image/${this.official ? "official" : "thumb"}`
                     + (getSiteId() ? `?siteId=${getSiteId()}` : "");
       }
+
+      console.debug(`User photo URL: ${this.url}`);
+
+      caches.open("sakai-v1").then(c => c.add(this.url));
     }
   }
 
@@ -96,9 +117,6 @@ export class SakaiUserPhoto extends SakaiElement {
           tabindex="0"
           role="button"
           style="background-image:url(${this.url}) ${this.profilePopup === SakaiUserPhoto.OFF ? "" : ";cursor: pointer;"}">
-        ${this.online ? html`
-        <span></span>
-        ` : nothing}
       </div>
       <div class="d-none">
         <sakai-profile user-id="${this.userId}"></sakai-profile>

@@ -174,6 +174,7 @@ export class SakaiWidgetPanel extends SakaiShadowElement {
               user-id="${ifDefined(this.userId ? this.userId : "")}"
               class="widget"
               state="${w.state}"
+              cache-name="${ifDefined(this.cacheName)}"
               @remove=${this.removeWidget}
               @move=${this.moveWidget}
               ?disable-left-and-up=${index === 0}
@@ -191,6 +192,7 @@ export class SakaiWidgetPanel extends SakaiShadowElement {
               user-id="${ifDefined(this.userId ? this.userId : undefined)}"
               class="widget"
               state="${w.state}"
+              cache-name="${ifDefined(this.cacheName)}"
               @remove=${this.removeWidget}
               @move=${this.moveWidget}
               ?disable-left-and-up=${index === 0}
@@ -208,6 +210,7 @@ export class SakaiWidgetPanel extends SakaiShadowElement {
               user-id="${ifDefined(this.userId ? this.userId : undefined)}"
               class="widget"
               state="${w.state}"
+              cache-name="${ifDefined(this.cacheName)}"
               @remove=${this.removeWidget}
               @move=${this.moveWidget}
               ?disable-left-and-up=${index === 0}
@@ -225,6 +228,7 @@ export class SakaiWidgetPanel extends SakaiShadowElement {
               user-id="${ifDefined(this.userId ? this.userId : undefined)}"
               class="widget"
               state="${w.state}"
+              cache-name="${ifDefined(this.cacheName)}"
               @remove=${this.removeWidget}
               @move=${this.moveWidget}
               ?disable-left-and-up=${index === 0}
@@ -242,6 +246,7 @@ export class SakaiWidgetPanel extends SakaiShadowElement {
               user-id="${ifDefined(this.userId ? this.userId : undefined)}"
               state="${w.state}"
               class="widget"
+              cache-name="${ifDefined(this.cacheName)}"
               @remove=${this.removeWidget}
               @move=${this.moveWidget}
               ?disable-left-and-up=${index === 0}

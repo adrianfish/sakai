@@ -18,7 +18,7 @@ export class SakaiTasksWidget extends SakaiDashboardWidget {
       <sakai-tasks
         user-id="${ifDefined(this.userId ? this.userId : "")}"
         site-id="${ifDefined(this.siteId ? this.siteId : "")}"
-      >
+        cache-name="${ifDefined(this.cacheName)}">
       </sakai-tasks>
     `;
   }

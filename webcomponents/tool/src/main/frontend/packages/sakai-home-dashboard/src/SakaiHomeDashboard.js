@@ -2,6 +2,8 @@ import { html, nothing } from "lit";
 import { SakaiElement } from "@sakai-ui/sakai-element";
 import { ifDefined } from "lit/directives/if-defined.js";
 import { unsafeHTML } from "lit/directives/unsafe-html.js";
+import { Signal } from "signal-polyfill";
+import { loggedOut } from "@sakai-ui/sakai-signals";
 import "@sakai-ui/sakai-icon/sakai-icon.js";
 import "@sakai-ui/sakai-course-list/sakai-course-list.js";
 import "@sakai-ui/sakai-widgets";
@@ -12,9 +14,8 @@ export class SakaiHomeDashboard extends SakaiElement {
 
   static properties = {
 
-    courses: { type: Array },
     userId: { attribute: "user-id", type: String },
-    showSites: { attribute: "show-sites", type: Boolean },
+    hideSites: { attribute: "hide-sites", type: Boolean },
     _data: { state: true },
     _showMotd: { state: true },
     _editing: { state: true },
@@ -24,18 +25,35 @@ export class SakaiHomeDashboard extends SakaiElement {
 
     super();
 
-    this.showSites = true;
+    this.hideSites = true;
 
     this.loadTranslations("dashboard");
+
+    this.logoutWatcher = new Signal.subtle.Watcher(() => {
+
+      queueMicrotask(() => {
+
+        if (loggedOut.get() === 1) {
+          caches.open(this.cacheName).then(c => c.delete(`/api/users/${this.userId}/dashboard`));
+        }
+
+        this.logoutWatcher.watch();
+      });
+    });
+
+    this.logoutWatcher.watch(loggedOut);
   }
 
-  set userId(value) {
+  connectedCallback() {
 
-    this._userId = value;
+    super.connectedCallback();
+
     this._loadData();
   }
 
-  get userId() { return this._userId; }
+  _userChanged() {
+    this.loadTranslations({ bundle: "dashboard", lang: this._user.locale }).then(r => this._i18n = r);
+  }
 
   _loadData() {
 
@@ -53,6 +71,9 @@ export class SakaiHomeDashboard extends SakaiElement {
 
         this._data = r;
         this._showMotd = this._data.motd;
+        if (this.cacheName && !this.siteId) {
+          caches.open(this.cacheName).then(c => c.put(url, Response.json(r)));
+        }
       })
       .catch(error => console.error(error));
   }
@@ -92,9 +113,7 @@ export class SakaiHomeDashboard extends SakaiElement {
     }).catch(error => console.error(error.message));
   }
 
-  _toggleMotd() {
-    this._showMotd = !this._showMotd;
-  }
+  _toggleMotd() { this._showMotd = !this._showMotd; }
 
   shouldUpdate() {
     return this._i18n && this._data;
@@ -105,20 +124,40 @@ export class SakaiHomeDashboard extends SakaiElement {
     return html`
 
       <div>
-        <div class="d-lg-flex flex-wrap align-items-center justify-content-between">
-          <div class="fs-2">${this._i18n.welcome} ${this._data.givenName}</div>
-          <div class="d-flex mb-2 mb-lg-0">
+        <div class="d-flex flex-wrap align-items-center justify-content-between mb-2">
+          <div class="fs-2 mb-md-2">${this._i18n.welcome} ${this._data.givenName}</div>
+          <div class="d-flex justify-content-end">
           ${this._editing ? html`
-            <div class="me-1">
-              <sakai-button @click=${this.save} title="${this._i18n.save_tooltip}" aria-label="${this._i18n.save_tooltip}">${this._i18n.save}</sakai-button>
-            </div>
-            <div>
-              <sakai-button @click=${this.cancel} title="${this._i18n.cancel_tooltip}" aria-label="${this._i18n.cancel_tooltip}">${this._i18n.cancel}</sakai-button>
-            </div>
+              <div class="me-1">
+                <button type="button"
+                    class="btn btn-secondary"
+                    @click=${this.save}
+                    title="${this._i18n.save_tooltip}"
+                    aria-label="${this._i18n.save_tooltip}">
+                  ${this._i18n.save}
+                </button>
+              </div>
+              <div>
+                <button type="button"
+                    class="btn btn-secondary"
+                    @click=${this.cancel}
+                    title="${this._i18n.cancel_tooltip}"
+                    aria-label="${this._i18n.cancel_tooltip}">
+                  ${this._i18n.cancel}
+                </button>
+              </div>
           ` : html`
+            ${this._online ? html`
             <div>
-              <sakai-button slot="invoker" @click=${this.edit} title="${this._i18n.edit_tooltip}" arial-label="${this._i18n.edit_tooltip}">${this._i18n.edit}</sakai-button>
+              <button type="button"
+                  class="btn btn-secondary"
+                  @click=${this.edit}
+                  title="${this._i18n.edit_tooltip}"
+                  arial-label="${this._i18n.edit_tooltip}">
+                ${this._i18n.edit}
+              </button>
             </div>
+            ` : nothing }
           `}
           </div>
         </div>
@@ -148,7 +187,7 @@ export class SakaiHomeDashboard extends SakaiElement {
           </div>
         ` : nothing}
         <div class="d-lg-flex">
-          ${this.showSites ? html`
+          ${!this.hideSites ? html`
             <div class="me-lg-3 mb-4 mb-lg-0">
               <sakai-course-list user-id="${this.userId}"></sakai-course-list>
             </div>
@@ -160,6 +199,7 @@ export class SakaiHomeDashboard extends SakaiElement {
               .layout=${this._data.layout}
               site-id=""
               user-id="${ifDefined(this.userId)}"
+              cache-name="${ifDefined(this.cacheName)}"
               ?editing=${this._editing}>
             </sakai-widget-panel>
           </div>

@@ -282,7 +282,7 @@ public class BasicConfigurationService implements ServerConfigurationService, Ap
         String rv = (String) threadLocalManager.get(CURRENT_SERVER_URL);
         if (rv == null)
         {
-            rv = getConfig("serverUrl", "http://localhost:8080"); //rv = (String) properties.get("serverUrl");
+            rv = getConfig("serverUrl", "http://localhost:8080");
         }
         return rv;
     }
@@ -292,7 +292,7 @@ public class BasicConfigurationService implements ServerConfigurationService, Ap
      */
     public String getServerName()
     {
-        return getConfig("serverName", "localhost"); //(String) properties.get("serverName");
+        return getConfig("serverName", "localhost");
     }
 
     /**

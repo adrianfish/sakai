@@ -72,7 +72,6 @@
                                 <exclude>lint-staged.config.mjs</exclude>
                                 <exclude>.gitignore</exclude>
                                 <exclude>.eslintrc.js</exclude>
-                                <exclude>.husky/**</exclude>
                                 <exclude>lerna.json</exclude>
                             </excludes>
                         </resource>

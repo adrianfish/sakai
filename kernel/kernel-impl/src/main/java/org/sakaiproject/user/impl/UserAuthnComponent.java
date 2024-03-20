@@ -22,7 +22,16 @@
 package org.sakaiproject.user.impl;
 
 import lombok.extern.slf4j.Slf4j;
+import lombok.Setter;
 
+import org.apache.commons.lang3.StringUtils;
+
+import java.io.IOException;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+
+import org.sakaiproject.tool.api.SessionManager;
 import org.sakaiproject.util.IPAddrUtil;
 import org.sakaiproject.user.api.Authentication;
 import org.sakaiproject.user.api.AuthenticationException;
@@ -35,6 +44,25 @@ import org.sakaiproject.user.api.IdPwEvidence;
 import org.sakaiproject.user.api.User;
 import org.sakaiproject.user.api.UserDirectoryService;
 import org.sakaiproject.user.api.UserNotDefinedException;
+import org.sakaiproject.user.api.model.WebAuthnCredential;
+import org.sakaiproject.user.api.repository.WebAuthnCredentialRepository;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.dataformat.cbor.databind.CBORMapper;
+
+import com.webauthn4j.credential.CredentialRecord;
+import com.webauthn4j.credential.CredentialRecordImpl;
+import com.webauthn4j.converter.util.ObjectConverter;
+import com.webauthn4j.converter.AttestedCredentialDataConverter;
+import com.webauthn4j.data.AuthenticatorTransport;
+import com.webauthn4j.data.attestation.authenticator.AttestedCredentialData;
+import com.webauthn4j.data.attestation.statement.AttestationStatement;
+import com.webauthn4j.data.extension.authenticator.AuthenticationExtensionsAuthenticatorOutputs;
+import com.webauthn4j.data.extension.authenticator.RegistrationExtensionAuthenticatorOutput;
+import com.webauthn4j.data.extension.client.AuthenticationExtensionsClientOutputs;
+import com.webauthn4j.data.extension.client.RegistrationExtensionClientOutput;
 
 /**
  * <p>
@@ -55,6 +83,11 @@ public abstract class UserAuthnComponent implements AuthenticationManager
 	
 	protected abstract AuthenticationCache authenticationCache();
 
+	@Setter
+	protected SessionManager sessionManager;
+
+	@Setter
+	protected WebAuthnCredentialRepository webAuthnCredentialRepository;
 
 	/**********************************************************************************************************************************************************************************************************************************************************
 	 * Init and Destroy
@@ -80,9 +113,7 @@ public abstract class UserAuthnComponent implements AuthenticationManager
 	 * Work interface methods: AuthenticationManager
 	 *********************************************************************************************************************************************************************************************************************************************************/
 
-	/**
-	 * @inheritDoc
-	 */
+    @Override
 	public Authentication authenticate(Evidence e) throws AuthenticationException
 	{
 		if (e instanceof IdPwEvidence)
@@ -167,4 +198,93 @@ public abstract class UserAuthnComponent implements AuthenticationManager
 			throw new AuthenticationUnknownException(e.toString());
 		}
 	}
+
+	@Override
+	public void registerWebAuthnCredential(CredentialRecord credentialRecord) {
+
+		String userId = sessionManager.getCurrentSessionUserId();
+
+		if (StringUtils.isBlank(userId)) {
+			log.warn("No current user id. We can't register a webauthn credential");
+			return;
+		}
+
+		ObjectMapper jsonMapper = new ObjectMapper();
+		CBORMapper cborMapper = new CBORMapper();
+
+		ObjectConverter objectConverter = new ObjectConverter(jsonMapper, cborMapper);
+
+		AttestedCredentialDataConverter attestedCredentialDataConverter
+			= new AttestedCredentialDataConverter(objectConverter);
+
+		byte[] attestedCredentialData = attestedCredentialDataConverter.convert(credentialRecord.getAttestedCredentialData());
+
+		AttestationStatementEnvelope envelope = new AttestationStatementEnvelope(credentialRecord.getAttestationStatement());
+		byte[] serializedEnvelope = objectConverter.getCborConverter().writeValueAsBytes(envelope);
+
+		String transports = objectConverter.getJsonConverter().writeValueAsString(credentialRecord.getTransports());
+
+		byte[] authenticatorExtensions = objectConverter.getCborConverter().writeValueAsBytes(credentialRecord.getAuthenticatorExtensions());
+
+		String clientExtensions = objectConverter.getJsonConverter().writeValueAsString(credentialRecord.getClientExtensions());
+
+		WebAuthnCredential credential = new WebAuthnCredential();
+		credential.setUserId(userId);
+		credential.setCredentialId(credentialRecord.getAttestedCredentialData().getCredentialId());
+		credential.setAttestedCredentialData(attestedCredentialData);
+		credential.setAttestationStatement(serializedEnvelope);
+		credential.setTransports(transports);
+		credential.setCounter(credentialRecord.getCounter());
+		credential.setAuthenticatorExtensions(authenticatorExtensions);
+		credential.setClientExtensions(clientExtensions);
+
+		webAuthnCredentialRepository.save(credential);
+	}
+
+	@Override
+	public Optional<Map<String, Object>> getWebAuthnCredential(byte[] credentialId) {
+
+		return webAuthnCredentialRepository.findByCredentialId(credentialId).map(cred -> {
+
+			ObjectMapper jsonMapper = new ObjectMapper();
+			CBORMapper cborMapper = new CBORMapper();
+
+			ObjectConverter objectConverter = new ObjectConverter(jsonMapper, cborMapper);
+
+			AttestedCredentialDataConverter attestedCredentialDataConverter
+				= new AttestedCredentialDataConverter(objectConverter);
+
+			AttestedCredentialData attestedCredentialData = attestedCredentialDataConverter.convert(cred.getAttestedCredentialData());
+
+			AttestationStatementEnvelope envelope = objectConverter.getCborConverter().readValue(cred.getAttestationStatement(), AttestationStatementEnvelope.class);
+			AttestationStatement attestationStatement = envelope.getAttestationStatement();
+
+			try {
+				Set<AuthenticatorTransport> transports = jsonMapper.readValue(cred.getTransports(), new TypeReference<Set<AuthenticatorTransport>>(){});
+
+				AuthenticationExtensionsClientOutputs<RegistrationExtensionClientOutput> clientExtensions
+					= jsonMapper.readValue(cred.getClientExtensions(), new TypeReference<AuthenticationExtensionsClientOutputs<RegistrationExtensionClientOutput>>(){});
+
+				AuthenticationExtensionsAuthenticatorOutputs<RegistrationExtensionAuthenticatorOutput> authenticatorExtensions
+					= cborMapper.readValue(cred.getAuthenticatorExtensions(),  new TypeReference<AuthenticationExtensionsAuthenticatorOutputs<RegistrationExtensionAuthenticatorOutput>>(){});
+
+				return Map.of("userId", cred.getUserId(),
+								"credentialRecord", new CredentialRecordImpl(attestationStatement,
+														null,
+														null,
+														null,
+														cred.getCounter(),
+														attestedCredentialData,
+														authenticatorExtensions,
+														null,
+														clientExtensions,
+														transports));
+			} catch (Exception e) {
+				log.warn("Failed to return WebAuthn credential for id {}: {}", credentialId, e.toString());
+				e.printStackTrace();
+			}
+
+			return null;
+		});
+    }
 }

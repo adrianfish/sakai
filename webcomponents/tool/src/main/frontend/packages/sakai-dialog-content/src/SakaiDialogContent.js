@@ -79,7 +79,7 @@ export class SakaiDialogContent extends SakaiShadowElement {
       #container {
         background-color: var(--sakai-background-color-2);
         font-family: var(--sakai-font-family);
-        min-width: 300px;
+        min-width: 250px;
         box-shadow: var(--elevation-8dp);
       }
         #titlebar {

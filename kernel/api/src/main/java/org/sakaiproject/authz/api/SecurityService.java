@@ -174,5 +174,4 @@ public interface SecurityService
 	 * @return true if roleswapped, false if not.
 	 */
 	public boolean isUserRoleSwapped();
-	
 }

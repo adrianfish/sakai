@@ -24,16 +24,8 @@ function loadProperties(suppliedOptions) {
     return;
   }
 
-  // https://stackoverflow.com/questions/19565776/check-if-window-parent-is-same-domain
-  let lang = "";
-  try {
-    lang = window.parent.portal && window.parent.portal.locale ? window.parent.portal.locale : "";
-  } catch (e) {
-    console.warn("checking for portal, " + e);
-  }
-
   const defaults = {
-    lang: (window.portal && window.portal.locale) ? window.portal.locale : lang,
+    lang: window?.portal?.locale ? window.portal.locale : "en_GB",
     resourceClass: "org.sakaiproject.i18n.InternationalizedMessages",
     cache: true,
   };

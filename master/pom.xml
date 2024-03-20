@@ -695,6 +695,18 @@
         <scope>provided</scope>
       </dependency>
       <dependency>
+        <groupId>com.webauthn4j</groupId>
+        <artifactId>webauthn4j-core</artifactId>
+        <version>0.29.0.RELEASE</version>
+        <scope>provided</scope>
+      </dependency>
+      <dependency>
+        <groupId>com.webauthn4j</groupId>
+        <artifactId>webauthn4j-util</artifactId>
+        <version>0.29.0.RELEASE</version>
+        <scope>provided</scope>
+      </dependency>
+      <dependency>
         <groupId>org.jsoup</groupId>
         <artifactId>jsoup</artifactId>
         <version>${sakai.jsoup.version}</version>

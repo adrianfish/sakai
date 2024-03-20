@@ -9,6 +9,7 @@
   "scripts": {
     "lint": "eslint \"packages/**/src/*.js\" --max-warnings=0",
     "bundle": "esbuild \"bundle-entry-points/*.js\" --sourcemap --preserve-symlinks --bundle --splitting --format=esm --outdir=bundles --minify",
+    "bundlepwa": "esbuild \"bundle-entry-points/pwa.js\" --sourcemap --preserve-symlinks --bundle --format=esm --outdir=bundles --minify",
     "analyze-bundle": "esbuild \"bundle-entry-points/*.js\" --preserve-symlinks --splitting --bundle --metafile=meta.json --format=esm --outdir=bundles --minify",
     "analyze": "lit-analyzer --strict --quiet --rules.no-complex-attribute-binding=warning --rules.no-incompatible-type-binding=off \"packages/**/src/*.js\"",
     "test": "playwright install chromium && wtr",
@@ -22,6 +23,7 @@
     "@eslint/js": "^9.13.0",
     "@faker-js/faker": "^9.6.0",
     "@lion/ui": "^0.11.2",
+    "@github/webauthn-json": "^2.1.1",
     "@open-wc/testing": "^4.0.0",
     "@sakai-ui/sakai-button": "file:packages/sakai-button",
     "@sakai-ui/sakai-calendar": "file:packages/sakai-calendar",
@@ -46,6 +48,7 @@
     "@sakai-ui/sakai-picture-changer": "file:packages/sakai-picture-changer",
     "@sakai-ui/sakai-portal-utils": "file:packages/sakai-portal-utils",
     "@sakai-ui/sakai-pronunciation-player": "file:packages/sakai-pronunciation-player",
+    "@sakai-ui/sakai-pwa": "file:packages/sakai-pwa",
     "@sakai-ui/sakai-rubrics": "file:packages/sakai-rubrics",
     "@sakai-ui/sakai-search": "file:packages/sakai-search",
     "@sakai-ui/sakai-submission-messager": "file:packages/sakai-submission-messager",
@@ -69,6 +72,7 @@
     "lit-analyzer": "^2.0.3",
     "sinon": "^19.0.2",
     "sortablejs": "^1.15.3",
+    "signal-polyfill": "^0.2.0",
     "temporal-polyfill": "0.2.5"
   }
 }

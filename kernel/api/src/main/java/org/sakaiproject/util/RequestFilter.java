@@ -1275,7 +1275,8 @@ public class RequestFilter implements Filter
 				// set the cookie
 				c = new Cookie(cookieName, sessionId);
 				c.setPath("/");
-				c.setMaxAge(-1);
+				//c.setMaxAge(-1);
+                c.setMaxAge(2630000);
 				if (cookieDomain != null)
 				{
 					c.setDomain(cookieDomain);

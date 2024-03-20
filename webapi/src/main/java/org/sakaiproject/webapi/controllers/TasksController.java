@@ -215,7 +215,7 @@ public class TasksController extends AbstractSakaiApiController {
         return result;
     }
 
-    @PutMapping(value = "/tasks/{userTaskId}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(value = "/tasks/{userTaskId}", produces = MediaType.APPLICATION_JSON_VALUE)
     public UserTaskAdapterBean updateTask(@RequestBody UserTaskAdapterBean taskTransfer ) {
 
         checkSakaiSession();

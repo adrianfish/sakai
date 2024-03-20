@@ -2,10 +2,15 @@ import { SakaiElement } from "@sakai-ui/sakai-element";
 import { html, nothing } from "lit";
 import { unsafeHTML } from "lit/directives/unsafe-html.js";
 import "@sakai-ui/sakai-user-photo/sakai-user-photo.js";
-import { callSubscribeIfPermitted, NOT_PUSH_CAPABLE, pushSetupComplete, registerPushCallback } from "@sakai-ui/sakai-push-utils";
+import { Signal } from "signal-polyfill";
+import { loggedOut } from "@sakai-ui/sakai-signals";
+import { callSubscribeIfPermitted,
+          NOT_PUSH_CAPABLE,
+          pushSetupComplete,
+          registerPushCallback } from "@sakai-ui/sakai-push-utils";
 import { getServiceName } from "@sakai-ui/sakai-portal-utils";
 import { NOTIFICATIONS, PUSH_DENIED_INFO, PUSH_INTRO, PUSH_SETUP_INFO } from "./states.js";
-import { markNotificationsViewed } from "./utils.js";
+import { fetchNotifications, markNotificationsViewed } from "./utils.js";
 
 export class SakaiNotifications extends SakaiElement {
 
@@ -16,6 +21,9 @@ export class SakaiNotifications extends SakaiElement {
     firefoxInfoUrl: { attribute: "firefox-info-url", type: String },
     safariInfoUrl: { attribute: "safari-info-url", type: String },
     edgeInfoUrl: { attribute: "edge-info-url", type: String },
+    deferLoad: { attribute: "defer-load", type: Boolean },
+    cacheName: { attribute: "cache-name", type: String },
+    precacheThumbnails: { attribute: "precache-thumbnails", type: Boolean },
     _state: { state: true },
     _highlightTestButton: { state: true },
     _browserInfoUrl: { state: true },
@@ -25,10 +33,22 @@ export class SakaiNotifications extends SakaiElement {
 
     super();
 
-    window.addEventListener("online", () => this._online = true );
-
     this._filteredNotifications = new Map();
     this._i18nLoaded = this.loadTranslations("sakai-notifications");
+
+    this.logoutWatcher = new Signal.subtle.Watcher(() => {
+
+      queueMicrotask(() => {
+
+        if (loggedOut.get() === 1) {
+          caches.open(this.cacheName).then(c => c.delete("/api/users/me/notifications"));
+        }
+
+        this.logoutWatcher.watch();
+      });
+    });
+
+    this.logoutWatcher.watch(loggedOut);
   }
 
   connectedCallback() {
@@ -47,43 +67,46 @@ export class SakaiNotifications extends SakaiElement {
       this._browserInfoUrl = this.edgeInfoUrl;
     }
 
-    this._i18nLoaded.then(() => this._loadInitialNotifications());
+    if (!this.deferLoad) {
+      this._i18nLoaded.then(() => this.loadNotifications());
+    }
+
+    //this.precacheThumbnails && this._precacheThumbnailImages();
   }
 
-  _loadInitialNotifications(register = true) {
+  loadNotifications(register = true) {
 
-    console.debug("_loadInitialNotifications");
+    console.debug("loadNotifications");
 
-    fetch(this.url, {
-      credentials: "include",
-      cache: "no-cache",
-      headers: { "Content-Type": "application/json" },
-    })
-    .then(r => {
+    fetchNotifications(this.url, register)
+      .then(notifications => {
 
-      if (r.ok) {
-        return r.json();
-      }
+        this.notifications = notifications;
+        this.precacheThumbnails && this._precacheThumbnailImages();
+        this._filterIntoToolNotifications();
+        this._fireLoadedEvent();
+        register && this._registerForNotifications();
+      });
+  }
 
-      throw new Error(`Network error while retrieving notifications from ${this.url}`);
-    })
-    .then(notifications => {
+  _precacheThumbnailImages() {
 
-      this.notifications = notifications;
-      this._filterIntoToolNotifications();
-      this._fireLoadedEvent();
-      register && this._registerForNotifications();
-    })
-    .catch(error => console.error(error));
+    caches.open(this.cacheName)
+      //.then(c => c.addAll(this.notifications.map(n => `/direct/profile/${n.fromUser}/image/thumb`)));
+      .then(c => c.addAll([...new Set(this.notifications.map(n => n.fromUser))].map(userId => `/direct/profile/${userId}/image/thumb`)));
   }
 
   _registerForNotifications() {
 
     console.debug("registerForNotifications");
 
+    if (Notification.permission !== "granted") return;
+
     pushSetupComplete.then(() => {
 
-      if (Notification.permission !== "granted") return;
+      if (this.cacheName) {
+        caches.open(this.cacheName).then(c => c.put("/api/users/me/notifications", Response.json(this.notifications)));
+      }
 
       registerPushCallback("notifications", message => {
 
@@ -91,7 +114,11 @@ export class SakaiNotifications extends SakaiElement {
         this._fireLoadedEvent();
         this._decorateNotification(message);
         this._filterIntoToolNotifications(false);
-      });
+
+        if (this.cacheName && message.event !== "test.notification") {
+          caches.open(this.cacheName).then(c => c.put("/api/users/me/notifications", Response.json(this.notifications)));
+        }
+      }, 1);
     })
     .catch(error => {
 
@@ -101,13 +128,11 @@ export class SakaiNotifications extends SakaiElement {
     });
   }
 
-  _filterIntoToolNotifications(decorate = true) {
+  _filterIntoToolNotifications() {
 
     this._filteredNotifications.clear();
 
     this.notifications.forEach(noti => {
-
-      decorate && this._decorateNotification(noti);
 
       // Grab the first section of the event. This is the tool event prefix.
       const toolEventPrefix = noti.event.substring(0, noti.event.indexOf("."));
@@ -195,9 +220,9 @@ export class SakaiNotifications extends SakaiElement {
 
   _fireLoadedEvent() {
 
-    const unviewed = this.notifications.filter(n => !n.viewed).length;
-    this.dispatchEvent(new CustomEvent("notifications-loaded", { detail: { count: unviewed }, bubbles: true }));
-    navigator.setAppBadge && navigator.setAppBadge(unviewed);
+    const unviewed = this.notifications.filter(n => n.event !== "test.notification" && !n.viewed).length;
+    this.dispatchEvent(new CustomEvent("notifications-loaded", { detail: { notifications: this.notifications, count: unviewed }, bubbles: true }));
+    navigator.setAppBadge?.(unviewed);
   }
 
   _clearNotification(e) {
@@ -213,6 +238,9 @@ export class SakaiNotifications extends SakaiElement {
           this.notifications.splice(index, 1);
           this._fireLoadedEvent();
           this._filterIntoToolNotifications(false);
+          if (this.cacheName) {
+            caches.open(this.cacheName).then(c => c.put("/api/users/me/notifications", Response.json(this.notifications)));
+          }
         } else {
           throw new Error(`Network error while clearing notification at ${url}`);
         }
@@ -231,6 +259,9 @@ export class SakaiNotifications extends SakaiElement {
           this._fireLoadedEvent();
           this._filterIntoToolNotifications();
           this.dispatchEvent(new CustomEvent("notifications-cleared", { bubbles: true }));
+          if (this.cacheName) {
+            caches.open("sakai-v1").then(c => c.put("/api/users/me/notifications", Response.json([])));
+          }
         } else {
           throw new Error(`Network error while clearing all notifications at ${url}`);
         }
@@ -238,7 +269,7 @@ export class SakaiNotifications extends SakaiElement {
       .catch(error => console.error(error));
   }
 
-  _clearTestNotifications() {
+  clearTestNotifications() {
 
     this.notifications = [ ...this.notifications.filter(n => !n.event.startsWith("test")) ];
     this._filterIntoToolNotifications();
@@ -253,6 +284,9 @@ export class SakaiNotifications extends SakaiElement {
           this.notifications?.forEach(a => a.viewed = true);
           this.requestUpdate();
           this._fireLoadedEvent();
+          if (this.cacheName) {
+            caches.open(this.cacheName).then(c => c.put("/api/users/me/notifications", Response.json(this.notifications)));
+          }
         } else {
           throw new Error("Network error while marking all notifications viewed");
         }
@@ -297,7 +331,7 @@ export class SakaiNotifications extends SakaiElement {
           this._state = PUSH_DENIED_INFO;
           break;
         case "granted":
-          this._loadInitialNotifications(true);
+          this.loadNotifications(true);
           this._highlightTestButton = true;
           break;
       }
@@ -398,7 +432,7 @@ export class SakaiNotifications extends SakaiElement {
           <div>
             <button type="button"
                 class="btn btn-link shadow-sm ms-2 mb-2"
-                @click=${this._clearTestNotifications}>
+                @click=${this.clearTestNotifications}>
               ${this._i18n.clear}
             </button>
           </div>
@@ -489,7 +523,7 @@ export class SakaiNotifications extends SakaiElement {
 
             ${Notification.permission !== "granted" && this._online ? html`
               <button class="btn btn-secondary btn-sm me-2"
-                  @click=${this._loadInitialNotifications}>
+                  @click=${this.loadNotifications}>
                 ${this._i18n.update}
               </button>
             ` : nothing}

@@ -2,6 +2,8 @@ import { css, html, nothing } from "lit";
 import { unsafeHTML } from "lit/directives/unsafe-html.js";
 import { SakaiPageableElement } from "@sakai-ui/sakai-pageable-element";
 import "@sakai-ui/sakai-icon/sakai-icon.js";
+import { Signal } from "signal-polyfill";
+import { loggedOut } from "@sakai-ui/sakai-signals";
 import { sakaiFormatDistance } from "@sakai-ui/sakai-date-fns";
 import * as constants from "./sakai-tasks-constants.js";
 
@@ -25,7 +27,31 @@ export class SakaiTasks extends SakaiPageableElement {
     this._canUpdateSite = false;
     this._currentFilter = constants.CURRENT;
     this.loadTranslations("tasks");
+
+    this.logoutWatcher = new Signal.subtle.Watcher(() => {
+
+      if (this.siteId) return;
+
+      queueMicrotask(() => {
+
+        if (loggedOut.get() === 1) {
+          caches.open(this.cacheName).then(c => c.delete("/api/users/me/tasks"));
+        }
+
+        this.logoutWatcher.watch();
+      });
+    });
+
+    this.logoutWatcher.watch(loggedOut);
   }
+
+  /*
+  _userChanged() {
+
+    console.log(this._user.locale);
+    this.loadTranslations({ bundle: "tasks", lang: this._user.locale }).then(r => this._i18n = r);
+  }
+  */
 
   set data(value) {
 
@@ -75,6 +101,10 @@ export class SakaiTasks extends SakaiPageableElement {
             import("../sakai-tasks-create-task.js"),
             import("@lion/ui/define/lion-dialog.js"),
           ]);
+        }
+
+        if (this.cacheName && !this.siteId) {
+          caches.open(this.cacheName).then(c => c.put(url, Response.json(response)));
         }
 
         this._canUpdateSite = response.canUpdateSite;
@@ -361,7 +391,7 @@ export class SakaiTasks extends SakaiPageableElement {
                   @click=${this.editTask}
                   title="${this._i18n.edit}"
                   aria-label="${this._i18n.edit}">
-                <sakai-icon type="edit" size="small"></sakai-icon>
+                <i class="si si-edit"></i>
               </a>
             </div>
               ${t.softDeleted ? html`
@@ -371,7 +401,7 @@ export class SakaiTasks extends SakaiPageableElement {
                       @click=${this.deleteTask}
                       title="${this._i18n.hard_delete}"
                       aria-label="${this._i18n.hard_delete}">
-                    <sakai-icon type="delete" size="small"></sakai-icon>
+                    <i class="si si-trash"></i>
                   </a>
                 </div>
                 <div class="restore">
@@ -390,7 +420,7 @@ export class SakaiTasks extends SakaiPageableElement {
                       @click=${this.softDeleteTask}
                       title="${this._i18n.soft_delete}"
                       aria-label="${this._i18n.soft_delete}">
-                    <sakai-icon type="delete" size="small"></sakai-icon>
+                    <i class="si si-trash"></i>
                   </a>
                 </div>
               `}
@@ -401,7 +431,7 @@ export class SakaiTasks extends SakaiPageableElement {
                 <a href="${t.url}"
                     title="${this._i18n.task_url}"
                     aria-label="${this._i18n.task_url}">
-                  <sakai-icon type="right" size="small"></sakai-icon>
+                  <i class="si si-right"></i>
                 </a>
               </div>
             ` : nothing }

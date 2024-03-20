@@ -243,7 +243,7 @@ export class SakaiTasksCreateTask extends SakaiDialogContent {
       <div class="input">
         <input type="text"
             id="description"
-            size="50"
+            size="40"
             maxlength="150"
             @input=${this._setDescription}
             .value=${this.task.description}>
@@ -378,11 +378,8 @@ export class SakaiTasksCreateTask extends SakaiDialogContent {
         font-weight: bold;
         color: var(--sakai-tasks-save-failed-color, red)
       }
-      #group {
-        width: 100%;
-      }
       sakai-editor {
-        width: 100%;
+        width: 80%;
       }
       .global-overlays {
         z-index: 1200;

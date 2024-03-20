@@ -1,8 +1,9 @@
 import { css, html, nothing } from "lit";
-import "@sakai-ui/sakai-icon";
 import { SakaiPageableElement } from "@sakai-ui/sakai-pageable-element";
 import { SakaiSitePicker } from "@sakai-ui/sakai-site-picker";
 import "@sakai-ui/sakai-site-picker/sakai-site-picker.js";
+import { Signal } from "signal-polyfill";
+import { loggedOut } from "@sakai-ui/sakai-signals";
 import { ASSIGNMENT_A_TO_Z, ASSIGNMENT_Z_TO_A, COURSE_A_TO_Z
   , COURSE_Z_TO_A, NEW_HIGH_TO_LOW, NEW_LOW_TO_HIGH
   , AVG_LOW_TO_HIGH, AVG_HIGH_TO_LOW } from "./sakai-grades-constants.js";
@@ -19,6 +20,22 @@ export class SakaiGrades extends SakaiPageableElement {
 
     this.showPager = true;
     this.loadTranslations("grades");
+
+    this.logoutWatcher = new Signal.subtle.Watcher(() => {
+
+      if (this.siteId) return;
+
+      queueMicrotask(() => {
+
+        if (loggedOut.get() === 1) {
+          caches.open(this.cacheName).then(c => c.delete("/api/users/me/grades"));
+        }
+
+        this.logoutWatcher.watch();
+      });
+    });
+
+    this.logoutWatcher.watch(loggedOut);
   }
 
   async loadAllData() {
@@ -38,7 +55,12 @@ export class SakaiGrades extends SakaiPageableElement {
         this.data = data.grades;
         !this.siteId && (this.sites = data.sites);
         this._allData = data.grades;
+
         this.sortChanged({ target: { value: NEW_LOW_TO_HIGH } });
+
+        if (this.cacheName && !this.siteId) {
+          caches.open(this.cacheName).then(c => c.put(url, Response.json(this.data)));
+        }
       })
       .catch (error => console.error(error));
   }
@@ -168,10 +190,7 @@ export class SakaiGrades extends SakaiPageableElement {
           <a href="${a.url}"
               aria-label="${this._i18n.url_tooltip}"
               title="${this._i18n.url_tooltip}">
-            <sakai-icon type="right" size="small">
-              aria-label="${this._i18n.url_tooltip}"
-              title="${this._i18n.url_tooltip}">
-            </sakai-icon>
+            <i class="si si-right"></i>
           </a>
         </div>
         `)}

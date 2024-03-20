@@ -3,7 +3,6 @@ import { ifDefined } from "lit-html/directives/if-defined.js";
 import { SakaiElement } from "@sakai-ui/sakai-element";
 import { pushSetupComplete, registerPushCallback } from "@sakai-ui/sakai-push-utils";
 import { markNotificationsViewed } from "@sakai-ui/sakai-notifications";
-import "@sakai-ui/sakai-icon";
 
 export class SakaiCourseCard extends SakaiElement {
 

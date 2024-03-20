@@ -92,4 +92,7 @@ public class UserNotification implements PersistableEntity<Long> {
 
     @Transient
     private String siteTitle;
+
+    @Transient
+    private long unreadCount = 0L;
 }

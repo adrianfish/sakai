@@ -1,6 +1,6 @@
 import { html } from "lit";
 import { ifDefined } from "lit/directives/if-defined.js";
-import "@sakai-ui/sakai-calendar";
+import "@sakai-ui/sakai-calendar/sakai-calendar.js";
 import { SakaiDashboardWidget } from "./SakaiDashboardWidget.js";
 
 export class SakaiCalendarWidget extends SakaiDashboardWidget {
@@ -30,7 +30,7 @@ export class SakaiCalendarWidget extends SakaiDashboardWidget {
       <sakai-calendar
         site-id=${ifDefined(this.siteId ? this.siteId : undefined)}
         user-id=${ifDefined(this.userId ? this.userId : undefined)}
-      >
+        cache-name="${ifDefined(this.cacheName)}">
       </sakai-calendar>
     `;
   }

@@ -1,0 +1,56 @@
+//Bootstrap icons
+@use "bootstrap-icons/font/bootstrap-icons";
+
+/*
+ * Mixin sakai-icons
+ * This mixin should never be called directly as its only use is to output css for icons.
+ * In $defaultIcons icon classnames are mapped to existing classnames:
+ * For example sakai-acadtermmanage : bi-calendar-plus, will assign the bi-calendar-plus icon
+ * to the si-sakai-acadtermmanage class
+ * The resulting icon classes should be used together with the si base class, like:
+ * si si-sakai-acadtermmanage
+ * For skin customization, this icon map can be extended by assigning a similar icon map to
+ * the $customIcons varuable
+ */
+
+@mixin sakai-icons($customIcons) {
+
+  $iconBaseClass: si;  
+
+  $defaultIcons: (
+    // sakai native tools
+    sakai-announcements : bi-megaphone,
+    sakai-assignment-grades : bi-file-text,
+    sakai-commons : bi-bank,
+    sakai-lessonbuildertool : bi-file-text,
+    sakai-profile2 : bi-person,
+    // other tools
+    alerts : bi-bell, 
+    sakai-blogwow : bi-pencil-square,
+    // other icons
+    close : bi-x,
+    sakai-filled-right-arrow : bi-arrow-right-circle-fill,
+    info-circle : bi-info-circle,
+    right: bi-arrow-right,
+  );
+
+  $allIcons: map-merge($defaultIcons, $customIcons);
+
+  @each $sakaiIcon, $assignedIcon in $allIcons {
+    @debug "#{$sakaiIcon}: #{$assignedIcon}"; //Logs icons for debugging
+    .#{$iconBaseClass}-#{$sakaiIcon} {
+      @extend .#{$assignedIcon};
+    }
+  }
+
+  //Assing icon base class
+  .#{$iconBaseClass} {
+    @extend .bi;
+  }
+}
+
+$customIcons: () !default;
+
+// call the mixin to actually create css for icons
+@include sakai-icons($customIcons);
+

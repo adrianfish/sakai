@@ -8,6 +8,7 @@ export class SakaiPictureChanger extends SakaiElement {
   static properties = {
 
     dialogTitle: { attribute: "dialog-title", type: String },
+    userId: { attribute: "user-id", type: String },
 
     _imageUrl: { state: true },
     _uploadError: { state: true },
@@ -120,18 +121,21 @@ export class SakaiPictureChanger extends SakaiElement {
 
     const d = new Date();
 
-    const imageUrl = `/direct/profile/${getUserId()}/image?${d.getTime()}`;
+    const imageUrl = `/direct/profile/${this.userId || getUserId()}/image?${d.getTime()}`;
     document.querySelectorAll(".sakai-accountProfileImage")
       .forEach(pic => pic.setAttribute("src", imageUrl));
 
     const style = `background-image: url(${imageUrl})`;
 
-    document.querySelectorAll(`.sakai-user-photo[data-user-id='${getUserId()}']`).forEach(up => {
+    document.querySelectorAll(`.sakai-user-photo[data-user-id='${this.userId || getUserId()}']`).forEach(up => {
       up.setAttribute("style", style);
     });
+
     // Update the profile image on the page
     const myPhoto = document.getElementById("myPhoto");
     myPhoto && (myPhoto.src = imageUrl);
+
+    document.querySelectorAll(".sakai-accountProfileImage").forEach(pi => pi.src = imageUrl);
   }
 
   _loadExisting() {
@@ -221,7 +225,7 @@ export class SakaiPictureChanger extends SakaiElement {
 
     return html`
 
-    <div class="modal fade" id="profile-image-upload" tabindex="-1" role="dialog">
+    <div class="modal fade" id="profile-image-upload" data-bs-backdrop="false" tabindex="-1" role="dialog">
     <div class="modal-dialog" role="document">
       <div class="modal-content">
         <div class="modal-header">

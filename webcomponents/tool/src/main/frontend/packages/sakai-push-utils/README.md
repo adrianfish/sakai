@@ -11,15 +11,20 @@ npm i @sakai-ui/sakai-push-utils
 ## Usage
 
 ```html
-import { pushSetupComplete } from "@sakai-ui/sakai-push-utils";
+import { setup } from "@sakai-ui/sakai-push-utils";
 
-pushSetupComplete.then(() => console.log("push setup complete"));
-
+setup.then(() => console.log("push setup complete"));
 ```
 
 ## Linting and formatting
 
 To scan the project for linting and formatting errors, run
+
+```bash
+npm run lint
+```
+
+To automatically fix linting and formatting errors, run
 
 ```bash
 npm run lint:fix
@@ -31,4 +36,9 @@ To execute the tests for this module, run
 
 ```bash
 npm run test
+```
+To run the tests in interactive watch mode run:
+
+```bash
+npm run test:watch
 ```

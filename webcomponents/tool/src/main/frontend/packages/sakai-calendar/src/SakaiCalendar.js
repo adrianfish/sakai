@@ -5,12 +5,15 @@ import { calendarStyles } from "./calendar-styles.js";
 import { SakaiSitePicker } from "@sakai-ui/sakai-site-picker";
 import "@sakai-ui/sakai-site-picker/sakai-site-picker.js";
 import { loadProperties } from "@sakai-ui/sakai-i18n";
+import { Signal } from "signal-polyfill";
+import { loggedOut } from "@sakai-ui/sakai-signals";
 
 export class SakaiCalendar extends LionCalendar {
 
   static properties = {
 
     siteId: { attribute: "site-id", type: String },
+    cacheName: { attribute: "cache-name", type: String },
     defer: { type: Boolean },
     _daysEvents: { state: true },
     _events: { state: true },
@@ -27,6 +30,23 @@ export class SakaiCalendar extends LionCalendar {
     });
 
     loadProperties("calendar-wc").then(r => this._i18n = r);
+
+    this.logoutWatcher = new Signal.subtle.Watcher(() => {
+
+      if (this.siteId) return;
+
+      queueMicrotask(() => {
+
+        if (loggedOut.get() === 1) {
+          caches.open(this.cacheName).then(c => c.delete("/api/users/current/calendar"));
+        }
+
+        this.logoutWatcher.watch();
+      });
+    });
+
+    this.logoutWatcher.watch(loggedOut);
+
   }
 
   connectedCallback() {
@@ -59,6 +79,10 @@ export class SakaiCalendar extends LionCalendar {
       this._allEvents = data.events;
       this._events = data.events;
       !this.siteId && (this._sites = data.sites);
+
+      if (this.cacheName && !this.siteId) {
+        caches.open(this.cacheName).then(c => c.put(url, Response.json(data)));
+      }
 
       this.renderRoot.querySelector(".calendar__day-button[today]")?.click();
     })

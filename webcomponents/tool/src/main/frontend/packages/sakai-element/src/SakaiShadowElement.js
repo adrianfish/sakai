@@ -1,19 +1,48 @@
 import { css, LitElement } from "lit";
 import { loadProperties, tr } from "@sakai-ui/sakai-i18n";
 import { getDocumentStyleSheets } from "./global-styles.js";
+import { Signal } from "signal-polyfill";
+import { userChanged } from "@sakai-ui/sakai-signals";
 
 export class SakaiShadowElement extends LitElement {
 
   static properties = {
+    _user: { state: true },
+    cacheName: { attribute: "cache-name", type: String },
     _online: { state: true },
     _i18n: { state: true },
   };
+
+  constructor() {
+
+    super();
+
+    this.userChangedWatcher = new Signal.subtle.Watcher(() => {
+
+      queueMicrotask(() => {
+
+        this._user = userChanged.get();
+        this.userChangedWatcher.watch();
+      });
+    });
+
+    this.userChangedWatcher.watch(userChanged);
+  }
 
   connectedCallback() {
 
     super.connectedCallback();
 
     this._online = navigator.onLine;
+
+    window.addEventListener("online", () => this._online = true );
+    window.addEventListener("offline", () => this._online = false );
+
+    // The idea here is that the userChangedWatcher may well not be hooked up in time to catch the
+    // signal update from wherever, so we add this as a way of components just setting their state
+    // explicitly from the signal
+    this._user = userChanged.get();
+    this._userChanged?.();
   }
 
   /**

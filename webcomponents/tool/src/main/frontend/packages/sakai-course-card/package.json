@@ -31,14 +31,14 @@
     "url": "https://github.com/sakaiproject/sakai-ui/issues"
   },
   "homepage": "https://github.com/sakaiproject/sakai-ui#readme",
-  "dependencies": {
-    "@sakai-ui/sakai-i18n": "file:../sakai-i18n",
-    "@sakai-ui/sakai-icon": "file:../sakai-icon",
-    "@sakai-ui/sakai-options-menu": "file:../sakai-options-menu",
-    "@sakai-ui/sakai-push-utils": "file:../sakai-push-utils"
-  },
   "exports": {
     ".": "./index.js",
     "./sakai-course-card.js": "./sakai-course-card.js"
+  },
+  "dependencies": {
+    "@sakai-ui/sakai-element": "file:../sakai-element",
+    "@sakai-ui/sakai-notifications": "file:../sakai-notifications",
+    "@sakai-ui/sakai-push-utils": "file:../sakai-push-utils",
+    "lit": "^3.2.1"
   }
 }
