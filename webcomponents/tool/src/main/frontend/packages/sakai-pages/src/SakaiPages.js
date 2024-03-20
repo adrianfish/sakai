@@ -11,7 +11,7 @@ export class SakaiPages extends SakaiElement {
     siteId: { attribute: "site-id", type: String },
     _topLevelPages: { attribute: false, type: Array },
     _i18n: { attribute: false, type: Object },
-    _addPageUrl: { attribute: false, type: String },
+    _addPageUrl: { state: true },
     _state: { attribute: false, type: String },
     _pages: { attribute: false, type: Array },
     _pageBeingEdited: { attribute: false, type: Object },
@@ -302,7 +302,7 @@ export class SakaiPages extends SakaiElement {
       ${this._state === "VIEW_PAGE" ? this._renderViewPage() : nothing}
       ${this._state === "PERMISSIONS" ? html`
         <sakai-permissions
-            tool="sakai.pages"
+            tool="pages"
             @permissions-complete=${this._permissionsComplete}
             fire-event>
         </sakai-permissions>

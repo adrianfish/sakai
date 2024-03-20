@@ -13,9 +13,12 @@
  ******************************************************************************/
 package org.sakaiproject.webapi.controllers;
 
+import org.sakaiproject.authz.api.SecurityService;
 import org.sakaiproject.pages.api.PageTransferBean;
 import org.sakaiproject.pages.api.PagesPermissionException;
 import org.sakaiproject.pages.api.PagesService;
+import org.sakaiproject.pages.api.Permissions;
+import org.sakaiproject.site.api.SiteService;
 
 import org.sakaiproject.webapi.beans.PagesRestBean;
 
@@ -47,6 +50,12 @@ public class PagesController extends AbstractSakaiApiController {
 	@Autowired
 	private PagesService pagesService;
 
+	@Autowired
+	private SiteService siteService;
+
+	@Autowired
+	private SecurityService securityService;
+
 	@GetMapping(value = "/sites/{siteId}/pages", produces = MediaType.APPLICATION_JSON_VALUE)
     public EntityModel<PagesRestBean> getSitePages(@PathVariable String siteId) {
 
@@ -58,7 +67,9 @@ public class PagesController extends AbstractSakaiApiController {
         pagesRestBean.pages = pagesService.getPagesForSite(siteId, /* populate */ false);
 
         List<Link> links = new ArrayList<>();
-        links.add(Link.of("/api/sites/" + siteId + "/pages", "addPage"));
+        if (securityService.unlock(Permissions.ADD_PAGE, siteService.siteReference(siteId))) {
+            links.add(Link.of("/api/sites/" + siteId + "/pages", "addPage"));
+        }
         return EntityModel.of(pagesRestBean, links);
     }
 
