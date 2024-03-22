@@ -24,6 +24,7 @@ import org.sakaiproject.springframework.data.SpringCrudRepository;
 public interface UserNotificationRepository extends SpringCrudRepository<UserNotification, Long> {
 
     List<UserNotification> findByToUser(String toUser);
+    Long countByToUserAndViewed(String userId, boolean viewed);
     int deleteByToUserAndDeferred(String userId, boolean deferred);
     int setAllNotificationsViewed(String userId);
     int setDeferredBySiteId(String siteId, boolean deferred);

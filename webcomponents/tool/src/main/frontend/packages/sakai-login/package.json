@@ -1,0 +1,44 @@
+{
+  "name": "@sakai-ui/sakai-login",
+  "version": "3.0.6",
+  "description": "",
+  "license": "ECL-2.0",
+  "author": "Adrian Fish <adrian.r.fish@gmail.com>",
+  "homepage": "https://github.com/sakaiproject/sakai-ui/",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/sakaiproject/sakai",
+    "directory": "webcomponents/tool/src/main/frontend/packages/sakai-login"
+  },
+  "main": "index.js",
+  "module": "index.js",
+  "files": [
+    "*.js",
+    "sakai-login.js",
+    "src"
+  ],
+  "scripts": {
+    "lint:fix": "eslint src --fix",
+    "test": "web-test-runner --coverage"
+  },
+  "keywords": [
+    "Sakai"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "exports": {
+    ".": "./index.js",
+    "./sakai-login.js": "./sakai-login.js"
+  },
+  "dependencies": {
+    "@sakai-ui/sakai-element": "file:../sakai-element",
+    "lit": "^3.0.2"
+  },
+  "devDependencies": {
+    "@open-wc/testing": "^3.1.7",
+    "@web/test-runner": "^0.15.0",
+    "eslint": "^8.53.0",
+    "fetch-mock": "^9.11.0"
+  }
+}

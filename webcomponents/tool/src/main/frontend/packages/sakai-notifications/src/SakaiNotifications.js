@@ -2,7 +2,10 @@ import { SakaiElement } from "@sakai-ui/sakai-element";
 import { html } from "lit";
 import { unsafeHTML } from "lit/directives/unsafe-html.js";
 import "@sakai-ui/sakai-user-photo";
-import { callSubscribeIfPermitted, pushSetupComplete, registerPushCallback } from "@sakai-ui/sakai-push-utils";
+import { callSubscribeIfPermitted,
+          pushSetupComplete,
+          registerPushCallback,
+          registerPushPermissionRequestCompletedCallback } from "@sakai-ui/sakai-push-utils";
 import { getServiceName } from "@sakai-ui/sakai-portal-utils";
 
 export class SakaiNotifications extends SakaiElement {
@@ -17,7 +20,7 @@ export class SakaiNotifications extends SakaiElement {
 
     super();
 
-    this.filteredNotifications = new Map();
+    this._filteredNotifications = new Map();
     this._i18nLoaded = this.loadTranslations("sakai-notifications");
     this._i18nLoaded.then(r => this._i18n = r);
   }
@@ -30,7 +33,9 @@ export class SakaiNotifications extends SakaiElement {
 
   get url() { return this._url; }
 
-  _loadInitialNotifications(register = true) {
+  _loadInitialNotifications() {
+
+    console.debug("_loadInitialNotifications");
 
     fetch(this.url, {
       credentials: "include",
@@ -49,7 +54,7 @@ export class SakaiNotifications extends SakaiElement {
 
       this.notifications = notifications;
       this._filterIntoToolNotifications();
-      register && this._registerForNotifications();
+      this._registerForNotifications();
       this._fireLoadedEvent();
     })
     .catch(error => console.error(error));
@@ -59,9 +64,9 @@ export class SakaiNotifications extends SakaiElement {
 
     console.debug("registerForNotifications");
 
-    pushSetupComplete.then(() => {
+    if (Notification.permission !== "granted") return;
 
-      if (Notification.permission !== "granted") return;
+    pushSetupComplete.then(() => {
 
       registerPushCallback("notifications", message => {
 
@@ -69,31 +74,46 @@ export class SakaiNotifications extends SakaiElement {
         this._fireLoadedEvent();
         this._decorateNotification(message);
         this._filterIntoToolNotifications(false);
+        caches.open("sakai-v1").then(cache => cache.put("/direct/portal/notifications.json", Response.json(this.notifications)));
       });
+
+      registerPushPermissionRequestCompletedCallback(() => this.requestUpdate());
     });
   }
 
   _filterIntoToolNotifications(decorate = true) {
 
-    this.filteredNotifications.clear();
+    this._filteredNotifications.clear();
 
     this.notifications.forEach(noti => {
-
-      decorate && this._decorateNotification(noti);
 
       // Grab the first section of the event. This is the tool event prefix.
       const toolEventPrefix = noti.event.substring(0, noti.event.indexOf("."));
 
-      if (!this.filteredNotifications.has(toolEventPrefix)) {
-        this.filteredNotifications.set(toolEventPrefix, []);
+      if (decorate) {
+        if (toolEventPrefix === "profile") {
+          this._decorateProfileNotification(noti);
+        } else if (toolEventPrefix === "asn") {
+          this._decorateAssignmentNotification(noti);
+        } else if (toolEventPrefix === "annc") {
+          this._decorateAnnouncementNotification(noti);
+        } else if (toolEventPrefix === "commons") {
+          this._decorateCommonsNotification(noti);
+        } else if (toolEventPrefix === "sam") {
+          this._decorateSamigoNotification(noti);
+        }
       }
 
-      this.filteredNotifications.get(toolEventPrefix).push(noti);
+      if (!this._filteredNotifications.has(toolEventPrefix)) {
+        this._filteredNotifications.set(toolEventPrefix, []);
+      }
+
+      this._filteredNotifications.get(toolEventPrefix).push(noti);
     });
 
     // Make sure the motd bundle is at the top.
-    const newMap = Array.from(this.filteredNotifications).sort(a => a === "motd" ? 1 : -1);
-    this.filteredNotifications = new Map(newMap);
+    const newMap = Array.from(this._filteredNotifications).sort(a => a === "motd" ? 1 : -1);
+    this._filteredNotifications = new Map(newMap);
 
     this.requestUpdate();
   }
@@ -188,6 +208,7 @@ export class SakaiNotifications extends SakaiElement {
           this.notifications.splice(index, 1);
           this._fireLoadedEvent();
           this._filterIntoToolNotifications(false);
+          caches.open("sakai-v1").then(cache => cache.put("/direct/portal/notifications.json", Response.json(this.notifications)));
         } else {
           console.error(`Failed to clear notification with id ${notificationId}`);
         }
@@ -203,6 +224,7 @@ export class SakaiNotifications extends SakaiElement {
           this.notifications = [];
           this._fireLoadedEvent();
           this._filterIntoToolNotifications();
+          caches.open("sakai-v1").then(cache => cache.put("/direct/portal/notifications.json", Response.json([])));
         } else {
           console.error("Failed to clear all notifications");
         }
@@ -218,6 +240,7 @@ export class SakaiNotifications extends SakaiElement {
           this.notifications?.forEach(a => a.viewed = true);
           this.requestUpdate();
           this._fireLoadedEvent();
+          caches.open("sakai-v1").then(cache => cache.put("/direct/portal/notifications.json", Response.json(this.notifications)));
         } else {
           console.error("Failed to mark all notifications as viewed");
         }
@@ -226,7 +249,7 @@ export class SakaiNotifications extends SakaiElement {
 
   _viewMotd(e) {
 
-    const noti = this.filteredNotifications.get(e.target.dataset.prefix).find(n => n.ref === e.target.dataset.ref);
+    const noti = this._filteredNotifications.get(e.target.dataset.prefix).find(n => n.ref === e.target.dataset.ref);
 
     if (!noti?.body) {
       const url = `/direct${e.target.dataset.ref}.json`;
@@ -326,11 +349,10 @@ export class SakaiNotifications extends SakaiElement {
           <div class="fw-bold">${this._i18n.notifications_not_allowed2.replace("{0}", getServiceName())}</div>
         </div>
       ` : html`
-
         ${Notification.permission === "granted" ? html`
           <div class="accordion py-0">
-            ${Array.from(this.filteredNotifications, e => e[0]).map(prefix => html`
-              ${this._renderAccordion(prefix, this.filteredNotifications.get(prefix))}
+            ${Array.from(this._filteredNotifications, e => e[0]).map(prefix => html`
+              ${this._renderAccordion(prefix, this._filteredNotifications.get(prefix))}
             `)}
           </div>
           ${this.notifications?.length > 0 ? html`

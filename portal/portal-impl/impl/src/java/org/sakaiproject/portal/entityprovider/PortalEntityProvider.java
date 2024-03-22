@@ -147,7 +147,6 @@ public class PortalEntityProvider extends AbstractEntityProvider implements Auto
 	public ActionReturn getNotifications(EntityView view) {
 
 		getCheckedCurrentUser();
-
 		return new ActionReturn(userMessagingService.getNotifications());
 	}
 

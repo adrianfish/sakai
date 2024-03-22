@@ -50,7 +50,6 @@ import javax.annotation.Resource;
 @RestController
 public class LoginController extends AbstractSakaiApiController {
 
-
 	@Resource
 	private SiteService siteService;
 
@@ -112,7 +111,7 @@ public class LoginController extends AbstractSakaiApiController {
 
             Cookie c = new Cookie(cookieName, s.getId() + "." + suffix);
             c.setPath("/");
-            c.setMaxAge(-1);
+            c.setMaxAge(2630000);
             if (System.getProperty(RequestFilter.SAKAI_COOKIE_DOMAIN) != null) {
                 c.setDomain(System.getProperty(RequestFilter.SAKAI_COOKIE_DOMAIN));
             }
@@ -125,7 +124,14 @@ public class LoginController extends AbstractSakaiApiController {
             }
 
             log.debug("/api/login username={} ip={} session={}", username, ipAddress, s.getId());
-            return s.getId();
+            return s.getUserId();
         }
 	}
+
+	@GetMapping("/logout")
+    public void logout() throws AuthenticationException {
+
+        System.out.println("LOGOUT");
+        usageSessionService.logout();
+    }
 }
