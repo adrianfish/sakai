@@ -172,7 +172,13 @@ export class SakaiPages extends SakaiElement {
 
     const pageId = e.target.dataset.pageId;
 
-    const url = `/api/sites/${this.siteId}/pages/${pageId}`;
+    const url = this._pages.find(page => page.id === pageId)?.links?.deletePage;
+
+    if (!url) {
+      console.error("_deletePage called without a deletePage url");
+      return;
+    }
+
     fetch(url, { method: "DELETE", credentials: "include" })
     .then(r => {
 
@@ -275,18 +281,22 @@ export class SakaiPages extends SakaiElement {
                     </button>
                   </td>
                   <td style="width: 140px;">
+                    ${page?.links?.editPage ? html`
                     <button type="button"
                         class="btn btn-link"
                         data-page-id="${page.id}"
                         @click=${this._editPage}>
                       <i class="si si-edit pe-none"></i>
                     </button>
+                    ` : nothing}
+                    ${page?.links?.deletePage ? html`
                     <button type="button"
                         class="btn btn-link delete-page-button"
                         data-page-id="${page.id}"
                         @click=${this._deletePage}>
                       <i class="si si-trash pe-none"></i>
                     </button>
+                    ` : nothing}
                   </td>
                 </tr>
               `)}

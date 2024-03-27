@@ -70,6 +70,20 @@ public class PagesController extends AbstractSakaiApiController {
         if (securityService.unlock(Permissions.ADD_PAGE, siteService.siteReference(siteId))) {
             links.add(Link.of("/api/sites/" + siteId + "/pages", "addPage"));
         }
+
+        pagesRestBean.pages.forEach(page -> {
+
+            // TODO: This will likely become a more complex call. Maybe we want add access controls
+            // to pages?
+            if (securityService.unlock(Permissions.DELETE_PAGE, siteService.siteReference(siteId))) {
+                page.links.put("deletePage", "/api/sites/" + siteId + "/pages/" + page.id);
+            }
+
+            if (securityService.unlock(Permissions.EDIT_PAGE, siteService.siteReference(siteId))) {
+                page.links.put("editPage", "/api/sites/" + siteId + "/pages/" + page.id);
+            }
+        });
+
         return EntityModel.of(pagesRestBean, links);
     }
 
