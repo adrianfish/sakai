@@ -57,34 +57,27 @@ public class PagesController extends AbstractSakaiApiController {
 	private SecurityService securityService;
 
 	@GetMapping(value = "/sites/{siteId}/pages", produces = MediaType.APPLICATION_JSON_VALUE)
-    public EntityModel<PagesRestBean> getSitePages(@PathVariable String siteId) {
+    public ResponseEntity<PagesRestBean> getSitePages(@PathVariable String siteId) {
 
 		String currentUserId = checkSakaiSession().getUserId();
 
         PagesRestBean pagesRestBean = new PagesRestBean();
         pagesRestBean.siteId = siteId;
         pagesRestBean.userId = currentUserId;
-        pagesRestBean.pages = pagesService.getPagesForSite(siteId, /* populate */ false);
 
-        List<Link> links = new ArrayList<>();
-        if (securityService.unlock(Permissions.ADD_PAGE, siteService.siteReference(siteId))) {
-            links.add(Link.of("/api/sites/" + siteId + "/pages", "addPage"));
+        try {
+            pagesRestBean.pages = pagesService.getPagesForSite(siteId, /* populate */ false);
+        } catch (PagesPermissionException ppe) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
 
-        pagesRestBean.pages.forEach(page -> {
+        if (securityService.unlock(Permissions.ADD_PAGE, siteService.siteReference(siteId))) {
+            pagesRestBean.links.put("addPage", "/api/sites/" + siteId + "/pages");
+        }
 
-            // TODO: This will likely become a more complex call. Maybe we want add access controls
-            // to pages?
-            if (securityService.unlock(Permissions.DELETE_PAGE, siteService.siteReference(siteId))) {
-                page.links.put("deletePage", "/api/sites/" + siteId + "/pages/" + page.id);
-            }
+        pagesRestBean.pages.forEach(this::addLinks);
 
-            if (securityService.unlock(Permissions.EDIT_PAGE, siteService.siteReference(siteId))) {
-                page.links.put("editPage", "/api/sites/" + siteId + "/pages/" + page.id);
-            }
-        });
-
-        return EntityModel.of(pagesRestBean, links);
+        return ResponseEntity.ok(pagesRestBean);
     }
 
     @PostMapping(value = "/sites/{siteId}/pages", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -93,7 +86,7 @@ public class PagesController extends AbstractSakaiApiController {
         checkSakaiSession();
 
         try {
-            return ResponseEntity.ok(pagesService.savePage(pageTransferBean));
+            return ResponseEntity.ok(addLinks(pagesService.savePage(pageTransferBean)));
         } catch (PagesPermissionException ppe) {
             log.error("createPage rest endpoint accessed without permission: {}", ppe.toString());
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
@@ -105,13 +98,12 @@ public class PagesController extends AbstractSakaiApiController {
 
         checkSakaiSession();
 
-        Optional<PageTransferBean> optBean = pagesService.getPage(siteId, pageId);
-
-        if (!optBean.isPresent()) {
-            return ResponseEntity.notFound().build();
+        try {
+            return pagesService.getPage(siteId, pageId).map(ResponseEntity::ok)
+                    .orElse(ResponseEntity.notFound().build());
+        } catch (PagesPermissionException ppe) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
-
-        return ResponseEntity.ok(optBean.get());
     }
 
     @PutMapping(value = "/sites/{siteId}/pages/{pageId}", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -120,7 +112,7 @@ public class PagesController extends AbstractSakaiApiController {
         checkSakaiSession();
 
         try {
-            return ResponseEntity.ok(pagesService.savePage(pageTransferBean));
+            return ResponseEntity.ok(addLinks(pagesService.savePage(pageTransferBean)));
         } catch (PagesPermissionException ppe) {
             log.error("updateSitePage rest endpoint accessed without permission: {}", ppe.toString());
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
@@ -141,11 +133,17 @@ public class PagesController extends AbstractSakaiApiController {
         }
     }
 
-    /*
-    private EntityModel entityModelForPageTransferBean(PageTransferBean pageBean) {
+    private PageTransferBean addLinks(PageTransferBean page) {
 
-        List<Link> links = new ArrayList<>();
-        links.add(Link.of(pageBean.url, "self"));
+        if (page.canDelete) {
+            page.links.put("deletePage", "/api/sites/" + page.siteId + "/pages/" + page.id);
+        }
+
+        if (page.canEdit) {
+            page.links.put("editPage", "/api/sites/" + page.siteId + "/pages/" + page.id);
+        }
+
+        return page;
+
     }
-    */
 }

@@ -12,6 +12,8 @@ public class PageTransferBean {
     public String content;
     public String siteId;
     public Map<String, String> links = new HashMap<>();
+    public boolean canDelete;
+    public boolean canEdit;
 
     public PagesPage asPage() {
 

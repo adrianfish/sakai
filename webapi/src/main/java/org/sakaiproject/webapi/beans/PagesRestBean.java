@@ -13,7 +13,9 @@
  ******************************************************************************/
 package org.sakaiproject.webapi.beans;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.sakaiproject.pages.api.PageTransferBean;
 
@@ -24,4 +26,5 @@ public class PagesRestBean {
     public String userId;
     public String siteId;
     public List<PageTransferBean> pages;
+    public Map<String, String> links = new HashMap<>();
 }

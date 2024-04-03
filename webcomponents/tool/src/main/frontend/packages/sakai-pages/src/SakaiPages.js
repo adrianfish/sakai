@@ -2,7 +2,6 @@ import { html, nothing } from "lit";
 import { unsafeHTML } from "lit-html/directives/unsafe-html.js";
 import { SakaiElement } from "@sakai-ui/sakai-element";
 import "@sakai-ui/sakai-editor/sakai-editor.js";
-//import "@sakai-ui/sakai-permissions/sakai-permissions.js";
 
 export class SakaiPages extends SakaiElement {
 
@@ -63,7 +62,7 @@ export class SakaiPages extends SakaiElement {
     .then(data => {
 
       this._pages = data.pages;
-      this._addPageUrl = data.links.find(link => link.rel === "addPage")?.href;
+      this._addPageUrl = data.links?.addPage;
     })
     .catch(error => console.error(error));
 
@@ -137,7 +136,11 @@ export class SakaiPages extends SakaiElement {
     .catch(error => console.error(error));
   }
 
-  _cancelAddPage() { this._state = "PAGES"; }
+  _cancelAddPage() {
+
+    this._pageBeingEdited = { ...this._templatePageBean };
+    this._state = "PAGES";
+  }
 
   _updateTitle(e) { this._pageBeingEdited.title = e.target.value; }
 

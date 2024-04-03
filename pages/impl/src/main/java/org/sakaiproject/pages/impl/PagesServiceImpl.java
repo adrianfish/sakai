@@ -39,7 +39,7 @@ public class PagesServiceImpl implements PagesService {
             throw new PagesPermissionException();
         }
 
-        return PageTransferBean.of(pageRepository.save(bean.asPage()));
+        return addPermissions(PageTransferBean.of(pageRepository.save(bean.asPage())));
     }
 
     public List<PageTransferBean> getPagesForSite(String siteId, boolean populate) throws PagesPermissionException {
@@ -54,7 +54,7 @@ public class PagesServiceImpl implements PagesService {
             if (!populate) {
                 bean.content = "";
             }
-            return bean;
+            return addPermissions(bean);
         }).collect(Collectors.toList());
     }
 
@@ -74,5 +74,12 @@ public class PagesServiceImpl implements PagesService {
         }
 
         pageRepository.deleteById(pageId);
+    }
+
+    private PageTransferBean addPermissions(PageTransferBean bean) {
+
+        bean.canDelete = securityService.unlock(Permissions.DELETE_PAGE, siteService.siteReference(bean.siteId));
+        bean.canEdit = securityService.unlock(Permissions.EDIT_PAGE, siteService.siteReference(bean.siteId));
+        return bean;
     }
 }
