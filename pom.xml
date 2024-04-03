@@ -89,9 +89,9 @@
                 <module>mycalendar</module>
                 <module>myconnections</module>
                 <module>oauth</module>
+                <module>pages</module>
                 <module>pasystem</module>
                 <module>plus</module>
-                <module>pages</module>
                 <module>podcasts</module>
                 <module>polls</module>
                 <module>portal</module>

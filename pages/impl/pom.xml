@@ -8,7 +8,7 @@
   <parent>
     <groupId>org.sakaiproject.pages</groupId>
     <artifactId>sakai-pages-base</artifactId>
-    <version>24-SNAPSHOT</version>
+    <version>25-SNAPSHOT</version>
   </parent>
 
   <artifactId>sakai-pages-impl</artifactId>
@@ -20,8 +20,6 @@
     <dependency>
       <groupId>org.sakaiproject.pages</groupId>
       <artifactId>sakai-pages-api</artifactId>
-      <version>24-SNAPSHOT</version>
-        <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>org.sakaiproject.kernel</groupId>
