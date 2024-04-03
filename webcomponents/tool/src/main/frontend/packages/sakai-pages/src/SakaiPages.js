@@ -195,8 +195,6 @@ export class SakaiPages extends SakaiElement {
     .catch(error => console.error(error));
   }
 
-  _permissionsComplete() { this._state = "PAGES"; }
-
   shouldUpdate() { return this._i18n; }
 
   _renderAddPage() {
@@ -311,11 +309,7 @@ export class SakaiPages extends SakaiElement {
       ${this._state === "ADD_PAGE" ? this._renderAddPage() : nothing}
       ${this._state === "VIEW_PAGE" ? this._renderViewPage() : nothing}
       ${this._state === "PERMISSIONS" ? html`
-        <sakai-permissions
-            tool="pages"
-            @permissions-complete=${this._permissionsComplete}
-            fire-event>
-        </sakai-permissions>
+        <sakai-permissions tool="pages"></sakai-permissions>
       ` : nothing}
     `;
   }

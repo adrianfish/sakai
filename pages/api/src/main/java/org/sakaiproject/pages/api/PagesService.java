@@ -10,9 +10,9 @@ public interface PagesService {
      */
     public PageTransferBean savePage(PageTransferBean page) throws PagesPermissionException;
 
-    public List<PageTransferBean> getPagesForSite(String siteId, boolean populate);
+    public List<PageTransferBean> getPagesForSite(String siteId, boolean populate) throws PagesPermissionException;
 
-    public Optional<PageTransferBean> getPage(String siteId, String pageId);
+    public Optional<PageTransferBean> getPage(String siteId, String pageId) throws PagesPermissionException;
 
-    public void deletePage(String pageId, String siteId) throws PagesPermissionException;
+    public void deletePage(String siteId, String pageId) throws PagesPermissionException;
 }

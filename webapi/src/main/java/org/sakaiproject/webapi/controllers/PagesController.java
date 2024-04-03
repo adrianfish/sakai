@@ -133,7 +133,7 @@ public class PagesController extends AbstractSakaiApiController {
         checkSakaiSession();
 
         try {
-            pagesService.deletePage(pageId, siteId);
+            pagesService.deletePage(siteId, pageId);
             return ResponseEntity.ok().build();
         } catch (PagesPermissionException ppe) {
             log.error("updateSitePage rest endpoint accessed without permission: {}", ppe.toString());
