@@ -1,11 +1,15 @@
 package org.sakaiproject.pages.api;
 
+import org.sakaiproject.entity.api.Entity;
 import org.sakaiproject.pages.api.model.PagesPage;
 
 import java.util.HashMap;
 import java.util.Map;
 
-public class PageTransferBean {
+import lombok.Getter;
+
+@Getter
+public class PageTransferBean implements Entity {
 
     public String id;
     public String title;
@@ -35,5 +39,9 @@ public class PageTransferBean {
         bean.content = page.getContent();
         bean.siteId = page.getSiteId();
         return bean;
+    }
+
+    public String getReference() {
+        return PagesService.REFERENCE_ROOT + Entity.SEPARATOR + id;
     }
 }

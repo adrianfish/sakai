@@ -30,13 +30,19 @@ public interface SakaiFsVolume {
 
     void deleteFolder(SakaiFsItem fsi) throws IOException;
 
-    boolean exists(SakaiFsItem newFile);
+    default boolean exists(SakaiFsItem newFile) {
+        return false;
+    }
 
     SakaiFsItem fromPath(String relativePath);
 
-    String getDimensions(SakaiFsItem fsi);
+    default String getDimensions(SakaiFsItem fsi) {
+        return null;
+    }
 
-    long getLastModified(SakaiFsItem fsi);
+    default long getLastModified(SakaiFsItem fsi) {
+        return 0L;
+    }
 
     String getMimeType(SakaiFsItem fsi);
 
@@ -50,19 +56,29 @@ public interface SakaiFsVolume {
 
     SakaiFsItem getRoot();
 
-    long getSize(SakaiFsItem fsi) throws IOException;
+    default long getSize(SakaiFsItem fsi) throws IOException {
+        return 0;
+    }
 
-    String getThumbnailFileName(SakaiFsItem fsi);
+    default String getThumbnailFileName(SakaiFsItem fsi) {
+        return null;
+    }
 
-    boolean hasChildFolder(SakaiFsItem fsi);
+    default boolean hasChildFolder(SakaiFsItem fsi) {
+        return false;
+    }
 
     boolean isFolder(SakaiFsItem fsi);
 
-    boolean isRoot(SakaiFsItem fsi);
+    default boolean isRoot(SakaiFsItem fsi) {
+        return false;
+    }
 
     SakaiFsItem[] listChildren(SakaiFsItem fsi) throws PermissionException;
 
-    InputStream openInputStream(SakaiFsItem fsi) throws IOException;
+    default InputStream openInputStream(SakaiFsItem fsi) throws IOException {
+        return null;
+    }
 
     void writeStream(SakaiFsItem f, InputStream is) throws IOException;
 

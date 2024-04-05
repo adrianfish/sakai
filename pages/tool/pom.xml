@@ -26,6 +26,10 @@
       <artifactId>commons-lang3</artifactId>
     </dependency>
 		<dependency>
+			<groupId>org.sakaiproject.pages</groupId>
+			<artifactId>sakai-pages-api</artifactId>
+		</dependency>
+		<dependency>
 			<groupId>org.sakaiproject.kernel</groupId>
 			<artifactId>sakai-kernel-api</artifactId>
 		</dependency>

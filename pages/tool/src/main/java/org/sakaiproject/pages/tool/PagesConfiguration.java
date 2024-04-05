@@ -22,9 +22,11 @@ import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRegistration;
 
+import org.sakaiproject.pages.api.PagesService;
 import org.sakaiproject.util.RequestFilter;
 import org.sakaiproject.util.SakaiContextLoaderListener;
 import org.sakaiproject.util.ToolListener;
+
 import org.springframework.web.WebApplicationInitializer;
 import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
 import org.springframework.web.servlet.DispatcherServlet;
@@ -47,7 +49,7 @@ public class PagesConfiguration implements WebApplicationInitializer {
                 true,
                 "/*");
 
-        ServletRegistration.Dynamic servlet = servletContext.addServlet("sakai.pages", new DispatcherServlet(rootContext));
+        ServletRegistration.Dynamic servlet = servletContext.addServlet(PagesService.TOOL_ID, new DispatcherServlet(rootContext));
         servlet.addMapping("/");
         servlet.setLoadOnStartup(1);
     }

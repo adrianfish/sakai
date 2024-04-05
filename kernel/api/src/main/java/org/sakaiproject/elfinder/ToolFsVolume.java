@@ -38,6 +38,7 @@ public interface ToolFsVolume extends SakaiFsVolume {
      * @param item The FsItem.
      * @return <code>true</code> if the passed item is writeable by the current user.
      */
-    boolean isWriteable(SakaiFsItem item);
-
+    default boolean isWriteable(SakaiFsItem item) {
+        return false;
+    }
 }

@@ -17,7 +17,7 @@ package org.sakaiproject.pages.impl.test;
 
 import static org.mockito.Mockito.mock;
 
-//import org.sakaiproject.entity.api.EntityManager;
+import org.sakaiproject.elfinder.SakaiFsService;
 import org.sakaiproject.springframework.orm.hibernate.AdditionalHibernateMappings;
 import org.sakaiproject.test.SakaiTestConfiguration;
 
@@ -42,10 +42,8 @@ public class PagesTestConfiguration extends SakaiTestConfiguration {
     @Getter
     private AdditionalHibernateMappings additionalHibernateMappings;
 
-    /*
-    @Bean(name = "org.sakaiproject.entity.api.EntityManager")
-    public EntityManager entityManager() {
-        return mock(EntityManager.class);
+    @Bean(name = "org.sakaiproject.elfinder.SakaiFsService")
+    public SakaiFsService sakaiFsService() {
+        return mock(SakaiFsService.class);
     }
-    */
 }

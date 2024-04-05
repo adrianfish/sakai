@@ -26,6 +26,7 @@ public enum FsType {
     DROPBOX("dropbox"),
     FORUMS_FORUM("forum"),
     FORUMS_TOPIC("topic"),
+    PAGE("page"),
     SCORM("scorm"),
     SITE("site");
 

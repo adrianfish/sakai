@@ -16,22 +16,32 @@
 package org.sakaiproject.pages.impl.test;
 
 import org.sakaiproject.authz.api.SecurityService;
+import org.sakaiproject.component.api.ServerConfigurationService;
+import org.sakaiproject.entity.api.Entity;
+import org.sakaiproject.entity.api.Reference;
+import org.sakaiproject.exception.IdUnusedException;
+import org.sakaiproject.pages.api.PageReferenceReckoner;
+import org.sakaiproject.pages.api.PageTransferBean;
 import org.sakaiproject.pages.api.PagesPermissionException;
 import org.sakaiproject.pages.api.PagesService;
-import org.sakaiproject.pages.api.PageTransferBean;
 import org.sakaiproject.pages.api.Permissions;
+import org.sakaiproject.pages.impl.PagesServiceImpl;
+import org.sakaiproject.site.api.Site;
+import org.sakaiproject.site.api.SiteService;
+import org.sakaiproject.site.api.ToolConfiguration;
 import org.sakaiproject.user.api.User;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.AbstractTransactionalJUnit4SpringContextTests;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.util.AopTestUtils;
 
 import static org.mockito.Mockito.*;
 
 import lombok.extern.slf4j.Slf4j;
 
-import java.util.List;
+import java.util.Collection;
 import java.util.Optional;
 
 import static org.junit.Assert.*;
@@ -46,6 +56,8 @@ public class PagesServiceTests extends AbstractTransactionalJUnit4SpringContextT
 
     @Autowired private PagesService pagesService;
     @Autowired private SecurityService securityService;
+    @Autowired private ServerConfigurationService serverConfigurationService;
+    @Autowired private SiteService siteService;
 
     private String instructor = "instructor";
     private User instructorUser = null;
@@ -55,6 +67,7 @@ public class PagesServiceTests extends AbstractTransactionalJUnit4SpringContextT
     private User user2User = null;
 
     private String siteId = "playpen";
+    private String siteReference = "/site/" + siteId;
     private String title = "eggs";
     private String content = "beans";
 
@@ -70,6 +83,9 @@ public class PagesServiceTests extends AbstractTransactionalJUnit4SpringContextT
         user2User = mock(User.class);
         when(user2User.getDisplayName()).thenReturn(user2);
 
+        when(siteService.siteReference(siteId)).thenReturn(siteReference);
+        when(securityService.unlock(SiteService.SITE_VISIT, siteReference)).thenReturn(true);
+
         reset(securityService);
     }
 
@@ -82,7 +98,7 @@ public class PagesServiceTests extends AbstractTransactionalJUnit4SpringContextT
 
         assertThrows(PagesPermissionException.class, () -> pagesService.savePage(pageBean));
 
-        when(securityService.unlock(Permissions.ADD_PAGE, "/site/" + siteId)).thenReturn(true);
+        when(securityService.unlock(Permissions.ADD_PAGE, siteReference)).thenReturn(true);
 
         PageTransferBean savedBean = pagesService.savePage(pageBean);
 
@@ -91,7 +107,8 @@ public class PagesServiceTests extends AbstractTransactionalJUnit4SpringContextT
         assertEquals(pageBean.content, savedBean.content);
         assertEquals(pageBean.siteId, savedBean.siteId);
 
-        List<PageTransferBean> pages = pagesService.getPagesForSite(siteId, true);
+        when(securityService.unlock(SiteService.SITE_VISIT, siteReference)).thenReturn(true);
+        Collection<PageTransferBean> pages = pagesService.getPagesForSite(siteId, true);
         assertEquals(1, pages.size());
 
         savedBean.content = "beans and sauce";
@@ -106,7 +123,7 @@ public class PagesServiceTests extends AbstractTransactionalJUnit4SpringContextT
         pages = pagesService.getPagesForSite(siteId, true);
         assertEquals(1, pages.size());
 
-        PageTransferBean returnedBean = pages.get(0);
+        PageTransferBean returnedBean = pages.iterator().next();
         assertEquals(returnedBean.id, updatedBean.id);
         assertEquals(returnedBean.title, updatedBean.title);
         assertEquals(returnedBean.content, updatedBean.content);
@@ -116,26 +133,29 @@ public class PagesServiceTests extends AbstractTransactionalJUnit4SpringContextT
     @Test
     public void getPagesForSite() throws PagesPermissionException {
 
-        when(securityService.unlock(Permissions.ADD_PAGE, "/site/" + siteId)).thenReturn(true);
+        when(securityService.unlock(Permissions.ADD_PAGE, siteReference)).thenReturn(true);
 
         PageTransferBean pageBean = getPageTransferBean();
 
         PageTransferBean savedBean = pagesService.savePage(pageBean);
-        List<PageTransferBean> pages = pagesService.getPagesForSite(siteId, true);
-        assertEquals(pageBean.content, pages.get(0).content);
+        when(securityService.unlock(SiteService.SITE_VISIT, siteReference)).thenReturn(true);
+        Collection<PageTransferBean> pages = pagesService.getPagesForSite(siteId, true);
+        assertEquals(pageBean.content, pages.iterator().next().content);
 
         pages = pagesService.getPagesForSite(siteId, false);
-        assertEquals("", pages.get(0).content);
+        assertEquals("", pages.iterator().next().content);
     }
 
     @Test
     public void getPage() throws PagesPermissionException {
 
-        when(securityService.unlock(Permissions.ADD_PAGE, "/site/" + siteId)).thenReturn(true);
+        when(securityService.unlock(Permissions.ADD_PAGE, siteReference)).thenReturn(true);
 
         PageTransferBean pageBean = getPageTransferBean();
 
         PageTransferBean savedBean = pagesService.savePage(pageBean);
+
+        when(securityService.unlock(SiteService.SITE_VISIT, siteReference)).thenReturn(true);
 
         Optional<PageTransferBean> retrievedBeanOpt = pagesService.getPage(siteId, savedBean.id);
         assertTrue(retrievedBeanOpt.isPresent());
@@ -150,23 +170,65 @@ public class PagesServiceTests extends AbstractTransactionalJUnit4SpringContextT
     @Test
     public void deletePage() throws PagesPermissionException {
 
-        when(securityService.unlock(Permissions.ADD_PAGE, "/site/" + siteId)).thenReturn(true);
+        when(securityService.unlock(Permissions.ADD_PAGE, siteReference)).thenReturn(true);
 
         PageTransferBean pageBean = getPageTransferBean();
 
         PageTransferBean savedBean = pagesService.savePage(pageBean);
 
-        List<PageTransferBean> pages = pagesService.getPagesForSite(siteId, true);
+        when(securityService.unlock(SiteService.SITE_VISIT, siteReference)).thenReturn(true);
+
+        Collection<PageTransferBean> pages = pagesService.getPagesForSite(siteId, true);
         assertEquals(1, pages.size());
 
-        assertThrows(PagesPermissionException.class, () -> pagesService.deletePage(savedBean.id, siteId));
+        assertThrows(PagesPermissionException.class, () -> pagesService.deletePage(siteId, savedBean.id));
 
-        when(securityService.unlock(Permissions.DELETE_PAGE, "/site/" + siteId)).thenReturn(true);
+        when(securityService.unlock(Permissions.DELETE_PAGE, siteReference)).thenReturn(true);
 
-        pagesService.deletePage(savedBean.id, siteId);
+        pagesService.deletePage(siteId, savedBean.id);
 
         pages = pagesService.getPagesForSite(siteId, true);
         assertEquals(0, pages.size());
+    }
+
+    @Test
+    public void getEntityUrl() throws PagesPermissionException {
+
+        when(securityService.unlock(Permissions.ADD_PAGE, siteReference)).thenReturn(true);
+
+        PageTransferBean pageBean = getPageTransferBean();
+
+        PageTransferBean savedBean = pagesService.savePage(pageBean);
+
+        String toolId = "my-pages";
+
+        ToolConfiguration tc = mock(ToolConfiguration.class);
+        when(tc.getId()).thenReturn(toolId);
+
+        Site site = mock(Site.class);
+        when(site.getToolForCommonId(PagesService.TOOL_ID)).thenReturn(tc);
+        try {
+            when(siteService.getSite(pageBean.siteId)).thenReturn(site);
+        } catch (IdUnusedException iue) {
+            fail("Failed to get site during mocking");
+        }
+
+        String ref = PageReferenceReckoner.reckoner().page(savedBean).reckon().toString();
+
+        Reference reference = mock(Reference.class);
+        when(reference.getReference()).thenReturn(ref);
+
+        String portalUrl = "http://mysakai.com/portal";
+        
+        when(serverConfigurationService.getPortalUrl()).thenReturn(portalUrl);
+
+        String testUrl = portalUrl + "/directtool/" + toolId + "/pages/" + savedBean.id;
+
+        PagesServiceImpl impl = (PagesServiceImpl) AopTestUtils.getTargetObject(pagesService);
+
+        Optional<String> url = impl.getEntityUrl(reference, Entity.UrlType.PORTAL);
+        assertTrue(url.isPresent());
+        assertEquals(testUrl, url.get());
     }
 
     private PageTransferBean getPageTransferBean() {

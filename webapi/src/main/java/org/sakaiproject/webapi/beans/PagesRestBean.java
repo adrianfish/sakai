@@ -14,17 +14,15 @@
 package org.sakaiproject.webapi.beans;
 
 import java.util.HashMap;
-import java.util.List;
+import java.util.Collection;
 import java.util.Map;
 
 import org.sakaiproject.pages.api.PageTransferBean;
-
-import org.springframework.hateoas.EntityModel;
 
 public class PagesRestBean {
 
     public String userId;
     public String siteId;
-    public List<PageTransferBean> pages;
+    public Collection<PageTransferBean> pages;
     public Map<String, String> links = new HashMap<>();
 }

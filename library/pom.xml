@@ -517,7 +517,6 @@
 									<jsSourceFiles>
 										<jsSourceFile>sakai.js</jsSourceFile>
 										<jsSourceFile>query.js</jsSourceFile>
-										<jsSourceFile>tools.js</jsSourceFile>
 										<jsSourceFile>ui.js</jsSourceFile>
 										<jsSourceFile>resizer.js</jsSourceFile>
 										<jsSourceFile>options.js</jsSourceFile>
