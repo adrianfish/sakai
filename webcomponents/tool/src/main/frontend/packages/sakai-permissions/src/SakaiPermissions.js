@@ -12,6 +12,7 @@ export class SakaiPermissions extends SakaiElement {
     bundleKey: { attribute: "bundle-key", type: String },
     onRefresh: { attribute: "on-refresh", type: String },
     fireEvent: { attribute: "fire-event", type: Boolean },
+    fireCancelEvent: { attribute: "fire-cancel-event", type: Boolean },
 
     roles: { state: true },
     groups: { state: true },
@@ -182,8 +183,16 @@ export class SakaiPermissions extends SakaiElement {
           `)}
         </table>
         <div class="act">
-          <input type="button" class="active" value="${this.i18n["gen.sav"]}" aria-label="${this.i18n["gen.sav"]}" @click="${this._savePermissions}"/>
-          <input type="button" value="${this.i18n["gen.can"]}" aria-label="${this.i18n["gen.can"]}" @click="${this._completePermissions}"/>
+          <input type="button"
+              class="active"
+              value="${this.i18n["gen.sav"]}"
+              aria-label="${this.i18n["gen.sav"]}"
+              @click=${this._savePermissions} />
+          <input type="button"
+              value="${this.i18n["gen.can"]}"
+              data-cancel="true"
+              aria-label="${this.i18n["gen.can"]}"
+              @click=${this._completePermissions} />
           <span id="${this.tool}-failure-message" class="permissions-save-message" style="display: none;">${this.i18n["per.error.save"]}</span>
         </div>
       `;
@@ -268,10 +277,16 @@ export class SakaiPermissions extends SakaiElement {
     });
   }
 
-  _completePermissions() {
+  _completePermissions(e) {
+
+    const cancelled = e?.target.dataset.cancel;
+
+    console.log(cancelled);
 
     if (this.fireEvent) {
       this.dispatchEvent(new CustomEvent("permissions-complete"));
+    } else if (cancelled && this.fireCancelEvent) {
+      this.dispatchEvent(new CustomEvent("permissions-cancelled"));
     } else if (this.onRefresh) {
       window.location.href = this.onRefresh;
     } else {

@@ -2,26 +2,29 @@ import { html, nothing } from "lit";
 import { unsafeHTML } from "lit-html/directives/unsafe-html.js";
 import { SakaiElement } from "@sakai-ui/sakai-element";
 import "@sakai-ui/sakai-editor/sakai-editor.js";
+import { ADD_PAGE, PAGES, PERMISSIONS, VIEW_PAGE } from "./states.js";
 
 export class SakaiPages extends SakaiElement {
 
   static properties = {
 
     siteId: { attribute: "site-id", type: String },
-    _topLevelPages: { attribute: false, type: Array },
-    _i18n: { attribute: false, type: Object },
+    pageId: { attribute: "page-id", type: String },
+
+    _topLevelPages: { state: true },
+    _i18n: { state: true },
     _addPageUrl: { state: true },
-    _state: { attribute: false, type: String },
-    _pages: { attribute: false, type: Array },
-    _pageBeingEdited: { attribute: false, type: Object },
-    _pageBeingViewed: { attribute: false, type: Object },
+    _state: { state: true },
+    _pages: { state: true },
+    _pageBeingEdited: { state: true },
+    _pageBeingViewed: { state: true },
   };
 
   constructor() {
 
     super();
 
-    this._state = "PAGES";
+    this._state = PAGES;
 
     this._pages = [];
 
@@ -32,18 +35,34 @@ export class SakaiPages extends SakaiElement {
     this._pageBeingEdited = { ...this._templatePageBean };
   }
 
-  set siteId(value) {
+  set _state(value) {
 
-    const oldValue = this._siteId;
+    const old = this.__state;
 
-    this._siteId = value;
+    // Ensure that the site data has been loaded if we want the PAGES view. It may not have been
+    // if we were at a single page url, for example.
+    if (value === PAGES && !this._pages?.length) this._getData();
 
-    this._getData();
+    this.__state = value;
 
-    this.requestUpdate("siteId", oldValue);
+    this.requestUpdate("_state", old);
   }
 
-  get siteId() { return this._siteId; }
+  get _state() { return this.__state; }
+
+  attributeChangedCallback(name, oldValue, newValue) {
+
+    super.attributeChangedCallback(name, oldValue, newValue);
+
+
+    if (this.siteId) {
+      if (this.pageId) {
+        this._viewPage(this.pageId);
+      } else {
+        this._getData();
+      }
+    }
+  }
 
   _getData() {
 
@@ -68,18 +87,18 @@ export class SakaiPages extends SakaiElement {
 
   }
 
-  _addPage() { this._state = "ADD_PAGE"; }
+  _addPage() { this._state = ADD_PAGE; }
 
   _showPermissions() {
 
     import("@sakai-ui/sakai-permissions/sakai-permissions.js").then(() => {
-      this._state = "PERMISSIONS";
+      this._state = PERMISSIONS;
     });
   }
 
-  _viewPage(e) {
+  _onViewPage(e) { this._viewPage(e.target.dataset.pageId); }
 
-    const pageId = e.target.dataset.pageId;
+  _viewPage(pageId) {
 
     const url = `/api/sites/${this.siteId}/pages/${pageId}`;
     fetch(url, { credentials: "include" })
@@ -93,12 +112,12 @@ export class SakaiPages extends SakaiElement {
     .then(page => {
 
       this._pageBeingViewed = page;
-      this._state = "VIEW_PAGE";
+      this._state = VIEW_PAGE;
     })
     .catch(error => console.error(error));
   }
 
-  _viewPages() { this._state = "PAGES"; }
+  _viewPages() { this._state = PAGES; }
 
   _savePage() {
 
@@ -131,7 +150,7 @@ export class SakaiPages extends SakaiElement {
 
       this._pageBeingEdited = { ...this._templatePageBean };
 
-      this._state = "PAGES"; // This will trigger an update
+      this._state = PAGES; // This will trigger an update
     })
     .catch(error => console.error(error));
   }
@@ -139,7 +158,7 @@ export class SakaiPages extends SakaiElement {
   _cancelAddPage() {
 
     this._pageBeingEdited = { ...this._templatePageBean };
-    this._state = "PAGES";
+    this._state = PAGES;
   }
 
   _updateTitle(e) { this._pageBeingEdited.title = e.target.value; }
@@ -162,7 +181,7 @@ export class SakaiPages extends SakaiElement {
     .then(page => {
 
       this._pageBeingEdited = page;
-      this._state = "ADD_PAGE";
+      this._state = ADD_PAGE;
     })
     .catch(error => console.error(error));
   }
@@ -198,6 +217,8 @@ export class SakaiPages extends SakaiElement {
     .catch(error => console.error(error));
   }
 
+  _onPermissionsCancelled() { this._state = PAGES; }
+
   shouldUpdate() { return this._i18n; }
 
   _renderAddPage() {
@@ -227,7 +248,7 @@ export class SakaiPages extends SakaiElement {
       <h1>${this._pageBeingViewed.title}</h1>
       <div>${unsafeHTML(this._pageBeingViewed.content)}</div>
       <div class="mt-2">
-        <button type="button" class="btn btn-secondary" @click=${this._viewPages}>Done</button>
+        <button type="button" class="btn btn-secondary" @click=${this._viewPages}>${this._i18n.done}</button>
       </div>
     `;
   }
@@ -235,27 +256,35 @@ export class SakaiPages extends SakaiElement {
   render() {
 
     return html`
-      ${this._state === "PAGES" ? html`
+      ${this._state === PAGES ? html`
         <div class="d-flex justify-content-between mb-3">
           <div>
             <h1 class="d-inline">${this._i18n.pages_header}</h1>
           </div>
 
-          <div>
+          <div class="d-flex">
             ${this._addPageUrl ? html`
                 <button type="button"
                     @click=${this._addPage}
-                    class="btn btn-icon">
+                    class="btn btn-icon d-flex align-items-center">
                   <i class="si si-add"></i>
                   <span class="ms-2">${this._i18n.add_page_header}</span>
                 </button>
             ` : nothing}
 
-              <button type="button"
-                  @click=${this._showPermissions}
-                  class="btn btn-icon ms-2">
-                <i class="si si-kebob"></i>
-              </button>
+              <div class="dropdown">
+                <button type="button"
+                    id="pages-options-menu-button"
+                    class="btn btn-icon ms-2"
+                    data-bs-toggle="dropdown"
+                    aria-expanded="false"
+                    aria-label="${this._i18n.options_menu_label}">
+                  <i class="si si-kebob"></i>
+                </button>
+                <ul class="dropdown-menu" aria-labelledby="pages-options-menu-button">
+                  <li><button class="dropdown-item" @click=${this._showPermissions}>${this._i18n.permissions}</button></li>
+                </ul>
+              </div>
           </div>
 
         </div>
@@ -277,7 +306,7 @@ export class SakaiPages extends SakaiElement {
                     <button type="button"
                         class="btn btn-link"
                         data-page-id="${page.id}"
-                        @click=${this._viewPage}>
+                        @click=${this._onViewPage}>
                       ${page.title}
                     </button>
                   </td>
@@ -309,10 +338,13 @@ export class SakaiPages extends SakaiElement {
           `}
       ` : nothing}
 
-      ${this._state === "ADD_PAGE" ? this._renderAddPage() : nothing}
-      ${this._state === "VIEW_PAGE" ? this._renderViewPage() : nothing}
-      ${this._state === "PERMISSIONS" ? html`
-        <sakai-permissions tool="pages"></sakai-permissions>
+      ${this._state === ADD_PAGE ? this._renderAddPage() : nothing}
+      ${this._state === VIEW_PAGE ? this._renderViewPage() : nothing}
+      ${this._state === PERMISSIONS ? html`
+        <sakai-permissions tool="pages"
+            @permissions-cancelled=${this._onPermissionsCancelled}
+            fire-cancel-event>
+        </sakai-permissions>
       ` : nothing}
     `;
   }

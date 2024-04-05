@@ -57,6 +57,19 @@ public class PagesController {
         return "index";
 	}
 
+	@GetMapping(value = "/pages/{pageId}")
+    public String topic(Model model, @PathVariable String pageId, HttpServletRequest request) {
+
+        checkSakaiSession();
+
+        loadModel(model, request);
+
+        Placement placement = toolManager.getCurrentPlacement();
+        model.addAttribute("siteId", placement.getContext());
+        model.addAttribute("pageId", pageId);
+        return "index";
+    }
+
     private void loadModel(Model model, HttpServletRequest request) {
 
         model.addAttribute("cdnQuery", PortalUtils.getCDNQuery());
