@@ -167,7 +167,7 @@ export class SakaiPages extends SakaiElement {
 
   _editPage(e) {
 
-    const pageId = e.target.dataset.pageId;
+    const pageId = e.currentTarget.dataset.pageId;
 
     const url = `/api/sites/${this.siteId}/pages/${pageId}`;
     fetch(url, { credentials: "include" })
@@ -192,7 +192,7 @@ export class SakaiPages extends SakaiElement {
       return false;
     }
 
-    const pageId = e.target.dataset.pageId;
+    const pageId = e.currentTarget.dataset.pageId;
 
     const url = this._pages.find(page => page.id === pageId)?.links?.deletePage;
 
@@ -310,23 +310,66 @@ export class SakaiPages extends SakaiElement {
                       ${page.title}
                     </button>
                   </td>
-                  <td style="width: 140px;">
-                    ${page?.links?.editPage ? html`
-                    <button type="button"
-                        class="btn btn-link"
-                        data-page-id="${page.id}"
-                        @click=${this._editPage}>
-                      <i class="si si-edit pe-none"></i>
-                    </button>
-                    ` : nothing}
-                    ${page?.links?.deletePage ? html`
-                    <button type="button"
-                        class="btn btn-link delete-page-button"
-                        data-page-id="${page.id}"
-                        @click=${this._deletePage}>
-                      <i class="si si-trash pe-none"></i>
-                    </button>
-                    ` : nothing}
+                  <td style="width: 80px;">
+
+                    <div class="dropdown">
+                      <button type="button"
+                          id="page-${page.id}-options-menu-button"
+                          class="btn btn-icon ms-2"
+                          data-bs-toggle="dropdown"
+                          aria-expanded="false"
+                          aria-label="${this._i18n.options_menu_label}">
+                        <i class="si si-kebob"></i>
+                      </button>
+                      <ul class="dropdown-menu" aria-labelledby="pages-${page.id}-options-menu-button">
+                        ${page?.links?.editPage ? html`
+                        <li>
+                          <button type="button"
+                              class="dropdown-item"
+                              data-page-id="${page.id}"
+                              @click=${this._editPage}>
+                            <i class="si si-edit"></i>
+                            <span>${this._i18n.edit}</span>
+                          </button>
+                        </li>
+                        ` : nothing}
+                        ${page?.links?.deletePage ? html`
+                        <li>
+                          <button type="button"
+                              class="dropdown-item"
+                              data-page-id="${page.id}"
+                              @click=${this._deletePage}>
+                            <i class="si si-trash"></i>
+                            <span>${this._i18n.delete}</span>
+                          </button>
+                        </li>
+                        ` : nothing}
+                        ${page?.links?.publishPage ? html`
+                        <li>
+                          <button type="button"
+                              class="dropdown-item"
+                              data-page-id="${page.id}"
+                              @click=${this._publishPage}>
+                            <i class="si si-visible"></i>
+                            <span>${this._i18n.publish}</span>
+                          </button>
+                        </li>
+                        ` : nothing}
+                        ${page?.links?.unpublishPage ? html`
+                        <li>
+                          <button type="button"
+                              class="dropdown-item"
+                              data-page-id="${page.id}"
+                              @click=${this._unpublishPage}>
+                            <i class="si si-hidden"></i>
+                            <span>${this._i18n.unpublish}</span>
+                          </button>
+                        </li>
+                        ` : nothing}
+
+
+                      </ul>
+                    </div>
                   </td>
                 </tr>
               `)}

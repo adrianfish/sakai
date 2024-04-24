@@ -141,6 +141,14 @@ public class PagesController extends AbstractSakaiApiController {
             page.links.put("editPage", "/api/sites/" + page.siteId + "/pages/" + page.id);
         }
 
+        if (page.canPublish) {
+            page.links.put("publishPage", "/api/sites/" + page.siteId + "/pages/" + page.id + "/publish");
+        }
+
+        if (page.canUnpublish) {
+            page.links.put("unpublishPage", "/api/sites/" + page.siteId + "/pages/" + page.id + "/unpublish");
+        }
+
         return page;
 
     }

@@ -18,6 +18,8 @@ public class PageTransferBean implements Entity {
     public Map<String, String> links = new HashMap<>();
     public boolean canDelete;
     public boolean canEdit;
+    public boolean canPublish;
+    public boolean canUnpublish;
 
     public PagesPage asPage() {
 

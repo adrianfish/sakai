@@ -46,6 +46,7 @@ public class PagesServiceImpl implements PagesService, EntityProducer {
         functionManager.registerFunction(Permissions.ADD_PAGE, true);
         functionManager.registerFunction(Permissions.DELETE_PAGE, true);
         functionManager.registerFunction(Permissions.EDIT_PAGE, true);
+        functionManager.registerFunction(Permissions.PUBLISH_PAGE, true);
 
         entityManager.registerEntityProducer(this, REFERENCE_ROOT);
     }
