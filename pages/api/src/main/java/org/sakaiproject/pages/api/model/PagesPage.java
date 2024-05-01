@@ -36,4 +36,7 @@ public class PagesPage implements PersistableEntity<String> {
 
     @Column(name = "SITE_ID", length = 36)
     private String siteId;
+
+    @Column(name = "DRAFT")
+    private Boolean draft = Boolean.TRUE;
 }

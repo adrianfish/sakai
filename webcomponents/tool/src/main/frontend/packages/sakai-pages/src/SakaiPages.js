@@ -24,13 +24,11 @@ export class SakaiPages extends SakaiElement {
 
     super();
 
-    this._state = PAGES;
-
     this._pages = [];
 
     this.loadTranslations("pages").then(i18n => this._i18n = i18n);
 
-    this._templatePageBean = { siteId: "", title: "", content: "" };
+    this._templatePageBean = { siteId: "", title: "", content: "", draft: true };
 
     this._pageBeingEdited = { ...this._templatePageBean };
   }
@@ -41,7 +39,7 @@ export class SakaiPages extends SakaiElement {
 
     // Ensure that the site data has been loaded if we want the PAGES view. It may not have been
     // if we were at a single page url, for example.
-    if (value === PAGES && !this._pages?.length) this._getData();
+    if (value === PAGES) this._getData();
 
     this.__state = value;
 
@@ -50,18 +48,11 @@ export class SakaiPages extends SakaiElement {
 
   get _state() { return this.__state; }
 
-  attributeChangedCallback(name, oldValue, newValue) {
+  connectedCallback() {
 
-    super.attributeChangedCallback(name, oldValue, newValue);
+    super.connectedCallback();
 
-
-    if (this.siteId) {
-      if (this.pageId) {
-        this._viewPage(this.pageId);
-      } else {
-        this._getData();
-      }
-    }
+    this._state = PAGES;
   }
 
   _getData() {
@@ -79,6 +70,8 @@ export class SakaiPages extends SakaiElement {
       throw new Error(`Network error whilst getting initial data from ${url}`);
     })
     .then(data => {
+
+      console.log(data.pages);
 
       this._pages = data.pages;
       this._addPageUrl = data.links?.addPage;
@@ -296,6 +289,7 @@ export class SakaiPages extends SakaiElement {
               <thead>
                 <tr>
                   <th>${this._i18n.title}</th>
+                  <th>Status</th>
                   <th>${this._i18n.actions}</th>
                 </tr>
               </thead>
@@ -311,12 +305,18 @@ export class SakaiPages extends SakaiElement {
                     </button>
                   </td>
                   <td style="width: 80px;">
+                  ${page.draft ? html`
+                    <i class="si si-draft"></i>
+                  ` : nothing}
+                  </td>
+                  <td style="width: 80px;">
 
                     <div class="dropdown">
                       <button type="button"
                           id="page-${page.id}-options-menu-button"
                           class="btn btn-icon ms-2"
                           data-bs-toggle="dropdown"
+                          data-bs-popperConfig="{ strategy: fixed }"
                           aria-expanded="false"
                           aria-label="${this._i18n.options_menu_label}">
                         <i class="si si-kebob"></i>
@@ -366,8 +366,6 @@ export class SakaiPages extends SakaiElement {
                           </button>
                         </li>
                         ` : nothing}
-
-
                       </ul>
                     </div>
                   </td>

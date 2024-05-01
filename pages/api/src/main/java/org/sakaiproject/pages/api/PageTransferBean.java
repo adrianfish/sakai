@@ -15,11 +15,11 @@ public class PageTransferBean implements Entity {
     public String title;
     public String content;
     public String siteId;
+    public Boolean draft;
     public Map<String, String> links = new HashMap<>();
     public boolean canDelete;
     public boolean canEdit;
     public boolean canPublish;
-    public boolean canUnpublish;
 
     public PagesPage asPage() {
 
@@ -29,6 +29,7 @@ public class PageTransferBean implements Entity {
         page.setTitle(this.title);
         page.setContent(this.content);
         page.setSiteId(this.siteId);
+        page.setDraft(this.draft);
 
         return page;
     }
@@ -40,6 +41,7 @@ public class PageTransferBean implements Entity {
         bean.title = page.getTitle();
         bean.content = page.getContent();
         bean.siteId = page.getSiteId();
+        bean.draft = page.getDraft();
         return bean;
     }
 

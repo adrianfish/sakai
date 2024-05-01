@@ -98,6 +98,7 @@ public class PagesServiceImpl implements PagesService, EntityProducer {
 
         bean.canDelete = securityService.unlock(Permissions.DELETE_PAGE, siteService.siteReference(bean.siteId));
         bean.canEdit = securityService.unlock(Permissions.EDIT_PAGE, siteService.siteReference(bean.siteId));
+        bean.canPublish = securityService.unlock(Permissions.PUBLISH_PAGE, siteService.siteReference(bean.siteId));
         return bean;
     }
 
