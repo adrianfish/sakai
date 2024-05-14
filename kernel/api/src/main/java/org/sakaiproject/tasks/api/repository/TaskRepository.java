@@ -30,5 +30,6 @@ import org.sakaiproject.springframework.data.SpringCrudRepository;
 public interface TaskRepository extends SpringCrudRepository<Task, Long> {
 
     Optional<Task> findByReference(String reference);
+    List<Task> findBySiteId(String siteId);
     List<Task> findByGroupsContaining(String groupId);
 }

@@ -22,6 +22,7 @@ import static org.junit.runners.MethodSorters.NAME_ASCENDING;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.Observable;
 import java.util.Optional;
 import java.util.Set;
 
@@ -33,6 +34,7 @@ import org.junit.runner.RunWith;
 import static org.mockito.Mockito.*;
 
 import org.sakaiproject.authz.api.SecurityService;
+import org.sakaiproject.event.api.Event;
 import org.sakaiproject.site.api.SiteService;
 import org.sakaiproject.tasks.api.Priorities;
 import org.sakaiproject.tasks.api.TaskService;
@@ -40,11 +42,13 @@ import org.sakaiproject.tasks.api.Task;
 import org.sakaiproject.tasks.api.TaskPermissions;
 import org.sakaiproject.tasks.api.UserTaskAdapterBean;
 import org.sakaiproject.tool.api.SessionManager;
+import org.sakaiproject.tasks.impl.TaskServiceImpl;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.AbstractTransactionalJUnit4SpringContextTests;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.util.AopTestUtils;
 import org.springframework.util.Assert;
 
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -222,6 +226,29 @@ public class TaskServiceTest extends AbstractTransactionalJUnit4SpringContextTes
         when(siteService.getUserSiteId(student)).thenReturn(studentSiteId);
         when(siteService.siteReference(studentSiteId)).thenReturn("/site/" + studentSiteId);
         assertTrue(taskService.canCurrentUserAddTask(null));
+    }
+
+    @Test
+    public void createsTasksForNewlyAddedUser() {
+
+        switchToInstructor();
+
+        String reference = "/a/xyz";
+        Task task = createTask(reference);
+
+        switchToStudent();
+
+        List<UserTaskAdapterBean> studentTasks = taskService.getAllTasksForCurrentUserOnSite(siteId);
+        assertTrue(studentTasks.isEmpty());
+
+        Event event = mock(Event.class);
+        when(event.getEvent()).thenReturn(SiteService.EVENT_USER_SITE_MEMBERSHIP_ADD);
+        when(event.getContext()).thenReturn(siteId);
+        when(event.getUserId()).thenReturn(student);
+
+        ((TaskServiceImpl) AopTestUtils.getTargetObject(taskService)).update(new Observable(), event);
+        studentTasks = taskService.getAllTasksForCurrentUserOnSite(siteId);
+        assertTrue(studentTasks.size() == 2);
     }
 
     private void switchToStudent() {

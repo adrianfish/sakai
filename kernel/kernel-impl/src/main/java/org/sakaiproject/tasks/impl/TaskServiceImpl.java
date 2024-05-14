@@ -43,6 +43,7 @@ import org.sakaiproject.event.api.Event;
 import org.sakaiproject.event.api.EventTrackingService;
 import org.sakaiproject.site.api.SiteService;
 import org.sakaiproject.tasks.api.AssignationType;
+import org.sakaiproject.tasks.api.Priorities;
 import org.sakaiproject.tasks.api.Task;
 import org.sakaiproject.tasks.api.TaskAssigned;
 import org.sakaiproject.tasks.api.UserTask;
@@ -134,6 +135,10 @@ public class TaskServiceImpl implements TaskService, Observer {
                 } catch (Exception e) {
                     log.error("Failed to update user tasks for group {}: {}", groupId, e.toString());
                 }
+            } else if (event.getEvent().equals(SiteService.EVENT_USER_SITE_MEMBERSHIP_ADD)) {
+                taskRepository.findBySiteId(event.getContext()).forEach(task -> {
+                    createTask(task, Collections.singleton(event.getUserId()), Priorities.MEDIUM);
+                });
             }
         }
     }

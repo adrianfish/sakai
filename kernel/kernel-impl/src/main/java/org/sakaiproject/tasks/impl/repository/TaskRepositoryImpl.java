@@ -49,6 +49,18 @@ public class TaskRepositoryImpl extends SpringCrudRepositoryImpl<Task, Long> imp
         return Optional.ofNullable(session.createQuery(cq).uniqueResult());
     }
 
+    public List<Task> findBySiteId(String siteId) {
+
+        Session session = sessionFactory.getCurrentSession();
+
+        CriteriaBuilder cb = session.getCriteriaBuilder();
+        CriteriaQuery<Task> cq = cb.createQuery(Task.class);
+        Root<Task> root = cq.from(Task.class);
+        cq.select(root).where(cb.equal(root.get("siteId"), siteId));
+
+        return session.createQuery(cq).list();
+    }
+
     public List<Task> findByGroupsContaining(String groupId) {
 
         Session session = sessionFactory.getCurrentSession();
