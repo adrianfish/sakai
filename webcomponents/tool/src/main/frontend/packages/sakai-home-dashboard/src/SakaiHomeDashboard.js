@@ -1,23 +1,22 @@
-import { html, css, LitElement } from "lit";
+import { html, nothing } from "lit";
+import { SakaiElement } from "@sakai-ui/sakai-element";
 import { ifDefined } from "lit/directives/if-defined.js";
 import { unsafeHTML } from "lit/directives/unsafe-html.js";
 import "@sakai-ui/sakai-icon/sakai-icon.js";
-import { loadProperties } from "@sakai-ui/sakai-i18n";
 import "@sakai-ui/sakai-course-list/sakai-course-list.js";
 import "@sakai-ui/sakai-widgets";
 import "@sakai-ui/sakai-widgets/sakai-widget-panel.js";
 import "@sakai-ui/sakai-button/sakai-button.js";
 
-export class SakaiHomeDashboard extends LitElement {
+export class SakaiHomeDashboard extends SakaiElement {
 
   static properties = {
 
-    data: Object,
-    i18n: Object,
-    state: String,
     courses: { type: Array },
     userId: { attribute: "user-id", type: String },
     showSites: { attribute: "show-sites", type: Boolean },
+    _data: { state: true },
+    _i18n: { state: true },
     _showMotd: { state: true },
     _editing: { state: true },
   };
@@ -26,7 +25,9 @@ export class SakaiHomeDashboard extends LitElement {
 
     super();
 
-    loadProperties("dashboard").then(r => this.i18n = r);
+    this.showSites = true;
+
+    this.loadTranslations("dashboard").then(r => this._i18n = r);
   }
 
   set userId(value) {
@@ -51,30 +52,30 @@ export class SakaiHomeDashboard extends LitElement {
       })
       .then(r => {
 
-        this.data = r;
-        this._showMotd = this.data.motd;
+        this._data = r;
+        this._showMotd = this._data.motd;
       })
       .catch(error => console.error(error));
   }
 
   shouldUpdate() {
-    return this.i18n && this.data;
+    return this._i18n && this._data;
   }
 
   widgetLayoutChange(e) {
-    this.data.layout = e.detail.layout;
+    this._data.layout = e.detail.layout;
   }
 
   edit() {
 
     this._editing = !this._editing;
-    this.layoutBackup = [ ...this.data.layout ];
+    this.layoutBackup = [ ...this._data.layout ];
   }
 
   cancel() {
 
     this._editing = false;
-    this.data.layout = [ ...this.layoutBackup ];
+    this._data.layout = [ ...this.layoutBackup ];
     this.requestUpdate();
   }
 
@@ -87,7 +88,7 @@ export class SakaiHomeDashboard extends LitElement {
       method: "PUT",
       credentials: "include",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ layout: this.data.layout }),
+      body: JSON.stringify({ layout: this._data.layout }),
     }).then(r => {
 
       if (!r.ok) {
@@ -104,61 +105,62 @@ export class SakaiHomeDashboard extends LitElement {
 
     return html`
 
-      <div id="container">
-        <div id="welcome-and-edit-block">
-          <div id="welcome">${this.i18n.welcome} ${this.data.givenName}</div>
-          <div id="edit-block">
+      <div class="hd-container">
+        <div class="hd-welcome-and-edit-block">
+          <div class="hd-welcome">${this._i18n.welcome} ${this._data.givenName}</div>
+          <div class="hd-edit-block">
           ${this._editing ? html`
-            <div id="save">
-              <sakai-button @click=${this.save} title="${this.i18n.save_tooltip}" aria-label="${this.i18n.save_tooltip}">${this.i18n.save}</sakai-button>
+            <div class="hd-save">
+              <sakai-button @click=${this.save} title="${this._i18n.save_tooltip}" aria-label="${this._i18n.save_tooltip}">${this._i18n.save}</sakai-button>
             </div>
-            <div id="cancel">
-              <sakai-button @click=${this.cancel} title="${this.i18n.cancel_tooltip}" aria-label="${this.i18n.cancel_tooltip}">${this.i18n.cancel}</sakai-button>
+            <div>
+              <sakai-button @click=${this.cancel} title="${this._i18n.cancel_tooltip}" aria-label="${this._i18n.cancel_tooltip}">${this._i18n.cancel}</sakai-button>
             </div>
           ` : html`
-            <div id="edit">
-              <sakai-button slot="invoker" @click=${this.edit} title="${this.i18n.edit_tooltip}" arial-label="${this.i18n.edit_tooltip}">${this.i18n.edit}</sakai-button>
+            <div>
+              <sakai-button slot="invoker" @click=${this.edit} title="${this._i18n.edit_tooltip}" arial-label="${this._i18n.edit_tooltip}">${this._i18n.edit}</sakai-button>
             </div>
           `}
           </div>
         </div>
-        ${this.data.worksiteSetupUrl ? html`
-          <div id="toolbar">
-            <sakai-button href="${this.data.worksiteSetupUrl}" title="${this.i18n.worksite_setup_tooltip}" aria-label="${this.i18n.worksite_setup_tooltip}">
-              <div id="add-worksite">
+        ${this._data.worksiteSetupUrl ? html`
+          <div class="hd-toolbar">
+            <sakai-button href="${this._data.worksiteSetupUrl}" title="${this._i18n.worksite_setup_tooltip}" aria-label="${this._i18n.worksite_setup_tooltip}">
+              <div class="hd-add-worksite">
                 <div><sakai-icon type="add" size="small"></sakai-icon></div>
-                <div>${this.i18n.worksite_setup}</div>
+                <div>${this._i18n.worksite_setup}</div>
               </div>
             </sakai-button>
           </div>
-        ` : ""}
-        ${this.data.motd ? html`
-          <div id="motd">
-            <div id="motd-title-block" @click=${this._toggleMotd}>
-              <div id="motd-title">${this.i18n.motd}</div>
-              <div id="motd-icon">
+        ` : nothing}
+        ${this._data.motd ? html`
+          <div class="hd-motd">
+            <div class="hd-motd-title-block" @click=${this._toggleMotd}>
+              <div class="hd-motd-title">${this._i18n.motd}</div>
+              <div>
                 <a href="javascript:;"
-                  title="${this._showMotd ? this.i18n.hide_motd_tooltip : this.i18n.show_motd_tooltip}"
-                  aria-label="${this._showMotd ? this.i18n.hide_motd_tooltip : this.i18n.show_motd_tooltip}">
+                  title="${this._showMotd ? this._i18n.hide_motd_tooltip : this._i18n.show_motd_tooltip}"
+                  aria-label="${this._showMotd ? this._i18n.hide_motd_tooltip : this._i18n.show_motd_tooltip}">
                   <sakai-icon type="${this._showMotd ? "up" : "down"}" size="small"></sakai-icon>
                 </a>
               </div>
             </div>
-            <div id="motd-message" style="display: ${this._showMotd ? "block" : "none"}">${unsafeHTML(this.data.motd)}</div>
+            <div class="hd-motd-message" style="display: ${this._showMotd ? "block" : "none"}">${unsafeHTML(this._data.motd)}</div>
           </div>
-        ` : ""}
-        <div id="courses-and-widgets">
+        ` : nothing}
+        <div class="hd-courses-and-widgets">
           ${this.showSites ? html`
-          <div id="courses"><sakai-course-list></div>
-          ` : ""}
-          <div id="widgets">
+            <div class="hd-courses">
+              <sakai-course-list user-id="${this.userId}"></sakai-course-list>
+            </div>
+          ` : nothing}
+          <div class="hd-widgets">
             <sakai-widget-panel
-              id="widget-grid"
               @changed=${this.widgetLayoutChange}
-              .widgetIds=${this.data.widgets}
-              .layout=${this.data.layout}
+              .widgetIds=${this._data.widgets}
+              .layout=${this._data.layout}
               site-id=""
-              user-id="${ifDefined(this.userId ? this.userId : "")}"
+              user-id="${ifDefined(this.userId)}"
               columns="2"
               ?editing=${this._editing}>
             </sakai-widget-panel>
@@ -168,6 +170,7 @@ export class SakaiHomeDashboard extends LitElement {
     `;
   }
 
+  /*
   static styles = css`
     #container {
       font-family: var(--sakai-font-family);
@@ -251,4 +254,5 @@ export class SakaiHomeDashboard extends LitElement {
           display: inline-block;
         }
   `;
+  */
 }

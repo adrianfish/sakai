@@ -7,13 +7,6 @@ export class SakaiShadowElement extends LitElement {
     _online: { state: true },
   };
 
-  connectedCallback() {
-
-    super.connectedCallback();
-
-    this._online = navigator.onLine;
-  }
-
   /**
    * Convenience wrapper for sakai-18n.tr.
    *
