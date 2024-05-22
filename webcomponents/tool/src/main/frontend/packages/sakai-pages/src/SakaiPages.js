@@ -284,32 +284,29 @@ export class SakaiPages extends SakaiElement {
 
         ${this._pages?.length ? html`
           <!-- PAGES TABLE STARTS HERE -->
-          <div class="table-responsive">
-            <table class="table table-striped table-bordered table-hover">
-              <thead>
-                <tr>
-                  <th>${this._i18n.title}</th>
-                  <th>Status</th>
-                  <th>${this._i18n.actions}</th>
-                </tr>
-              </thead>
-              <tbody>
+            <div class="container grid-striped">
+              <div class="sakai-flex-header">
+                <div class="col-10">${this._i18n.title}</div>
+                <div class="col-1 text-center">Status</div>
+                <div class="col-1 text-center">${this._i18n.actions}</div>
+              </div>
               ${this._pages.map(page => html`
-                <tr>
-                  <td>
+                <div class="row mb-1 align-items-center">
+                  <div class="col-10">
                     <button type="button"
                         class="btn btn-link"
+                        style="padding: 0"
                         data-page-id="${page.id}"
                         @click=${this._onViewPage}>
                       ${page.title}
                     </button>
-                  </td>
-                  <td style="width: 80px;">
+                  </div>
+                  <div class="col-1 text-center">
                   ${page.draft ? html`
                     <i class="si si-draft"></i>
                   ` : nothing}
-                  </td>
-                  <td style="width: 80px;">
+                  </div>
+                  <div class="col-1 text-center">
 
                     <div class="dropdown">
                       <button type="button"
@@ -368,12 +365,10 @@ export class SakaiPages extends SakaiElement {
                         ` : nothing}
                       </ul>
                     </div>
-                  </td>
-                </tr>
+                  </div>
+                </div>
               `)}
-              </tbody>
-            </table>
-          </div>
+            </div>
           ` : html`
             <h4>No pages</h4>
           `}

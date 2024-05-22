@@ -1,0 +1,9 @@
+.#{$namespace}sakai-pages {
+  .grid-striped .row:nth-of-type(odd) {
+    background-color: rgba(0,0,0,.05);
+  }
+}
+
+.sakai-flex-header {
+  @extend .row, .fw-bold, .mb-2, .py-2, .border-bottom, .border-1, .align-items-center;
+}
