@@ -177,6 +177,14 @@ public interface GradingService extends EntityProducer {
     /**
      * Get an assignment based on its id
      *
+     * @param assignmentId
+     * @return An Optional. of the Assignment with the given assignmentId
+     */
+    public Optional<Assignment> getAssignment(Long assignmentId);
+
+    /**
+     * Get an assignment based on its id
+     *
      * @param gradebookUid
      * @param assignmentId
      * @return the associated Assignment with the given assignmentId
@@ -312,6 +320,10 @@ public interface GradingService extends EntityProducer {
      */
     public void removeAssignment(Long assignmentId) throws StaleObjectModificationException;
 
+    public void removeAssignment(Long assignmentId, Boolean softDelete) throws StaleObjectModificationException;
+
+    public void restoreExternalAssignment(Long assignmentId);
+
     /**
      *
      * Get the categories for the given gradebook. This method cannot be used outside of the gradebook because it returns the
@@ -378,6 +390,8 @@ public interface GradingService extends EntityProducer {
      * @param assignmentDefinition the new properties of the assignment
      */
     public void updateAssignment(String gradebookUid, Long assignmentId, Assignment assignmentDefinition);
+
+    public void updateAssignment(String gradebookUid, Long assignmentId, Assignment assignmentDefinition, boolean updateExternal);
 
     /**
      *
@@ -865,7 +879,7 @@ public interface GradingService extends EntityProducer {
      * @deprecated Replaced by
      *      {@link addExternalAssessment(String, String, String, String, Double, Date, String, Boolean)}
      */
-    public void addExternalAssessment(String gradebookUid, String externalId, String externalUrl,
+    public Long addExternalAssessment(String gradebookUid, String externalId, String externalUrl,
             String title, double points, Date dueDate, String externalServiceDescription, String externalData)
             throws ConflictingAssignmentNameException, ConflictingExternalIdException, AssignmentHasIllegalPointsException;
 
@@ -895,7 +909,7 @@ public interface GradingService extends EntityProducer {
      *
      *
      */
-    public void addExternalAssessment(String gradebookUid, String externalId, String externalUrl, String title, Double points,
+    public Long addExternalAssessment(String gradebookUid, String externalId, String externalUrl, String title, Double points,
                                       Date dueDate, String externalServiceDescription, String externalData, Boolean ungraded)
             throws ConflictingAssignmentNameException, ConflictingExternalIdException, AssignmentHasIllegalPointsException;
 
@@ -918,7 +932,7 @@ public interface GradingService extends EntityProducer {
      * @throws AssignmentHasIllegalPointsException
      * @throws InvalidCategoryException
      */
-    public void addExternalAssessment(String gradebookUid, String externalId, String externalUrl, String title, Double points,
+    public Long addExternalAssessment(String gradebookUid, String externalId, String externalUrl, String title, Double points,
                                       Date dueDate, String externalServiceDescription, String externalData, Boolean ungraded, Long categoryId)
             throws ConflictingAssignmentNameException, ConflictingExternalIdException, AssignmentHasIllegalPointsException, InvalidCategoryException;
 
@@ -941,8 +955,8 @@ public interface GradingService extends EntityProducer {
      * @throws AssignmentHasIllegalPointsException
      * @throws InvalidCategoryException
      */
-    public void addExternalAssessment(String gradebookUid, String externalId, String externalUrl, String title, Double points,
-                                      Date dueDate, String externalServiceDescription, String externalData, Boolean ungraded, Long categoryId, String gradableReference)
+    public Long addExternalAssessment(String gradebookUid, String externalId, String externalUrl, String title, Double points,
+                                      Date dueDate, String externalServiceDescription, String externalData, Boolean ungraded, Long categoryId, String gradableReference, Boolean displayInGradebook)
             throws ConflictingAssignmentNameException, ConflictingExternalIdException, AssignmentHasIllegalPointsException, InvalidCategoryException;
 
 
@@ -970,10 +984,10 @@ public interface GradingService extends EntityProducer {
      * @throws AssignmentHasIllegalPointsException
      */
     public void updateExternalAssessment(String gradebookUid, String externalId, String externalUrl, String externalData,
-                                         String title, Double points, Date dueDate, Boolean ungraded)
+                                         String title, Double points, Date dueDate, Boolean ungraded, Boolean displayInGradebook)
             throws AssessmentNotFoundException, ConflictingAssignmentNameException, AssignmentHasIllegalPointsException;
 
-    public void updateExternalAssessment(String gradebookUid, String externalId, String externalUrl, String externalData, String title, Long categoryId, Double points, Date dueDate, Boolean ungraded)
+    public void updateExternalAssessment(String gradebookUid, String externalId, String externalUrl, String externalData, String title, Long categoryId, Double points, Date dueDate, Boolean ungraded, Boolean displayInGradebook)
             throws AssessmentNotFoundException, ConflictingAssignmentNameException, AssignmentHasIllegalPointsException;
 
     /**
@@ -1077,6 +1091,8 @@ public interface GradingService extends EntityProducer {
      * @param externalId The external assessment's external identifier
      */
     public boolean isExternalAssignmentDefined(String gradebookUid, String externalId);
+
+    public boolean isExternalAssignment(Long gbItemId);
 
     /**
      * Check with the appropriate external service if a specific assignment is

@@ -189,6 +189,18 @@ public class GradebookAssignmentRepositoryImpl extends SpringCrudRepositoryImpl<
     }
 
     @Transactional(readOnly = true)
+    public boolean existsByIdAndExternallyMaintained(Long id, Boolean externallyMaintained) {
+
+        Session session = sessionFactory.getCurrentSession();
+        CriteriaBuilder cb = session.getCriteriaBuilder();
+        CriteriaQuery<Long> query = cb.createQuery(Long.class);
+        Root<GradebookAssignment> ga = query.from(GradebookAssignment.class);
+        query.select(cb.count(ga))
+            .where(cb.and(cb.equal(ga.get("id"), id), cb.equal(ga.get("externallyMaintained"), externallyMaintained)));
+        return session.createQuery(query).uniqueResult() == 1L;
+    }
+
+    @Transactional(readOnly = true)
     public List<GradebookAssignment> findByGradebook_Uid(String gradebookUid) {
 
         Session session = sessionFactory.getCurrentSession();

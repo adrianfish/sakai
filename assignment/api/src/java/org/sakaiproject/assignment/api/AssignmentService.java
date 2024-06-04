@@ -831,6 +831,8 @@ public interface AssignmentService extends EntityProducer {
      */
     Optional<Assignment> getAssignmentForGradebookLink(String context, String linkId) throws IdUnusedException, PermissionException;
 
+    Optional<org.sakaiproject.grading.api.Assignment> getGradingItemForAssignment(String gbItemId);
+
     /**
      * Returns a list of users that belong to multiple groups, if the user is considered a "student" in the group
      * by the standards of the Assignments tool.

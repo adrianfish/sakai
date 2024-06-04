@@ -409,7 +409,8 @@ public class DateManagerServiceImpl implements DateManagerService {
 								gAssignment.getCategoryId(),
 								gAssignment.getPoints(),
 								Date.from(update.dueDate),
-								gAssignment.getUngraded()
+								gAssignment.getUngraded(),
+                                gAssignment.getDisplayInGradebook()
 						);
 					}
 				}
@@ -668,7 +669,8 @@ public class DateManagerServiceImpl implements DateManagerService {
 								gAssignment.getCategoryId(),
 								gAssignment.getPoints(),
 								dueDateTemp,
-								gAssignment.getUngraded()
+								gAssignment.getUngraded(),
+                                gAssignment.getDisplayInGradebook()
 						);
 					}
 				}

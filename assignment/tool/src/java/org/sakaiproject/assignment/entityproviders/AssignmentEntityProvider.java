@@ -1848,27 +1848,14 @@ public class AssignmentEntityProvider extends AbstractEntityProvider implements 
 
             this.anonymousGrading = assignmentService.assignmentUsesAnonymousGrading(a);
 
-            String gradebookAssignmentProp = a.getProperties().get(PROP_ASSIGNMENT_ASSOCIATE_GRADEBOOK_ASSIGNMENT);
-            if (StringUtils.isNotBlank(gradebookAssignmentProp)) {
+            String gbItemId = a.getProperties().get(PROP_ASSIGNMENT_ASSOCIATE_GRADEBOOK_ASSIGNMENT);
+            if (StringUtils.isNotBlank(gbItemId)) {
                 // try to get internal gradebook assignment first
-                org.sakaiproject.grading.api.Assignment gAssignment = gradingService.getAssignment(a.getContext(), gradebookAssignmentProp);
+                org.sakaiproject.grading.api.Assignment gAssignment = gradingService.getAssignment(a.getContext(), gbItemId);
                 if (gAssignment != null) {
                     // linked Gradebook item is internal
                     this.gradebookItemId = gAssignment.getId();
                     this.gradebookItemName = gAssignment.getName();
-                } else {
-                    // If the linked assignment is not internal to Gradebook, try the external assignment service
-                    // However, there is no API available in GradebookExternalAssessmentService of getExternalAssignment()
-                    // We will first check whether the external assignment is defined, and then get it through GradingService
-                    boolean isExternalAssignmentDefined = gradingService.isExternalAssignmentDefined(a.getContext(), gradebookAssignmentProp);
-                    if (isExternalAssignmentDefined) {
-                        // since the gradebook item is externally defined, the item is named after the external object's title
-                        gAssignment = gradingService.getExternalAssignment(a.getContext(), gradebookAssignmentProp);
-                        if (gAssignment != null) {
-                            this.gradebookItemId = gAssignment.getId();
-                            this.gradebookItemName = gAssignment.getName();
-                        }
-                    }
                 }
             } else {
                 log.warn("The property \"prop_new_assignment_add_to_gradebook\" is null for the assignment feed");

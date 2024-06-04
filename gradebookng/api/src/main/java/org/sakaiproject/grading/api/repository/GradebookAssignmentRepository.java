@@ -36,5 +36,6 @@ public interface GradebookAssignmentRepository extends SpringCrudRepository<Grad
     Long countByNameAndGradebook_UidAndRemoved(String name, String gradebookUid, Boolean removed);
     Long countByNameAndGradebookAndNotIdAndRemoved(String name, Gradebook gradebook, Long id, Boolean removed);
     boolean existsByIdAndRemoved(Long id, Boolean removed);
+    boolean existsByIdAndExternallyMaintained(Long id, Boolean externallyMaintained);
     List<GradebookAssignment> findByGradebook_Uid(String gradebookUid);
 }
