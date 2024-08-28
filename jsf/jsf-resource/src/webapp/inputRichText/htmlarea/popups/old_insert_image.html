@@ -21,16 +21,6 @@ function _getTextRange(elm) {
   return r;
 }
 
-window.onerror = HandleError
-
-function HandleError(message, url, line) {
-  var str = "An error has occurred in this dialog." + "\n\n"
-  + "Error: " + line + "\n" + message;
-  alert(str);
-  window.close();
-  return true;
-}
-
 function Init() {
   var elmSelectedImage;
   var htmlSelectionControl = "Control";

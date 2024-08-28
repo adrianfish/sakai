@@ -1185,17 +1185,17 @@ public class SkinnableCharonPortal extends HttpServlet implements Portal {
 
         Editor editor = portalService.getActiveEditor(placement);
         String preloadScript = editor.getPreloadScript() == null ? ""
-                : "<script type=\"text/javascript\">"
+                : "<script>"
                 + editor.getPreloadScript()
                 + "</script>\n";
         String editorScript = editor.getEditorUrl() == null ? ""
-                : "<script type=\"text/javascript\" src=\""
+                : "<script src=\""
                 + PortalUtils.getCDNPath()
                 + editor.getEditorUrl()
                 + PortalUtils.getCDNQuery()
                 + "\"></script>\n";
         String launchScript = editor.getLaunchUrl() == null ? ""
-                : "<script type=\"text/javascript\" src=\""
+                : "<script src=\""
                 + PortalUtils.getCDNPath()
                 + editor.getLaunchUrl()
                 + PortalUtils.getCDNQuery()
@@ -1204,7 +1204,7 @@ public class SkinnableCharonPortal extends HttpServlet implements Portal {
         StringBuilder headJs = new StringBuilder();
 
         String contentItemUrl = portalService.getContentItemUrl(site);
-        headJs.append("<script type=\"text/javascript\" src=\"");
+        headJs.append("<script src=\"");
         headJs.append(PortalUtils.getCDNPath());
         headJs.append("/library/js/headscripts.js");
         headJs.append(PortalUtils.getCDNQuery());
@@ -1215,7 +1215,7 @@ public class SkinnableCharonPortal extends HttpServlet implements Portal {
             headJs.append("<script src=\"").append(PortalUtils.getWebjarsPath()).append("momentjs/").append(PortalUtils.MOMENTJS_VERSION).append("/min/moment-with-locales.min.js").append(PortalUtils.getCDNQuery()).append("\"></script>\n");
         }
 
-        headJs.append("<script type=\"text/javascript\">var sakai = sakai || {}; sakai.editor = sakai.editor || {}; " +
+        headJs.append("<script>var sakai = sakai || {}; sakai.editor = sakai.editor || {}; " +
                 "sakai.editor.editors = sakai.editor.editors || {}; " +
                 "sakai.editor.editors.ckeditor = sakai.editor.editors.ckeditor || {}; " +
                 "sakai.locale = sakai.locale || {};\n");
@@ -1241,7 +1241,7 @@ public class SkinnableCharonPortal extends HttpServlet implements Portal {
         Session s = sessionManager.getCurrentSession();
         String userWarning = (String) s.getAttribute("userWarning");
         if (StringUtils.isNotEmpty(userWarning)) {
-            headJs.append("<script type=\"text/javascript\">");
+            headJs.append("<script>");
             headJs.append("if ( window.self !== window.top ) {");
             headJs.append(" setTimeout(function(){ window.top.portal_check_pnotify() }, 3000);");
             headJs.append("}</script>");
@@ -1254,7 +1254,7 @@ public class SkinnableCharonPortal extends HttpServlet implements Portal {
                     Element config = new Element("script");
                     Element srcPath = new Element("script");
                     config.attr("src", "/library/js/mathjax-config.js" + PortalUtils.getCDNQuery());
-                    srcPath.attr("type", "text/javascript").attr("src", mathJaxPath.trim());
+                    srcPath.attr("src", mathJaxPath.trim());
                     headJs.append(config).append(srcPath);
                 }
             }

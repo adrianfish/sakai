@@ -39,7 +39,7 @@ export class SakaiAnnouncements extends SakaiPageableElement {
   async loadAllData() {
 
     const url = this.siteId ? `/api/sites/${this.siteId}/announcements`
-      : "/api/users/me/announcements";
+      : "/api/users/me/announcement";
 
     return fetch(url)
       .then(r => {
@@ -50,8 +50,7 @@ export class SakaiAnnouncements extends SakaiPageableElement {
         throw new Error(`Failed to get announcements from ${url}`);
 
       })
-      .then(data => this.data = data)
-      .catch (error => console.error(error));
+      .then(data => this.data = data);
   }
 
   _sitesSelected(e) {

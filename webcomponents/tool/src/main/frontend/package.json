@@ -48,6 +48,7 @@
     "@sakai-ui/sakai-submission-messager": "file:packages/sakai-submission-messager",
     "@sakai-ui/sakai-tasks": "file:packages/sakai-tasks",
     "@sakai-ui/sakai-user-photo": "file:packages/sakai-user-photo",
+    "@sakai-ui/sakai-utils": "^3.0.6",
     "@sakai-ui/sakai-widgets": "file:packages/sakai-widgets",
     "@web/test-runner": "^0.18.2",
     "esbuild": "^0.21.5",
@@ -62,6 +63,8 @@
     "lit-analyzer": "^2.0.2",
     "npx": "^10.2.2",
     "sortablejs": "^1.15.0",
+    "source-map-js": "^1.2.0",
+    "sourcemapped-stacktrace": "^1.1.11",
     "temporal-polyfill": "0.2.5"
   },
   "dependencies": {
