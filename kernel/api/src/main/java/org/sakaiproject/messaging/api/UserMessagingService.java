@@ -41,6 +41,7 @@ public interface UserMessagingService {
      * implementation and don't have to be handled by the caller.
      *
      * @param users A Set of users to message
+     * @param message the message to send
      * @param media A list of MessageMedium objects to control how messages are sent
      * @param replacements A Map of replacement tokens for any template processing
      * @param priority a notification priority. If you supply NotificationService.NOTI_REQUIRED

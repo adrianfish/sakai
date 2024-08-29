@@ -2,6 +2,7 @@ import { SourceMapConsumer } from "source-map-js";
 
 const sourceMaps = {};
 
+// Lifted this from https://stackoverflow.com/questions/75400967/get-stack-trace-as-a-string-when-using-source-map
 const getSourceMapFromUri = async uri => {
 
   if (sourceMaps[uri]) return sourceMaps[uri];
@@ -19,6 +20,7 @@ const getSourceMapFromUri = async uri => {
   return map;
 };
 
+// Lifted this from https://stackoverflow.com/questions/75400967/get-stack-trace-as-a-string-when-using-source-map
 const mapStackTrace = async stack => {
 
   const stackLines = stack.split("\n");
@@ -56,6 +58,15 @@ export const handleError = e => {
 
   if (!stack) return false;
 
-  mapStackTrace(stack).then(t => console.log(t));
+  mapStackTrace(stack).then(t => {
+
+    const url = "/api/frontend-logger";
+    fetch(url, {
+      method: "POST",
+      body: t,
+    })
+    .catch(e => console.debug(e));
+  });
+
   return false;
 };
