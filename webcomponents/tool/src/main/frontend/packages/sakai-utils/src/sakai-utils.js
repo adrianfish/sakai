@@ -1,7 +1,8 @@
-import { RawSourceMap, SourceMapConsumer } from 'source-map-js';
+import { SourceMapConsumer } from "source-map-js";
 
 const sourceMaps = {};
-async function getSourceMapFromUri(uri) {
+
+const getSourceMapFromUri = async uri => {
 
   if (sourceMaps[uri]) return sourceMaps[uri];
 
@@ -13,14 +14,14 @@ async function getSourceMapFromUri(uri) {
 
   const map = await (await fetch(mapUri)).json();
 
-  sourceMaps[uri] = map;
+  if (!sourceMaps[uri]) sourceMaps[uri] = map;
 
   return map;
-}
+};
 
-export async function mapStackTrace(stack) {
+const mapStackTrace = async stack => {
 
-  const stackLines = stack.split('\n');
+  const stackLines = stack.split("\n");
   const mappedStack = [];
 
   for (const line of stackLines) {
@@ -46,5 +47,15 @@ export async function mapStackTrace(stack) {
     mappedStack.push(`${originalPosition.source}:${originalPosition.line}:${originalPosition.column + 1}`);
   }
 
-  return mappedStack.join('\n');
-}
+  return mappedStack.join("\n");
+};
+
+export const handleError = e => {
+
+  const stack = e?.stack || e?.reason?.stack;
+
+  if (!stack) return false;
+
+  mapStackTrace(stack).then(t => console.log(t));
+  return false;
+};
