@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<emailTemplates>
+<emailTemplate>
+  <subject>[${localSakaiName}] ${bundle["frontendlogger.report.title"]} </subject>
+    <message>
+${bundle["frontendlogger.report.sessionId"]} ${sessionId}
+${bundle["frontendlogger.report.userEid"]} ${userEid}
+
+${bundle["frontendlogger.report.stackTrace"]}
+
+${stackTrace}
+
+    </message>
+    <messagehtml>
+&lt;strong&gt;${bundle["frontendlogger.report.sessionId"]}&lt;/strong&gt; ${sessionId}
+&lt;br /&gt;
+&lt;strong&gt;${bundle["frontendlogger.report.userEid"]}&lt;/strong&gt; ${userEid}
+&lt;br /&gt;
+&lt;br /&gt;
+&lt;strong&gt;${bundle["frontendlogger.report.stackTrace"]}&lt;/strong&gt;
+&lt;br /&gt;
+${stackTrace}
+    </messagehtml>
+    <version>1</version>
+    <owner>admin</owner>
+    <key>sakai.webapi.frontenderror</key>
+    <locale></locale>
+    <localeLangTag></localeLangTag>
+</emailTemplate>
+</emailTemplates>

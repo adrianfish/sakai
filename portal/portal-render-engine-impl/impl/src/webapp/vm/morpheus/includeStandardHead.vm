@@ -63,7 +63,13 @@
             };
         </script>
 
-        <script type="module" src="/webcomponents/bundles/base.js$!{portalCDNQuery}"></script>
+        <script src="${pageWebjarsPath}source-map/0.7.4/dist/source-map.js$!{portalCDNQuery}"></script>
+        <script>
+            sourceMap.SourceMapConsumer.initialize({ "lib/mappings.wasm": "${pageWebjarsPath}source-map/0.7.4/lib/mappings.wasm" });
+        </script>
+        <script src="/library/js/frontend-logger.js$!{portalCDNQuery}"></script>
+
+        <script type="module" src="/webcomponents/bundles/base.js$!{portalCDNQuery}" fetchpriority="high"></script>
 
         #parse("/vm/morpheus/snippets/title-snippet.vm")
 

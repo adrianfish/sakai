@@ -15,8 +15,3 @@ globalThis.Sortable = Sortable;
 import { loadProperties, tr } from "@sakai-ui/sakai-i18n";
 globalThis.loadProperties = loadProperties;
 globalThis.tr = tr;
-
-import { handleError } from "@sakai-ui/sakai-utils";
-
-window.addEventListener("unhandledrejection", handleError);
-window.addEventListener("error", handleError);

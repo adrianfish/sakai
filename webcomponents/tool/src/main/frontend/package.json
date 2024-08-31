@@ -3,9 +3,7 @@
   "version": "1.0.0",
   "description": "Sakai Element",
   "main": "js/sakai-element.js",
-  "workspaces": [
-    "./packages/*"
-  ],
+  "workspaces": [ "./packages/*" ],
   "scripts": {
     "lint": "eslint \"packages/**/src/*.js\" --max-warnings=0",
     "bundle": "esbuild \"bundle-entry-points/*.js\" --sourcemap --preserve-symlinks --bundle --splitting --format=esm --outdir=bundles --minify",
@@ -63,8 +61,6 @@
     "lit-analyzer": "^2.0.2",
     "npx": "^10.2.2",
     "sortablejs": "^1.15.0",
-    "source-map-js": "^1.2.0",
-    "sourcemapped-stacktrace": "^1.1.11",
     "temporal-polyfill": "0.2.5"
   },
   "dependencies": {

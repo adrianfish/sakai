@@ -16,13 +16,23 @@ package org.sakaiproject.webapi.controllers;
 import org.apache.commons.lang3.StringUtils;
 
 import org.sakaiproject.component.api.ServerConfigurationService;
+import org.sakaiproject.messaging.api.UserMessagingService;
+import org.sakaiproject.messaging.api.Message;
+import org.sakaiproject.messaging.api.MessageMedium;
 import org.sakaiproject.tool.api.Session;
+import org.sakaiproject.user.api.UserDirectoryService;
 import org.sakaiproject.user.api.UserNotDefinedException;
+import org.sakaiproject.util.ResourceLoader;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import javax.annotation.PostConstruct;
 
@@ -35,7 +45,15 @@ public class FrontendLoggerController extends AbstractSakaiApiController {
     @Autowired
     private ServerConfigurationService serverConfigurationService;
 
+    @Autowired
+    private UserDirectoryService userDirectoryService;
+
+    @Autowired
+    private UserMessagingService userMessagingService;
+
     private String recipientUserId;
+
+    private ResourceLoader rl = new ResourceLoader("frontendlogger");
 
     @PostConstruct
     public void init() {
@@ -44,6 +62,8 @@ public class FrontendLoggerController extends AbstractSakaiApiController {
         if (StringUtils.isBlank(recipientUserId)) {
             log.error("frontend-logger.recipientUserId is not configured in sakai properties");
         }
+
+        userMessagingService.importTemplateFromResourceXmlFile("templates/frontendError.xml", "sakai.webapi.frontenderror");
     }
 
     @PostMapping(value = "/frontend-logger")
@@ -51,18 +71,16 @@ public class FrontendLoggerController extends AbstractSakaiApiController {
 
         Session session = checkSakaiSession();
 
-        Set.of(userDirectoryService.getUser(recipientUserId));
-        userMessagingService.message(Set.of(userDirectoryService.getUser(recipientUserId)),
-            Message.builder().tool("sakai.webapi").type("frontend_error").build(),
-            List.of(MessageMedium.EMAIL),
-            Map.of(
-
-
-        System.out.println(recipientUserId);
-        User user = userDirectoryService.getUser(recipientUserId);
-
-        System.out.println(session.getUserEid());
-        System.out.println(session.getId());
-        System.out.println(stack);
+        try {
+            userMessagingService.message(
+                Set.of(userDirectoryService.getUserByEid(recipientUserId)),
+                Message.builder().tool("sakai.webapi").type("frontenderror").build(),
+                List.of(MessageMedium.EMAIL),
+                new HashMap(Map.of("sessionId", session.getId(), "userEid", session.getUserEid(), "stackTrace", stack, "bundle", rl)),
+                0
+            );
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }
