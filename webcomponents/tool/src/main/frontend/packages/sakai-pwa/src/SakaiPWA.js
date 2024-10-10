@@ -349,7 +349,7 @@ export class SakaiPWA extends SakaiElement {
 
       <aside class="offcanvas offcanvas-end" tabindex="-1" id="sakai-notifications-panel" aria-labelledby="sakai-notifications-panel-title">
         <div class="offcanvas-header">
-          <h2 class="offcanvas-title m-0" id="sakai-notifications-panel-title">${this._i18n.notifications_panel_title}</h2>
+          <h2 class="offcanvas-title m-0" id="sakai-notifications-panel-title">${this._i18n.notifications}</h2>
           <span>&nbsp;</span>
           <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close this notifications menu"></button>
         </div>
