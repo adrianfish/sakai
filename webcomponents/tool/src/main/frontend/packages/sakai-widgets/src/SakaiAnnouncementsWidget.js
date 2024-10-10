@@ -18,7 +18,7 @@ export class SakaiAnnouncementsWidget extends SakaiDashboardWidget {
       <sakai-announcements
         user-id="${ifDefined(this.userId ? this.userId : undefined)}"
         site-id="${ifDefined(this.siteId ? this.siteId : undefined)}"
-      >
+        cache-name="${ifDefined(this.cacheName)}">
       </sakai-announcements>
     `;
   }

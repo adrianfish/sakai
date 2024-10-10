@@ -62,6 +62,7 @@
     "lint-staged": "^15.1.0",
     "lit-analyzer": "^2.0.2",
     "npx": "^10.2.2",
+    "signal-polyfill": "^0.2.0",
     "sortablejs": "^1.15.0",
     "temporal-polyfill": "0.2.5"
   },

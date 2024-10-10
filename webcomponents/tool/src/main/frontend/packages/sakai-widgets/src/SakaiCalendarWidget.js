@@ -31,7 +31,7 @@ export class SakaiCalendarWidget extends SakaiDashboardWidget {
       <sakai-calendar
         site-id=${ifDefined(this.siteId ? this.siteId : undefined)}
         user-id=${ifDefined(this.userId ? this.userId : undefined)}
-      >
+        cache-name="${ifDefined(this.cacheName)}">
       </sakai-calendar>
     `;
   }

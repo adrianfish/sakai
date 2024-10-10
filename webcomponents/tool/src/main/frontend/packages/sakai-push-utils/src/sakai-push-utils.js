@@ -272,7 +272,7 @@ export const logout = () => {
 
   caches.open("sakai-v1").then(cache => {
 
-    cache.delete("/api/users/me/notifications").then(successful => successful && navigator.setAppBadge?.(0));
+    //cache.delete("/api/users/me/notifications").then(successful => successful && navigator.setAppBadge?.(0));
     cache.delete("/pwa/");
   });
 

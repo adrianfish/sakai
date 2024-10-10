@@ -3,6 +3,8 @@ import "@sakai-ui/sakai-icon";
 import { SakaiPageableElement } from "@sakai-ui/sakai-pageable-element";
 import { SakaiSitePicker } from "@sakai-ui/sakai-site-picker";
 import "@sakai-ui/sakai-site-picker/sakai-site-picker.js";
+import { Signal } from "signal-polyfill";
+import { SakaiPWA } from "@sakai-ui/sakai-pwa";
 import { ASSIGNMENT_A_TO_Z, ASSIGNMENT_Z_TO_A, COURSE_A_TO_Z
   , COURSE_Z_TO_A, NEW_HIGH_TO_LOW, NEW_LOW_TO_HIGH
   , AVG_LOW_TO_HIGH, AVG_HIGH_TO_LOW } from "./sakai-grades-constants.js";
@@ -22,10 +24,22 @@ export class SakaiGrades extends SakaiPageableElement {
     this.loadTranslations("grades").then(r => this._i18n = r);
   }
 
+  connectedCallback() {
+
+    super.connectedCallback();
+
+    this.logoutWatcher = new Signal.subtle.Watcher(() => {
+      caches.open(this.cacheName).then(c => c.delete("/api/users/me/grades"));
+    });
+
+    this.logoutWatcher.watch(SakaiPWA.loggedOutSignal);
+  }
+
   async loadAllData() {
 
     const url = this.siteId ? `/api/sites/${this.siteId}/grades`
       : "/api/users/me/grades";
+
     return fetch(url)
       .then(r => {
 
@@ -46,6 +60,10 @@ export class SakaiGrades extends SakaiPageableElement {
             done.push(g.siteId);
           }
         });
+
+        if (this.cacheName && !this.siteId) {
+          caches.open(this.cacheName).then(c => c.put(url, Response.json(this.data)));
+        }
 
         this.data = data;
         this._allData = data;

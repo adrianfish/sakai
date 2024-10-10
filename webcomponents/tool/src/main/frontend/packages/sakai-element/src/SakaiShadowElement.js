@@ -5,6 +5,7 @@ import { getGlobalStyleSheets } from "./global-styles.js";
 export class SakaiShadowElement extends LitElement {
 
   static properties = {
+    cacheName: { attribute: "cache-name", type: String },
     _online: { state: true },
   };
 

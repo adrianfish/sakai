@@ -175,6 +175,7 @@ export class SakaiHomeDashboard extends SakaiElement {
               .layout=${this._data.layout}
               site-id=""
               user-id="${ifDefined(this.userId)}"
+              cache-name="${ifDefined(this.cacheName)}"
               ?editing=${this._editing}>
             </sakai-widget-panel>
           </div>

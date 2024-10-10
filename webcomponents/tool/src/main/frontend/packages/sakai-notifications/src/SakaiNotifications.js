@@ -20,6 +20,7 @@ export class SakaiNotifications extends SakaiElement {
     safariInfoUrl: { attribute: "safari-info-url", type: String },
     edgeInfoUrl: { attribute: "edge-info-url", type: String },
     deferLoad: { attribute: "defer-load", type: Boolean },
+    cacheName: { attribute: "cache-name", type: String },
     _state: { state: true },
     _highlightTestButton: { state: true },
     _i18n: { state: true },
@@ -52,8 +53,6 @@ export class SakaiNotifications extends SakaiElement {
     } else if (this.safariInfoUrl && navigator.userAgent.includes("Edg")) {
       this._browserInfoUrl = this.edgeInfoUrl;
     }
-
-    console.log("connected");
 
     if (!this.deferLoad) {
       this._i18nLoaded.then(() => this.loadNotifications());
@@ -95,7 +94,9 @@ export class SakaiNotifications extends SakaiElement {
 
     pushSetupComplete.then(() => {
 
-      caches.open("sakai-v1").then(cache => cache.put("/api/users/me/notifications", Response.json(this.notifications)));
+      if (this.cacheName) {
+        caches.open(this.cacheName).then(c => c.put("/api/users/me/notifications", Response.json(this.notifications)));
+      }
 
       registerPushCallback("notifications", message => {
 
@@ -104,8 +105,8 @@ export class SakaiNotifications extends SakaiElement {
         this._decorateNotification(message);
         this._filterIntoToolNotifications(false);
 
-        if (message.event !== "test.notification") {
-          caches.open("sakai-v1").then(cache => cache.put("/api/users/me/notifications", Response.json(this.notifications)));
+        if (this.cacheName && message.event !== "test.notification") {
+          caches.open(this.cacheName).then(c => c.put("/api/users/me/notifications", Response.json(this.notifications)));
         }
       });
     })
@@ -231,7 +232,7 @@ export class SakaiNotifications extends SakaiElement {
   _fireLoadedEvent() {
 
     const unviewed = this.notifications.filter(n => n.event !== "test.notification" && !n.viewed).length;
-    this.dispatchEvent(new CustomEvent("notifications-loaded", { detail: { count: unviewed }, bubbles: true }));
+    this.dispatchEvent(new CustomEvent("notifications-loaded", { detail: { notifications: this.notifications, count: unviewed }, bubbles: true }));
     navigator.setAppBadge?.(unviewed);
   }
 
@@ -248,7 +249,9 @@ export class SakaiNotifications extends SakaiElement {
           this.notifications.splice(index, 1);
           this._fireLoadedEvent();
           this._filterIntoToolNotifications(false);
-          caches.open("sakai-v1").then(cache => cache.put("/api/users/me/notifications", Response.json(this.notifications)));
+          if (this.cacheName) {
+            caches.open(this.cacheName).then(c => c.put("/api/users/me/notifications", Response.json(this.notifications)));
+          }
         } else {
           throw new Error(`Network error while clearing notification at ${url}`);
         }
@@ -267,7 +270,9 @@ export class SakaiNotifications extends SakaiElement {
           this._fireLoadedEvent();
           this._filterIntoToolNotifications();
           this.dispatchEvent(new CustomEvent("notifications-cleared", { bubbles: true }));
-          caches.open("sakai-v1").then(cache => cache.put("/api/users/me/notifications", Response.json([])));
+          if (this.cacheName) {
+            caches.open("sakai-v1").then(c => c.put("/api/users/me/notifications", Response.json([])));
+          }
         } else {
           throw new Error(`Network error while clearing all notifications at ${url}`);
         }
@@ -290,7 +295,9 @@ export class SakaiNotifications extends SakaiElement {
           this.notifications?.forEach(a => a.viewed = true);
           this.requestUpdate();
           this._fireLoadedEvent();
-          caches.open("sakai-v1").then(cache => cache.put("/api/users/me/notifications", Response.json(this.notifications)));
+          if (this.cacheName) {
+            caches.open(this.cacheName).then(c => c.put("/api/users/me/notifications", Response.json(this.notifications)));
+          }
         } else {
           throw new Error("Network error while marking all notifications viewed");
         }

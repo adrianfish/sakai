@@ -2,6 +2,8 @@ import { css, html, nothing } from "lit";
 import { unsafeHTML } from "lit/directives/unsafe-html.js";
 import { SakaiPageableElement } from "@sakai-ui/sakai-pageable-element";
 import "@sakai-ui/sakai-icon/sakai-icon.js";
+import { Signal } from "signal-polyfill";
+import { SakaiPWA } from "@sakai-ui/sakai-pwa";
 import { sakaiFormatDistance } from "@sakai-ui/sakai-date-fns";
 import * as constants from "./sakai-tasks-constants.js";
 
@@ -25,6 +27,17 @@ export class SakaiTasks extends SakaiPageableElement {
     this._canUpdateSite = false;
     this._currentFilter = constants.CURRENT;
     this.loadTranslations("tasks").then(r => this.i18n = r);
+  }
+
+  connectedCallback() {
+
+    super.connectedCallback();
+
+    this.logoutWatcher = new Signal.subtle.Watcher(() => {
+      caches.open(this.cacheName).then(c => c.delete("/api/users/me/tasks"));
+    });
+
+    this.logoutWatcher.watch(SakaiPWA.loggedOutSignal);
   }
 
   set data(value) {
@@ -75,6 +88,10 @@ export class SakaiTasks extends SakaiPageableElement {
             import("../sakai-tasks-create-task.js"),
             import("@lion/dialog/define"),
           ]);
+        }
+
+        if (this.cacheName && !this.siteId) {
+          caches.open(this.cacheName).then(c => c.put(url, Response.json(this.data)));
         }
 
         this._canUpdateSite = response.canUpdateSite;

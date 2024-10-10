@@ -44,6 +44,10 @@ export class SakaiForums extends SakaiPageableElement {
           });
         }
 
+        if (this.cacheName && !this.siteId) {
+          caches.open(this.cacheName).then(c => c.put(url, Response.json(this.data)));
+        }
+
         this._allData = data;
         this.data = data;
 

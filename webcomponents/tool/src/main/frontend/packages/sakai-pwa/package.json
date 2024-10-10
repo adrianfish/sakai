@@ -15,7 +15,7 @@
   "files": [
     "*.js",
     "sakai-pwa.js",
-    "sakai-profile-panel.js",
+    "sakai-account-panel.js",
     "src"
   ],
   "scripts": {

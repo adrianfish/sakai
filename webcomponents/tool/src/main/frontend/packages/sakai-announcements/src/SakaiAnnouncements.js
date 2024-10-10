@@ -1,9 +1,11 @@
 import { css, html, nothing } from "lit";
 import { ifDefined } from "lit/directives/if-defined.js";
-import "@sakai-ui/sakai-icon";
+import "@sakai-ui/sakai-icon/sakai-icon.js";
 import { SakaiPageableElement } from "@sakai-ui/sakai-pageable-element";
 import { SakaiSitePicker } from "@sakai-ui/sakai-site-picker";
 import "@sakai-ui/sakai-site-picker/sakai-site-picker.js";
+import { SakaiPWA } from "@sakai-ui/sakai-pwa";
+import { Signal } from "signal-polyfill";
 import {
   TITLE_A_TO_Z,
   TITLE_Z_TO_A,
@@ -21,6 +23,17 @@ export class SakaiAnnouncements extends SakaiPageableElement {
 
     this.showPager = true;
     this.loadTranslations("announcements").then(r => this.i18n = r);
+  }
+
+  connectedCallback() {
+
+    super.connectedCallback();
+
+    this.logoutWatcher = new Signal.subtle.Watcher(() => {
+      caches.open(this.cacheName).then(c => c.delete("/api/users/me/announcements"));
+    });
+
+    this.logoutWatcher.watch(SakaiPWA.loggedOutSignal);
   }
 
   set data(value) {
@@ -50,10 +63,17 @@ export class SakaiAnnouncements extends SakaiPageableElement {
         if (r.ok) {
           return r.json();
         }
-        throw new Error(`Failed to get announcements from ${url}`);
 
+        throw new Error(`Failed to get announcements from ${url}`);
       })
-      .then(data => this.data = data)
+      .then(data => {
+
+        this.data = data;
+
+        if (this.cacheName && !this.siteId) {
+          caches.open(this.cacheName).then(c => c.put(url, Response.json(this.data)));
+        }
+      })
       .catch (error => console.error(error));
   }
 

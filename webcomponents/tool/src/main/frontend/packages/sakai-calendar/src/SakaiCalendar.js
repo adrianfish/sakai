@@ -65,6 +65,10 @@ export class SakaiCalendar extends LionCalendar {
         }, []);
       }
 
+      if (this.cacheName && !this.siteId) {
+        caches.open(this.cacheName).then(c => c.put(url, Response.json(data)));
+      }
+
       this.renderRoot.querySelector(".calendar__day-button[today]")?.click();
     })
     .catch (error => console.error(error));
