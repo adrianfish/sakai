@@ -22,14 +22,19 @@ export class SakaiGrades extends SakaiPageableElement {
 
     this.showPager = true;
     this.loadTranslations("grades").then(r => this._i18n = r);
-  }
-
-  connectedCallback() {
-
-    super.connectedCallback();
 
     this.logoutWatcher = new Signal.subtle.Watcher(() => {
-      caches.open(this.cacheName).then(c => c.delete("/api/users/me/grades"));
+
+      if (this.siteId) return;
+
+      queueMicrotask(() => {
+
+        if (SakaiPWA.loggedOutSignal.get() === 1) {
+          caches.open(this.cacheName).then(c => c.delete("/api/users/me/grades"));
+        }
+
+        this.logoutWatcher.watch();
+      });
     });
 
     this.logoutWatcher.watch(SakaiPWA.loggedOutSignal);

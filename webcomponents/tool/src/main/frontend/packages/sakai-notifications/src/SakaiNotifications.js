@@ -2,6 +2,8 @@ import { SakaiElement } from "@sakai-ui/sakai-element";
 import { html, nothing } from "lit";
 import { unsafeHTML } from "lit/directives/unsafe-html.js";
 import "@sakai-ui/sakai-user-photo/sakai-user-photo.js";
+import { Signal } from "signal-polyfill";
+import { SakaiPWA } from "@sakai-ui/sakai-pwa";
 import { callSubscribeIfPermitted,
           NOT_PUSH_CAPABLE,
           pushSetupComplete,
@@ -36,6 +38,20 @@ export class SakaiNotifications extends SakaiElement {
     this._filteredNotifications = new Map();
     this._i18nLoaded = this.loadTranslations("sakai-notifications");
     this._i18nLoaded.then(r => this._i18n = r);
+
+    this.logoutWatcher = new Signal.subtle.Watcher(value => {
+
+      queueMicrotask(() => {
+
+        if (SakaiPWA.loggedOutSignal.get() === 1) {
+          caches.open(this.cacheName).then(c => c.delete("/api/users/me/notifications"));
+        }
+
+        this.logoutWatcher.watch();
+      });
+    });
+
+    this.logoutWatcher.watch(SakaiPWA.loggedOutSignal);
   }
 
   connectedCallback() {
@@ -108,7 +124,7 @@ export class SakaiNotifications extends SakaiElement {
         if (this.cacheName && message.event !== "test.notification") {
           caches.open(this.cacheName).then(c => c.put("/api/users/me/notifications", Response.json(this.notifications)));
         }
-      });
+      }, 1);
     })
     .catch(error => {
 

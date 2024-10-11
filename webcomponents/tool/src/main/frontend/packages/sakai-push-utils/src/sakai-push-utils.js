@@ -126,7 +126,7 @@ export const checkUserChangedThenSet = userId => {
 
   if (differentUser) {
     // New user logged in. Make sure to remove the user specific stuff from the cache.
-    caches.open("sakai-v1").then(cache => cache.delete("/api/users/me/notifications"));
+    //caches.open("sakai-v1").then(cache => cache.delete("/api/users/me/notifications"));
     caches.open("sakai-v1").then(cache => cache.delete("/api/keys/sakaipush"));
   }
 
@@ -203,11 +203,14 @@ export const callSubscribeIfPermitted = async () => {
   return subscribeIfPermitted(reg);
 };
 
-export const registerPushCallback = (toolOrNotifications, cb) => {
+export const registerPushCallback = (toolOrNotifications, cb, max) => {
 
   console.debug(`Registering push callback for ${toolOrNotifications}`);
 
   const callbacks = pushCallbacks.get(toolOrNotifications) || [];
+
+  if (callbacks.length === max) return;
+
   callbacks.push(cb);
   pushCallbacks.set(toolOrNotifications, callbacks);
 };
@@ -271,8 +274,6 @@ export const onLogin = userId => {
 export const logout = () => {
 
   caches.open("sakai-v1").then(cache => {
-
-    //cache.delete("/api/users/me/notifications").then(successful => successful && navigator.setAppBadge?.(0));
     cache.delete("/pwa/");
   });
 

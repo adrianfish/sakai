@@ -48,8 +48,10 @@ export class SakaiPWA extends SakaiElement {
     super.connectedCallback();
 
     if (!this.userId) {
+      SakaiPWA.loggedOutSignal.set(1);
       this._state = SakaiPWA.SPLASH;
     } else {
+      SakaiPWA.loggedOutSignal.set(0);
       this._state = SakaiPWA.DASHBOARD;
     }
   }
@@ -69,7 +71,7 @@ export class SakaiPWA extends SakaiElement {
 
     this._state = SakaiPWA.DASHBOARD;
 
-    SakaiPWA.loggedOutSignal.set(false);
+    SakaiPWA.loggedOutSignal.set(0);
 
     this.updateComplete.then(() => this.querySelector("sakai-notifications").loadNotifications());
   }
@@ -88,7 +90,8 @@ export class SakaiPWA extends SakaiElement {
         logout();
         this.userId = undefined;
         this._state = SakaiPWA.SPLASH;
-        SakaiPWA.loggedOutSignal.set(true);
+        navigator.setAppBadge?.(0);
+        SakaiPWA.loggedOutSignal.set(1);
       } else {
         throw Error(`Error while logging in at ${url}`);
       }
@@ -303,4 +306,4 @@ export class SakaiPWA extends SakaiElement {
 SakaiPWA.DASHBOARD = "dashboard";
 SakaiPWA.LOGIN = "login";
 SakaiPWA.SPLASH = "splash";
-SakaiPWA.loggedOutSignal = new Signal.State(true);
+SakaiPWA.loggedOutSignal = new Signal.State(1);

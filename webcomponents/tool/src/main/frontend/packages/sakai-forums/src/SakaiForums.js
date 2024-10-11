@@ -3,6 +3,8 @@ import "@sakai-ui/sakai-icon";
 import { SakaiPageableElement } from "@sakai-ui/sakai-pageable-element";
 import { SakaiSitePicker } from "@sakai-ui/sakai-site-picker";
 import "@sakai-ui/sakai-site-picker/sakai-site-picker.js";
+import { SakaiPWA } from "@sakai-ui/sakai-pwa";
+import { Signal } from "signal-polyfill";
 
 export class SakaiForums extends SakaiPageableElement {
 
@@ -14,6 +16,28 @@ export class SakaiForums extends SakaiPageableElement {
 
     this.showPager = true;
     this.loadTranslations("forums").then(r => this._i18n = r);
+  }
+
+  connectedCallback() {
+
+    super.connectedCallback();
+
+    this.logoutWatcher = new Signal.subtle.Watcher(() => {
+
+      if (this.siteId) return;
+
+      queueMicrotask(() => {
+
+        if (SakaiPWA.loggedOutSignal.get() === 1) {
+          caches.open(this.cacheName).then(c => c.delete(`/api/users/${this.userId}/forums/summary`));
+        }
+
+        this.logoutWatcher.watch();
+      });
+    });
+
+    this.logoutWatcher.watch(SakaiPWA.loggedOutSignal);
+
   }
 
   async loadAllData() {

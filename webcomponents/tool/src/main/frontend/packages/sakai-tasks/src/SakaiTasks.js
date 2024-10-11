@@ -27,14 +27,19 @@ export class SakaiTasks extends SakaiPageableElement {
     this._canUpdateSite = false;
     this._currentFilter = constants.CURRENT;
     this.loadTranslations("tasks").then(r => this.i18n = r);
-  }
-
-  connectedCallback() {
-
-    super.connectedCallback();
 
     this.logoutWatcher = new Signal.subtle.Watcher(() => {
-      caches.open(this.cacheName).then(c => c.delete("/api/users/me/tasks"));
+
+      if (this.siteId) return;
+
+      queueMicrotask(() => {
+
+        if (SakaiPWA.loggedOutSignal.get() === 1) {
+          caches.open(this.cacheName).then(c => c.delete("/api/users/me/tasks"));
+        }
+
+        this.logoutWatcher.watch();
+      });
     });
 
     this.logoutWatcher.watch(SakaiPWA.loggedOutSignal);

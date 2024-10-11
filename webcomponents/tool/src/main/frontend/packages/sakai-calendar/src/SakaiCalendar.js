@@ -5,6 +5,8 @@ import { loadProperties } from "@sakai-ui/sakai-i18n";
 import { calendarStyles } from "./calendar-styles.js";
 import { SakaiSitePicker } from "@sakai-ui/sakai-site-picker";
 import "@sakai-ui/sakai-site-picker/sakai-site-picker.js";
+import { SakaiPWA } from "@sakai-ui/sakai-pwa";
+import { Signal } from "signal-polyfill";
 
 export class SakaiCalendar extends LionCalendar {
 
@@ -12,6 +14,7 @@ export class SakaiCalendar extends LionCalendar {
 
     userId: { attribute: "user-id", type: String },
     siteId: { attribute: "site-id", type: String },
+    cacheName: { attribute: "cache-name", type: String },
     defer: { type: Boolean },
     _i18n: { state: true },
     _daysEvents: { state: true },
@@ -27,6 +30,23 @@ export class SakaiCalendar extends LionCalendar {
     });
 
     loadProperties("calendar-wc").then(r => this._i18n = r);
+
+    this.logoutWatcher = new Signal.subtle.Watcher(() => {
+
+      if (this.siteId) return;
+
+      queueMicrotask(() => {
+
+        if (SakaiPWA.loggedOutSignal.get() === 1) {
+          caches.open(this.cacheName).then(c => c.delete("/api/users/current/calendar"));
+        }
+
+        this.logoutWatcher.watch();
+      });
+    });
+
+    this.logoutWatcher.watch(SakaiPWA.loggedOutSignal);
+
   }
 
   connectedCallback() {
