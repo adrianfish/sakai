@@ -27,6 +27,20 @@ self.addEventListener("install", async event => {
           "/library/skin/default-skin/pwa.css",
           "/library/webjars/bootstrap/5.2.0/js/bootstrap.bundle.min.js",
           "/webcomponents/bundles/pwa.js",
+          "/sakai-ws/rest/i18n/getI18nProperties?locale=en_GB&resourceclass=org.sakaiproject.i18n.InternationalizedMessages&resourcebundle=account-panel-wc",
+          "/sakai-ws/rest/i18n/getI18nProperties?locale=en_GB&resourceclass=org.sakaiproject.i18n.InternationalizedMessages&resourcebundle=announcements",
+          "/sakai-ws/rest/i18n/getI18nProperties?locale=en_GB&resourceclass=org.sakaiproject.i18n.InternationalizedMessages&resourcebundle=calendar-wc",
+          "/sakai-ws/rest/i18n/getI18nProperties?locale=en_GB&resourceclass=org.sakaiproject.i18n.InternationalizedMessages&resourcebundle=dashboard",
+          "/sakai-ws/rest/i18n/getI18nProperties?locale=en_GB&resourceclass=org.sakaiproject.i18n.InternationalizedMessages&resourcebundle=dashboard-widget",
+          "/sakai-ws/rest/i18n/getI18nProperties?locale=en_GB&resourceclass=org.sakaiproject.i18n.InternationalizedMessages&resourcebundle=dialog-content",
+          "/sakai-ws/rest/i18n/getI18nProperties?locale=en_GB&resourceclass=org.sakaiproject.i18n.InternationalizedMessages&resourcebundle=forums",
+          "/sakai-ws/rest/i18n/getI18nProperties?locale=en_GB&resourceclass=org.sakaiproject.i18n.InternationalizedMessages&resourcebundle=grades",
+          "/sakai-ws/rest/i18n/getI18nProperties?locale=en_GB&resourceclass=org.sakaiproject.i18n.InternationalizedMessages&resourcebundle=profile-wc",
+          "/sakai-ws/rest/i18n/getI18nProperties?locale=en_GB&resourceclass=org.sakaiproject.i18n.InternationalizedMessages&resourcebundle=sakai-notifications",
+          "/sakai-ws/rest/i18n/getI18nProperties?locale=en_GB&resourceclass=org.sakaiproject.i18n.InternationalizedMessages&resourcebundle=sakai-pwa",
+          "/sakai-ws/rest/i18n/getI18nProperties?locale=en_GB&resourceclass=org.sakaiproject.i18n.InternationalizedMessages&resourcebundle=site-picker",
+          "/sakai-ws/rest/i18n/getI18nProperties?locale=en_GB&resourceclass=org.sakaiproject.i18n.InternationalizedMessages&resourcebundle=tasks",
+          "/sakai-ws/rest/i18n/getI18nProperties?locale=en_GB&resourceclass=org.sakaiproject.i18n.InternationalizedMessages&resourcebundle=widgetpanel",
         ])
       )
   );
@@ -121,8 +135,7 @@ self.addEventListener("fetch", async event => {
         // Fetch it and cache if needed.
         return fetch(event.request).then(fetchedResponse => {
 
-          if (event.request.method === "GET" && (event.request.url.match(/api\/users\/me\/notifications/)
-                                                  || event.request.url.match(/profile.*thumb$/)
+          if (event.request.method === "GET" && (event.request.url.match(/profile.*thumb$/)
                                                   || event.request.url.match(/api\/users\/.*\/profile$/)
                                                   || event.request.url.match(/resourcebundle/))) {
             console.debug(`Caching ${event.request.url} ...`);

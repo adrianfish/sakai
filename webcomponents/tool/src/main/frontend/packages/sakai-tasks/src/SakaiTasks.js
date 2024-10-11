@@ -356,7 +356,7 @@ export class SakaiTasks extends SakaiPageableElement {
         ${this.dataPage.filter(t => t.visible).map((t, i) => html`
           <div class="priority-block priority_${t.priority} cell ${i % 2 === 0 ? "even" : "odd"}">
             <div tabindex="0" title="${this.i18n[`priority_${t.priority}_tooltip`]}" aria-label="${this.i18n[`priority_${t.priority}_tooltip`]}">
-              <sakai-icon size="small" type="priority"></sakai-icon>
+              <i class="si si-flag"></i>
             </div>
           </div>
           <div class="task-block cell ${i % 2 === 0 ? "even" : "odd"}">
@@ -385,7 +385,7 @@ export class SakaiTasks extends SakaiPageableElement {
                   @click=${this.editTask}
                   title="${this.i18n.edit}"
                   aria-label="${this.i18n.edit}">
-                <sakai-icon type="edit" size="small"></sakai-icon>
+                <i class="si si-edit"></i>
               </a>
             </div>
               ${t.softDeleted ? html`
@@ -395,7 +395,7 @@ export class SakaiTasks extends SakaiPageableElement {
                       @click=${this.deleteTask}
                       title="${this.i18n.hard_delete}"
                       aria-label="${this.i18n.hard_delete}">
-                    <sakai-icon type="delete" size="small"></sakai-icon>
+                    <i class="si si-trash"></i>
                   </a>
                 </div>
                 <div class="restore">
@@ -414,7 +414,7 @@ export class SakaiTasks extends SakaiPageableElement {
                       @click=${this.softDeleteTask}
                       title="${this.i18n.soft_delete}"
                       aria-label="${this.i18n.soft_delete}">
-                    <sakai-icon type="delete" size="small"></sakai-icon>
+                    <i class="si si-trash"></i>
                   </a>
                 </div>
               `}
@@ -425,7 +425,7 @@ export class SakaiTasks extends SakaiPageableElement {
                 <a href="${t.url}"
                     title="${this.i18n.task_url}"
                     aria-label="${this.i18n.task_url}">
-                  <sakai-icon type="right" size="small"></sakai-icon>
+                  <i class="si si-right"></i>
                 </a>
               </div>
             ` : nothing }
@@ -452,19 +452,6 @@ export class SakaiTasks extends SakaiPageableElement {
         margin-top: 8px;
         margin-bottom: 10px;
       }
-        sakai-icon[type="add"] {
-          padding: 3px 3px 2px 0;
-          vertical-align: middle;
-          color: var(--button-primary-text-color);
-        }
-        .add-task-button {
-          margin-left: 1px;
-          background-color: var(--button-primary-background);
-          color: var(--button-primary-text-color);
-          border: 0px solid var(--button-primary-border-color);
-          border-radius: 2px;
-        }
-
       #controls {
         display: flex;
         margin-bottom: 10px;

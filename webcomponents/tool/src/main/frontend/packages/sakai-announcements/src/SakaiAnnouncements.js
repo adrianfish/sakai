@@ -1,6 +1,5 @@
 import { css, html, nothing } from "lit";
 import { ifDefined } from "lit/directives/if-defined.js";
-import "@sakai-ui/sakai-icon/sakai-icon.js";
 import { SakaiPageableElement } from "@sakai-ui/sakai-pageable-element";
 import { SakaiSitePicker } from "@sakai-ui/sakai-site-picker";
 import "@sakai-ui/sakai-site-picker/sakai-site-picker.js";
@@ -177,7 +176,7 @@ export class SakaiAnnouncements extends SakaiPageableElement {
       ${this.dataPage.filter(a => a.visible).map((a, i) => html`
         <div class="title cell ${i % 2 === 0 ? "even" : "odd"}">
           ${a.highlighted ? html`
-          <sakai-icon type="favourite" size="small"></sakai-icon>
+          <i class="si si-star-fill"></i>
           ` : nothing}
           <span class="${ifDefined(a.highlighted ? "highlighted" : undefined)}">${a.subject}</span>
         </div>
@@ -188,7 +187,7 @@ export class SakaiAnnouncements extends SakaiPageableElement {
           <a href="${a.url}"
               title="${this.i18n.url_tooltip}"
               aria-label="${this.i18n.url_tooltip}">
-            <sakai-icon type="right" size="small"></sakai-icon>
+            <i class="si si-right"></i>
           </a>
         </div>
       `)}

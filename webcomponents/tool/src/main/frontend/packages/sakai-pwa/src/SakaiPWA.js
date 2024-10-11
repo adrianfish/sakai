@@ -61,6 +61,8 @@ export class SakaiPWA extends SakaiElement {
     // Logged in successfully.
     onLogin(e.detail.user.userId);
 
+    caches.open("sakai-v1").then(c => c.add("/pwa/"));
+
     this.userId = e.detail.user.userId;
     this.userName = e.detail.user.userName;
     this.userDisplayName = e.detail.user.userDisplayName;
@@ -88,6 +90,7 @@ export class SakaiPWA extends SakaiElement {
 
       if (r.ok) {
         logout();
+        caches.open("sakai-v1").then(c => c.delete("/pwa/"));
         this.userId = undefined;
         this._state = SakaiPWA.SPLASH;
         navigator.setAppBadge?.(0);

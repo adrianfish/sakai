@@ -1,5 +1,4 @@
 import { css, html, nothing } from "lit";
-import "@sakai-ui/sakai-icon";
 import { SakaiPageableElement } from "@sakai-ui/sakai-pageable-element";
 import { SakaiSitePicker } from "@sakai-ui/sakai-site-picker";
 import "@sakai-ui/sakai-site-picker/sakai-site-picker.js";
@@ -202,10 +201,7 @@ export class SakaiGrades extends SakaiPageableElement {
           <a href="${a.url}"
               aria-label="${this._i18n.url_tooltip}"
               title="${this._i18n.url_tooltip}">
-            <sakai-icon type="right" size="small">
-              aria-label="${this._i18n.url_tooltip}"
-              title="${this._i18n.url_tooltip}">
-            </sakai-icon>
+            <i class="si si-right"></i>
           </a>
         </div>
         `)}

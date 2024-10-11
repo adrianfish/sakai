@@ -126,7 +126,6 @@ export const checkUserChangedThenSet = userId => {
 
   if (differentUser) {
     // New user logged in. Make sure to remove the user specific stuff from the cache.
-    //caches.open("sakai-v1").then(cache => cache.delete("/api/users/me/notifications"));
     caches.open("sakai-v1").then(cache => cache.delete("/api/keys/sakaipush"));
   }
 
@@ -243,8 +242,6 @@ export const onLogin = userId => {
 
   console.debug(`onLogin(${userId})`);
 
-  caches.open("sakai-v1").then(cache => cache.add("/pwa/"));
-
   const differentUser = checkUserChangedThenSet(userId);
 
   // If the logged in user has changed, we should resubscribe this device
@@ -272,10 +269,5 @@ export const onLogin = userId => {
 };
 
 export const logout = () => {
-
-  caches.open("sakai-v1").then(cache => {
-    cache.delete("/pwa/");
-  });
-
   navigator.serviceWorker.ready.then(reg => reg.active.postMessage("LOGOUT"));
 };
