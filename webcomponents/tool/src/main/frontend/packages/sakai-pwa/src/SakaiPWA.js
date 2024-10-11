@@ -132,44 +132,9 @@ export class SakaiPWA extends SakaiElement {
   _renderHeader() {
 
     return html`
-      <div id="pwa-header" class="d-flex align-items-center justify-content-between">
-        <div>
-          <button type="button"
-              class="pwa-header-button btn icon-button"
-              ?disabled=${this._offline || !this.userId}>
-            <span class="bi bi-list"></span>
-          </button>
-        </div>
-        <div class="d-flex justify-content-center">
-          <div id="pwa-header-logo">
-            <img src="/library/skin/default-skin/images/sakaiLogo.png" alt="Sakai Logo">
-          </div>
-        </div>
-        <div>
-        ${!this._offline && !this.userId ? html`
-          <!-- WE ARE ONLINE BUT NOT LOGGED IN -->
-
-          <button type="button"
-              class="btn btn-link"
-              data-state="${SakaiPWA.LOGIN}"
-              @click=${this._setState}
-              ?disabled=${this._state === SakaiPWA.LOGIN}>
-            Login
-          </button>
-        ` : nothing }
-
-          ${this.userId ? html`
-          <button class="btn icon-button sak-sysInd-account"
-              type="button"
-              data-bs-toggle="offcanvas"
-              data-bs-target="#sakai-account-panel"
-              aria-controls="sakai-account-panel"
-              title="${this._i18n.account_panel_title}">
-            <img id="profile-image" class="rounded-circle"
-                src="/direct/profile/${this.userId}/image/thumb"
-                alt="${this._i18n.profile_image_alt}" />
-          </button>
-          ` : nothing}
+      <div id="pwa-header" class="d-flex align-items-center p-2">
+        <div id="pwa-header-logo" class="mx-auto">
+          <img src="/library/skin/default-skin/images/sakaiLogo.png" alt="Sakai Logo">
         </div>
       </div>
     `;
@@ -286,16 +251,18 @@ export class SakaiPWA extends SakaiElement {
         </div>
 
         <div class="offcanvas-body d-flex flex-column">
-        <sakai-notifications
-            user-id="${this.userId}"
-            url="/api/users/me/notifications"
-            @notifications-loaded=${this._notificationsLoaded}
-            ?offline=${this._offline}
-            cache-name="sakai-v1"
-            defer-load>
-        </sakai-notifications>
+          <sakai-notifications
+              user-id="${this.userId}"
+              url="/api/users/me/notifications"
+              @notifications-loaded=${this._notificationsLoaded}
+              ?offline=${this._offline}
+              cache-name="sakai-v1"
+              defer-load>
+          </sakai-notifications>
         </div>
       </aside>
+
+      ${!this.userId ? this._renderHeader() : nothing}
 
       <div id="pwa-main">
         ${this._offline ? html`
