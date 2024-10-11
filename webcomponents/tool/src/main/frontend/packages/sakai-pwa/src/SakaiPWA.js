@@ -179,51 +179,64 @@ export class SakaiPWA extends SakaiElement {
 
     return html`
       <div id="pwa-footer" class="bg-dark d-flex align-items-center justify-content-around py-2">
-        <div>
-          <button class="btn icon-button responsive-allsites-button"
-              data-bs-toggle="offcanvas"
-              data-bs-target="#select-site-sidebar"
-              aria-label="${this._i18n.allsites}"
-              aria-controls="select-site-sidebar"
-              title="${this._i18n.allsites}">
-              <i class="si si-all-sites"></i>
-          </button>
-        </div>
-
-        <div>
-          <button class="portal-notifications-button btn icon-button"
-              data-bs-toggle="offcanvas"
-              data-bs-target="#sakai-notifications-panel"
-              aria-controls="sakai-notifications-panel"
-              aria-label="${this._i18n.notifications}"
-              title="${this._i18n.notifications}">
-            <i class="bi-bell"></i>
-            <span class="portal-notifications-indicator p-1 rounded-circle d-none">
-              <span class="visually-hidden">${this._i18n.new_notifications_label}</span>
-            </span>
-          </button>
-        </div>
-
-        <div>
-          <a class="btn icon-button"
-              href="/portal"
-              title="${this._i18n.portal_home}">
-            <i class="bi-house"></i>
-          </a>
-        </div>
-
-        ${this.usePortalSearch ? html`
+        ${this.userId ? html`
           <div>
-            <button class="btn icon-button portal-search-button"
+            <button class="btn icon-button responsive-allsites-button"
                 data-bs-toggle="offcanvas"
-                data-bs-target="#sakai-search-panel"
-                aria-controls="sakai-search-panel"
-                aria-label="${this._i18n.search_for_content}"
-                title="${this._i18n.search_for_content}">
-              <i class="bi-search"></i>
+                data-bs-target="#select-site-sidebar"
+                aria-label="${this._i18n.allsites}"
+                aria-controls="select-site-sidebar"
+                title="${this._i18n.allsites}">
+                <i class="si si-all-sites"></i>
             </button>
           </div>
-        ` : nothing}
+
+          <div>
+            <button class="portal-notifications-button btn icon-button"
+                data-bs-toggle="offcanvas"
+                data-bs-target="#sakai-notifications-panel"
+                aria-controls="sakai-notifications-panel"
+                aria-label="${this._i18n.notifications}"
+                title="${this._i18n.notifications}">
+              <i class="bi-bell"></i>
+              <span class="portal-notifications-indicator p-1 rounded-circle d-none">
+                <span class="visually-hidden">${this._i18n.new_notifications_label}</span>
+              </span>
+            </button>
+          </div>
+
+          ${this.usePortalSearch ? html`
+            <div>
+              <button class="btn icon-button portal-search-button"
+                  data-bs-toggle="offcanvas"
+                  data-bs-target="#sakai-search-panel"
+                  aria-controls="sakai-search-panel"
+                  aria-label="${this._i18n.search_for_content}"
+                  title="${this._i18n.search_for_content}">
+                <i class="bi-search"></i>
+              </button>
+            </div>
+          ` : nothing}
+
+          <button class="btn icon-button sak-sysInd-account"
+              type="button"
+              data-bs-toggle="offcanvas"
+              data-bs-target="#sakai-account-panel"
+              aria-controls="sakai-account-panel"
+              title="${this._i18n.account_panel_title}">
+            <img id="profile-image" class="rounded-circle"
+                src="/direct/profile/${this.userId}/image/thumb"
+                alt="${this._i18n.profile_image_alt}" />
+          </button>
+        ` : html`
+          <button type="button"
+              class="btn btn-lg btn-primary fs-2"
+              data-state="${SakaiPWA.LOGIN}"
+              @click=${this._setState}
+              ?disabled=${this._state === SakaiPWA.LOGIN}>
+            ${this._i18n.login}
+          </button>
+        `}
       </div>
     </div>
     `;
@@ -283,8 +296,6 @@ export class SakaiPWA extends SakaiElement {
         </sakai-notifications>
         </div>
       </aside>
-
-      ${this._renderHeader()}
 
       <div id="pwa-main">
         ${this._offline ? html`
