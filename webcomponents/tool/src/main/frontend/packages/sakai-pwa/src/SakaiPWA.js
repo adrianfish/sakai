@@ -132,18 +132,18 @@ export class SakaiPWA extends SakaiElement {
   _renderHeader() {
 
     return html`
-      <div id="pwa-header" class="d-flex align-items-center p-2">
+      <header id="pwa-header" class="d-flex align-items-center p-2">
         <div id="pwa-header-logo" class="mx-auto">
           <img src="/library/skin/default-skin/images/sakaiLogo.png" alt="Sakai Logo">
         </div>
-      </div>
+      </header>
     `;
   }
 
   _renderFooter() {
 
     return html`
-      <div id="pwa-footer" class="bg-dark d-flex align-items-center justify-content-around py-2">
+      <div id="pwa-footer" class="bg-dark d-flex align-items-center justify-content-around py-2 pb-4">
         ${this.userId ? html`
           <div>
             <button class="btn icon-button responsive-allsites-button"
@@ -203,14 +203,13 @@ export class SakaiPWA extends SakaiElement {
           </button>
         `}
       </div>
-    </div>
     `;
   }
 
   _renderContent() {
 
     return html`
-      <div class="p-4">
+      <div class="p-3">
         ${this._state === SakaiPWA.DASHBOARD ? html`
           <sakai-home-dashboard user-id="${this.userId}" cache-name="sakai-v1" hide-sites></sakai-home-dashboard>
         ` : nothing }
@@ -264,7 +263,7 @@ export class SakaiPWA extends SakaiElement {
 
       ${!this.userId ? this._renderHeader() : nothing}
 
-      <div id="pwa-main">
+      <main id="pwa-main">
         ${this._offline ? html`
           <div class="sak-banner-info">You are offline</div>
           ${!this.userId ? html`
@@ -277,7 +276,7 @@ export class SakaiPWA extends SakaiElement {
         ` : html `
           ${this._renderContent()}
         `}
-      </div>
+      </main>
 
       ${this._renderFooter()}
     `;

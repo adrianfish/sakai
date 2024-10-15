@@ -1,4 +1,6 @@
-self.addEventListener("activate", event => {
+self.addEventListener("activate", async event => {
+
+  if (self.registration.navigationPreload) { await self.registration.navigationPreload.enable(); }
 
   console.debug("Activated. Claiming clients ...");
   return self.clients.claim();
@@ -27,20 +29,6 @@ self.addEventListener("install", async event => {
           "/library/skin/default-skin/pwa.css",
           "/library/webjars/bootstrap/5.2.0/js/bootstrap.bundle.min.js",
           "/webcomponents/bundles/pwa.js",
-          "/sakai-ws/rest/i18n/getI18nProperties?locale=en_GB&resourceclass=org.sakaiproject.i18n.InternationalizedMessages&resourcebundle=account-panel-wc",
-          "/sakai-ws/rest/i18n/getI18nProperties?locale=en_GB&resourceclass=org.sakaiproject.i18n.InternationalizedMessages&resourcebundle=announcements",
-          "/sakai-ws/rest/i18n/getI18nProperties?locale=en_GB&resourceclass=org.sakaiproject.i18n.InternationalizedMessages&resourcebundle=calendar-wc",
-          "/sakai-ws/rest/i18n/getI18nProperties?locale=en_GB&resourceclass=org.sakaiproject.i18n.InternationalizedMessages&resourcebundle=dashboard",
-          "/sakai-ws/rest/i18n/getI18nProperties?locale=en_GB&resourceclass=org.sakaiproject.i18n.InternationalizedMessages&resourcebundle=dashboard-widget",
-          "/sakai-ws/rest/i18n/getI18nProperties?locale=en_GB&resourceclass=org.sakaiproject.i18n.InternationalizedMessages&resourcebundle=dialog-content",
-          "/sakai-ws/rest/i18n/getI18nProperties?locale=en_GB&resourceclass=org.sakaiproject.i18n.InternationalizedMessages&resourcebundle=forums",
-          "/sakai-ws/rest/i18n/getI18nProperties?locale=en_GB&resourceclass=org.sakaiproject.i18n.InternationalizedMessages&resourcebundle=grades",
-          "/sakai-ws/rest/i18n/getI18nProperties?locale=en_GB&resourceclass=org.sakaiproject.i18n.InternationalizedMessages&resourcebundle=profile-wc",
-          "/sakai-ws/rest/i18n/getI18nProperties?locale=en_GB&resourceclass=org.sakaiproject.i18n.InternationalizedMessages&resourcebundle=sakai-notifications",
-          "/sakai-ws/rest/i18n/getI18nProperties?locale=en_GB&resourceclass=org.sakaiproject.i18n.InternationalizedMessages&resourcebundle=sakai-pwa",
-          "/sakai-ws/rest/i18n/getI18nProperties?locale=en_GB&resourceclass=org.sakaiproject.i18n.InternationalizedMessages&resourcebundle=site-picker",
-          "/sakai-ws/rest/i18n/getI18nProperties?locale=en_GB&resourceclass=org.sakaiproject.i18n.InternationalizedMessages&resourcebundle=tasks",
-          "/sakai-ws/rest/i18n/getI18nProperties?locale=en_GB&resourceclass=org.sakaiproject.i18n.InternationalizedMessages&resourcebundle=widgetpanel",
         ])
       )
   );
@@ -113,8 +101,6 @@ self.addEventListener("fetch", async event => {
       // Check the cache
       const cache = await caches.open("sakai-v1");
       const cachedResponse = await cache.match(event.request);
-
-
       if (cachedResponse) {
         console.debug(`${event.request.url} is in the cache.`);
         if (navigator.onLine) {
@@ -128,6 +114,12 @@ self.addEventListener("fetch", async event => {
 
       console.debug(`${event.request.url} is not currently in the cache`);
 
+      // Else, use the preloaded response, if it's there
+      const preloadedResponse = await event.preloadResponse;
+      if (preloadedResponse) return preloadedResponse;
+
+      console.debug(`${event.request.url} is not currently in the cache, or preloaded`);
+
       if (navigator.onLine) {
 
         console.debug(`We're online. Fetching ${event.request.url} ...`);
@@ -135,9 +127,9 @@ self.addEventListener("fetch", async event => {
         // Fetch it and cache if needed.
         return fetch(event.request).then(fetchedResponse => {
 
-          if (event.request.method === "GET" && (event.request.url.match(/profile.*thumb$/)
-                                                  || event.request.url.match(/api\/users\/.*\/profile$/)
-                                                  || event.request.url.match(/resourcebundle/))) {
+          if (event.request.method === "GET" && (event.request.url.match(/profile.*\/image\/thumb$/)
+                                                  || event.request.url.match("/sakai-ws\/rest\/i18n")
+                                                  || event.request.url.match(/api\/users\/.*\/profile$/))) {
             console.debug(`Caching ${event.request.url} ...`);
             cache.put(event.request, fetchedResponse.clone());
           }
