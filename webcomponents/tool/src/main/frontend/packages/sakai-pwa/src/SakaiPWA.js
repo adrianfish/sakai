@@ -71,6 +71,32 @@ export class SakaiPWA extends SakaiElement {
     // TODO: this is nasty ...
     portal.user.timezone = this.userTimezone;
 
+    const nums = function* nums(max) {
+      let i = 0;
+      while (i < max) {
+        i++;
+        yield Math.floor(Math.random() * 100);
+      }
+    }
+
+    const challenge = new Uint8Array([...nums(32)]);
+
+    console.log(challenge);
+
+    console.log("HERE");
+    navigator.credentials.create({
+      publicKey: {
+        challenge,
+        rp: { id: "localhost", name: "Localhost" },
+        user: {
+          id: new Uint8Array([79, 252, 83, 72, 214, 7, 89, 26]),
+          name: this.userName,
+          displayName: this.userDisplayName,
+        },
+        pubKeyCredParams: [ {type: "public-key", alg: -7} ]
+      }
+    }).then(c => console.log(c));
+
     this._state = SakaiPWA.DASHBOARD;
 
     SakaiPWA.loggedOutSignal.set(0);

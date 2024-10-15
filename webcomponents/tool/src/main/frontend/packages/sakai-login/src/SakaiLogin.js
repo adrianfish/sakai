@@ -35,16 +35,11 @@ export class SakaiLogin extends SakaiElement {
     .then(user => {
 
       console.debug(`Logged in at ${url}. UserId: ${user.userId}`);
+      user.password = this._password;
       this.dispatchEvent(new CustomEvent("login-successful", { detail: { user } }));
     })
     .catch(error => console.error(error));
   }
-
-  /*
-  shouldUpdate() {
-    return this._i18n;
-  }
-  */
 
   render() {
 
