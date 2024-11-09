@@ -15,9 +15,6 @@
 
     #end ## END of IF ( $sitePages.pageNavToolsCount > 1 || ! $sitePages.pageMaxIfSingle )
 
-#*
-        #parse("/vm/morpheus/includeSiteHierarchy.vm")
-*#
-        #parse("/vm/morpheus/includePage.vm")
+    #parse("/vm/morpheus/includePage.vm")
     
 <!-- END VM includePageWithNav.vm -->

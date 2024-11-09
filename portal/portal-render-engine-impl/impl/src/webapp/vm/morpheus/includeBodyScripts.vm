@@ -105,7 +105,7 @@
     });
 
     // Setup mobile login
-    new MobileLogin(portal.head.querySelector("#mobileLoginBtn"), {
+    new MobileLogin(document.getElementById("mobileLoginBtn"), {
       passwordField: {
         icons: {
           hidden: "bi-eye-slash-fill",

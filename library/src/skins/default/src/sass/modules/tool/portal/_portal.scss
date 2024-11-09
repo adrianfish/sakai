@@ -8,7 +8,7 @@
 .portal-container {
   display: grid;
   grid-template-columns: 1fr;
-  grid-template-rows: auto auto var(--portal-header-height) 1fr var(--portal-header-height);
+  grid-template-rows: auto auto 0 1fr var(--portal-header-height);
   grid-template-areas:
       "paBanner"
       "jumpLinks"
@@ -193,10 +193,6 @@
   }
 }
 
-.breadcrumb-item + .breadcrumb-item::before {
-  color: var(--sakak-breadcrumb-color);
-}
-
 .search-result-link {
 
   &:focus, &:hover {
@@ -223,6 +219,10 @@
     i {
       font-size: 24px;
     }
+  }
+
+  .sakai-accountProfileImage {
+    width: 40px;
   }
 }
 .portal-jump-links {

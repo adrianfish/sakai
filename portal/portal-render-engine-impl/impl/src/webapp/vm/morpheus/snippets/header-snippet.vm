@@ -1,16 +1,6 @@
 ## Header that shows institution and/or banner logos
 
-<header class="portal-header d-flex align-items-center justify-content-between" role="banner">
-
-  <button class="btn icon-button m-1 d-md-none btn-sidebar-collapse responsive-sidebar-button"
-      data-bs-toggle="offcanvas"
-      data-bs-target="#portal-nav-sidebar"
-      aria-controls="portal-nav-sidebar"
-      aria-label="$rloader.sit_navigation"
-      aria-expanded="false"
-      title="$rloader.sit_navigation">
-    <span class="bi bi-list"></span>
-  </button>
+<header class="portal-header d-none d-md-flex align-items-center justify-content-between" role="banner">
 
   <div class="d-flex align-items-center">
     <div id="logoWrapper" class="portal-header-logo d-flex align-items-center justify-content-between bg-primary">
@@ -29,21 +19,6 @@
         <span class="bi bi-list"></span>
       </button>
     </div>
-    #if (${userIsLoggedIn})
-    <div class="align-items-center portal-header-breadcrumb d-none d-md-flex">
-      <div id="header-site-title" class="ms-3 portal-header-breadcrumb-item">
-        <a href="$!{siteUrl}">$!{siteTitle}</a>
-      </div>
-      #foreach( $page in $sitePages.pageNavTools )
-        #if ($page.current)
-          <div class="mx-2 bi bi-chevron-right portal-header-breadcrumb-separator d-none d-md-block"></div>
-          <div class="portal-header-breadcrumb-item header-tool-title">
-            <a href="${page.pageResetUrl}" title="$rloader.sit_reset">${page.pageTitle}</a>
-          </div>
-        #end
-      #end
-    </div>
-    #end
   </div>
 
   <a href="#" class="sak-sysInd-systemAlerts nav-link d-none align-items-center text-white me-auto" onclick="alert('Somehow we will get the dismissed PA System alert to re-appear');">

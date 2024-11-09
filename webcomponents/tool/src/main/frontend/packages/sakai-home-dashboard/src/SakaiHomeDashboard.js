@@ -106,9 +106,9 @@ export class SakaiHomeDashboard extends SakaiElement {
     return html`
 
       <div>
-        <div class="d-lg-flex flex-wrap align-items-center justify-content-between">
+        <div class="d-flex flex-wrap align-items-center justify-content-between mb-3">
           <div class="fs-2">${this._i18n.welcome} ${this._data.givenName}</div>
-          <div class="d-flex mb-2 mb-lg-0">
+          <div class="d-flex">
           ${this._editing ? html`
             <div class="me-1">
               <sakai-button @click=${this.save} title="${this._i18n.save_tooltip}" aria-label="${this._i18n.save_tooltip}">${this._i18n.save}</sakai-button>
