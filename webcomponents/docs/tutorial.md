@@ -4,12 +4,13 @@ In this tutorial we're going to learn how to:
 
 1. Add a new sakai-todo-list component  to Sakai
 2. Deploy a basic Sakai tool to host our new component
-3. Work on our component directly in the deployed Tomcat webapp, refreshing the browser to see our changes
+3. Work on our component and bundle it using esbuild
 4. Internationalise the component using Sakai's i18n rest api
 5. Add a rest endpoint to Sakai's web api and fetch our todos from it
 
 You'll need a Sakai tomcat environment set up and ready to go. You'll need an editor - vim, emacs,
-VS code, IntelliJ IDEA, Eclipse - any will do as we're just editing javascript.
+VS code, IntelliJ IDEA, Eclipse - any will do as we're just editing javascript. You'll also need to
+know how to use git.
 
 Conventions used in this tutorial:
 
@@ -22,14 +23,30 @@ TUTORIAL\_SRC.
 
 We'll use docs to describe this directory, the one containing this tutorial.
 
-## 1. Add the sakai-todo-list component to Sakai
+## 1. Add the sakai-todo-list package to the webcomponents project
 
-All of our components live under the SAKAI\_SRC/webcomponents/tool/src/main/fontend/js directory, that's
-where we want to put our component's js file.
+All of our components live under the SAKAI\_SRC/webcomponents/tool/src/main/fontend/packages directory, that's
+where we want to put our component.
 
-Copy sakai-todo-list.js to SAKAI\_SRC/webcomponents/tool/src/main/frontend/js
+First, let's change to the webcomponents directory:
 
-    cp TUTORIAL_SRC/js/sakai-todo-list.js ../tool/src/main/frontend/js
+    cd SAKAI_SRC/webcomponents
+
+Copy across our component package starter from the tutorial source:
+
+    cp -r TUTORIAL\_SRC/package/* tool/src/main/frontend/packages/
+
+## 2. Write tests for some component functionality
+
+Enter the package directory:
+
+    cd tool/src/main/frontend/packages/sakai-todo-list
+
+Load up test/sakai-todo-list.test.js in your editor.
+
+Run the tests:
+
+    npm run test
 
 Now build the webcomponents project:
 
@@ -37,10 +54,7 @@ Now build the webcomponents project:
     mvn clean install sakai:deploy
 
 This will build and lint all the js files in the webcomponents project. They will be deployed to the
-webcomponents webapp in your Tomcat. If you look in the webcomponents webapp in your Tomcat, you'll
-see the sakai-todo-list.js file. Edit it and you see that it is more or less identical to your
-source file. All that has happened is that the maven build has added a cache busting string to the
-import paths, and the import paths have been adapted to work in the browser.
+webcomponents webapp in your Tomcat.
 
 ## 2. Add a tool to Sakai to host the todo list component
 
@@ -57,12 +71,12 @@ you should just see "Sakai Todo List".
 
 ## 3. Do some work on the component, directly in the exploded Tomcat webapp directory
 
-Go into your tomcat's webcomponents exploded webapp. You should see the sakai-todo-list.js file in
+Go into your tomcat's webcomponents exploded webapp. You should see the SakaiTodoList.js file in
 there. If you edit it, you'll see that the maven  build has altered it a bit from your source file.
-Copy the sakai-todo-list.js source file into TOMCAT/webapps/webcomponents. You may have to set the
+Copy the SakaiTodoList.js source file into TOMCAT/webapps/webcomponents. You may have to set the
 file permissions on your tomcat first.
 
-    cp SAKAI_SRC/webcomponents/tool/src/main/frontend/js/sakai-todo-list.js TOMCAT/webapps/webcomponents
+    cp SAKAI_SRC/webcomponents/tool/src/main/frontend/js/SakaiTodoList.js TOMCAT/webapps/webcomponents
 
 ### 3.1 Add some styles
 
@@ -214,7 +228,7 @@ Chrome console open while working on this stuff). The error is telling us that t
 Now is a great time to save what you've done back into your source tree from the deployed webapp. If
 you forget to do this and run a maven build on webcomponents, **your changes will be lost!** So, do this:
 
-    cp TOMCAT/webapps/webcomponents/sakai-todo-list.js SAKAI_SRC/webcomponents/tool/src/main/frontend/js
+    cp TOMCAT/webapps/webcomponents/SakaiTodoList.js SAKAI_SRC/webcomponents/tool/src/main/frontend/js
 
 Okay, now we need to add our i18n bundle. Add a file to SAKAI\_SRC/webcomponents/bundle/src/main/bundle
 called todo-list.properties. It's basically a Java properties file. Now add two properties:
