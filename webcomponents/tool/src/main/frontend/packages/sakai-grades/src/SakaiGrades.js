@@ -5,11 +5,14 @@ import { SakaiSitePicker } from "@sakai-ui/sakai-site-picker";
 import "@sakai-ui/sakai-site-picker/sakai-site-picker.js";
 import { ASSIGNMENT_A_TO_Z, ASSIGNMENT_Z_TO_A, COURSE_A_TO_Z
   , COURSE_Z_TO_A, NEW_HIGH_TO_LOW, NEW_LOW_TO_HIGH
-  , AVG_LOW_TO_HIGH, AVG_HIGH_TO_LOW } from "./sakai-grades-constants.js";
+  , SCORE_LOW_TO_HIGH, SCORE_HIGH_TO_LOW } from "./sakai-grades-constants.js";
 
 export class SakaiGrades extends SakaiPageableElement {
 
-  static properties = { secret: { type: Boolean } };
+  static properties = {
+    secret: { type: Boolean },
+    canGradeSite: { state: true },
+  };
 
   constructor() {
 
@@ -34,6 +37,7 @@ export class SakaiGrades extends SakaiPageableElement {
       .then(data => {
 
         this.data = data.grades;
+        this.canGradeSite = data.canGradeSite;
         !this.siteId && (this.sites = data.sites);
         this._allData = data.grades;
         this.sortChanged({ target: { value: NEW_LOW_TO_HIGH } });
@@ -62,14 +66,14 @@ export class SakaiGrades extends SakaiPageableElement {
       case NEW_LOW_TO_HIGH:
         this.data.sort((g1, g2) => g1.ungraded - g2.ungraded);
         break;
-      case AVG_LOW_TO_HIGH:
+      case SCORE_LOW_TO_HIGH:
         this.data.sort((g1, g2) => {
           if (g1.notGradedYet) return 1;
           else if (g2.notGradedYet) return -1;
           return g1.score - g2.score;
         });
         break;
-      case AVG_HIGH_TO_LOW:
+      case SCORE_HIGH_TO_LOW:
         this.data.sort((g1, g2) => g2.score - g1.score);
         break;
       default:
@@ -134,13 +138,15 @@ export class SakaiGrades extends SakaiPageableElement {
           <select @change=${this.sortChanged}
               title="${this._i18n.sort_tooltip}"
               aria-label="${this._i18n.sort_tooltip}">
+            ${this.siteId && this.canGradeSite ? html`
             <option value="${NEW_LOW_TO_HIGH}">${this._i18n.sort_new_low_to_high}</option>
             <option value="${NEW_HIGH_TO_LOW}">${this._i18n.sort_new_high_to_low}</option>
-            <option value="${AVG_LOW_TO_HIGH}">${this._i18n.sort_average_low_to_high}</option>
-            <option value="${AVG_HIGH_TO_LOW}">${this._i18n.sort_average_high_to_low}</option>
+            ` : nothing}
+            <option value="${SCORE_LOW_TO_HIGH}">${this._i18n.sort_score_low_to_high}</option>
+            <option value="${SCORE_HIGH_TO_LOW}">${this._i18n.sort_score_high_to_low}</option>
             <option value="${ASSIGNMENT_A_TO_Z}">${this._i18n.sort_assignment_a_to_z}</option>
             <option value="${ASSIGNMENT_Z_TO_A}">${this._i18n.sort_assignment_z_to_a}</option>
-            ${this.siteId ? "" : html`
+            ${this.siteId ? nothing : html`
             <option value="${COURSE_A_TO_Z}">${this._i18n.sort_course_a_to_z}</option>
             <option value="${COURSE_Z_TO_A}">${this._i18n.sort_course_z_to_a}</option>
             `}
@@ -154,7 +160,7 @@ export class SakaiGrades extends SakaiPageableElement {
         <div class="header">${this._i18n.view}</div>
         ${this.dataPage.map((a, i) => html`
         <div class="assignment cell ${i % 2 === 0 ? "even" : "odd"}">
-          ${a.siteRole === "Instructor" ? html`
+          ${a.canGrade ? html`
           <div class="new-count">${a.ungraded} ${this._i18n.new_submissions}</div>
           ` : nothing}
           ${this.siteId ? html`
@@ -164,7 +170,7 @@ export class SakaiGrades extends SakaiPageableElement {
           `}
         </div>
         <div class="score cell ${i % 2 === 0 ? "even" : "odd"}${this.secret ? " blurred" : ""}" aria-hidden="${this.secret ? "true" : "false"}">
-            ${a.notGradedYet ? "-" : a.score} ${!a.notGradedYet && a.siteRole === "Instructor" ? html`${this._i18n.course_average}` : nothing}
+            ${a.notGradedYet ? "-" : a.score} ${!a.notGradedYet && a.canGrade ? html`${this._i18n.course_average}` : nothing}
         </div>
         <div class="next cell ${i % 2 === 0 ? "even" : "odd"}">
           <a href="${a.url}"

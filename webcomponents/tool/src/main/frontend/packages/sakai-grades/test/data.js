@@ -22,6 +22,7 @@ url_tooltip=Click to be taken to the grades
 course_assignment=Course/Assignment
 `;
 
+export const siteId = "123456";
 export const userId = "adrian";
 export const siteTitle = "XYZ Site";
 
@@ -31,8 +32,15 @@ export const vavavoomSite = "Vavavoom Site";
 export const gradesUrl= `/api/users/me/grades`;
 
 export const grades = [
-  { name: "Infinite Set Theory", ungraded: 3, score: "47.3", notGradedYet: false, url: "/grades/inf", siteTitle: "Natural Sciences 101", siteRole: "Instructor" },
-  { name: "Bayesian Inference", ungraded: 6, score: "12.4", notGradedYet: false, url: "/grades/bayes", siteTitle: "Probablity 101", siteRole: "Instructor" },
-  { name: "Euler Series", ungraded: 8, score: "23.7", notGradedYet: false, url: "/grades/euler", siteTitle: "French 101", siteRole: "Instructor" },
-  { name: "Fast Fourier Transform", ungraded: 0, score: "85", notGradedYet: false, url: "/grades/fft", siteTitle: "Math 101", siteRole: "Student" },
+  { name: "Infinite Set Theory", ungraded: 3, score: "47.3", notGradedYet: false, url: "/grades/inf", siteTitle: "Natural Sciences 101", canGrade: true },
+  { name: "Bayesian Inference", ungraded: 6, score: "12.4", notGradedYet: false, url: "/grades/bayes", siteTitle: "Probablity 101", canGrade: true },
+  { name: "Euler Series", ungraded: 8, score: "23.7", notGradedYet: false, url: "/grades/euler", siteTitle: "French 101", canGrade: true },
+  { name: "Fast Fourier Transform", ungraded: 0, score: "85", notGradedYet: false, url: "/grades/fft", siteTitle: "Math 101" },
+];
+
+export const siteGradesUrl= `/api/sites/${siteId}/grades`;
+
+export const siteGrades = [
+  { name: "Infinite Set Theory", ungraded: 3, score: "47.3", notGradedYet: false, url: "/grades/inf", siteTitle: "Natural Sciences 101" },
+  { name: "Infinite Set Theory", ungraded: 6, score: "12.4", notGradedYet: false, url: "/grades/inf", siteTitle: "Natural Sciences 101" },
 ];

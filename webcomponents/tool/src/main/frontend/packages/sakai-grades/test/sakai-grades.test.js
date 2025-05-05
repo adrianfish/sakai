@@ -6,7 +6,7 @@ import fetchMock from "fetch-mock/esm/client";
 
 import { ASSIGNMENT_A_TO_Z, ASSIGNMENT_Z_TO_A, COURSE_A_TO_Z
   , COURSE_Z_TO_A, NEW_HIGH_TO_LOW, NEW_LOW_TO_HIGH
-  , AVG_LOW_TO_HIGH, AVG_HIGH_TO_LOW } from "../src/sakai-grades-constants.js";
+  , SCORE_LOW_TO_HIGH, SCORE_HIGH_TO_LOW } from "../src/sakai-grades-constants.js";
 
 describe("sakai-grades tests", () => {
 
@@ -27,7 +27,7 @@ describe("sakai-grades tests", () => {
 
     // In user mode, we'd expect to get announcements from multiple sites.
     let el = await fixture(html`
-      <sakai-grades user-id="${data.userId}"></sakai-grades>
+      <sakai-grades></sakai-grades>
     `);
 
     await elementUpdated(el);
@@ -54,11 +54,11 @@ describe("sakai-grades tests", () => {
     filterSelect.dispatchEvent(new Event("change"));
     await elementUpdated(el);
     await expect(el).to.be.accessible();
-    expect(el.shadowRoot.querySelector(".new-count").innerHTML).to.contain(8);
     all = el.shadowRoot.querySelectorAll(".new-count");
-    expect(all.item(all.length - 1).innerHTML).to.contain(3);
+    expect(all.item(0).innerHTML).to.contain(3);
+    expect(all.item(all.length - 1).innerHTML).to.contain(8);
 
-    filterSelect.value = AVG_LOW_TO_HIGH;
+    filterSelect.value = SCORE_LOW_TO_HIGH;
     filterSelect.dispatchEvent(new Event("change"));
 
     await elementUpdated(el);
@@ -70,7 +70,7 @@ describe("sakai-grades tests", () => {
     fetchMock.get(data.gradesUrl, { grades: [], sites: sitePickerData.sites });
 
     const el = await fixture(html`
-      <sakai-grades user-id="${data.userId}"></sakai-grades>
+      <sakai-grades></sakai-grades>
     `);
 
     await elementUpdated(el);
@@ -79,5 +79,18 @@ describe("sakai-grades tests", () => {
 
     expect(el.shadowRoot.querySelector(".sak-banner-info")).to.exist;
     expect(el.shadowRoot.querySelector(".sak-banner-info").innerHTML).to.contain(el._i18n.no_grades);
+  });
+
+  it ("hides the new sort options if canGrade is not set", async () => {
+
+    fetchMock.get(data.siteGradesUrl, { grades: data.siteGrades, canGradeSite: false });
+
+    const el = await fixture(html`
+      <sakai-grades site-id="${data.siteId}"></sakai-grades>
+    `);
+
+    await waitUntil(() => el.dataPage);
+
+    await elementUpdated(el);
   });
 });

@@ -23,6 +23,7 @@ import org.sakaiproject.exception.IdUnusedException;
 import org.sakaiproject.grading.api.Assignment;
 import org.sakaiproject.grading.api.CategoryDefinition;
 import org.sakaiproject.grading.api.GradeDefinition;
+import org.sakaiproject.grading.api.GradingAuthz;
 import org.sakaiproject.grading.api.GradingConstants;
 import org.sakaiproject.grading.api.SortType;
 import org.sakaiproject.grading.api.model.Gradebook;
@@ -142,6 +143,10 @@ public class GradesController extends AbstractSakaiApiController {
                 }
                 bean.setUrl(url);
 
+                String siteRef = siteService.siteReference(siteId);
+                bean.setCanGrade(securityService.unlock(GradingAuthz.PERMISSION_GRADE_ALL, siteRef)
+                        || securityService.unlock(GradingAuthz.PERMISSION_GRADE_SECTION, siteRef));
+
                 // add data to list
                 beans.add(bean);
             }
@@ -162,11 +167,16 @@ public class GradesController extends AbstractSakaiApiController {
     }
 
     @GetMapping(value = "/sites/{siteId}/grades", produces = MediaType.APPLICATION_JSON_VALUE)
-    public Map<String, List> getSiteGrades(@PathVariable String siteId) throws UserNotDefinedException {
+    public Map<String, Object> getSiteGrades(@PathVariable String siteId) throws UserNotDefinedException {
 
         checkSakaiSession();
 
-        return Map.of("grades", gradeDataSupplierForSite.apply(siteId));
+        String siteRef = siteService.siteReference(siteId);
+
+        boolean canGradeSite = securityService.unlock(GradingAuthz.PERMISSION_GRADE_ALL, siteRef)
+                || securityService.unlock(GradingAuthz.PERMISSION_GRADE_SECTION, siteRef);
+
+        return Map.of("grades", gradeDataSupplierForSite.apply(siteId), "canGradeSite", canGradeSite);
     }
 
     @GetMapping(value = "/sites/{siteId}/grading/item-data", produces = MediaType.APPLICATION_JSON_VALUE)

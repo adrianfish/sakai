@@ -35,6 +35,7 @@ public class GradeRestBean {
     private String siteTitle;
     private String siteRole;
     private String siteId;
+    private boolean canGrade;
 
     public GradeRestBean(Assignment assignment) {
 
