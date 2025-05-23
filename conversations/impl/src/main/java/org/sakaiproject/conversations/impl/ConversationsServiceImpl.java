@@ -99,6 +99,7 @@ import org.sakaiproject.exception.PermissionException;
 import org.sakaiproject.grading.api.AssessmentNotFoundException;
 import org.sakaiproject.grading.api.Assignment;
 import org.sakaiproject.grading.api.GradeDefinition;
+import org.sakaiproject.grading.api.GradingConstants;
 import org.sakaiproject.grading.api.GradingSecurityException;
 import org.sakaiproject.grading.api.GradingService;
 import org.sakaiproject.lti.api.LTIService;
@@ -107,6 +108,8 @@ import org.sakaiproject.memory.api.MemoryService;
 import org.sakaiproject.messaging.api.Message;
 import org.sakaiproject.messaging.api.MessageMedium;
 import org.sakaiproject.messaging.api.UserMessagingService;
+import org.sakaiproject.rubrics.api.RubricsService;
+import org.sakaiproject.rubrics.api.RubricsConstants;
 import org.sakaiproject.site.api.Site;
 import org.sakaiproject.site.api.SiteService;
 import org.sakaiproject.sitestats.api.Stat;
@@ -193,6 +196,8 @@ public class ConversationsServiceImpl implements ConversationsService, EntityTra
     private TopicShowDateMessager topicShowDateMessager;
 
     private ConversationsTopicRepository topicRepository;
+
+    private RubricsService rubricsService;
 
     private TopicStatusRepository topicStatusRepository;
 
@@ -554,7 +559,7 @@ public class ConversationsServiceImpl implements ConversationsService, EntityTra
         ConversationsTopic topic = topicRepository.save(topicBean.asTopic());
 
         syncGradingItem(isNew, existingGradingItemId, topic, topicBean);
-        
+
         topic = updateCalendarForTopic(oldDueDateCalendarEventId, topic);
 
         TopicTransferBean outTopicBean = TopicTransferBean.of(topic);
@@ -572,6 +577,7 @@ public class ConversationsServiceImpl implements ConversationsService, EntityTra
             .collect(Collectors.toList());
 
         TopicTransferBean decoratedBean = decorateTopicBean(outTopicBean, topic, currentUserId, settings);
+
 
         ConversationsTopic finalTopic = topic;
 
@@ -645,6 +651,11 @@ public class ConversationsServiceImpl implements ConversationsService, EntityTra
                         topic = topicRepository.save(topic);
                     }
                 }
+            }
+
+            if (params.rubricId != -1L) {
+                Map<String, String> rubricParams = Map.of(RubricsConstants.RBCS_LIST, Long.toString(params.rubricId), RubricsConstants.RBCS_ASSOCIATE, "1");
+                rubricsService.saveRubricAssociation(GradingConstants.TOOL_ID, topic.getGradingItemId().toString(), rubricParams);
             }
         } else {
             if (gradingService.isExternalAssignmentDefined(params.siteId, topicRef)) {

@@ -314,6 +314,8 @@ public class RubricsRestController extends AbstractSakaiApiController {
     @GetMapping(value = "/sites/{siteId}/rubric-associations/tools/{toolId}/items/{itemId}", produces = MediaType.APPLICATION_JSON_VALUE)
     ResponseEntity<AssociationTransferBean> getAssociationForToolAndAssignment(@PathVariable String siteId, @PathVariable String toolId, @PathVariable String itemId) throws Exception {
 
+        System.out.println(itemId);
+
         checkSakaiSession();
 
         Optional<AssociationTransferBean> optBean = rubricsService.getAssociationForToolAndItem(toolId, itemId, siteId);

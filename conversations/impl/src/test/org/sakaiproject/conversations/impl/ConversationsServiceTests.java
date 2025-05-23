@@ -50,9 +50,12 @@ import org.sakaiproject.event.api.Event;
 import org.sakaiproject.event.api.EventTrackingService;
 import org.sakaiproject.event.api.NotificationService;
 import org.sakaiproject.grading.api.Assignment;
+import org.sakaiproject.grading.api.GradingConstants;
 import org.sakaiproject.grading.api.GradingService;
 import org.sakaiproject.memory.api.Cache;
 import org.sakaiproject.memory.api.MemoryService;
+import org.sakaiproject.rubrics.api.RubricsConstants;
+import org.sakaiproject.rubrics.api.RubricsService;
 import org.sakaiproject.site.api.Site;
 import org.sakaiproject.site.api.SiteService;
 import org.sakaiproject.site.api.ToolConfiguration;
@@ -119,6 +122,7 @@ public class ConversationsServiceTests extends AbstractTransactionalJUnit4Spring
     @Autowired private SiteService siteService;
     @Autowired private ServerConfigurationService serverConfigurationService;
     @Autowired private ConversationsTopicRepository topicRepository;
+    @Autowired private RubricsService rubricsService;
     @Autowired private TopicStatusRepository topicStatusRepository;
 
     private ResourceLoader resourceLoader;
@@ -2049,6 +2053,36 @@ public class ConversationsServiceTests extends AbstractTransactionalJUnit4Spring
         savedBean = saveTopic(savedBean);
 
         assertNull(savedBean.gradingItemId);
+    }
+
+    @Test
+    public void attachingARubric() {
+
+        switchToInstructor(null);
+
+        String title = "Hello, World";
+        long rubricId = 123L;
+        Long gradingItemId = 333L;
+
+        TopicTransferBean params = new TopicTransferBean();
+        params.aboutReference = site1Ref;
+        params.title = title;
+        params.siteId = site1Id;
+        params.rubricId = rubricId;
+        params.gradingItemId = gradingItemId;
+        params.graded = true;
+
+        params.gradingPoints = 40D;
+
+        Assignment ass = mock(Assignment.class);
+
+        when(ass.getPoints()).thenReturn(params.gradingPoints);
+        when(gradingService.getAssignment(site1Id, site1Id, gradingItemId)).thenReturn(ass);
+
+        TopicTransferBean savedBean = saveTopic(params);
+
+        Map<String, String> rubricParams = Map.of(RubricsConstants.RBCS_LIST, Long.toString(rubricId), RubricsConstants.RBCS_ASSOCIATE, "1");
+        verify(rubricsService).saveRubricAssociation(GradingConstants.TOOL_ID, params.gradingItemId.toString(), rubricParams);
     }
 
     @Test

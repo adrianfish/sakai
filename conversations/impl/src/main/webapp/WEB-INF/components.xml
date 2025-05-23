@@ -131,6 +131,7 @@
     <property name="settingsRepository" ref="org.sakaiproject.conversations.api.repository.SettingsRepository" />
     <property name="siteService" ref="org.sakaiproject.site.api.SiteService" />
     <property name="statsManager" ref="org.sakaiproject.sitestats.api.StatsManager" />
+    <property name="rubricsService" ref="org.sakaiproject.rubrics.api.RubricsService" />
     <property name="tagRepository" ref="org.sakaiproject.conversations.api.repository.TagRepository" />
     <property name="timeService" ref="org.sakaiproject.time.api.TimeService" />
     <property name="topicRepository" ref="org.sakaiproject.conversations.api.repository.ConversationsTopicRepository" />

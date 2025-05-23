@@ -49,6 +49,7 @@ import org.sakaiproject.conversations.impl.notificationprefs.ConversationsNotifi
 import org.sakaiproject.grading.api.GradingService;
 import org.sakaiproject.lti.api.LTIService;
 import org.sakaiproject.messaging.api.UserMessagingService;
+import org.sakaiproject.rubrics.api.RubricsService;
 import org.sakaiproject.search.api.SearchIndexBuilder;
 import org.sakaiproject.search.api.SearchService;
 import org.sakaiproject.sitestats.api.StatsManager;
@@ -190,6 +191,11 @@ public class ConversationsTestConfiguration extends SakaiTestConfiguration {
     @Bean(name = "org.sakaiproject.grading.api.GradingService")
     public GradingService gradingService() {
         return mock(GradingService.class);
+    }
+
+    @Bean(name = "org.sakaiproject.rubrics.api.RubricsService")
+    public RubricsService rubricsService() {
+        return mock(RubricsService.class);
     }
 
     @Bean(name = "org.sakaiproject.lti.api.LTIService")

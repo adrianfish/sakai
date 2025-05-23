@@ -58,6 +58,7 @@ public class ConversationsReferenceReckoner {
                     break;
                 case "t":
                 default:
+                    if (StringUtils.isBlank(id)) return "";
                     // using topic type as default when no matching type found
                     reference = reference + Entity.SEPARATOR + siteId + Entity.SEPARATOR + "t" + Entity.SEPARATOR + id;
             }

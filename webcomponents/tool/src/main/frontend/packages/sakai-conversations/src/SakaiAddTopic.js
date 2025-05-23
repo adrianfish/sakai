@@ -129,6 +129,7 @@ export class SakaiAddTopic extends SakaiElement {
       lightTopic.gradingCategory = itemAssociation.category ? Number(itemAssociation.category) : -1;
       lightTopic.gradingItemId = itemAssociation.gradingItemId ? Number(itemAssociation.gradingItemId) : -1;
       lightTopic.gradingPoints = itemAssociation.points ? Number(itemAssociation.points) : -1;
+      lightTopic.rubricId = itemAssociation.rubricId ? Number(itemAssociation.rubricId) : -1;
 
       if (lightTopic.createGradingItem && lightTopic.gradingPoints === -1) {
         console.warn("No grading points specified");

@@ -6,6 +6,7 @@
     [(${sakaiHtmlHead})]
   </head>
   <body onload="setMainFrameHeight('Mainmercuryx710');setFocus(focus_path);"   class="Mrphs-container Mrphs-sakai-dropbox">
+    <script type="module" th:src="@{~/webcomponents/bundles/rubric-association-requirements.js} + ${cdnQuery}"></script>
     <script type="module" th:src="@{~/webcomponents/bundles/conversations.js} + ${cdnQuery}"></script>
     <script>includeLatestJQuery('conversations');</script>
     <div class="portletBody">

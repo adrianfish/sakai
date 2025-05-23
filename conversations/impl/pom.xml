@@ -46,6 +46,10 @@
       <artifactId>sakai-grading-api</artifactId>
     </dependency>
     <dependency>
+      <groupId>org.sakaiproject.rubrics</groupId>
+      <artifactId>rubrics-api</artifactId>
+    </dependency>
+    <dependency>
       <groupId>org.sakaiproject.edu-services.sections</groupId>
       <artifactId>sections-api</artifactId>
     </dependency>

@@ -1,5 +1,7 @@
 import { SakaiShadowElement } from "@sakai-ui/sakai-element";
 import { html, nothing } from "lit";
+import { ifDefined } from "lit/directives/if-defined.js";
+import "@sakai-ui/sakai-rubrics/sakai-rubric-association.js";
 
 export class SakaiGradingItemAssociation extends SakaiShadowElement {
 
@@ -7,13 +9,22 @@ export class SakaiGradingItemAssociation extends SakaiShadowElement {
     gradableType: { attribute: "gradable-type", type: String },
     gradableRef: { attribute: "gradable-ref", type: String },
     siteId : { attribute: "site-id", type: String },
-    gradingItemId: { state: true },
     useGrading: { attribute: "use-grading", type: Boolean },
+
     createGradingItem: { state: true },
+    gradingItemId: { state: true },
     _categories: { state: true },
     _gradingItems: { state: true },
+    _toolId: { state: true },
     _useCategory: { state: true },
   };
+
+  constructor() {
+
+    super();
+
+    this._toolId = "sakai.gradebookng";
+  }
 
   connectedCallback() {
 
@@ -59,6 +70,10 @@ export class SakaiGradingItemAssociation extends SakaiShadowElement {
       throw new Error(`Network error while getting categories from ${url}`);
     })
     .catch(error => console.error(error));
+  }
+
+  _rubricSelected(e) {
+    this.rubricId = e.detail.rubricId;
   }
 
   focusPoints() {
@@ -158,6 +173,14 @@ export class SakaiGradingItemAssociation extends SakaiShadowElement {
                     </select>
                   </div>
                 ` : nothing}
+              </div>
+              <div class="ms-4">
+                <sakai-rubric-association site-id="${this.siteId}"
+                    tool-id="${this._toolId}"
+                    entity-id="${ifDefined(this.gradingItemId)}"
+                    @rubric-selected=${this._rubricSelected}
+                    hide-options>
+                </sakai-rubric-association>
               </div>
             ` : nothing}
           </div>

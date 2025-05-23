@@ -108,6 +108,7 @@ public class TopicTransferBean implements Entity {
     public boolean createGradingItem;
     public double gradingPoints;
     public long gradingCategory;
+    public long rubricId;
 
     public static TopicTransferBean of(ConversationsTopic topic) {
 

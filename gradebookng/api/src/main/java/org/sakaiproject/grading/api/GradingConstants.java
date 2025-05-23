@@ -25,6 +25,9 @@ import java.math.MathContext;
 import java.math.RoundingMode;
 
 public interface GradingConstants {
+
+    static final String TOOL_ID = "sakai.gradebookng";
+
     Integer GRADE_TYPE_POINTS = 1;
     Integer GRADE_TYPE_PERCENTAGE = 2;
     Integer GRADE_TYPE_LETTER = 3;
