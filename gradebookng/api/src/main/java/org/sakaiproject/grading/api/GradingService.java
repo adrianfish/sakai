@@ -480,7 +480,7 @@ public interface GradingService extends EntityProducer {
      * @param gradebookUid
      * @return the constant representation of the grade entry type (ie points, %, letter grade)
      */
-    public Integer getGradeEntryType(String gradebookUid);
+    public GradeType getGradeEntryType(String gradebookUid);
 
     /**
      * Get student's assignment's score as string.

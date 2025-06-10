@@ -64,8 +64,8 @@ public class AssignmentGradeRecordRepositoryImpl extends SpringCrudRepositoryImp
         CriteriaQuery<AssignmentGradeRecord> query = cb.createQuery(AssignmentGradeRecord.class);
         Root<AssignmentGradeRecord> agr = query.from(AssignmentGradeRecord.class);
         Join<AssignmentGradeRecord, GradableObject> go = agr.join("gradableObject");
-        query.where(cb.and(cb.equal(go.get("id"), gradableObjectId), cb.equal(go.get("removed"), removed)))
-            .orderBy(cb.asc(agr.get("pointsEarned")));
+        query.where(cb.and(cb.equal(go.get("id"), gradableObjectId), cb.equal(go.get("removed"), removed)));
+            //.orderBy(cb.asc(agr.get("pointsEarned")));
         return session.createQuery(query).list();
     }
 

@@ -113,12 +113,15 @@ public class AssignmentGradeRecord extends AbstractGradeRecord implements Clonea
      * @param studentId The student id for whom this grade record belongs
      * @param grade The grade, or points earned
      */
-    public AssignmentGradeRecord(GradebookAssignment assignment, String studentId, Double grade) {
+    public AssignmentGradeRecord(GradebookAssignment assignment, String studentId, Double pointsGrade, String letterGrade) {
 
         super();
         this.gradableObject = assignment;
         this.studentId = studentId;
-        this.pointsEarned = grade;
+
+        if (pointsGrade != null) this.pointsEarned = pointsGrade;
+
+        if (letterGrade != null) this.letterEarned = letterGrade;
     }
 
     public static Comparator<AssignmentGradeRecord> calcComparator;

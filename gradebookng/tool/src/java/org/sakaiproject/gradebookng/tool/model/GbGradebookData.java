@@ -44,6 +44,7 @@ import org.sakaiproject.grading.api.Assignment;
 import org.sakaiproject.grading.api.CategoryDefinition;
 import org.sakaiproject.grading.api.CourseGradeTransferBean;
 import org.sakaiproject.grading.api.GradebookInformation;
+import org.sakaiproject.grading.api.GradeType;
 import org.sakaiproject.grading.api.GradingConstants;
 import org.sakaiproject.util.ResourceLoader;
 
@@ -408,8 +409,8 @@ public class GbGradebookData {
 		result.put("isCourseLetterGradeDisplayed", this.settings.getCourseLetterGradeDisplayed());
 		result.put("isCourseAverageDisplayed", this.settings.getCourseAverageDisplayed());
 		result.put("isCoursePointsDisplayed", this.settings.getCoursePointsDisplayed());
-		result.put("isPointsGradeEntry", Objects.equals(GradingConstants.GRADE_TYPE_POINTS, this.settings.getGradeType()));
-		result.put("isPercentageGradeEntry", Objects.equals(GradingConstants.GRADE_TYPE_PERCENTAGE, this.settings.getGradeType()));
+		result.put("isPointsGradeEntry", GradeType.POINTS == this.settings.getGradeType());
+		result.put("isPercentageGradeEntry", GradeType.PERCENTAGE == this.settings.getGradeType());
 		result.put("isCategoriesEnabled", !Objects.equals(this.settings.getCategoryType(), GradingConstants.CATEGORY_TYPE_NO_CATEGORY));
 		result.put("isCategoryTypeWeighted", Objects.equals(this.settings.getCategoryType(), GradingConstants.CATEGORY_TYPE_WEIGHTED_CATEGORY));
 		result.put("isStudentOrderedByLastName", this.uiSettings.getNameSortOrder() == GbStudentNameSortOrder.LAST_NAME);

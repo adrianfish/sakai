@@ -49,6 +49,7 @@ import org.sakaiproject.gradebookng.business.util.FormatHelper;
 import org.sakaiproject.gradebookng.tool.model.UiMode;
 import org.sakaiproject.grading.api.Assignment;
 import org.sakaiproject.grading.api.CategoryDefinition;
+import org.sakaiproject.grading.api.GradeType;
 import org.sakaiproject.grading.api.GradingConstants;
 import org.sakaiproject.grading.api.model.Gradebook;
 import org.sakaiproject.portal.util.PortalUtils;
@@ -88,7 +89,7 @@ public class AddOrEditGradeItemPanelContent extends BasePanel {
     public void onInitialize() {
 		super.onInitialize();
 		final Gradebook gradebook = this.businessService.getGradebook(currentGradebookUid, currentSiteId);
-		final Integer gradingType = gradebook.getGradeType();
+		final GradeType gradingType = gradebook.getGradeType();
 
 		final Assignment assignment = assignmentModel.getObject();
         this.categoriesEnabled = !Objects.equals(GradingConstants.CATEGORY_TYPE_NO_CATEGORY, gradebook.getCategoryType());
@@ -121,7 +122,7 @@ public class AddOrEditGradeItemPanelContent extends BasePanel {
 
 		// points
 		final Label pointsLabel = new Label("pointsLabel");
-		if (Objects.equals(GradingConstants.GRADE_TYPE_PERCENTAGE, gradingType)) {
+		if (gradingType == GradeType.PERCENTAGE) {
 			pointsLabel.setDefaultModel(new ResourceModel("label.addgradeitem.percentage"));
 		} else {
 			pointsLabel.setDefaultModel(new ResourceModel("label.addgradeitem.points"));
@@ -156,7 +157,7 @@ public class AddOrEditGradeItemPanelContent extends BasePanel {
 			protected void onUpdate(final AjaxRequestTarget target) {
 
 				// conditional option to scale
-				if (Objects.equals(GradingConstants.GRADE_TYPE_POINTS, gradingType)) {
+				if (gradingType == GradeType.POINTS) {
 
 					final Double existing = AddOrEditGradeItemPanelContent.this.existingPoints;
 					final Double current = points.getModelObject();

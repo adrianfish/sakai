@@ -80,6 +80,7 @@ import org.sakaiproject.gradebookng.business.util.EventHelper;
 import org.sakaiproject.gradebookng.business.util.FormatHelper;
 import org.sakaiproject.gradebookng.business.util.GbStopWatch;
 import org.sakaiproject.gradebookng.tool.model.GradebookUiSettings;
+import org.sakaiproject.grading.api.GradeType;
 import org.sakaiproject.grading.api.GradingConstants;
 import org.sakaiproject.grading.api.GradingService;
 import org.sakaiproject.grading.api.MessageHelper;
@@ -608,7 +609,7 @@ public class GradebookNgBusinessService {
 		final Double maxPoints = assignment.getPoints();
 
 		// check what grading mode we are in
-		final Integer gradingType = gradebook.getGradeType();
+		final GradeType gradingType = gradebook.getGradeType();
 
 		// if percentage entry type, reformat the grades, otherwise use points as is
 		String newGradeAdjusted = newGrade;
@@ -626,7 +627,7 @@ public class GradebookNgBusinessService {
 					",".equals(formattedText.getDecimalSeparator()) ? "," : ".");
 		}
 
-		if (Objects.equals(GradingConstants.GRADE_TYPE_PERCENTAGE, gradingType)) {
+		if (gradingType == GradeType.PERCENTAGE) {
 			// the passed in grades represents a percentage so the number needs to be adjusted back to points
 			Double newGradePercentage = new Double("0.0");
 
@@ -767,8 +768,8 @@ public class GradebookNgBusinessService {
 
 		// if percentage entry type, reformat the grade, otherwise use points as is
 		String storedGradeAdjusted = storedGrade;
-		final Integer gradingType = getGradebook(gradebookUid, siteId).getGradeType();
-		if (Objects.equals(GradingConstants.GRADE_TYPE_PERCENTAGE, gradingType)) {
+		final GradeType gradingType = getGradebook(gradebookUid, siteId).getGradeType();
+		if (gradingType == GradeType.PERCENTAGE) {
 			// the stored grade represents points so the number needs to be adjusted back to percentage
 			Double storedGradePoints = new Double("0.0");
 			if (StringUtils.isNotBlank(storedGrade)) {
@@ -918,7 +919,7 @@ public class GradebookNgBusinessService {
 		return items;
 	}
 
-	public List<GbGradeComparisonItem> buildMatrixForGradeComparison(String gradebookUid, String siteId, Assignment assignment, Integer gradingType, GradebookInformation settings){
+	public List<GbGradeComparisonItem> buildMatrixForGradeComparison(String gradebookUid, String siteId, Assignment assignment, GradeType gradingType, GradebookInformation settings){
 		// Only return the list if the feature is activated
 		boolean serverPropertyOn = serverConfigService.getConfig(
 				SAK_PROP_ALLOW_STUDENTS_TO_COMPARE_GRADES,
@@ -961,7 +962,7 @@ public class GradebookNgBusinessService {
 						el.setIsCurrentUser(userEid.equals(el.getEid()));
 						
 						el.setGrade(FormatHelper.formatGrade(el.getGrade())
-								+ (Objects.equals(GradingConstants.GRADE_TYPE_PERCENTAGE, gradingType) ? "%" : ""));
+								+ (gradingType == GradeType.PERCENTAGE ? "%" : ""));
 						return el;
 					})
 					.collect(Collectors.toList());

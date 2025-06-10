@@ -72,6 +72,7 @@ import org.sakaiproject.grading.api.GradeDefinition;
 import org.sakaiproject.grading.api.GradeMappingDefinition;
 import org.sakaiproject.grading.api.GradebookHelper;
 import org.sakaiproject.grading.api.GradebookInformation;
+import org.sakaiproject.grading.api.GradeType;
 import org.sakaiproject.grading.api.GradingConstants;
 import org.sakaiproject.grading.api.GradingPermissionService;
 import org.sakaiproject.grading.api.GradingPersistenceManager;
@@ -527,24 +528,27 @@ public class GradingServiceImpl implements GradingService {
 
                 gradeDef.setExcused(BooleanUtils.toBoolean(gradeRecord.getExcludedFromGrade()));
 
-                if (Objects.equals(GradingConstants.GRADE_TYPE_LETTER, gradebook.getGradeType())) {
-                    final List<AssignmentGradeRecord> gradeList = new ArrayList<>();
-                    gradeList.add(gradeRecord);
-                    convertPointsToLetterGrade(gradebook, gradeList);
-                    final AssignmentGradeRecord gradeRec = gradeList.get(0);
-                    if (gradeRec != null) {
-                        gradeDef.setGrade(gradeRec.getLetterEarned());
-                    }
-                } else if (Objects.equals(GradingConstants.GRADE_TYPE_PERCENTAGE, gradebook.getGradeType())) {
-                    final Double percent = calculateEquivalentPercent(assignment.getPointsPossible(),
-                            gradeRecord.getPointsEarned());
-                    if (percent != null) {
-                        gradeDef.setGrade(percent.toString());
-                    }
-                } else {
-                    if (gradeRecord.getPointsEarned() != null) {
-                        gradeDef.setGrade(gradeRecord.getPointsEarned().toString());
-                    }
+                switch (gradebook.getGradeType()) {
+                    case POINTS:
+                        if (gradeRecord.getPointsEarned() != null) {
+                            gradeDef.setGrade(gradeRecord.getPointsEarned().toString());
+                        }
+                        break;
+                    case PERCENTAGE:
+                        Double percent = calculateEquivalentPercent(assignment.getPointsPossible(),
+                                gradeRecord.getPointsEarned());
+                        if (percent != null) {
+                            gradeDef.setGrade(percent.toString());
+                        }
+                        break;
+                    case LETTER:
+                        if (gradeRecord.getLetterEarned() != null) {
+                            gradeDef.setGrade(gradeRecord.getLetterEarned());
+                        }
+                        break;
+                    default:
+                        gradeDef.setGrade(null);
+                        log.warn("Unknown grade type: {}", gradebook.getGradeType());
                 }
             }
         }
@@ -799,10 +803,9 @@ public class GradingServiceImpl implements GradingService {
             log.error("AUTHORIZATION FAILURE: User {} in gradebook {} attempted to add an assignment", getUserUid(), gradebookUid);
             throw new GradingSecurityException();
         }
-
-        final String validatedName = GradebookHelper.validateAssignmentNameAndPoints(assignmentDefinition);
-
         final Gradebook gradebook = getGradebook(gradebookUid);
+
+        final String validatedName = GradebookHelper.validateAssignmentNameAndPoints(assignmentDefinition, gradebook.getGradeType() == GradeType.LETTER);
 
         Long assignmentId = null;
         // if attaching to category
@@ -855,9 +858,9 @@ public class GradingServiceImpl implements GradingService {
             throw new GradingSecurityException();
         }
 
-        final String validatedName = GradebookHelper.validateAssignmentNameAndPoints(assignmentDefinition);
-
         final Gradebook gradebook = this.getGradebook(gradebookUid);
+
+        final String validatedName = GradebookHelper.validateAssignmentNameAndPoints(assignmentDefinition, gradebook.getGradeType() == GradeType.LETTER);
 
         final GradebookAssignment assignment = getAssignmentWithoutStatsByID(gradebookUid, assignmentId);
         if (assignment == null) {
@@ -868,12 +871,12 @@ public class GradingServiceImpl implements GradingService {
         // check if we need to scale the grades
         boolean scaleGrades = false;
         final Double originalPointsPossible = assignment.getPointsPossible();
-        if (Objects.equals(GradingConstants.GRADE_TYPE_PERCENTAGE, gradebook.getGradeType())
+        if (GradeType.PERCENTAGE == gradebook.getGradeType()
                 && !assignment.getPointsPossible().equals(assignmentDefinition.getPoints())) {
             scaleGrades = true;
         }
 
-        if (Objects.equals(GradingConstants.GRADE_TYPE_POINTS, gradebook.getGradeType()) && assignmentDefinition.getScaleGrades()) {
+        if (GradeType.POINTS == gradebook.getGradeType() && assignmentDefinition.getScaleGrades()) {
             scaleGrades = true;
         }
 
@@ -946,13 +949,10 @@ public class GradingServiceImpl implements GradingService {
         final Map<String, List<AssignmentGradeRecord>> gradeRecMap = getGradeRecordMapForStudents(gradebookId, studentUids);
 
         // get all of the counted assignments
-        final List<GradebookAssignment> countedAssigns = getCountedAssignments(gradebookId)
+        final List<GradebookAssignment> countedAssigns = getCountedAssignments(gradebook)
             .stream().filter(a -> a.isIncludedInCalculations()).collect(Collectors.toList());
-        // double totalPointsPossible = getTotalPointsInternal(gradebookId, session);
-        // if (log.isDebugEnabled()) log.debug("Total points = " + totalPointsPossible);
 
         for (CourseGradeRecord cgr : records) {
-            // double totalPointsEarned = getTotalPointsEarnedInternal(gradebookId, cgr.getStudentId(), session);
             final List<AssignmentGradeRecord> studentGradeRecs = gradeRecMap.get(cgr.getStudentId());
 
             applyDropScores(studentGradeRecs, gradebook.getCategoryType());
@@ -989,8 +989,8 @@ public class GradingServiceImpl implements GradingService {
             final List<AssignmentGradeRecord> studentGradeRecs, final List<GradebookAssignment> countedAssigns,
             final boolean literalTotal) {
 
-        final Integer gbGradeType = gradebook.getGradeType();
-        if (!Objects.equals(GradingConstants.GRADE_TYPE_POINTS, gbGradeType) && !Objects.equals(GradingConstants.GRADE_TYPE_PERCENTAGE, gbGradeType)) {
+        final GradeType gradeType = gradebook.getGradeType();
+        if (gradeType != GradeType.POINTS && gradeType != GradeType.PERCENTAGE && gradeType != GradeType.LETTER) {
             log.error("Wrong grade type in GradebookCalculationImpl.getTotalPointsInternal");
             return -1;
         }
@@ -1002,7 +1002,7 @@ public class GradingServiceImpl implements GradingService {
 
         double totalPointsPossible = 0;
 
-        final HashSet<GradebookAssignment> countedSet = new HashSet<>(countedAssigns);
+        final Set<GradebookAssignment> countedSet = new HashSet<>(countedAssigns);
 
         // we need to filter this list to identify only "counted" grade recs
         final List<AssignmentGradeRecord> countedGradeRecs = new ArrayList<>();
@@ -1016,7 +1016,7 @@ public class GradingServiceImpl implements GradingService {
 
             boolean excused = BooleanUtils.toBoolean(gradeRec.getExcludedFromGrade());
             if (assign.getCounted() && !assign.getUngraded() && !assign.getRemoved() && countedSet.contains(assign) &&
-                    assign.getPointsPossible() != null && assign.getPointsPossible() > 0 && !gradeRec.getDroppedFromGrade() && !extraCredit
+                    (gradeType == GradeType.LETTER || (assign.getPointsPossible() != null && assign.getPointsPossible() > 0)) && !gradeRec.getDroppedFromGrade() && !extraCredit
                     && !excused) {
                 countedGradeRecs.add(gradeRec);
             }
@@ -1025,28 +1025,22 @@ public class GradingServiceImpl implements GradingService {
         final Set<Long> assignmentsTaken = new HashSet<>();
         final Set<Long> categoryTaken = new HashSet<>();
         for (final AssignmentGradeRecord gradeRec : countedGradeRecs) {
-            if (gradeRec.getPointsEarned() != null && !gradeRec.getPointsEarned().equals("")) {
-                final Double pointsEarned = gradeRec.getPointsEarned();
-                final GradebookAssignment go = gradeRec.getAssignment();
-                if (pointsEarned != null) {
-                    if (Objects.equals(gradebook.getCategoryType(), GradingConstants.CATEGORY_TYPE_NO_CATEGORY)) {
-                        assignmentsTaken.add(go.getId());
-                    } else if ((Objects.equals(gradebook.getCategoryType(), GradingConstants.CATEGORY_TYPE_ONLY_CATEGORY)
-                            || Objects.equals(gradebook.getCategoryType(), GradingConstants.CATEGORY_TYPE_WEIGHTED_CATEGORY))
-                            && go != null && categories != null) {
-                        // assignmentsTaken.add(go.getId());
-                        // }
-                        // else if (gradebook.getCategoryType() == GradingCategoryType.WEIGHTED_CATEGORY && go != null &&
-                        // categories != null)
-                        // {
-                        for (Category cate : categories) {
-                            if (cate != null && !cate.getRemoved() && go.getCategory() != null
-                                    && cate.getId().equals(go.getCategory().getId())
-                                    && ((cate.getExtraCredit() != null && !cate.getExtraCredit()) || cate.getExtraCredit() == null)) {
-                                assignmentsTaken.add(go.getId());
-                                categoryTaken.add(cate.getId());
-                                break;
-                            }
+            boolean gradeAssigned = gradeType == GradeType.LETTER ? gradeRec.getLetterEarned() != null : gradeRec.getPointsEarned() != null;
+            if (gradeAssigned) {
+                final GradebookAssignment gradingItem = gradeRec.getAssignment();
+                if (Objects.equals(gradebook.getCategoryType(), GradingConstants.CATEGORY_TYPE_NO_CATEGORY)) {
+                    assignmentsTaken.add(gradingItem.getId());
+                } else if ((Objects.equals(gradebook.getCategoryType(), GradingConstants.CATEGORY_TYPE_ONLY_CATEGORY)
+                        || Objects.equals(gradebook.getCategoryType(), GradingConstants.CATEGORY_TYPE_WEIGHTED_CATEGORY))
+                        && gradingItem != null && categories != null) {
+
+                    for (Category category : categories) {
+                        if (category != null && !category.getRemoved() && gradingItem.getCategory() != null
+                                && category.getId().equals(gradingItem.getCategory().getId())
+                                && ((category.getExtraCredit() != null && !category.getExtraCredit()) || category.getExtraCredit() == null)) {
+                            assignmentsTaken.add(gradingItem.getId());
+                            categoryTaken.add(category.getId());
+                            break;
                         }
                     }
                 }
@@ -1055,29 +1049,37 @@ public class GradingServiceImpl implements GradingService {
 
         if (!assignmentsTaken.isEmpty()) {
             if (!literalTotal && Objects.equals(gradebook.getCategoryType(), GradingConstants.CATEGORY_TYPE_WEIGHTED_CATEGORY)) {
-                for (Category cate : categories) {
-                    if (cate != null && !cate.getRemoved() && categoryTaken.contains(cate.getId())) {
-                        totalPointsPossible += cate.getWeight();
+                for (Category category : categories) {
+                    if (category != null && !category.getRemoved() && categoryTaken.contains(category.getId())) {
+                        totalPointsPossible += category.getWeight();
                     }
                 }
                 return totalPointsPossible;
             }
-            final Iterator assignmentIter = countedAssigns.iterator();
-            while (assignmentIter.hasNext()) {
-                final GradebookAssignment asn = (GradebookAssignment) assignmentIter.next();
-                if (asn != null) {
-                    final Double pointsPossible = asn.getPointsPossible();
+            for (GradebookAssignment gradingItem : countedAssigns) {
+                if (gradingItem == null) continue;
 
-                    if (Objects.equals(gradebook.getCategoryType(), GradingConstants.CATEGORY_TYPE_NO_CATEGORY)
-                            && assignmentsTaken.contains(asn.getId())) {
-                        totalPointsPossible += pointsPossible;
-                    } else if (Objects.equals(gradebook.getCategoryType(), GradingConstants.CATEGORY_TYPE_ONLY_CATEGORY)
-                            && assignmentsTaken.contains(asn.getId())) {
-                        totalPointsPossible += pointsPossible;
-                    } else if (literalTotal && Objects.equals(gradebook.getCategoryType(), GradingConstants.CATEGORY_TYPE_WEIGHTED_CATEGORY)
-                            && assignmentsTaken.contains(asn.getId())) {
-                        totalPointsPossible += pointsPossible;
-                    }
+                Double pointsPossible = 0D;
+
+                switch (gradeType) {
+                    case LETTER:
+                        LetterGradePercentMapping gradeMapping = getLetterGradePercentMapping(gradebook);
+                        pointsPossible = gradeMapping.getGradeMap().get("A");
+                        break;
+                    default:
+                        pointsPossible = gradingItem.getPointsPossible();
+                }
+
+
+                if (Objects.equals(gradebook.getCategoryType(), GradingConstants.CATEGORY_TYPE_NO_CATEGORY)
+                        && assignmentsTaken.contains(gradingItem.getId())) {
+                    totalPointsPossible += pointsPossible;
+                } else if (Objects.equals(gradebook.getCategoryType(), GradingConstants.CATEGORY_TYPE_ONLY_CATEGORY)
+                        && assignmentsTaken.contains(gradingItem.getId())) {
+                    totalPointsPossible += pointsPossible;
+                } else if (literalTotal && Objects.equals(gradebook.getCategoryType(), GradingConstants.CATEGORY_TYPE_WEIGHTED_CATEGORY)
+                        && assignmentsTaken.contains(gradingItem.getId())) {
+                    totalPointsPossible += pointsPossible;
                 }
             }
         } else {
@@ -1088,10 +1090,10 @@ public class GradingServiceImpl implements GradingService {
     }
 
     private List<Double> getTotalPointsEarnedInternal(final String studentId, final Gradebook gradebook, final List<Category> categories,
-            final List<AssignmentGradeRecord> gradeRecs, final List<GradebookAssignment> countedAssigns) {
+        final List<AssignmentGradeRecord> gradeRecs, final List<GradebookAssignment> countedAssigns) {
 
-        final Integer gbGradeType = gradebook.getGradeType();
-        if (!Objects.equals(GradingConstants.GRADE_TYPE_POINTS, gbGradeType) && !Objects.equals(GradingConstants.GRADE_TYPE_PERCENTAGE, gbGradeType)) {
+        final GradeType gradeType = gradebook.getGradeType();
+        if (gradeType != GradeType.POINTS && gradeType != GradeType.PERCENTAGE && gradeType != GradeType.LETTER) {
             log.error("Wrong grade type in GradebookCalculationImpl.getTotalPointsEarnedInternal");
             return Collections.emptyList();
         }
@@ -1109,51 +1111,56 @@ public class GradingServiceImpl implements GradingService {
         BigDecimal extraPointsEarned = new BigDecimal(0);
         BigDecimal literalTotalPointsEarned = new BigDecimal(0d);
 
-        final Map<Long, BigDecimal> cateScoreMap = new HashMap<>();
-        final Map<Long, BigDecimal> cateTotalScoreMap = new HashMap<>();
+        final Map<Long, BigDecimal> categoryScoreMap = new HashMap<>();
+        final Map<Long, BigDecimal> categoryTotalScoreMap = new HashMap<>();
         final Set<Long> assignmentsTaken = new HashSet<>();
 
         for (final AssignmentGradeRecord gradeRec : gradeRecs) {
             final boolean excused = BooleanUtils.toBoolean(gradeRec.getExcludedFromGrade());
 
-            if (gradeRec.getPointsEarned() != null && !gradeRec.getPointsEarned().equals("") && !gradeRec.getDroppedFromGrade()) {
-                final GradebookAssignment go = gradeRec.getAssignment();
-                if (go.isIncludedInCalculations() && countedAssigns.contains(go)) {
-                    BigDecimal pointsEarned = BigDecimal.valueOf(gradeRec.getPointsEarned());
-                    final BigDecimal pointsPossible = BigDecimal.valueOf(go.getPointsPossible());
+            boolean counted = !gradeRec.getDroppedFromGrade()
+                && (gradeType == GradeType.LETTER ? StringUtils.isNotBlank(gradeRec.getLetterEarned()) : gradeRec.getPointsEarned() != null);
+            if (counted) {
+                final GradebookAssignment gradingItem = gradeRec.getAssignment();
+                if (gradingItem.isIncludedInCalculations() && countedAssigns.contains(gradingItem)) {
+                    BigDecimal pointsEarned = gradeType == GradeType.LETTER ? null : BigDecimal.valueOf(gradeRec.getPointsEarned());
+                    BigDecimal pointsPossible = GradeType.LETTER == gradeType ? null : BigDecimal.valueOf(gradingItem.getPointsPossible());
+                    if (gradeType == GradeType.LETTER) {
+                        LetterGradePercentMapping gradeMapping = getLetterGradePercentMapping(gradebook);
+                        pointsEarned = BigDecimal.valueOf(gradeMapping.getGradeMap().get((gradeRec.getLetterEarned())));
+                        pointsPossible = BigDecimal.valueOf(gradeMapping.getGradeMap().get("A"));
+                    }
 
-                    // if (gbGradeType == GradeType.POINTS)
-                    // {
                     if (Objects.equals(gradebook.getCategoryType(), GradingConstants.CATEGORY_TYPE_NO_CATEGORY)) {
                         if (!excused) {
                             totalPointsEarned = totalPointsEarned.add(pointsEarned, GradingService.MATH_CONTEXT);
                             literalTotalPointsEarned = pointsEarned.add(literalTotalPointsEarned, GradingService.MATH_CONTEXT);
-                            assignmentsTaken.add(go.getId());
+                            assignmentsTaken.add(gradingItem.getId());
                         }
-                    } else if (Objects.equals(gradebook.getCategoryType(), GradingConstants.CATEGORY_TYPE_ONLY_CATEGORY) && go != null) {
+                    } else if (Objects.equals(gradebook.getCategoryType(), GradingConstants.CATEGORY_TYPE_ONLY_CATEGORY) && gradingItem != null) {
                         if (!excused) {
                             totalPointsEarned = totalPointsEarned.add(pointsEarned, GradingService.MATH_CONTEXT);
                             literalTotalPointsEarned = pointsEarned.add(literalTotalPointsEarned, GradingService.MATH_CONTEXT);
-                            assignmentsTaken.add(go.getId());
+                            assignmentsTaken.add(gradingItem.getId());
                         }
-                    } else if (Objects.equals(gradebook.getCategoryType(), GradingConstants.CATEGORY_TYPE_WEIGHTED_CATEGORY) && go != null
+                    } else if (Objects.equals(gradebook.getCategoryType(), GradingConstants.CATEGORY_TYPE_WEIGHTED_CATEGORY) && gradingItem != null
                             && categories != null) {
-                        for (Category cate : categories) {
-                            if (cate != null && !cate.getRemoved() && go.getCategory() != null
-                                    && cate.getId().equals(go.getCategory().getId())) {
+                        for (Category category : categories) {
+                            if (category != null && !category.getRemoved() && gradingItem.getCategory() != null
+                                    && category.getId().equals(gradingItem.getCategory().getId())) {
                                 if (!excused) {
-                                    assignmentsTaken.add(go.getId());
+                                    assignmentsTaken.add(gradingItem.getId());
                                     literalTotalPointsEarned = pointsEarned.add(literalTotalPointsEarned, GradingService.MATH_CONTEXT);
 
                                     // If category is equal weight, manipulate points to be the average
-                                    if (cate.getEqualWeightAssignments()) {
+                                    if (category.getEqualWeightAssignments()) {
                                         pointsEarned = pointsEarned.divide(pointsPossible, GradingService.MATH_CONTEXT);
                                     }
 
-                                    if (cateScoreMap.get(cate.getId()) != null) {
-                                        cateScoreMap.put(cate.getId(), ((BigDecimal)cateScoreMap.get(cate.getId())).add(pointsEarned, GradingService.MATH_CONTEXT));
+                                    if (categoryScoreMap.get(category.getId()) != null) {
+                                        categoryScoreMap.put(category.getId(), ((BigDecimal)categoryScoreMap.get(category.getId())).add(pointsEarned, GradingService.MATH_CONTEXT));
                                     } else {
-                                        cateScoreMap.put(cate.getId(), pointsEarned);
+                                        categoryScoreMap.put(category.getId(), pointsEarned);
                                     }
                                 }
                                 break;
@@ -1169,20 +1176,20 @@ public class GradingServiceImpl implements GradingService {
                 BigDecimal pointsPossible = new BigDecimal(asgn.getPointsPossible());
 
                 if (assignmentsTaken.contains(asgn.getId())) {
-                    for (Category cate : categories) {
-                        if (cate != null && !cate.getRemoved() && asgn.getCategory() != null
-                                && cate.getId().equals(asgn.getCategory().getId()) && !asgn.getExtraCredit()) {
+                    for (Category category : categories) {
+                        if (category != null && !category.getRemoved() && asgn.getCategory() != null
+                                && category.getId().equals(asgn.getCategory().getId()) && !asgn.getExtraCredit()) {
 
                             // If it's equal-weight category, just want to divide averages by number of items
-                            if (cate.getEqualWeightAssignments()) {
+                            if (category.getEqualWeightAssignments()) {
                                 pointsPossible = new BigDecimal("1");
                             }
 
-                            if (cateTotalScoreMap.get(cate.getId()) == null) {
-                                cateTotalScoreMap.put(cate.getId(), pointsPossible);
+                            if (categoryTotalScoreMap.get(category.getId()) == null) {
+                                categoryTotalScoreMap.put(category.getId(), pointsPossible);
                             } else {
-                                cateTotalScoreMap.put(cate.getId(),
-                                        ((BigDecimal) cateTotalScoreMap.get(cate.getId())).add(pointsPossible));
+                                categoryTotalScoreMap.put(category.getId(),
+                                        ((BigDecimal) categoryTotalScoreMap.get(category.getId())).add(pointsPossible));
                             }
                         }
                     }
@@ -1195,16 +1202,16 @@ public class GradingServiceImpl implements GradingService {
         }
 
         if (Objects.equals(gradebook.getCategoryType(), GradingConstants.CATEGORY_TYPE_WEIGHTED_CATEGORY)) {
-            for (Category cate : categories) {
-                if (cate != null && !cate.getRemoved() && cateScoreMap.get(cate.getId()) != null
-                        && cateTotalScoreMap.get(cate.getId()) != null) {
-                    if (cate.getExtraCredit()) {
-                        extraPointsEarned = extraPointsEarned.add(((BigDecimal) cateScoreMap.get(cate.getId())).multiply(new BigDecimal(cate.getWeight()), GradingService.MATH_CONTEXT)
-                                .divide((BigDecimal) cateTotalScoreMap.get(cate.getId()), GradingService.MATH_CONTEXT));
+            for (Category category : categories) {
+                if (category != null && !category.getRemoved() && categoryScoreMap.get(category.getId()) != null
+                        && categoryTotalScoreMap.get(category.getId()) != null) {
+                    if (category.getExtraCredit()) {
+                        extraPointsEarned = extraPointsEarned.add(((BigDecimal) categoryScoreMap.get(category.getId())).multiply(new BigDecimal(category.getWeight()), GradingService.MATH_CONTEXT)
+                                .divide((BigDecimal) categoryTotalScoreMap.get(category.getId()), GradingService.MATH_CONTEXT));
                     }
                     else {
-                        totalPointsEarned = totalPointsEarned.add(((BigDecimal) cateScoreMap.get(cate.getId())).multiply(new BigDecimal(cate.getWeight()), GradingService.MATH_CONTEXT)
-                                .divide((BigDecimal) cateTotalScoreMap.get(cate.getId()), GradingService.MATH_CONTEXT));
+                        totalPointsEarned = totalPointsEarned.add(((BigDecimal) categoryScoreMap.get(category.getId())).multiply(new BigDecimal(category.getWeight()), GradingService.MATH_CONTEXT)
+                                .divide((BigDecimal) categoryTotalScoreMap.get(category.getId()), GradingService.MATH_CONTEXT));
                     }
                 }
             }
@@ -1234,26 +1241,6 @@ public class GradingServiceImpl implements GradingService {
     private List<GradebookAssignment> getAssignmentsCounted(Long gradebookId) {
 
         return gradingPersistenceManager.getCountedAssignmentsForGradebook(gradebookId);
-    }
-
-    /**
-     * Get all assignment grade records for the given students
-     *
-     * @param gradebookId
-     * @param studentUids
-     * @return
-     *
-     */
-    private List<AssignmentGradeRecord> getAllAssignmentGradeRecords(Long gradebookId, Collection<String> studentUids) {
-
-        if (studentUids.isEmpty()) {
-            // If there are no enrollments, no need to execute the query.
-            log.debug("No enrollments were specified.  Returning an empty List of grade records");
-            return Collections.<AssignmentGradeRecord>emptyList();
-        } else {
-            List<AssignmentGradeRecord> unfilteredRecords = gradingPersistenceManager.getAllAssignmentGradeRecordsForGradebook(gradebookId);
-            return filterGradeRecordsByStudents(unfilteredRecords, studentUids);
-        }
     }
 
     private List<AssignmentGradeRecord> getAllAssignmentGradeRecordsForGbItem(Long gradableObjectId, Collection studentUids) {
@@ -1538,7 +1525,10 @@ public class GradingServiceImpl implements GradingService {
 
     @Override
     public List<GradeDefinition> getGradesForStudentsForItem(final String gradebookUid, final String siteId, final Long gradableObjectId,
-            final List<String> studentIds) {
+            final List<String> students) {
+
+        // Ensure we have a mutable copy of the student list
+        List<String> studentIds = new ArrayList<>(students);
 
         if (gradableObjectId == null) {
             throw new IllegalArgumentException("null gradableObjectId passed to getGradesForStudentsForItem");
@@ -1564,19 +1554,20 @@ public class GradingServiceImpl implements GradingService {
                 throw new GradingSecurityException();
             }
 
-            final Long categoryId = gbItem.getCategory() != null ? gbItem.getCategory().getId() : null;
-            final Map enrRecFunctionMap = this.gradingAuthz.findMatchingEnrollmentsForItem(gradebook.getUid(), siteId, categoryId,
+            Long categoryId = gbItem.getCategory() != null ? gbItem.getCategory().getId() : null;
+            Map<EnrollmentRecord, String> enrRecFunctionMap = this.gradingAuthz.findMatchingEnrollmentsForItem(gradebook.getUid(), siteId, categoryId,
                     gradebook.getCategoryType(), null, isCurrentGbSite(gradebook.getUid()) ? null : gradebook.getUid());
-            final Set enrRecs = enrRecFunctionMap.keySet();
-            final Map studentIdEnrRecMap = new HashMap();
-            if (enrRecs != null) {
-                for (final Iterator enrIter = enrRecs.iterator(); enrIter.hasNext();) {
-                    final EnrollmentRecord enr = (EnrollmentRecord) enrIter.next();
-                    if (enr != null) {
-                        studentIdEnrRecMap.put(enr.getUser().getUserUid(), enr);
-                    }
+            Set<EnrollmentRecord> enrRecs = enrRecFunctionMap.keySet();
+            Map<String, EnrollmentRecord> studentIdEnrRecMap
+                = enrRecs.stream().filter(Objects::nonNull).collect(Collectors.toMap(r -> r.getUser().getUserUid(), r -> r));
+            /*
+            Map<String, EnrollmentRecord> studentIdEnrRecMap = new HashMap<>();
+            for (EnrollmentRecord enr : enrRecs) {
+                if (enr != null) {
+                    studentIdEnrRecMap.put(enr.getUser().getUserUid(), enr);
                 }
             }
+            */
 
             // filter the provided studentIds if user doesn't have permissions
             studentIds.removeIf(studentId -> {
@@ -1584,10 +1575,10 @@ public class GradingServiceImpl implements GradingService {
             });
 
             // retrieve the grading comments for all of the students
-            final List<Comment> commentRecs = getComments(gbItem, studentIds);
-            final Map<String, String> studentIdCommentTextMap = new HashMap();
+            List<Comment> commentRecs = getComments(gbItem, studentIds);
+            Map<String, String> studentIdCommentTextMap = new HashMap();
             if (commentRecs != null) {
-                for (final Comment comment : commentRecs) {
+                for (Comment comment : commentRecs) {
                     if (comment != null) {
                         studentIdCommentTextMap.put(comment.getStudentId(), comment.getCommentText());
                     }
@@ -1595,20 +1586,17 @@ public class GradingServiceImpl implements GradingService {
             }
 
             // now, we can populate the grade information
-            final List<String> studentsWithGradeRec = new ArrayList<>();
-            final List<AssignmentGradeRecord> gradeRecs = getAllAssignmentGradeRecordsForGbItem(gradableObjectId, studentIds);
+            List<String> studentsWithGradeRec = new ArrayList<>();
+            List<AssignmentGradeRecord> gradeRecs = getAllAssignmentGradeRecordsForGbItem(gradableObjectId, studentIds);
             if (gradeRecs != null) {
-                if (Objects.equals(GradingConstants.GRADE_TYPE_LETTER, gradebook.getGradeType())) {
-                    convertPointsToLetterGrade(gradebook, gradeRecs);
-                } else if (Objects.equals(GradingConstants.GRADE_TYPE_PERCENTAGE, gradebook.getGradeType())) {
+                if (GradeType.PERCENTAGE == gradebook.getGradeType()) {
                     convertPointsToPercentage(gradebook, gradeRecs);
                 }
 
-                for (final Object element : gradeRecs) {
-                    final AssignmentGradeRecord agr = (AssignmentGradeRecord) element;
+                for (AssignmentGradeRecord agr : gradeRecs) {
                     if (agr != null) {
-                        final String commentText = studentIdCommentTextMap.get(agr.getStudentId());
-                        final GradeDefinition gradeDef = convertGradeRecordToGradeDefinition(agr, gbItem, gradebook, commentText);
+                        String commentText = studentIdCommentTextMap.get(agr.getStudentId());
+                        GradeDefinition gradeDef = convertGradeRecordToGradeDefinition(agr, gbItem, gradebook, commentText);
 
                         studentGrades.add(gradeDef);
                         studentsWithGradeRec.add(agr.getStudentId());
@@ -1617,11 +1605,11 @@ public class GradingServiceImpl implements GradingService {
 
                 // if student has a comment but no grade add an empty grade definition with the comment
                 if (studentsWithGradeRec.size() < studentIds.size()) {
-                    for (final String studentId : studentIdCommentTextMap.keySet()) {
+                    for (String studentId : studentIdCommentTextMap.keySet()) {
                         if (!studentsWithGradeRec.contains(studentId)) {
-                            final String comment = studentIdCommentTextMap.get(studentId);
-                            final AssignmentGradeRecord emptyGradeRecord = new AssignmentGradeRecord(gbItem, studentId, null);
-                            final GradeDefinition gradeDef = convertGradeRecordToGradeDefinition(emptyGradeRecord, gbItem, gradebook,
+                            String comment = studentIdCommentTextMap.get(studentId);
+                            AssignmentGradeRecord emptyGradeRecord = new AssignmentGradeRecord(gbItem, studentId, null, null);
+                            GradeDefinition gradeDef = convertGradeRecordToGradeDefinition(emptyGradeRecord, gbItem, gradebook,
                                     comment);
                             studentGrades.add(gradeDef);
                         }
@@ -1697,19 +1685,27 @@ public class GradingServiceImpl implements GradingService {
         gradeDef.setStudentUid(gradeRecord.getStudentId());
         gradeDef.setGraderUid(gradeRecord.getGraderId());
         gradeDef.setDateRecorded(gradeRecord.getDateRecorded());
-        final Integer gradeEntryType = gradebook.getGradeType();
-        gradeDef.setGradeEntryType(gradeEntryType);
+        final GradeType gradeType = gradebook.getGradeType();
+        gradeDef.setGradeEntryType(gradeType);
+
         String grade = null;
-        if (Objects.equals(GradingConstants.GRADE_TYPE_LETTER, gradeEntryType)) {
-            grade = gradeRecord.getLetterEarned();
-        } else if (Objects.equals(GradingConstants.GRADE_TYPE_PERCENTAGE, gradeEntryType)) {
-            final Double percentEarned = gradeRecord.getPercentEarned();
-            grade = percentEarned != null ? percentEarned.toString() : null;
-        } else {
-            final Double pointsEarned = gradeRecord.getPointsEarned();
-            grade = pointsEarned != null ? pointsEarned.toString() : null;
+        switch (gradeType) {
+            case POINTS:
+                Double pointsEarned = gradeRecord.getPointsEarned();
+                grade = pointsEarned != null ? pointsEarned.toString() : null;
+                break;
+            case PERCENTAGE:
+                Double percentEarned = gradeRecord.getPercentEarned();
+                grade = percentEarned != null ? percentEarned.toString() : null;
+                break;
+                case LETTER:
+                    grade = gradeRecord.getLetterEarned();
+                    break;
+            default:
+                log.warn("Invalid grade type passed to convertGradeRecordToGradeDefinition: {}", gradeType);
         }
         gradeDef.setGrade(grade);
+
         gradeDef.setGradeReleased(gradebook.getAssignmentsDisplayed() && gbo.getReleased());
 
         if (commentText != null) {
@@ -1730,13 +1726,13 @@ public class GradingServiceImpl implements GradingService {
         }
 
         Gradebook gradebook = getGradebook(gradebookUuid);
-        Integer gradeType = gradebook.getGradeType();
+        GradeType gradeType = gradebook.getGradeType();
         LetterGradePercentMapping mapping = null;
-        if (Objects.equals(GradingConstants.GRADE_TYPE_LETTER, gradeType)) {
+        if (gradeType == GradeType.LETTER) {
             mapping = getLetterGradePercentMapping(gradebook);
         }
 
-        return isGradeValid(grade, gradeType, mapping);
+        return isGradeValid(grade, gradeType, null);
     }
 
     @Override
@@ -1769,7 +1765,7 @@ public class GradingServiceImpl implements GradingService {
         return gradeIsValid;
     }
 
-    private boolean isGradeValid(final String grade, final Integer gradeEntryType, final LetterGradePercentMapping gradeMapping) {
+    private boolean isGradeValid(final String grade, final GradeType gradeEntryType, final LetterGradePercentMapping gradeMapping) {
 
         boolean gradeIsValid = false;
 
@@ -1779,7 +1775,7 @@ public class GradingServiceImpl implements GradingService {
 
         } else {
 
-            if (Objects.equals(GradingConstants.GRADE_TYPE_POINTS, gradeEntryType) || Objects.equals(GradingConstants.GRADE_TYPE_PERCENTAGE, gradeEntryType)) {
+            if (gradeEntryType == GradeType.POINTS || gradeEntryType == GradeType.PERCENTAGE) {
                 try {
                     final NumberFormat nbFormat = NumberFormat.getInstance(resourceLoader.getLocale());
                     final Double gradeAsDouble = nbFormat.parse(grade).doubleValue();
@@ -1802,7 +1798,7 @@ public class GradingServiceImpl implements GradingService {
                     log.debug("Passed grade is not a numeric value");
                 }
 
-            } else if (Objects.equals(GradingConstants.GRADE_TYPE_LETTER, gradeEntryType)) {
+            } else if (gradeEntryType == GradeType.LETTER) {
                 if (gradeMapping == null) {
                     throw new IllegalArgumentException("Null mapping passed to isGradeValid for a letter grade-based gradeook");
                 }
@@ -1830,10 +1826,10 @@ public class GradingServiceImpl implements GradingService {
 
         if (studentIdToGradeMap != null) {
             Gradebook gradebook = getGradebook(gradebookUid);
-            Integer gradeType = gradebook.getGradeType();
+            GradeType gradeType = gradebook.getGradeType();
 
             LetterGradePercentMapping gradeMapping = null;
-            if (Objects.equals(GradingConstants.GRADE_TYPE_LETTER, gradeType)) {
+            if (gradeType == GradeType.LETTER) {
                 gradeMapping = getLetterGradePercentMapping(gradebook);
             }
 
@@ -1996,7 +1992,7 @@ public class GradingServiceImpl implements GradingService {
         final String graderId = sessionManager.getCurrentSessionUserId();
         final Date now = new Date();
         LetterGradePercentMapping mapping = null;
-        if (Objects.equals(GradingConstants.GRADE_TYPE_LETTER, gradebook.getGradeType())) {
+        if (GradeType.LETTER == gradebook.getGradeType()) {
             mapping = getLetterGradePercentMapping(gradebook);
         }
 
@@ -2026,8 +2022,6 @@ public class GradingServiceImpl implements GradingService {
             }
             // Determine if the AssignmentGradeRecord needs to be updated
             final String newGrade = StringUtils.trimToEmpty(gradeDef.getGrade());
-            final Double convertedGrade = convertInputGradeToPoints(gradebook.getGradeType(), mapping, assignment.getPointsPossible(),
-                    newGrade);
             AssignmentGradeRecord gradeRec = studentIdGradeRecordMap.get(studentId);
             boolean currentExcuse;
             if (gradeRec == null) {
@@ -2036,21 +2030,37 @@ public class GradingServiceImpl implements GradingService {
                 currentExcuse = BooleanUtils.toBoolean(gradeRec.getExcludedFromGrade());
             }
 
-            if (gradeRec != null) {
-                final Double pointsEarned = gradeRec.getPointsEarned();
-                if ((convertedGrade == null && pointsEarned != null)
-                        || (convertedGrade != null && pointsEarned == null)
-                        || (convertedGrade != null && pointsEarned != null && !convertedGrade.equals(pointsEarned))
-                        || (excuse != currentExcuse)) {
+            GradeType gradeType = gradebook.getGradeType();
+            final Double convertedGrade = gradeType == GradeType.LETTER ? null : convertInputGradeToPoints(gradeType, mapping, assignment.getPointsPossible(), newGrade);
 
-                    gradeRec.setPointsEarned(convertedGrade);
+            if (gradeRec != null) {
+                boolean changed = false;
+
+                if (gradeType == GradeType.POINTS || gradeType == GradeType.PERCENTAGE) {
+                    final Double pointsEarned = gradeRec.getPointsEarned();
+                    if ((convertedGrade == null && pointsEarned != null)
+                            || (convertedGrade != null && pointsEarned == null)
+                            || (convertedGrade != null && pointsEarned != null && !convertedGrade.equals(pointsEarned))
+                            || (excuse != currentExcuse)) {
+
+                        changed = true;
+                        gradeRec.setPointsEarned(convertedGrade);
+                    }
+                } else if (gradeType == GradeType.LETTER) {
+                    if (!StringUtils.equals(newGrade, gradeRec.getLetterEarned())) {
+                        changed = true;
+                        gradeRec.setLetterEarned(newGrade);
+                    }
+                }
+
+                if (changed) {
                     gradeRec.setGraderId(graderUid);
                     gradeRec.setDateRecorded(gradedDate);
                     gradeRec.setExcludedFromGrade(excuse);
                     gradeRecordsToUpdate.add(gradeRec);
 
                     // Add a GradingEvent, which stores the actual input grade rather than the converted one
-                    final GradingEvent event = new GradingEvent(assignment, graderId, studentId, newGrade);
+                    GradingEvent event = new GradingEvent(assignment, graderId, studentId, newGrade);
                     if (excuse != currentExcuse) {
                         event.setStatus(excuse ?
                                 GradingEventStatus.GRADE_EXCLUDED :
@@ -2061,7 +2071,8 @@ public class GradingServiceImpl implements GradingService {
             } else {
                 // if the grade is something other than null, add a new AGR
                 if (StringUtils.isNotBlank(newGrade) && (StringUtils.isNotBlank(gradeDef.getGrade()) || excuse != currentExcuse)) {
-                    gradeRec = new AssignmentGradeRecord(assignment, studentId, convertedGrade);
+                    gradeRec = gradeType == GradeType.LETTER
+                        ? new AssignmentGradeRecord(assignment, studentId, null, newGrade) : new AssignmentGradeRecord(assignment, studentId, convertedGrade, null);
                     gradeRec.setGraderId(graderUid);
                     gradeRec.setDateRecorded(gradedDate);
                     gradeRecordsToUpdate.add(gradeRec);
@@ -2125,7 +2136,7 @@ public class GradingServiceImpl implements GradingService {
      * @return given a generic String grade, converts it to the equivalent Double point value that will be stored in the db based upon the
      *         gradebook's grade entry type
      */
-    private Double convertInputGradeToPoints(final Integer gradeEntryType, final LetterGradePercentMapping mapping,
+    private Double convertInputGradeToPoints(final GradeType gradeEntryType, final LetterGradePercentMapping mapping,
             final Double gbItemPointsPossible, final String grade) throws InvalidGradeException {
 
         if (StringUtils.isBlank(grade)) {
@@ -2133,28 +2144,37 @@ public class GradingServiceImpl implements GradingService {
         }
 
         Double convertedValue = null;
-        if (Objects.equals(GradingConstants.GRADE_TYPE_POINTS, gradeEntryType)) {
-            try {
-                final NumberFormat nbFormat = NumberFormat.getInstance(resourceLoader.getLocale());
-                final Double pointValue = nbFormat.parse(grade).doubleValue();
-                convertedValue = pointValue;
-            } catch (NumberFormatException | ParseException nfe) {
-                throw new InvalidGradeException("Invalid grade passed to convertInputGradeToPoints");
-            }
-        } else if (Objects.equals(GradingConstants.GRADE_TYPE_PERCENTAGE, gradeEntryType) || Objects.equals(GradingConstants.GRADE_TYPE_LETTER, gradeEntryType)) {
+        switch (gradeEntryType) {
+            case POINTS:
+                try {
+                    final NumberFormat nbFormat = NumberFormat.getInstance(resourceLoader.getLocale());
+                    final Double pointValue = nbFormat.parse(grade).doubleValue();
+                    convertedValue = pointValue;
+                } catch (NumberFormatException | ParseException nfe) {
+                    throw new InvalidGradeException("Invalid grade passed to convertInputGradeToPoints");
+                }
+                break;
+            case PERCENTAGE:
+                // for letter or %-based grading, we need to calculate the equivalent point value
+                if (gbItemPointsPossible == null) {
+                    throw new IllegalArgumentException("Null points possible passed" +
+                            " to convertInputGradeToPoints for letter or % based grading");
+                }
 
-            // for letter or %-based grading, we need to calculate the equivalent point value
-            if (gbItemPointsPossible == null) {
-                throw new IllegalArgumentException("Null points possible passed" +
-                        " to convertInputGradeToPoints for letter or % based grading");
-            }
+                Double percentage = null;
+                try {
+                    final NumberFormat nbFormat = NumberFormat.getInstance(resourceLoader.getLocale());
+                    percentage = nbFormat.parse(grade).doubleValue();
+                } catch (NumberFormatException | ParseException nfe) {
+                    throw new IllegalArgumentException("Invalid % grade passed to convertInputGradeToPoints");
+                }
 
-            Double percentage = null;
-            if (Objects.equals(GradingConstants.GRADE_TYPE_LETTER, gradeEntryType)) {
+                convertedValue = calculateEquivalentPointValueForPercent(gbItemPointsPossible, percentage);
+                break;
+            case LETTER:
                 if (mapping == null) {
                     throw new IllegalArgumentException("No mapping passed to convertInputGradeToPoints for a letter-based gb");
                 }
-
                 if (mapping.getGradeMap() != null) {
                     // standardize the grade mapping
                     final String standardizedGrade = mapping.standardizeInputGrade(grade);
@@ -2162,27 +2182,18 @@ public class GradingServiceImpl implements GradingService {
                     if (percentage == null) {
                         throw new IllegalArgumentException("Invalid grade passed to convertInputGradeToPoints");
                     }
+                    convertedValue = calculateEquivalentPointValueForPercent(gbItemPointsPossible, percentage);
                 }
-            } else {
-                try {
-                    final NumberFormat nbFormat = NumberFormat.getInstance(resourceLoader.getLocale());
-                    percentage = nbFormat.parse(grade).doubleValue();
-                } catch (NumberFormatException | ParseException nfe) {
-                    throw new IllegalArgumentException("Invalid % grade passed to convertInputGradeToPoints");
-                }
-            }
-
-            convertedValue = calculateEquivalentPointValueForPercent(gbItemPointsPossible, percentage);
-
-        } else {
-            throw new InvalidGradeException("invalid grade entry type passed to convertInputGradeToPoints");
+                break;
+            default:
+                throw new InvalidGradeException("invalid grade entry type passed to convertInputGradeToPoints");
         }
 
         return convertedValue;
     }
 
     @Override
-    public Integer getGradeEntryType(String gradebookUid) {
+    public GradeType getGradeEntryType(String gradebookUid) {
 
         if (gradebookUid == null) {
             throw new IllegalArgumentException("null gradebookUid passed to getGradeEntryType");
@@ -2276,11 +2287,17 @@ public class GradingServiceImpl implements GradingService {
         AssignmentGradeRecord gradeRecord = getAssignmentGradeRecord(assignment, studentUid);
         if (gradeRecord == null) {
             // Creating a new grade record.
-            gradeRecord = new AssignmentGradeRecord(assignment, studentUid, convertStringToDouble(score));
+            gradeRecord = new AssignmentGradeRecord(assignment, studentUid, convertStringToDouble(score), null);
             // TODO: test if it's ungraded item or not. if yes, set ungraded grade for this record. if not, need validation??
         } else {
             // TODO: test if it's ungraded item or not. if yes, set ungraded grade for this record. if not, need validation??
-            gradeRecord.setPointsEarned(convertStringToDouble(score));
+            switch (getGradebook(gradebookUid).getGradeType()) {
+                case LETTER:
+                    gradeRecord.setLetterEarned(score);
+                    break;
+                default:
+                    gradeRecord.setPointsEarned(convertStringToDouble(score));
+            }
         }
         gradeRecord.setGraderId(graderId);
         gradeRecord.setDateRecorded(now);
@@ -2289,7 +2306,7 @@ public class GradingServiceImpl implements GradingService {
         gradingPersistenceManager.saveGradingEvent(new GradingEvent(assignment, graderId, studentUid, score));
 
         // Post an event in SAKAI_EVENT table
-        postUpdateGradeEvent(gradebookUid, assignment.getName(), studentUid, convertStringToDouble(score));
+        postUpdateGradeEvent(gradebookUid, assignment.getName(), studentUid, score);
 
         log.debug("Score updated in gradebookUid={}, assignmentId={} by userUid={} from client={}, new score={}", gradebookUid, assignmentId, getUserUid()
                 , clientServiceDescription, score);
@@ -2385,17 +2402,17 @@ public class GradingServiceImpl implements GradingService {
      * @param gradebookId
      * @return a list of Assignments that have not been removed, are "counted", graded, and have a points possible > 0
      */
-    private List<GradebookAssignment> getCountedAssignments(Long gradebookId) {
+    private List<GradebookAssignment> getCountedAssignments(Gradebook gradebook) {
 
         List<GradebookAssignment> assignList = new ArrayList<>();
 
-        List<GradebookAssignment> results = gradingPersistenceManager.getCountedAndGradedAssignmentsForGradebook(gradebookId);
+        List<GradebookAssignment> results = gradingPersistenceManager.getCountedAndGradedAssignmentsForGradebook(gradebook.getId());
 
         if (results != null) {
             // making sure there's no invalid points possible for normal assignments
             for (final GradebookAssignment a : results) {
 
-                if (a.getPointsPossible() != null && a.getPointsPossible() > 0) {
+                if (gradebook.getGradeType() == GradeType.LETTER || (a.getPointsPossible() != null && a.getPointsPossible() > 0)) {
                     assignList.add(a);
                 }
             }
@@ -2584,11 +2601,11 @@ public class GradingServiceImpl implements GradingService {
      * @param pointsEarned
      * @return
      */
-    private void postUpdateGradeEvent(String gradebookUid, String assignmentName, String studentUid, Double pointsEarned) {
+    private void postUpdateGradeEvent(String gradebookUid, String assignmentName, String studentUid, String grade) {
 
-        log.debug("postUpdateGradeEvent {} {} {} {}", gradebookUid, assignmentName, studentUid, pointsEarned);
+        log.debug("postUpdateGradeEvent {} {} {} {}", gradebookUid, assignmentName, studentUid, grade);
         postEvent("gradebook.updateItemScore",
-                "/gradebook/" + gradebookUid + "/" + assignmentName + "/" + studentUid + "/" + pointsEarned + "/student");//aqui se pasa el uid y en otro el id?
+                "/gradebook/" + gradebookUid + "/" + assignmentName + "/" + studentUid + "/" + grade + "/student");//aqui se pasa el uid y en otro el id?
     }
 
     /**
@@ -2647,7 +2664,7 @@ public class GradingServiceImpl implements GradingService {
         if ( gb == null ) return;
         String gradebookUid = gb.getUid();
 
-        postUpdateGradeEvent(gradebookUid, assignmentName, studentId, score);
+        postUpdateGradeEvent(gradebookUid, assignmentName, studentId, scoreStr);
     }
 
     /**
@@ -2801,9 +2818,9 @@ public class GradingServiceImpl implements GradingService {
             Double grade;
 
             // determine the grade we should be using depending on the grading type
-            if (Objects.equals(GradingConstants.GRADE_TYPE_PERCENTAGE, gb.getGradeType())) {
+            if (GradeType.PERCENTAGE == gb.getGradeType()) {
                 grade = calculateEquivalentPointValueForPercent(pointsPossible, NumberUtils.createDouble(rawGrade));
-            } else if (Objects.equals(GradingConstants.GRADE_TYPE_LETTER, gb.getGradeType())) {
+            } else if (GradeType.LETTER == gb.getGradeType()) {
                 grade = gradingSchema.get(rawGrade);
             } else {
                 grade = NumberUtils.createDouble(rawGrade);
@@ -2830,7 +2847,7 @@ public class GradingServiceImpl implements GradingService {
             a.setId(assignment.getId()); // store the id so we can find out later which grades were dropped, if any
 
             // create the AGR
-            final AssignmentGradeRecord gradeRecord = new AssignmentGradeRecord(a, studentUuid, grade);
+            final AssignmentGradeRecord gradeRecord = new AssignmentGradeRecord(a, studentUuid, grade, null);
 
             if (!a.getNotCounted()) {
                 gradeRecords.add(gradeRecord);
@@ -3448,7 +3465,7 @@ public class GradingServiceImpl implements GradingService {
         final String currentUserUid = sessionManager.getCurrentSessionUserId();
 
         // scale for total points changed when on percentage grading
-        if (Objects.equals(GradingConstants.GRADE_TYPE_PERCENTAGE, gradebook.getGradeType()) && assignment.getPointsPossible() != null) {
+        if (GradeType.PERCENTAGE == gradebook.getGradeType() && assignment.getPointsPossible() != null) {
 
             log.debug("Scaling percentage grades");
 
@@ -3468,7 +3485,7 @@ public class GradingServiceImpl implements GradingService {
                 }
             }
         }
-        else if (Objects.equals(GradingConstants.GRADE_TYPE_POINTS, gradebook.getGradeType()) && assignment.getPointsPossible() != null) {
+        else if (GradeType.POINTS == gradebook.getGradeType() && assignment.getPointsPossible() != null) {
 
             log.debug("Scaling point grades");
 
@@ -3753,19 +3770,19 @@ public class GradingServiceImpl implements GradingService {
                 agr.setPointsEarned(newPointsEarned);
                 gradingPersistenceManager.saveAssignmentGradeRecord(agr);
                 changedStudents.add(studentUid);
-                postUpdateGradeEvent(gradebookUid, assignment.getName(), studentUid, newPointsEarned);
+                postUpdateGradeEvent(gradebookUid, assignment.getName(), studentUid, newPointsEarned.toString());
             }
         }
         for (String studentUid : previouslyUnscoredStudents) {
             // Don't save unnecessary null scores.
             Double newPointsEarned = studentUidsToScores.get(studentUid);
             if (newPointsEarned != null) {
-                AssignmentGradeRecord agr = new AssignmentGradeRecord(assignment, studentUid, newPointsEarned);
+                AssignmentGradeRecord agr = new AssignmentGradeRecord(assignment, studentUid, newPointsEarned, null);
                 agr.setDateRecorded(now);
                 agr.setGraderId(graderId);
                 gradingPersistenceManager.saveAssignmentGradeRecord(agr);
                 changedStudents.add(studentUid);
-                postUpdateGradeEvent(gradebookUid, assignment.getName(), studentUid, newPointsEarned);
+                postUpdateGradeEvent(gradebookUid, assignment.getName(), studentUid, newPointsEarned.toString());
             }
         }
 
@@ -3817,7 +3834,7 @@ public class GradingServiceImpl implements GradingService {
                 }
                 gradingPersistenceManager.saveAssignmentGradeRecord(agr);
                 changedStudents.add(studentUid);
-                postUpdateGradeEvent(gradebookUid, assignment.getName(), studentUid, newPointsEarned);
+                postUpdateGradeEvent(gradebookUid, assignment.getName(), studentUid, newPointsEarned.toString());
             }
         }
         for (String studentUid : previouslyUnscoredStudents) {
@@ -3825,12 +3842,12 @@ public class GradingServiceImpl implements GradingService {
             String newPointsEarned = studentUidsToScores.get(studentUid);
             if (newPointsEarned != null) {
                 AssignmentGradeRecord agr = new AssignmentGradeRecord(assignment, studentUid,
-                        convertStringToDouble(newPointsEarned));
+                        convertStringToDouble(newPointsEarned), null);
                 agr.setDateRecorded(now);
                 agr.setGraderId(graderId);
                 gradingPersistenceManager.saveAssignmentGradeRecord(agr);
                 changedStudents.add(studentUid);
-                postUpdateGradeEvent(gradebookUid, assignment.getName(), studentUid, convertStringToDouble(newPointsEarned));
+                postUpdateGradeEvent(gradebookUid, assignment.getName(), studentUid, newPointsEarned);
             }
         }
 
@@ -4132,9 +4149,9 @@ public class GradingServiceImpl implements GradingService {
                 (newPointsEarned == null && oldPointsEarned != null)) {
             if (agr == null) {
                 if (newPointsEarned != null) {
-                    agr = new AssignmentGradeRecord(asn, studentUid, Double.valueOf(newPointsEarned));
+                    agr = new AssignmentGradeRecord(asn, studentUid, Double.valueOf(newPointsEarned), null);
                 } else {
-                    agr = new AssignmentGradeRecord(asn, studentUid, null);
+                    agr = new AssignmentGradeRecord(asn, studentUid, null, null);
                 }
             } else {
                 if (newPointsEarned != null) {
@@ -4151,7 +4168,7 @@ public class GradingServiceImpl implements GradingService {
             gradingPersistenceManager.saveAssignmentGradeRecord(agr);
 
             // Sync database.
-            postUpdateGradeEvent(gradebookUid, asn.getName(), studentUid, newPointsEarned);
+            postUpdateGradeEvent(gradebookUid, asn.getName(), studentUid, newPointsEarned.toString());
         } else {
             log.debug("Ignoring updateExternalAssessmentScore, since the new points value is the same as the old");
         }
@@ -4277,10 +4294,8 @@ public class GradingServiceImpl implements GradingService {
         // Check for null default.
         if (defaultGradeMapping == null) {
             defaultGradeMapping = gradeMappings.iterator().next();
-            if (log.isWarnEnabled()) {
-                log.warn("No default GradeMapping found for new Gradebook={}; will set default to {}",
-                        gradebook.getUid(), defaultGradeMapping.getName());
-            }
+            log.warn("No default GradeMapping found for new Gradebook={}; will set default to {}",
+                gradebook.getUid(), defaultGradeMapping.getName());
         }
         gradebook.setSelectedGradeMapping(defaultGradeMapping);
 
@@ -4291,13 +4306,6 @@ public class GradingServiceImpl implements GradingService {
         // uncommitted.
         gradebook.setGradeMappings(gradeMappings);
 
-        gradebook.setGradeType(GradingConstants.GRADE_TYPE_POINTS);
-        gradebook.setCategoryType(GradingConstants.CATEGORY_TYPE_NO_CATEGORY);
-
-        //SAK-29740 make backwards compatible
-        gradebook.setCourseLetterGradeDisplayed(true);
-        gradebook.setCourseAverageDisplayed(true);
-
         // SAK-33855 turn on stats for new gradebooks
         final Boolean propAssignmentStatsDisplayed = this.serverConfigurationService.getBoolean(PROP_ASSIGNMENT_STATS_DISPLAYED, true);
         gradebook.setAssignmentStatsDisplayed(propAssignmentStatsDisplayed);
@@ -4305,7 +4313,6 @@ public class GradingServiceImpl implements GradingService {
         final Boolean propCourseGradeStatsDisplayed = this.serverConfigurationService.getBoolean(PROP_COURSE_GRADE_STATS_DISPLAYED, true);
         gradebook.setCourseGradeStatsDisplayed(propCourseGradeStatsDisplayed);
 
-        // Update the gradebook with the new selected grade mapping
         return gradingPersistenceManager.saveGradebook(gradebook);
     }
 
