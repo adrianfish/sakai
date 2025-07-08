@@ -184,7 +184,7 @@ public class DbContentService extends BaseContentService
      * The Default is DefaultFileSystemHandler.
      */
     @Setter
-    private FileSystemHandler fileSystemHandler = new DefaultFileSystemHandler();
+    private FileSystemHandler fileSystemHandler;
 
     @Autowired
     protected LockManager lockManager = null;
@@ -273,6 +273,7 @@ public class DbContentService extends BaseContentService
 
         try
         {
+            log.info("Using FileSystemHandler: {}", fileSystemHandler.getClass().getName());
             setContentServiceSql(sqlService.getVendor());
 
             // if we are auto-creating our schema, check and create
