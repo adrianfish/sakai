@@ -67,6 +67,7 @@ public class UserProfile implements Serializable {
         }
         props.put(key, value);
     }
+
     public String getProperty(String key) {
         if (props == null) {
             return null;

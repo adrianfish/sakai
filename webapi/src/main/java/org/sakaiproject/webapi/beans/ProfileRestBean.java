@@ -15,6 +15,15 @@ package org.sakaiproject.webapi.beans;
 
 public class ProfileRestBean {
 
+    public String id;
+    public String eid;
+    public String firstName;
+    public String lastName;
+    public String type;
+    public String creatorDisplayName;
+    public String formattedCreatedDate;
+    public String modifierDisplayName;
+    public String formattedModifiedDate;
     public String name;
     public String nickname;
     public String pronouns;
@@ -23,4 +32,7 @@ public class ProfileRestBean {
     public String profileUrl;
     public boolean hasPronunciationRecording;
     public String studentNumber;
+
+    public boolean disabled;
+    public boolean canEdit;
 }

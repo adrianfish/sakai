@@ -63,11 +63,22 @@ public class ProfileController extends AbstractSakaiApiController {
             @PathVariable String userId,
             @RequestParam(required = false) String siteId) throws UserNotDefinedException {
 
-        Session session = checkSakaiSession();
-        String currentUserId = session.getUserId();
-
         if (StringUtils.equals(userId, "blank")) {
             return ResponseEntity.noContent().build();
+        }
+
+        String currentUserId = checkSakaiSession().getUserId();
+
+        if (StringUtils.equals(userId, "me")) {
+            userId = currentUserId;
+        }
+
+        User user = null;
+        try {
+          user = userDirectoryService.getUser(userId);
+        } catch (UserNotDefinedException unde) {
+            log.error("No user for id {}", userId);
+            return ResponseEntity.badRequest().build();
         }
 
         UserProfile userProfile = (UserProfile) profileLogic.getUserProfile(userId);
@@ -97,6 +108,15 @@ public class ProfileController extends AbstractSakaiApiController {
         
         // Only add these fields if the user has permission to view the profile
         if (canViewProfile) {
+            bean.eid = user.getEid();
+            bean.firstName = user.getFirstName();
+            bean.lastName = user.getLastName();
+            bean.type = user.getType();
+            bean.creatorDisplayName = user.getCreatedBy().getDisplayName();
+            //bean.formattedCreatedDate = user.getFormattedCreatedDate();
+            bean.modifierDisplayName = user.getModifiedBy().getDisplayName();
+            //bean.formattedModifiedDate = user.getFormattedModifiedDate();
+            //
             bean.nickname = userProfile.getNickname();
             bean.pronouns = userProfile.getPronouns();
             bean.pronunciation = userProfile.getPhoneticPronunciation();
@@ -111,15 +131,9 @@ public class ProfileController extends AbstractSakaiApiController {
 
         // Only add candidate details if the user has permission to view them
         if (canViewCandidateDetails && candidateDetailProvider != null) {
-            try {
-                User user = userDirectoryService.getUser(userId);
-                candidateDetailProvider.getInstitutionalNumericId(user, null).ifPresent(id -> {
-                    bean.studentNumber = id;
-                });
-            } catch (UserNotDefinedException unde) {
-                log.error("No user for id {}", userId);
-                return ResponseEntity.badRequest().build();
-            }
+            candidateDetailProvider.getInstitutionalNumericId(user, null).ifPresent(id -> {
+                bean.studentNumber = id;
+            });
         }
 
         return ResponseEntity.ok(bean);
