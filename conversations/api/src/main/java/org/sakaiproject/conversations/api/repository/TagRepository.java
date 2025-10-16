@@ -17,10 +17,10 @@ package org.sakaiproject.conversations.api.repository;
 
 import java.util.List;
 
-import org.sakaiproject.conversations.api.model.Tag;
+import org.sakaiproject.conversations.api.model.ConversationsTag;
 import org.sakaiproject.springframework.data.SpringCrudRepository;
 
-public interface TagRepository extends SpringCrudRepository<Tag, Long> {
+public interface TagRepository extends SpringCrudRepository<ConversationsTag, Long> {
 
-    List<Tag> findBySiteId(String siteId);
+    List<ConversationsTag> findBySiteId(String siteId);
 }

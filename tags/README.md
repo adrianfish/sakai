@@ -13,8 +13,8 @@ tagservice.enabled=true
 (NOTE: At this time, disabling the tag service will only disable the admin tool.  Other features will still be available. In the future disabling the tag service will also disable the service.)
 
 1.1.2 MAX NUMBER OF TAGS RETURNED BY THE REST SERVICES IN A PAGE
-Sets the max size of the pages returned by the rest services in searches and lists to avoid large queries in big collections. (Default is 200)
-tagservice.maxpagesize=200
+Sets the max size of the pages returned by the rest services in searches and lists to avoid large queries in big collections. (Default is 100)
+tagservice.maxpagesize=100
 
 1.1.3 CONFIGURATION OF THE IMPORT JOBS
 The options will be defined later in this document.

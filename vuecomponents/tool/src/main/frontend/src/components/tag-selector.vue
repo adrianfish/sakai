@@ -186,8 +186,8 @@ export default {
       .then((data) => {
         this.options = data.map((tag) => {
           return {
-            name: tag.tagLabel,
-            code: tag.tagId,
+            name: tag.label,
+            code: tag.id,
           };
         });
       })
@@ -209,8 +209,8 @@ export default {
         .then((data) => {
           this.value = data.map((tag) => {
             return {
-              name: tag.tagLabel,
-              code: tag.tagId,
+              name: tag.label,
+              code: tag.id,
             };
           });
         })

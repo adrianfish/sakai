@@ -32,6 +32,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Arrays;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.regex.Matcher;
@@ -54,8 +55,8 @@ import org.sakaiproject.event.cover.EventTrackingService;
 import org.sakaiproject.rubrics.api.RubricsConstants;
 import org.sakaiproject.rubrics.api.RubricsService;
 import org.sakaiproject.samigo.util.SamigoConstants;
-import org.sakaiproject.tags.api.Tag;
 import org.sakaiproject.tags.api.TagService;
+import org.sakaiproject.tags.api.TagRecord;
 import org.sakaiproject.tool.assessment.data.dao.assessment.Answer;
 import org.sakaiproject.tool.assessment.data.dao.assessment.AnswerFeedback;
 import org.sakaiproject.tool.assessment.data.dao.assessment.FavoriteColChoices;
@@ -390,16 +391,16 @@ public class ItemAddListener implements ActionListener {
 	private String convertTagSelectOptionsToJson(String[] tagsFromForm){
 
 		String tagsListToJson = "[";
-		if (tagsFromForm!=null) {
+		if (tagsFromForm != null) {
 			Boolean more = false;
-			for (String s:tagsFromForm) {
+			for (String s : tagsFromForm) {
 				if (more) {
 					tagsListToJson += ",";
 				}
-				if (tagService.getTags().getForId(s).isPresent()) {
-					Tag tag = tagService.getTags().getForId(s).get();
-					String tagLabel = tag.getTagLabel();
-					String tagCollectionName = tag.getCollectionName();
+        		Optional<TagRecord> tag = tagService.getForId(s);
+				if (tag.isPresent()) {
+					String tagLabel = tag.get().label();
+					String tagCollectionName = tag.get().collectionName();
 					tagsListToJson += "{\"tagId\":\"" + s + "\",\"tagLabel\":\"" + tagLabel + "\",\"tagCollectionName\":\"" + tagCollectionName + "\"}";
 					more = true;
 				}
@@ -927,11 +928,10 @@ public class ItemAddListener implements ActionListener {
 				  }
 			  }
 			  if (!found) {  //If it is not in the list... we need to add it.
-				  if (tagService.getTags().getForId(s).isPresent()) {
-					  Tag tag = tagService.getTags().getForId(s).get();
-					  item.addItemTag(s, tag.getTagLabel(), tag.getTagCollectionId(), tag.getCollectionName());
+				  Optional<TagRecord> tag = tagService.getForId(s);
+				  if (tag.isPresent()) {
+					  item.addItemTag(s, tag.get().label(), tag.get().collectionId(), tag.get().collectionName());
 				  }
-
 			  }
 		  }
 	  }

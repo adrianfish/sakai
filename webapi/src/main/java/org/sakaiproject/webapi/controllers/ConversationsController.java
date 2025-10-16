@@ -27,7 +27,7 @@ import org.sakaiproject.conversations.api.beans.PostTransferBean;
 import org.sakaiproject.conversations.api.beans.TopicTransferBean;
 import org.sakaiproject.conversations.api.model.ConvStatus;
 import org.sakaiproject.conversations.api.model.Settings;
-import org.sakaiproject.conversations.api.model.Tag;
+import org.sakaiproject.conversations.api.model.ConversationsTag;
 import org.sakaiproject.entity.api.EntityManager;
 import org.sakaiproject.exception.IdUnusedException;
 import org.sakaiproject.grading.api.GradingAuthz;
@@ -408,21 +408,21 @@ public class ConversationsController extends AbstractSakaiApiController {
     }
 
 	@PostMapping(value = "/sites/{siteId}/conversations/tags", produces = MediaType.APPLICATION_JSON_VALUE)
-    public List<Tag> createTags(@PathVariable String siteId, @RequestBody List<Tag> tags) throws ConversationsPermissionsException {
+    public List<ConversationsTag> createTags(@PathVariable String siteId, @RequestBody List<ConversationsTag> tags) throws ConversationsPermissionsException {
 
 		checkSakaiSession();
         return conversationsService.createTags(tags);
     }
 
 	@GetMapping(value = "/sites/{siteId}/conversations/tags", produces = MediaType.APPLICATION_JSON_VALUE)
-    public List<Tag> getTagsForSite(@PathVariable String siteId) throws ConversationsPermissionsException {
+    public List<ConversationsTag> getTagsForSite(@PathVariable String siteId) throws ConversationsPermissionsException {
 
 		checkSakaiSession();
         return conversationsService.getTagsForSite(siteId);
     }
 
 	@PutMapping(value = "/sites/{siteId}/conversations/tags/{tagId}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<Tag> updateTag(@PathVariable String siteId, @PathVariable Long tagId, @RequestBody Tag tag) throws ConversationsPermissionsException {
+    public ResponseEntity<ConversationsTag> updateTag(@PathVariable String siteId, @PathVariable Long tagId, @RequestBody ConversationsTag tag) throws ConversationsPermissionsException {
 
 		checkSakaiSession();
 

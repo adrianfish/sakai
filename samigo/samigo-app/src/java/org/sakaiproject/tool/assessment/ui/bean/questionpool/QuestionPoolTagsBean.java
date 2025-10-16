@@ -37,7 +37,7 @@ public class QuestionPoolTagsBean {
     public Set<String> getTagIds() {
         return tags != null
                 ? tags.stream()
-                        .map(QuestionPoolTag::getTagId)
+                        .map(QuestionPoolTag::getTagLabel)
                         .collect(Collectors.toSet())
                 : null;
     }
@@ -53,7 +53,7 @@ public class QuestionPoolTagsBean {
     public void setTagIdsCsv(String tagIdsCsv) {
         if (tagIdsCsv != null) {
             tags = Arrays.stream(StringUtils.split(tagIdsCsv, TAGS_SEPARATOR))
-                    .map(tagId -> QuestionPoolTag.builder().tagId(tagId).build())
+                    .map(tagLabel -> QuestionPoolTag.builder().tagLabel(tagLabel).build())
                     .collect(Collectors.toSet());
         } else {
             tags = Collections.emptySet();

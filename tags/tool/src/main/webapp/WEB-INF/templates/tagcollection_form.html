@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+  <head>
+    <meta charset="UTF-8">
+    [(${sakaiHtmlHead})]
+  </head>
+  <body>
+    <div class="portletBody tagservice-body">
+      <header class="tagservice-section-header">
+        <h3 th:text="#{tagcollection}"></h3>
+      </header>
+
+      <div class="container-fluid">
+        <form class="form-horizontal" method="POST" th:action="@{/tagcollections/new}" th:object="${tagcollection}">
+          <div class="form-group">
+            <label class="col-sm-2 control-label" for="name" th:text="#{name}"></label>
+            <div class="col-sm-10">
+              <input class="form-control" type="text" name="name" id="name" required th:value="*{name}" />
+              <div class="text-danger" th:if="${#fields.hasErrors('name')}" th:errors="*{name}">Name Error</div>
+            </div>
+          </div>
+          
+          <div class="form-group">
+            <label class="col-sm-2 control-label" for="description" th:text="#{description}"></label>
+              <div class="col-sm-10">
+                <input class="form-control" type="text" name="description" id="description" th:value="*{description}" />
+              </div>
+          </div>
+          
+          <div class="form-group">
+            <label class="col-sm-2 control-label" for="externalSourceName" th:text="#{externalSourceName}"></label>
+              <div class="col-sm-10">
+                <input class="form-control" type="text" name="externalSourceName" id="externalSourceName" th:value="*{externalSourceName}" />
+                <div class="text-danger" th:if="${#fields.hasErrors('externalSourceName')}" th:errors="*{externalSourceName}">External Source Name Error</div>
+              </div>
+          </div>
+          
+          <div class="form-group">
+            <label class="col-sm-2 control-label" for="externalSourceDescription" th:text="#{externalSourceDescription}"></label>
+              <div class="col-sm-10">
+                <input class="form-control" type="text" name="externalSourceDescription" id="externalSourceDescription" th:value="*{externalSourceDescription}" />
+              </div>
+          </div>
+          
+          <div hidden class="form-group">
+            <div class="col-sm-10">
+              <input type="hidden" name="id" id="id" th:value="*{id}" />
+              <input type="hidden" name="externalUpdate" id="externalUpdate" th:value="*{externalUpdate}" />
+              <input type="hidden" name="externalCreation" id="externalCreation" th:value="*{externalCreation}" />
+              <input type="hidden" name="lastSynchronizationDate" id="lastSynchronizationDate" th:value="*{lastSynchronizationDate}" />
+              <input type="hidden" name="lastUpdateDateInExternalSystem" id="lastUpdateDateInExternalSystem" th:value="*{lastUpdateDateInExternalSystem}" />
+              <input type="hidden" name="lastModifiedBy" id="lastModifiedBy" th:value="*{lastModifiedBy}" />
+              <input type="hidden" name="lastModificationDate" id="lastModificationDate" th:value="*{lastModificationDate}" />
+              <input type="hidden" name="createdBy" id="createdBy" th:value="*{createdBy}" />
+              <input type="hidden" name="creationDate" id="creationDate" th:value="*{creationDate}" />
+            </div>
+          </div>
+
+          <div class="col-sm-offset-2 col-sm-10">
+            <input class="btn btn-primary" type="submit" name="save" th:value="#{save_tag_collection}" />
+            <a class="btn btn-primary tagservice-cancel-btn" th:href="@{/}" data-target="/" th:text="#{Cancel}"></a>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <script>includeLatestJQuery('tagcollection_form.html');</script>
+    <script src="/library/js/lang-datepicker/lang-datepicker.js"></script>
+    <script src="/tags-tool/scripts/tagservice-tool.js"></script>
+  </body>
+</html>

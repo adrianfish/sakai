@@ -37,5 +37,8 @@ scormplayer/scorm-tool/contentPackages
 .java-version
 .aider*
 
+**/tags
+!tags/
+
 **/.claude/settings.local.json
 .mcp.json

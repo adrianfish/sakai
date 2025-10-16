@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+  <head>
+    <meta charset="UTF-8">
+    [(${sakaiHtmlHead})]
+  </head>
+  <body>
+    <div class="portletBody tagservice-body">
+      <div th:if="${!tagserviceactive}" class="tagservice-section">
+        <div class="alert alert-danger" th:text="#{tagservice-disabled}"></div>
+      </div>
+      <section class="tagservice-section">
+        <header class="tagservice-section-header">
+          <h3>
+            <span>Tags in Collection</span>: 
+            <span th:text="${actualtagcollectionname}">Collection Name</span>
+          </h3>
+          <div class="btn-toolbar float-end">
+            <a th:href="@{'/tags/' + ${id} + '/tags/new'}" class="btn btn-primary btn-sm pull-right" th:text="#{create_tag}"></a>
+            <a th:href="@{/}" class="btn btn-primary btn-sm pull-right" th:text="#{Return}"></a>
+          </div>
+        </header>
+
+        <table class="tagservice-table table table-striped table-hover table-condensed">
+          <thead>
+            <tr>
+              <th class="tags-percent-big" th:text="#{tag_label}"></th>
+              <th th:text="#{description}"></th>
+              <th class="tags-percent-total"><!-- actions --></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr th:if="${tagsintagcollection.empty}">
+              <td colspan="3" class="text-center">
+                <div class="alert alert-info" style="margin-top: 15px;" th:text="#{no_tags_in_collection}">
+                </div>
+              </td>
+            </tr>
+            <tr th:each="tag : ${tagsintagcollection}" th:if="${!tagsintagcollection.empty}">
+              <td th:text="${tag.label}">Tag Label</td>
+              <td th:text="${tag.description}">Description</td>
+              <td class="actions">
+                <a th:href="@{'/tags/' + ${tag.id} + '/delete'}"
+                    class="btn btn-warning btn-xs tagservice-delete-btn"
+                    data-record-type="tag"
+                    th:attr="aria-label=#{delete_tag},title=#{delete_tag}">
+                  <span class="fa fa-trash" aria-hidden="true"></span>
+                </a>
+                <a th:href="@{'/tags/' + ${tag.id} + '/edit'}" class="btn btn-primary btn-xs" th:text="#{Edit}"></a>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+
+        <!-- Pagination -->
+        <div th:if="${showPagination}" class="paging_bootstrap">
+          <ul class="pagination">
+            <li th:class="${pageNum > 1 ? 'page-item prev' : 'page-item prev disabled'}">
+              <a class="page-link" th:href="${pageNum > 1 ? '/tagsintagcollection/' + id + '/manage?pageNum=' + (pageNum-1) + '&pageSize=' + pageSize : '#'}">&Lt;</a>
+            </li>
+            
+            <li th:each="i : ${#numbers.sequence(1, totalPages)}" 
+                th:class="${i == pageNum ? 'page-item active' : 'page-item'}">
+              <a class="page-link" th:href="@{'/tagsintagcollection/' + ${id} + '/manage?pageNum=' + ${i} + '&pageSize=' + ${pageSize}}" th:text="${i}">1</a>
+            </li>
+            
+            <li th:class="${pageNum < totalPages ? 'page-item next' : 'page-item next disabled'}">
+              <a class="page-link" th:href="${pageNum < totalPages ? '/tagsintagcollection/' + id + '/manage?pageNum=' + (pageNum+1) + '&pageSize=' + pageSize : '#'}">&Gt;</a>
+            </li>
+          </ul>
+        </div>
+      </section>
+    </div>
+
+    <script>includeLatestJQuery('tagsintagcollection.html');</script>
+    <script src="/library/js/lang-datepicker/lang-datepicker.js"></script>
+  </body>
+</html>

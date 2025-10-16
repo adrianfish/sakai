@@ -19,7 +19,7 @@ export class SakaiAddTopic extends SakaiElement {
     siteId: { attribute: "site-id", type: String },
     aboutReference: { attribute: "about-reference", type: String },
     groups: { type: Array },
-    tags: { attribute: "tags", type: Array },
+    tags: { type: Array },
     canPin: { attribute: "can-pin", type: Boolean },
     canAnonPost: { attribute: "can-anon", type: Boolean },
     canGrade: { attribute: "can-grade", type: Boolean },

@@ -31,7 +31,7 @@ import org.sakaiproject.conversations.api.model.ConversationsComment;
 import org.sakaiproject.conversations.api.model.ConvStatus;
 import org.sakaiproject.conversations.api.model.ConversationsPost;
 import org.sakaiproject.conversations.api.model.Settings;
-import org.sakaiproject.conversations.api.model.Tag;
+import org.sakaiproject.conversations.api.model.ConversationsTag;
 import org.sakaiproject.conversations.api.model.ConversationsTopic;
 import org.sakaiproject.entity.api.Entity;
 import org.sakaiproject.entity.api.EntityProducer;
@@ -112,9 +112,9 @@ public interface ConversationsService extends EntityProducer {
     void deleteComment(String siteId, String commentId) throws ConversationsPermissionsException;
     Optional<String> getCommentPortalUrl(String commentId);
 
-    List<Tag> createTags(List<Tag> tags) throws ConversationsPermissionsException;
-    Tag saveTag(Tag tag) throws ConversationsPermissionsException;
-    List<Tag> getTagsForSite(String siteId) throws ConversationsPermissionsException;
+    List<ConversationsTag> createTags(List<ConversationsTag> tags) throws ConversationsPermissionsException;
+    ConversationsTag saveTag(ConversationsTag tag) throws ConversationsPermissionsException;
+    List<ConversationsTag> getTagsForSite(String siteId) throws ConversationsPermissionsException;
     void deleteTag(Long tagId) throws ConversationsPermissionsException;
 
     Settings getSettingsForSite(String siteId) throws ConversationsPermissionsException;

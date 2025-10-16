@@ -22,22 +22,22 @@ import org.hibernate.Session;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 
-import org.sakaiproject.conversations.api.model.Tag;
+import org.sakaiproject.conversations.api.model.ConversationsTag;
 import org.sakaiproject.conversations.api.repository.TagRepository;
 import org.sakaiproject.springframework.data.SpringCrudRepositoryImpl;
 
 import org.springframework.transaction.annotation.Transactional;
 
-public class TagRepositoryImpl extends SpringCrudRepositoryImpl<Tag, Long>  implements TagRepository {
+public class TagRepositoryImpl extends SpringCrudRepositoryImpl<ConversationsTag, Long>  implements TagRepository {
 
     @Transactional
-    public List<Tag> findBySiteId(String siteId) {
+    public List<ConversationsTag> findBySiteId(String siteId) {
 
         Session session = sessionFactory.getCurrentSession();
 
         CriteriaBuilder cb = session.getCriteriaBuilder();
-        CriteriaQuery<Tag> query = cb.createQuery(Tag.class);
-        query.where(cb.equal(query.from(Tag.class).get("siteId"), siteId));
+        CriteriaQuery<ConversationsTag> query = cb.createQuery(ConversationsTag.class);
+        query.where(cb.equal(query.from(ConversationsTag.class).get("siteId"), siteId));
 
         return session.createQuery(query).list();
     }

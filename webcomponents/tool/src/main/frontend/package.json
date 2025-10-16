@@ -71,5 +71,8 @@
     "sinon": "^19.0.2",
     "sortablejs": "^1.15.3",
     "temporal-polyfill": "0.2.5"
+  },
+  "dependencies": {
+    "@sakai-ui/sakai-tags": "^3.0.6"
   }
 }

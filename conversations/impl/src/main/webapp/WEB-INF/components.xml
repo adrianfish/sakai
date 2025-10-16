@@ -17,13 +17,13 @@
       <list>
         <value>org.sakaiproject.conversations.api.model.ConversationsComment</value>
         <value>org.sakaiproject.conversations.api.model.ConversationsPost</value>
+        <value>org.sakaiproject.conversations.api.model.ConversationsTag</value>
         <value>org.sakaiproject.conversations.api.model.ConversationsTopic</value>
         <value>org.sakaiproject.conversations.api.model.ConvStatus</value>
         <value>org.sakaiproject.conversations.api.model.PostReaction</value>
         <value>org.sakaiproject.conversations.api.model.PostReactionTotal</value>
         <value>org.sakaiproject.conversations.api.model.PostStatus</value>
         <value>org.sakaiproject.conversations.api.model.Settings</value>
-        <value>org.sakaiproject.conversations.api.model.Tag</value>
         <value>org.sakaiproject.conversations.api.model.TopicReaction</value>
         <value>org.sakaiproject.conversations.api.model.TopicReactionTotal</value>
         <value>org.sakaiproject.conversations.api.model.TopicStatus</value>

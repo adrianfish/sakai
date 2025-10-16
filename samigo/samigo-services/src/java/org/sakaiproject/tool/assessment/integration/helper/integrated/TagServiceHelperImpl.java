@@ -22,9 +22,9 @@ package org.sakaiproject.tool.assessment.integration.helper.integrated;
 
 import org.sakaiproject.event.api.NotificationService;
 import org.sakaiproject.tags.api.MissingUuidException;
-import org.sakaiproject.tags.api.Tag;
-import org.sakaiproject.tags.api.TagCollection;
 import org.sakaiproject.tags.api.TagService;
+import org.sakaiproject.tags.api.TagCollectionRecord;
+import org.sakaiproject.tags.api.TagRecord;
 import org.sakaiproject.tool.assessment.integration.helper.ifc.TagEventHandler;
 import org.sakaiproject.tool.assessment.integration.helper.ifc.TagServiceHelper;
 
@@ -42,10 +42,10 @@ public class TagServiceHelperImpl implements TagServiceHelper {
 
     @Override
     public Optional<TagView> findTagById(String id) {
-        final Optional<Tag> results = tagService.getTags().getForId(id);
+        Optional<TagRecord> results = tagService.getForId(id);
         if ( results.isPresent() ) {
-            final Tag tag = results.get();
-                final TagView tagView = new TagView(tag.getTagId(), tag.getTagLabel(), tag.getTagCollectionId(), tag.getCollectionName());
+            TagRecord tag = results.get();
+                TagView tagView = new TagView(tag.id(), tag.label(), tag.collectionId(), tag.collectionName());
                 return Optional.of(tagView);
 
         } else {
@@ -55,10 +55,10 @@ public class TagServiceHelperImpl implements TagServiceHelper {
 
     @Override
     public Optional<TagCollectionView> findTagCollectionById(String id) {
-        final Optional<TagCollection> results = tagService.getTagCollections().getForId(id);
+        final Optional<TagCollectionRecord> results = tagService.getCollectionForId(id);
         if ( results.isPresent() ) {
-            final TagCollection tagCollection = results.get();
-            final TagCollectionView tagView = new TagCollectionView(tagCollection.getTagCollectionId(), tagCollection.getName());
+            TagCollectionRecord tagCollection = results.get();
+            TagCollectionView tagView = new TagCollectionView(tagCollection.id(), tagCollection.name());
             return Optional.of(tagView);
         } else {
             return Optional.empty();

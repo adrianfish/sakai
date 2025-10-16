@@ -15,7 +15,7 @@
  */
 package org.sakaiproject.tool.assessment.business.questionpool;
 
-import org.sakaiproject.tags.api.Tag;
+import org.sakaiproject.tags.api.TagRecord;
 import org.sakaiproject.tool.assessment.data.ifc.assessment.TagIfc;
 
 import lombok.Builder;
@@ -34,12 +34,12 @@ public class QuestionPoolTag implements TagIfc {
     private String tagCollectionName;
 
 
-    public static QuestionPoolTag of(Tag tag) {
+    public static QuestionPoolTag of(TagRecord tag) {
         return QuestionPoolTag.builder()
-                .tagId(tag.getTagId())
-                .tagLabel(tag.getTagLabel())
-                .tagCollectionId(tag.getTagCollectionId())
-                .tagCollectionName(tag.getCollectionName())
+                .tagId(tag.id())
+                .tagLabel(tag.label())
+                .tagCollectionId(tag.collectionId())
+                .tagCollectionName(tag.collectionName())
                 .build();
     }
 }

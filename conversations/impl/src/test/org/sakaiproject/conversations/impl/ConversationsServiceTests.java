@@ -36,9 +36,9 @@ import org.sakaiproject.conversations.api.beans.PostTransferBean;
 import org.sakaiproject.conversations.api.beans.TopicTransferBean;
 import org.sakaiproject.conversations.api.model.ConversationsComment;
 import org.sakaiproject.conversations.api.model.ConversationsPost;
+import org.sakaiproject.conversations.api.model.ConversationsTag;
 import org.sakaiproject.conversations.api.model.ConversationsTopic;
 import org.sakaiproject.conversations.api.model.Settings;
-import org.sakaiproject.conversations.api.model.Tag;
 import org.sakaiproject.conversations.api.model.TopicStatus;
 import org.sakaiproject.conversations.api.repository.ConversationsCommentRepository;
 import org.sakaiproject.conversations.api.repository.ConversationsPostRepository;
@@ -1211,7 +1211,7 @@ public class ConversationsServiceTests extends AbstractTransactionalJUnit4Spring
     @Test
     public void crudTags() {
 
-        Tag tag = new Tag();
+        ConversationsTag tag = new ConversationsTag();
         tag.setSiteId(site1Id);
         tag.setLabel("chicken");
 
@@ -1222,10 +1222,10 @@ public class ConversationsServiceTests extends AbstractTransactionalJUnit4Spring
 
         when(securityService.unlock(Permissions.TAG_CREATE.label, site1Ref)).thenReturn(true);
         try {
-            Tag savedTag = conversationsService.saveTag(tag);
+            ConversationsTag savedTag = conversationsService.saveTag(tag);
             assertFalse(savedTag.getId() == null);
 
-            List<Tag> siteTags = conversationsService.getTagsForSite(tag.getSiteId());
+            List<ConversationsTag> siteTags = conversationsService.getTagsForSite(tag.getSiteId());
 
             // Should only be able to pull the tags if we can tag topics
             assertEquals(siteTags.size(), 0);
@@ -1242,7 +1242,7 @@ public class ConversationsServiceTests extends AbstractTransactionalJUnit4Spring
             siteTags = conversationsService.getTagsForSite(tag.getSiteId());
             assertEquals(0, siteTags.size());
 
-            List<Tag> tags = new ArrayList<>();
+            List<ConversationsTag> tags = new ArrayList<>();
             tags.add(tag);
             conversationsService.createTags(tags);
 
@@ -1264,13 +1264,13 @@ public class ConversationsServiceTests extends AbstractTransactionalJUnit4Spring
 
         switchToUser1();
         TopicTransferBean topicBean = createTopic(true);
-        Tag tag = new Tag();
+        ConversationsTag tag = new ConversationsTag();
         tag.setSiteId(site1Id);
         tag.setLabel("chicken");
 
         when(securityService.unlock(Permissions.TAG_CREATE.label, site1Ref)).thenReturn(true);
 
-        List<Tag> tags = new ArrayList<>();
+        List<ConversationsTag> tags = new ArrayList<>();
         tags.add(tag);
         try {
             tags = conversationsService.createTags(tags);

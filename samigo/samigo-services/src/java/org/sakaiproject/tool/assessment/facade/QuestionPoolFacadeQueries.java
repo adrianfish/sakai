@@ -179,7 +179,7 @@ public class QuestionPoolFacadeQueries
     if (ObjectUtils.allNotNull(poolId, ownerUserId)) {
       String poolReference = SamigoConstants.REFERENCE_PREFIX_QUESTIONPOOL + "/" + poolId;
 
-      Set<QuestionPoolTag> tags = tagService.getAssociatedTagsForItem(ownerUserId, poolReference).stream()
+      Set<QuestionPoolTag> tags = tagService.getAssociatedTagsForReference(ownerUserId, poolReference).stream()
           .map(QuestionPoolTag::of)
           .collect(Collectors.toSet());
 

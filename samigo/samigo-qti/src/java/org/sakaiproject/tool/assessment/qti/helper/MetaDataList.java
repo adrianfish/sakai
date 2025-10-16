@@ -28,7 +28,9 @@ import java.util.StringTokenizer;
 import lombok.extern.slf4j.Slf4j;
 
 import org.sakaiproject.component.cover.ComponentManager;
-import org.sakaiproject.tags.api.*;
+import org.sakaiproject.tags.api.TagService;
+import org.sakaiproject.tags.api.TagCollectionRecord;
+import org.sakaiproject.tags.api.TagRecord;
 import org.sakaiproject.tool.assessment.qti.constants.AuthoringConstantStrings;
 import org.sakaiproject.tool.assessment.data.ifc.assessment.AssessmentMetaDataIfc;
 import org.sakaiproject.tool.assessment.facade.AssessmentFacade;
@@ -172,15 +174,13 @@ import org.sakaiproject.tool.assessment.facade.ItemFacade;
                 }
 
                 if (!(tagCollectionName.equals("Not assigned collection"))){ //check if the collection is in our system and add the tag
-                    Optional collection = tagService.getTagCollections().getForExternalSourceName(tagCollectionName);
-                    if (collection.isPresent()) {
-                        TagCollection tagCollection = (TagCollection) collection.get();
-                        List<Tag> potentialTags = tagService.getTags().getTagsByExactLabel(tagLabel.trim());
-                        potentialTags.stream().filter(t -> t.getCollectionName().equals(tagCollection.getName())).forEach(t -> {
-                                item.addItemTag(t.getTagId(), t.getTagLabel(), t.getTagCollectionId(), t.getCollectionName());
+                    String trimmedTagLabel = tagLabel.trim();
+                    tagService.getCollectionForExternalSourceName(tagCollectionName).ifPresent(tagCollection -> {
+                        List<TagRecord> potentialTags = tagService.getTagsByExactLabel(trimmedTagLabel);
+                        potentialTags.stream().filter(t -> t.collectionName().equals(tagCollection.name())).forEach(t -> {
+                                item.addItemTag(t.id(), t.label(), t.collectionId(), t.collectionName());
                         });
-
-                    }
+                    });
                 }
 
             }

@@ -70,7 +70,7 @@ import org.sakaiproject.exception.IdUnusedException;
 import org.sakaiproject.site.api.Group;
 import org.sakaiproject.site.api.Site;
 import org.sakaiproject.site.api.SiteService;
-import org.sakaiproject.tags.api.Tag;
+import org.sakaiproject.tags.api.TagRecord;
 import org.sakaiproject.tags.api.TagService;
 import org.sakaiproject.time.api.UserTimeService;
 import org.sakaiproject.tool.api.Session;
@@ -4315,7 +4315,7 @@ public void processChangeSelectView(ValueChangeEvent eve)
       }
         dbean.setSendToStringDecorated(createDecoratedSentToDisplay(dbean));
 
-      List<String> tagLabels = tagService.getAssociatedTagsForItem(getUserId(), String.valueOf(element.getId())).stream().map(Tag::getTagLabel).collect(Collectors.toList());
+      List<String> tagLabels = tagService.getAssociatedTagsForReference(getUserId(), String.valueOf(element.getId())).stream().map(TagRecord::label).collect(Collectors.toList());
       dbean.setTagList(tagLabels);
 
       decLs.add(dbean) ;

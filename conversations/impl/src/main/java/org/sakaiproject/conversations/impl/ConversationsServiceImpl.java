@@ -72,7 +72,7 @@ import org.sakaiproject.conversations.api.model.PostReaction;
 import org.sakaiproject.conversations.api.model.PostReactionTotal;
 import org.sakaiproject.conversations.api.model.PostStatus;
 import org.sakaiproject.conversations.api.model.Settings;
-import org.sakaiproject.conversations.api.model.Tag;
+import org.sakaiproject.conversations.api.model.ConversationsTag;
 import org.sakaiproject.conversations.api.model.ConversationsTopic;
 import org.sakaiproject.conversations.api.model.TopicReaction;
 import org.sakaiproject.conversations.api.model.TopicReactionTotal;
@@ -2150,7 +2150,7 @@ public class ConversationsServiceImpl implements ConversationsService, EntityTra
         return PostTransferBean.of(postRepository.save(post));
     }
 
-    public Tag saveTag(Tag tag) throws ConversationsPermissionsException {
+    public ConversationsTag saveTag(ConversationsTag tag) throws ConversationsPermissionsException {
 
         getCheckedCurrentUserId();
 
@@ -2163,7 +2163,7 @@ public class ConversationsServiceImpl implements ConversationsService, EntityTra
         return tagRepository.save(tag);
     }
 
-    public List<Tag> createTags(List<Tag> tags) throws ConversationsPermissionsException {
+    public List<ConversationsTag> createTags(List<ConversationsTag> tags) throws ConversationsPermissionsException {
 
         getCheckedCurrentUserId();
 
@@ -2178,19 +2178,19 @@ public class ConversationsServiceImpl implements ConversationsService, EntityTra
 
     @Override
     @Transactional(readOnly = true)
-    public List<Tag> getTagsForSite(String siteId) throws ConversationsPermissionsException {
+    public List<ConversationsTag> getTagsForSite(String siteId) throws ConversationsPermissionsException {
 
         getCheckedCurrentUserId();
 
         String siteRef = siteService.siteReference(siteId);
 
         if (!securityService.unlock(Permissions.TOPIC_TAG.label, siteRef)) {
-            return Collections.<Tag>emptyList();
+            return Collections.<ConversationsTag>emptyList();
         }
 
-        List<Tag> tags = tagRepository.findBySiteId(siteId);
+        List<ConversationsTag> tags = tagRepository.findBySiteId(siteId);
         // Sort tags alphabetically by label
-        tags.sort(Comparator.comparing(Tag::getLabel, new AlphaNumericComparator()));
+        tags.sort(Comparator.comparing(ConversationsTag::getLabel, new AlphaNumericComparator()));
         return tags;
     }
 
@@ -2199,7 +2199,7 @@ public class ConversationsServiceImpl implements ConversationsService, EntityTra
 
         getCheckedCurrentUserId();
 
-        Optional<Tag> optTag = tagRepository.findById(tagId);
+        Optional<ConversationsTag> optTag = tagRepository.findById(tagId);
 
         if (optTag.isPresent()) {
             String siteRef = "/site/" + optTag.get().getSiteId();

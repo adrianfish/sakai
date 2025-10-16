@@ -207,8 +207,8 @@ import org.sakaiproject.site.api.ToolConfiguration;
 import org.sakaiproject.taggable.api.TaggingHelperInfo;
 import org.sakaiproject.taggable.api.TaggingManager;
 import org.sakaiproject.taggable.api.TaggingProvider;
-import org.sakaiproject.tags.api.Tag;
 import org.sakaiproject.tags.api.TagService;
+import org.sakaiproject.tags.api.TagRecord;
 import org.sakaiproject.time.api.TimeService;
 import org.sakaiproject.time.api.UserTimeService;
 import org.sakaiproject.tool.api.Session;
@@ -2931,7 +2931,7 @@ public class AssignmentAction extends PagedResourceActionII {
             Set<String> allTaggedGroupsAndInstructorsSet = new HashSet<>();
             Map<String, List<String>> tagsMap = new HashMap<>();
             assignments.forEach(a -> {
-                List<String> tagLabels = tagService.getAssociatedTagsForItem(a.getContext(), a.getId()).stream().map(Tag::getTagLabel).collect(Collectors.toList());
+                List<String> tagLabels = tagService.getAssociatedTagsForReference(a.getContext(), a.getId()).stream().map(TagRecord::label).collect(Collectors.toList());
                 List<String> instructorAndGroupTags = addInstructorAndGroupTags(a);
                 tagLabels.addAll(instructorAndGroupTags);
                 allTaggedGroupsAndInstructorsSet.addAll(instructorAndGroupTags);

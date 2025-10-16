@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+</head>
+<body>
+    <div class="portletBody tagservice-body">
+        <header class="tagservice-section-header">
+            <h3>
+                <span>Tag</span>
+                <span class="incollection">
+                    (Tag Collection: 
+                    <span th:text="${actualtagcollectionname}">Collection Name</span>)
+                </span>
+            </h3>
+        </header>
+
+        <div class="container-fluid">
+            <form class="form-horizontal" method="POST" th:action="@{/tags/new}" th:object="${tag}">
+                <div class="form-group">
+                    <label class="col-sm-2 control-label" for="label">Label</label>
+                    <div class="col-sm-10">
+                        <input class="form-control" type="text" name="label" id="label" th:value="*{label}" required th:attr="readonly=${externalcreation}" />
+                        <div class="text-danger" th:if="${#fields.hasErrors('label')}" th:errors="*{label}">Label Error</div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="col-sm-2 control-label" for="description">Description</label>
+                    <div class="col-sm-10">
+                        <input class="form-control" type="text" name="description" id="description" th:value="*{description}" th:attr="readonly=${externalcreation}" />
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="col-sm-2 control-label" for="externalId">External ID</label>
+                    <div class="col-sm-10">
+                        <input class="form-control" type="text" name="externalId" id="externalId" th:value="*{externalId}" th:attr="readonly=${externalcreation}" />
+                    </div>
+                </div>
+
+                <div class="form-group" th:style="${mode == 'new' ? '' : 'display:none'}">
+                    <label class="col-sm-2 control-label" for="collectionName">Tag Collection Name</label>
+                    <div class="col-sm-10">
+                        <input class="form-control" type="text" th:attr="readonly=${tagcollectionidreadonly}" name="collectionName" id="collectionName" th:value="*{collectionName}" required />
+                    </div>
+                </div>
+
+                <div hidden class="form-group">
+                    <div class="col-sm-10">
+                        <input type="hidden" name="id" id="id" th:value="*{id}" />
+                        <input type="hidden" name="createdBy" id="createdBy" th:value="*{createdBy}" />
+                        <input type="hidden" name="creationDate" id="creationDate" th:value="*{creationDate}" />
+                        <input type="hidden" name="lastModifiedBy" id="lastModifiedBy" th:value="*{lastModifiedBy}" />
+                        <input type="hidden" name="lastModificationDate" id="lastModificationDate" th:value="*{lastModificationDate}" />
+                        <input type="hidden" name="alternativeLabels" id="alternativeLabels" th:value="*{alternativeLabels}" />
+                        <input type="hidden" name="externalCreation" id="externalCreation" th:value="*{externalCreation}" />
+                        <input type="hidden" name="externalCreationDate" id="externalCreationDate" th:value="*{externalCreationDate}" />
+                        <input type="hidden" name="externalUpdate" id="externalUpdate" th:value="*{externalUpdate}" />
+                        <input type="hidden" name="lastUpdateDateInExternalSystem" id="lastUpdateDateInExternalSystem" th:value="*{lastUpdateDateInExternalSystem}" />
+                        <input type="hidden" name="parentId" id="parentId" th:value="*{parentId}" />
+                        <input type="hidden" name="externalHierarchyCode" id="externalHierarchyCode" th:value="*{externalHierarchyCode}" />
+                        <input type="hidden" name="externalType" id="externalType" th:value="*{externalType}" />
+                        <input type="hidden" name="data" id="data" th:value="*{data}" />
+                        <input type="hidden" name="collectionId" id="collectionId" th:value="*{collectionId}" />
+                    </div>
+                </div>
+
+                <div class="col-sm-offset-2 col-sm-10">
+                    <input class="btn btn-primary" type="submit" name="create" value="Save Tag" th:attr="style=${isExternallyUpdated}" />
+                    <a class="btn btn-primary tagservice-cancel-btn" th:href="${returnpath}" data-target="${returnpath}">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>includeLatestJQuery('tag_form.html');</script>
+    <script src="/library/js/lang-datepicker/lang-datepicker.js"></script>
+</body>
+</html>

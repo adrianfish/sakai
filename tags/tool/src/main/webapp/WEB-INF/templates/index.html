@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+  <head>
+    <meta charset="UTF-8">
+    [(${sakaiHtmlHead})]
+  </head>
+  <body>
+    <div class="portletBody tagservice-body">
+      <div th:if="${!tagserviceactive}" class="tagservice-section">
+        <div class="alert alert-danger" th:text="#{tagservice-disabled}"></div>
+      </div>
+
+      <section class="tagservice-section">
+        <header class="tagservice-section-header">
+          <h3 th:text="#{tagcollections}">Tag Collections</h3>
+          <div class="btn-toolbar float-end" th:if="${canCreate}">
+            <a th:href="@{/tagcollections/new}" class="btn btn-primary btn-sm pull-right" th:text="#{create_tag_collection}">Create Tag Collection</a>
+          </div>
+        </header>
+
+        <table class="tagservice-table table table-striped table-hover table-condensed">
+          <thead>
+            <tr>
+              <th class="tags-collections-percent-small" th:text="#{name}">Name</th>
+              <th class="tags-collections-percent-big" th:text="#{description}">Description</th>
+              <th class="tags-collections-percent-small" th:text="#{externalSourceName}">External Source Name</th>
+              <th class="tags-collections-percent-big" th:text="#{externalSourceDescription}">External Source Description</th>
+              <th><!-- actions --></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr th:if="${tagcollections.empty}">
+              <td colspan="5" class="text-center">
+                  <div class="alert alert-info" style="margin-top: 15px;">
+                      No tag collections found
+                  </div>
+              </td>
+            </tr>
+            <tr th:each="collection : ${tagcollections}" th:if="${!tagcollections.empty}">
+              <td th:text="${collection.name}">Collection Name</td>
+              <td th:text="${collection.description}">Description</td>
+              <td th:text="${collection.externalSourceName}">External Source</td>
+              <td th:text="${collection.externalSourceDescription}">External Source Description</td>
+              <td class="actions">
+                <a th:if="${canCreate}" th:href="@{'/tagcollections/' + ${collection.id} + '/edit'}" class="btn btn-primary btn-xs" th:text="#{Edit}">Edit</a>
+                <a th:href="@{'/tagsintagcollection/' + ${collection.id} + '/manage'}" class="btn btn-primary btn-xs" th:text="#{manage_tags}">Manage Tags</a>
+                <a th:if="${canCreate}"
+                    th:href="@{'/tagcollections/' + ${collection.id} + '/delete'}"
+                    class="btn btn-warning btn-xs tagservice-delete-btn"
+                    data-record-type="tagcollection"
+                    th:attr="aria-label=#{delete_tag_collection}, title=#{delete_tag_collection}">
+                  <span class="fa fa-trash" aria-hidden="true"></span>
+                </a>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+
+        <!-- Pagination -->
+        <div th:if="${showPagination}" class="paging_bootstrap">
+          <ul class="pagination">
+            <li th:class="${pageNum > 0 ? 'page-item prev' : 'page-item prev disabled'}">
+              <a class="page-link" th:href="${pageNum > 0 ? '/?pageNum=' + (pageNum-1) + '&pageSize=' + pageSize : '#'}">&Lt;</a>
+            </li>
+            
+            <li th:each="i : ${#numbers.sequence(0, totalPages-1)}" 
+                th:class="${i == pageNum ? 'page-item active' : 'page-item'}">
+              <a class="page-link" th:href="@{'/?pageNum=' + ${i} + '&pageSize=' + ${pageSize}}" th:text="${i+1}">1</a>
+            </li>
+            
+            <li th:class="${pageNum < totalPages-1 ? 'page-item next' : 'page-item next disabled'}">
+              <a class="page-link" th:href="${pageNum < totalPages-1 ? '/?pageNum=' + (pageNum+1) + '&pageSize=' + pageSize : '#'}">&Gt;</a>
+            </li>
+          </ul>
+        </div>
+      </section>
+    </div>
+
+    <script>includeLatestJQuery('index.html');</script>
+    <script src="/library/js/lang-datepicker/lang-datepicker.js"></script>
+  </body>
+</html>

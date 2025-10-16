@@ -33,7 +33,7 @@ import org.sakaiproject.component.cover.ComponentManager;
 import org.sakaiproject.content.api.ContentResource;
 import org.sakaiproject.rubrics.api.RubricsConstants;
 import org.sakaiproject.rubrics.api.RubricsService;
-import org.sakaiproject.tags.api.Tag;
+import org.sakaiproject.tags.api.TagRecord;
 import org.sakaiproject.tags.api.TagService;
 import org.sakaiproject.tool.assessment.data.dao.assessment.Answer;
 import org.sakaiproject.tool.assessment.data.dao.assessment.AnswerFeedback;
@@ -536,9 +536,9 @@ public class ItemService
         Iterator itemsNewTagsIterator = itemTagIfcSet.iterator();
         while (itemsNewTagsIterator.hasNext()) {
           ItemTagIfc tagToAdd = (ItemTagIfc) itemsNewTagsIterator.next();
-          if (tagService.getTags().getForId(tagToAdd.getTagId()).isPresent()) {
-            Tag tag = tagService.getTags().getForId(tagToAdd.getTagId()).get();
-            itemHashed.addItemTag(tagToAdd.getTagId(), tag.getTagLabel(), tag.getTagCollectionId(), tag.getCollectionName());
+          if (tagService.getForId(tagToAdd.getTagId()).isPresent()) {
+            TagRecord tag = tagService.getForId(tagToAdd.getTagId()).get();
+            itemHashed.addItemTag(tagToAdd.getTagId(), tag.label(), tag.collectionId(), tag.collectionName());
           }
         }
         //And now save the item

@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Error</title>
+    <link rel="stylesheet" type="text/css" th:href="${skinRepo} + '/tool_base.css'">
+</head>
+<body>
+    <div class="portletBody">
+        <div class="alert alert-danger">
+            <h3>Error</h3>
+            <p th:text="${errorMessage}">An error occurred</p>
+            <p th:if="${statusCode}" th:text="'Status code: ' + ${statusCode}">Status code: 500</p>
+            <p><a href="/">Return to home</a></p>
+        </div>
+    </div>
+</body>
+</html>

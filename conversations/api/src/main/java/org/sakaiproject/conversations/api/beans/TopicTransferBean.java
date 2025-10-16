@@ -16,7 +16,7 @@
 package org.sakaiproject.conversations.api.beans;
 
 import org.sakaiproject.conversations.api.model.Metadata;
-import org.sakaiproject.conversations.api.model.Tag;
+import org.sakaiproject.conversations.api.model.ConversationsTag;
 import org.sakaiproject.conversations.api.model.ConversationsTopic;
 import org.sakaiproject.conversations.api.Reaction;
 import org.sakaiproject.conversations.api.TopicType;
@@ -61,7 +61,7 @@ public class TopicTransferBean implements Entity {
     public boolean mustPostBeforeViewing;
     public boolean hasPosted;
     public boolean resolved;
-    public List<Tag> tags = new ArrayList<>();
+    public List<ConversationsTag> tags = new ArrayList<>();
     public Map<Reaction, Boolean> myReactions = new HashMap<>();
     public Map<Reaction, Integer> reactionTotals = new HashMap<>();
     public Set<String> groups = new HashSet<>();

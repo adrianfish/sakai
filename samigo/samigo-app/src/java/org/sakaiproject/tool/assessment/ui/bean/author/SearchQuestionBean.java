@@ -42,7 +42,7 @@ import org.sakaiproject.component.api.ServerConfigurationService;
 import org.sakaiproject.component.cover.ComponentManager;
 import org.sakaiproject.search.api.SearchService;
 import org.sakaiproject.site.api.SiteService;
-import org.sakaiproject.tags.api.Tag;
+import org.sakaiproject.tags.api.TagRecord;
 import org.sakaiproject.tags.api.TagService;
 import org.sakaiproject.tool.assessment.data.ifc.assessment.ItemDataIfc;
 import org.sakaiproject.tool.assessment.facade.AgentFacade;
@@ -134,10 +134,10 @@ public class SearchQuestionBean   implements Serializable {
                 if (more) {
                     tagsLabels += ",";
                 }
-                if (tagService.getTags().getForId(s).isPresent()) {
-                    Tag tag = tagService.getTags().getForId(s).get();
-                    String tagLabel = tag.getTagLabel();
-                    String tagCollectionName = tag.getCollectionName();
+                if (tagService.getForId(s).isPresent()) {
+                    TagRecord tag = tagService.getForId(s).get();
+                    String tagLabel = tag.label();
+                    String tagCollectionName = tag.collectionName();
                     tagsLabels += " " + tagLabel + "(" + tagCollectionName + ")";
                     additionalSearchInformation.put("tag_" + i,tagLabel + "(" + tagCollectionName + ")");
                     more = true;
