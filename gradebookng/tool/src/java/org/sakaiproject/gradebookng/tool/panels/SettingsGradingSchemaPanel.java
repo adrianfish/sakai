@@ -27,7 +27,6 @@ import lombok.Getter;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import org.apache.wicket.AttributeModifier;
-import org.apache.wicket.ajax.AjaxEventBehavior;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.ajax.form.AjaxFormComponentUpdatingBehavior;
 import org.apache.wicket.ajax.markup.html.form.AjaxButton;
@@ -35,7 +34,6 @@ import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.markup.html.form.ChoiceRenderer;
 import org.apache.wicket.markup.html.form.DropDownChoice;
-import org.apache.wicket.markup.html.form.Form;
 import org.apache.wicket.markup.html.form.IFormModelUpdateListener;
 import org.apache.wicket.markup.html.form.TextField;
 import org.apache.wicket.markup.html.list.ListItem;
@@ -47,14 +45,20 @@ import org.apache.wicket.model.ResourceModel;
 import org.sakaiproject.gradebookng.business.FirstNameComparatorGbUser;
 import org.sakaiproject.gradebookng.business.model.GbUser;
 import org.sakaiproject.gradebookng.business.util.SettingsHelper;
-import org.sakaiproject.gradebookng.tool.chart.CourseGradeChart;
 import org.sakaiproject.gradebookng.tool.component.GbAjaxButton;
 import org.sakaiproject.gradebookng.tool.model.GbGradingSchemaEntry;
 import org.sakaiproject.gradebookng.tool.model.GbSettings;
 import org.sakaiproject.gradebookng.tool.stats.CourseGradeStatistics;
 import org.sakaiproject.grading.api.CourseGradeTransferBean;
+import org.sakaiproject.grading.api.GbChartData;
 import org.sakaiproject.grading.api.GradeMappingDefinition;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 public class SettingsGradingSchemaPanel extends BasePanel implements IFormModelUpdateListener {
 
 	private static final long serialVersionUID = 1L;
@@ -73,8 +77,6 @@ public class SettingsGradingSchemaPanel extends BasePanel implements IFormModelU
 	Label modifiedSchema;
 	Label unsavedSchema;
 	Label duplicateEntries;
-
-	CourseGradeChart chart;
 
 	/**
 	 * This is the currently PERSISTED grade mapping id that is persisted for this gradebook
@@ -342,10 +344,11 @@ public class SettingsGradingSchemaPanel extends BasePanel implements IFormModelU
 			}
 		});
 
-		// chart
-		this.chart = new CourseGradeChart("gradingSchemaChart", null);
-		chart.setCurrentGradebookAndSite(currentGradebookUid, currentSiteId);
-		settingsGradingSchemaPanel.add(this.chart);
+		final WebMarkupContainer chart = new WebMarkupContainer("gradingSchemaChart");
+		String siteId = getCurrentSiteId();
+		String dataUrl = "/api/sites/" + siteId + "/grades/" + siteId + "/courseGrades";
+		chart.add(AttributeModifier.append("data-url", dataUrl));
+		settingsGradingSchemaPanel.add(chart);
 	}
 
 	/**
@@ -427,8 +430,8 @@ public class SettingsGradingSchemaPanel extends BasePanel implements IFormModelU
 	 */
 	private Map<String, CourseGradeTransferBean> getCourseGrades() {
 
-		final List<String> studentUuids = this.businessService.getGradeableUsers(currentGradebookUid, currentSiteId, null);
-		return this.businessService.getCourseGrades(currentGradebookUid, currentSiteId, studentUuids, null);
+		final List<String> studentUuids = gradingService.getGradeableUsers(currentGradebookUid, currentSiteId, null);
+		return gradingService.getCourseGradeForStudents(currentGradebookUid, currentSiteId, studentUuids);
 	}
 
 	/**
@@ -569,8 +572,18 @@ public class SettingsGradingSchemaPanel extends BasePanel implements IFormModelU
 
 		// refresh the chart
 		Map<String, Double> schemaMap = SettingsHelper.asMap(schemaList);
-		schemaMap = GradeMappingDefinition.sortGradeMapping(schemaMap);
-		this.chart.refresh(target, schemaMap);
+
+		String siteId = getCurrentSiteId();
+		GbChartData data = gradingService.getCourseGrades(siteId, siteId, schemaMap);
+
+		target.appendJavaScript("setChartData('" + toJson(data) + "')");
+	}
+
+	private String toJson(final GbChartData data) {
+		final Gson gson = new GsonBuilder().disableHtmlEscaping().create();
+		final String json = gson.toJson(data);
+		log.debug(json);
+		return json;
 	}
 
 	/**

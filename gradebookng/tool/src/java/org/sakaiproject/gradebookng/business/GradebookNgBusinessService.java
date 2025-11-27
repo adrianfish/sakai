@@ -71,7 +71,6 @@ import org.sakaiproject.section.api.coursemanagement.EnrollmentRecord;
 import org.sakaiproject.section.api.facade.Role;
 import org.sakaiproject.exception.IdUnusedException;
 import org.sakaiproject.exception.PermissionException;
-import org.sakaiproject.gradebookng.business.exception.GbAccessDeniedException;
 import org.sakaiproject.gradebookng.business.exception.GbException;
 import org.sakaiproject.gradebookng.business.importExport.CommentValidator;
 import org.sakaiproject.gradebookng.business.model.*;
@@ -80,6 +79,9 @@ import org.sakaiproject.gradebookng.business.util.EventHelper;
 import org.sakaiproject.gradebookng.business.util.FormatHelper;
 import org.sakaiproject.gradebookng.business.util.GbStopWatch;
 import org.sakaiproject.gradebookng.tool.model.GradebookUiSettings;
+import org.sakaiproject.grading.api.GbAccessDeniedException;
+import org.sakaiproject.grading.api.GbGroup;
+import org.sakaiproject.grading.api.GbRole;
 import org.sakaiproject.grading.api.GradingConstants;
 import org.sakaiproject.grading.api.GradingService;
 import org.sakaiproject.rubrics.api.RubricsConstants;
@@ -194,90 +196,8 @@ public class GradebookNgBusinessService {
 	 *
 	 * @return a list of users as uuids or null if none
 	 */
-	public List<String> getGradeableUsers(final String gradebookUid, final String siteId, final String groupFilter) {
-
-		try {
-
-			// note that this list MUST exclude TAs as it is checked in the
-			// GradingService and will throw a SecurityException if invalid
-			// users are provided
-			Site site = siteService.getSite(siteId);
-			final Set<String> userUuids = site.getUsersIsAllowed(GbRole.STUDENT.getValue());
-
-			// filter the allowed list based on membership
-			if (StringUtils.isNotBlank(groupFilter) || !gradebookUid.equals(siteId)) {
-				String groupId = StringUtils.isNotBlank(groupFilter) ? groupFilter : gradebookUid;
-				final Set<String> groupMembers = new HashSet<>();
-
-				final Set<Member> members = site.getGroup(groupId).getMembers();
-				for (final Member m : members) {
-					if (userUuids.contains(m.getUserId())) {
-						groupMembers.add(m.getUserId());
-					}
-				}
-
-				// only keep the ones we identified in the group
-				userUuids.retainAll(groupMembers);
-			}
-
-			final GbRole role = this.getUserRole(siteId);
-
-			// if TA, pass it through the gradebook permissions (only if there
-			// are permissions)
-			if (role == GbRole.TA) {
-				final User user = getCurrentUser();
-
-				// if there are permissions, pass it through them
-				// don't need to test TA access if no permissions
-				final List<PermissionDefinition> perms = getPermissionsForUser(user.getId(), gradebookUid, siteId);
-				if (!perms.isEmpty()) {
-
-					// get list of sections and groups this TA has access to
-					final List<CourseSection> courseSections = this.gradingService.getViewableSections(gradebookUid, siteId);
-
-					//for each section TA has access to, grab student Id's
-					List<String> viewableStudents = new ArrayList<>();
-
-					Map<String, List<String>> groupMembers = getGroupMemberships(gradebookUid, siteId);
-					
-					//iterate through sections available to the TA and build a list of the student members of each section
-					if(courseSections != null && !courseSections.isEmpty() && groupMembers!=null){
-						for(CourseSection section:courseSections){
-							if(groupMembers.containsKey(section.getUuid())) {
-								List<String> members = groupMembers.get(section.getUuid());
-								for (String member : members) {
-									if (siteId != null && member != null && securityService.unlock(member, GbPortalPermission.VIEW_OWN_GRADES.getValue(), siteService.siteReference(siteId))){
-										viewableStudents.add(member);
-									}
-								}
-							}
-						}
-					}
-
-					// If all group IDs in perms are null, this means TA has permission to view/grade All Sections/Groups.
-					// In this situation, we should add non-provided site members to their viewable list
-					List<String> nonProvidedMembers = site.getMembers().stream().filter(m -> !m.isProvided()).map(Member::getUserId).collect(Collectors.toList());
-					if (perms.stream().allMatch(p -> p.getGroupReference() == null)) {
-						viewableStudents.addAll(nonProvidedMembers);
-					}
-
-					if (!viewableStudents.isEmpty()) {
-						userUuids.retainAll(viewableStudents); // retain only those that are visible to this TA
-					} else {
-						userUuids.removeAll(sectionManager.getSectionEnrollmentsForStudents(siteId, userUuids).getStudentUuids()); // TA can view/grade students without section
-						nonProvidedMembers.forEach(userUuids::remove); // Filter out non-provided users
-					}
-				}
-			}
-
-			return new ArrayList<>(userUuids);
-		} catch (final IdUnusedException e) {
-			log.warn("IdUnusedException trying to getGradeableUsers", e);
-			return null;
-		} catch (final GbAccessDeniedException e) {
-			log.warn("GbAccessDeniedException trying to getGradeableUsers", e);
-			return null;
-		}
+	public List<String> getGradeableUsers(String gradebookUid, String siteId, String groupFilter) {
+        return gradingService.getGradeableUsers(gradebookUid, siteId, groupFilter);
 	}
 
 	/**
@@ -435,8 +355,8 @@ public class GradebookNgBusinessService {
 
 		GbRole role;
 		try {
-			role = this.getUserRole(siteId);
-		} catch (final GbAccessDeniedException e) {
+			role = gradingService.getUserRole(siteId);
+		} catch (GbAccessDeniedException e) {
 			log.warn("GbAccessDeniedException trying to getGradebookCategories", e);
 			return rval;
 		}
@@ -463,7 +383,7 @@ public class GradebookNgBusinessService {
 			//if categories is empty (no fine grain permissions enabled), Check permissions, if they are not empty then realms perms exist 
 			//and they don't filter to category level so allow all.
 			//This should still allow the gb_permission_t perms to override if the TA is restricted to certain categories
-			if(viewableCategoryIds.isEmpty() && !this.getPermissionsForUser(user.getId(), gradebookUid, siteId).isEmpty()){
+			if(viewableCategoryIds.isEmpty() && !gradingService.getPermissionsForUser(user.getId(), gradebookUid, siteId).isEmpty()){
 				viewableCategoryIds = allCategoryIds;
 			}
 
@@ -522,26 +442,6 @@ public class GradebookNgBusinessService {
 		// filter out the categories that don't match the categories of the viewable assignments
 		return catDefs.stream().filter(def -> catIds.contains(def.getId())).collect(Collectors.toList());
 
-	}
-
-	/**
-	 * Get a map of course grades for the given gradebook, users and optionally the grademap you want to use.
-	 *
-	 * @param gradebook the gradebook
-	 * @param studentUuids uuids for the students
-	 * @param gradeMap the grade mapping to use. This should be left blank if you are displaying grades to students so that the currently persisted value is used.
-	 * @return the map of course grades for students, key = studentUuid, value = course grade, or an empty map
-	 */
-	public Map<String, CourseGradeTransferBean> getCourseGrades(final String gradebookUid, final String siteId, final List<String> studentUuids, final Map<String, Double> gradeMap) {
-		Map<String, CourseGradeTransferBean> rval = new HashMap<>();
-		if (gradebookUid != null) {
-			if(gradeMap != null) {
-				rval = this.gradingService.getCourseGradeForStudents(gradebookUid, siteId, studentUuids, gradeMap);
-			} else {
-				rval = this.gradingService.getCourseGradeForStudents(gradebookUid, siteId, studentUuids);
-			}
-		}
-		return rval;
 	}
 
 	/**
@@ -834,7 +734,7 @@ public class GradebookNgBusinessService {
 		// get role for current user
 		GbRole role;
 		try {
-			role = this.getUserRole(siteId);
+			role = gradingService.getUserRole(siteId);
 		} catch (final GbAccessDeniedException e) {
 			throw new GbException("Error getting role for current user", e);
 		}
@@ -888,7 +788,7 @@ public class GradebookNgBusinessService {
 		// get role for current user
 		GbRole role;
 		try {
-			role = this.getUserRole(siteId);
+			role = gradingService.getUserRole(siteId);
 		} catch (final GbAccessDeniedException e) {
 			throw new GbException("Error getting role for current user", e);
 		}
@@ -896,7 +796,7 @@ public class GradebookNgBusinessService {
 		final GradebookUiSettings settings = new GradebookUiSettings();
 
 		// ------------- Get Users -------------
-		final List<String> studentUUIDs = getGradeableUsers(gradebookUid, siteId, groupFilter);
+		final List<String> studentUUIDs = gradingService.getGradeableUsers(gradebookUid, siteId, groupFilter);
 		final List<GbUser> gbStudents = getGbUsers(siteId, studentUUIDs);
 		stopwatch.timeWithContext("buildGradeMatrixForImportExport", "getGbUsersForUiSettings", stopwatch.getTime());
 
@@ -944,7 +844,7 @@ public class GradebookNgBusinessService {
 		SecurityAdvisor advisor = null;
 		try {
 			advisor = addSecurityAdvisor();
-			data = buildGradeMatrix(gradebookUid, siteId, Collections.singletonList(assignment), getGradeableUsers(gradebookUid, siteId, null), null)
+			data = buildGradeMatrix(gradebookUid, siteId, Collections.singletonList(assignment), gradingService.getGradeableUsers(gradebookUid, siteId, null), null)
 					.stream().map(GbGradeComparisonItem::new)
 					.map(el -> {
 						if(isComparingOrDisplayingFullName){
@@ -1100,7 +1000,7 @@ public class GradebookNgBusinessService {
 	public void putCourseGradesInMatrix(Map<String, GbStudentGradeInfo> matrix, List<GbUser> gbStudents, List<String> studentUuids, Gradebook gradebook, String siteId, GbRole role,
 											boolean isCourseGradeVisible, GradebookUiSettings settings) {
 		// Get the course grades
-		final Map<String, CourseGradeTransferBean> courseGrades = getCourseGrades(gradebook.getUid(), siteId, studentUuids, null);
+		final Map<String, CourseGradeTransferBean> courseGrades = gradingService.getCourseGradeForStudents(gradebook.getUid(), siteId, studentUuids);
 
 		// Return quickly if it is empty (maybe failed permission checks)
 		if (courseGrades == null || courseGrades.isEmpty()) return;
@@ -1274,7 +1174,7 @@ public class GradebookNgBusinessService {
 		// so we are only concerned with the gradeable permission
 		if (role == GbRole.TA) {
 			// get permissions
-			final List<PermissionDefinition> permissions = getPermissionsForUser(currentUserUuid, gradebook.getUid(), siteId);
+			final List<PermissionDefinition> permissions = gradingService.getPermissionsForUser(currentUserUuid, gradebook.getUid(), siteId);
 
 			log.debug("All permissions: {}", permissions.size());
 
@@ -1297,7 +1197,7 @@ public class GradebookNgBusinessService {
 				}
 
 				// get the group membership for the students
-				final Map<String, List<String>> groupMembershipsMap = getGroupMemberships(gradebook.getUid(), siteId);
+				final Map<String, List<String>> groupMembershipsMap = gradingService.getGroupMemberships(gradebook.getUid(), siteId);
 
 				//Pair group <-> category
 				Map <Long, List<String>> permByCat = new HashMap<>();
@@ -1424,7 +1324,7 @@ public class GradebookNgBusinessService {
 		if (role == GbRole.TA) {
 
 			// get permissions
-			final List<PermissionDefinition> permissions = getPermissionsForUser(currentUserUuid, gradebook.getUid(), siteId);
+			final List<PermissionDefinition> permissions = gradingService.getPermissionsForUser(currentUserUuid, gradebook.getUid(), siteId);
 
 			log.debug("All permissions: {}", permissions.size());
 
@@ -1447,7 +1347,7 @@ public class GradebookNgBusinessService {
 				}
 
 				// get the group membership for the students
-				final Map<String, List<String>> groupMembershipsMap = getGroupMemberships(gradebook.getUid(), siteId);
+				final Map<String, List<String>> groupMembershipsMap = gradingService.getGroupMemberships(gradebook.getUid(), siteId);
 
 				// for every student
 				for (final GbUser student : gbStudents) {
@@ -1576,96 +1476,6 @@ public class GradebookNgBusinessService {
 	}
 
 	/**
-	 * Get a list of sections and groups in a site
-	 *
-	 * @param gradebookUid the gradebook to get sections/groups for
-	 * @param siteId the site id to get sections/groups for
-	 * @return a list of sections and groups in the site
-	 */
-	public List<GbGroup> getSiteSectionsAndGroups(String gradebookUid, String siteId) {
-
-		final List<GbGroup> rval = new ArrayList<>();
-
-		GbRole role;
-		try {
-			role = this.getUserRole(siteId);
-		} catch (final GbAccessDeniedException e) {
-			log.warn("Could not fetch the users role in site [{}], {}", siteId, e.toString());
-			return rval;
-		}
-
-		// get groups (handles both groups and sections)
-		try {
-			final Site site = this.siteService.getSite(siteId);
-			final Collection<Group> groups = isSuperUser() || role == GbRole.INSTRUCTOR ? 
-				site.getGroups() : 
-				site.getGroupsWithMember(userDirectoryService.getCurrentUser().getId());
-
-			for (final Group group : groups) {
-				if (gradebookUid.equals(siteId) || gradebookUid.equals(group.getId())) {
-					rval.add(new GbGroup(group.getId(), group.getTitle(), group.getReference(), GbGroup.Type.GROUP));
-				}
-			}
-
-		} catch (final IdUnusedException e) {
-			// essentially ignore and use what we have
-			log.error("Error retrieving groups", e);
-		}
-
-		// if user is a TA, get the groups they can see and filter the GbGroup list
-		if (role == GbRole.TA) {
-			final Gradebook gradebook = this.getGradebook(gradebookUid, siteId);
-			final User user = getCurrentUser();
-			boolean canGradeAll = false;
-
-			// need list of all groups as REFERENCES (not ids)
-			final List<String> allGroupIds = new ArrayList<>();
-			for (final GbGroup group : rval) {
-				allGroupIds.add(group.getReference());
-			}
-
-			// get the ones the TA can actually view
-			List<String> viewableGroupIds = this.gradingPermissionService
-					.getViewableGroupsForUser(gradebook.getId(), user.getId(), allGroupIds);
-
-			if (viewableGroupIds == null) {
-				viewableGroupIds = new ArrayList<>();
-			}
-
-			//FIXME: Another realms hack. The above method only returns groups from gb_permission_t. If this list is empty,
-			//need to check realms to see if user has privilege to grade any groups.
-			if (CollectionUtils.isEmpty(viewableGroupIds)) {
-				List<PermissionDefinition> realmsPerms = this.getPermissionsForUser(user.getId(), gradebookUid, siteId);
-				if (CollectionUtils.isNotEmpty(realmsPerms)) {
-					for (PermissionDefinition permDef : realmsPerms) {
-						if (permDef.getGroupReference() != null) {
-							viewableGroupIds.add(permDef.getGroupReference());
-						} else {
-							canGradeAll = true;
-						}
-					}
-				}
-			}
-
-			if (!canGradeAll) {
-				// remove the ones that the user can't view
-				final Iterator<GbGroup> iter = rval.iterator();
-				while (iter.hasNext()) {
-					final GbGroup group = iter.next();
-					if (!viewableGroupIds.contains(group.getReference())) {
-						iter.remove();
-					}
-				}
-			}
-
-		}
-
-		Collections.sort(rval);
-
-		return rval;
-	}
-
-	/**
 	 * Helper to get site. This will ONLY work in a portal site context, it will return empty otherwise (ie via an entityprovider).
 	 *
 	 * @return
@@ -1746,7 +1556,7 @@ public class GradebookNgBusinessService {
                 task.setSystem(true);
                 task.setDescription(assignment.getName());
                 task.setDue((assignment.getDueDate() == null) ? null : assignment.getDueDate().toInstant());
-                Set<String> users = new HashSet<>(this.getGradeableUsers(gradebookUid, siteId, null));
+                Set<String> users = new HashSet<>(gradingService.getGradeableUsers(gradebookUid, siteId, null));
                 taskService.createTask(task, users, Priorities.HIGH);
             }
                         
@@ -1957,7 +1767,7 @@ public class GradebookNgBusinessService {
 			task.setSystem(true);
 			task.setDescription(assignment.getName());
 			task.setDue((assignment.getDueDate() == null) ? null : assignment.getDueDate().toInstant());
-			Set<String> users = new HashSet<>(this.getGradeableUsers(gradebookUid, siteId, null));
+			Set<String> users = new HashSet<>(gradingService.getGradeableUsers(gradebookUid, siteId, null));
 			taskService.createTask(task, users, Priorities.HIGH);
 		}
         
@@ -1985,7 +1795,7 @@ public class GradebookNgBusinessService {
 		final Assignment assignment = getAssignment(gradebookUid, siteId, assignmentId);
 
 		// get students
-		final List<String> studentUuids = this.getGradeableUsers(gradebookUid, siteId, group);
+		final List<String> studentUuids = gradingService.getGradeableUsers(gradebookUid, siteId, group);
 
 		// get grades (only returns those where there is a grade, or comment; does not return those where there is no grade AND no comment)
 		final List<GradeDefinition> defs = this.gradingService.getGradesForStudentsForItem(gradebook.getUid(), siteId, assignmentId, studentUuids);
@@ -2136,30 +1946,8 @@ public class GradebookNgBusinessService {
 	 * @return GbRole for the current user
 	 * @throws GbAccessDeniedException if something goes wrong checking the site or user permissions
 	 */
-	public GbRole getUserRole(final String siteId) throws GbAccessDeniedException {
-
-		final String userId = getCurrentUser().getId();
-
-		String siteRef;
-		try {
-			siteRef = this.siteService.getSite(siteId).getReference();
-		} catch (final IdUnusedException e) {
-			throw new GbAccessDeniedException(e);
-		}
-
-		GbRole rval;
-
-		if (this.securityService.unlock(userId, GbRole.INSTRUCTOR.getValue(), siteRef)) {
-			rval = GbRole.INSTRUCTOR;
-		} else if (this.securityService.unlock(userId, GbRole.TA.getValue(), siteRef)) {
-			rval = GbRole.TA;
-		} else if (this.securityService.unlock(userId, GbRole.STUDENT.getValue(), siteRef)) {
-			rval = GbRole.STUDENT;
-		} else {
-			throw new GbAccessDeniedException("Current user does not have a valid section.role.x permission");
-		}
-
-		return rval;
+	public GbRole getUserRole(String siteId) throws GbAccessDeniedException {
+		return gradingService.getUserRole(siteId);
 	}
 
 	/**
@@ -2170,7 +1958,7 @@ public class GradebookNgBusinessService {
 	 */
 	public GbRole getUserRoleOrNone(String siteId) {
 		try {
-			return getUserRole(siteId);
+			return gradingService.getUserRole(siteId);
 		} catch (GbAccessDeniedException e) {
 			return GbRole.NONE;
 		}
@@ -2199,7 +1987,7 @@ public class GradebookNgBusinessService {
 		// GradingService
 		GbRole role;
 		try {
-			role = this.getUserRole(siteId);
+			role = gradingService.getUserRole(siteId);
 		} catch (final GbAccessDeniedException e) {
 			log.warn("GbAccessDeniedException trying to getGradesForStudent for student: {}", studentUuid, e);
 			return rval;
@@ -2368,17 +2156,6 @@ public class GradebookNgBusinessService {
 		return rval;
 	}
 
-	public List<PermissionDefinition> getPermissionsForUser(final String userUuid, String gradebookUid, String siteId) {
-		List<PermissionDefinition> permissions = this.gradingPermissionService.getPermissionsForUser(gradebookUid, userUuid);
-
-		//if db permissions are null, check realms permissions.
-		if (permissions == null || permissions.isEmpty()) {
-			//This method should return empty arraylist if they have no realms perms
-			permissions = this.gradingPermissionService.getRealmsPermissionsForUser(userUuid, siteId, Role.TA);
-		}
-		return permissions;
-	}
-
 	/**
 	 * Update the permissions for the user. Note: These are currently only defined/used for a teaching assistant.
 	 *
@@ -2417,7 +2194,7 @@ public class GradebookNgBusinessService {
 
 		GbRole role;
 		try {
-			role = this.getUserRole(siteId);
+			role = gradingService.getUserRole(siteId);
 		} catch (final GbAccessDeniedException e) {
 			log.warn("GbAccessDeniedException trying to check isCourseGradeVisible", e);
 			return false;
@@ -2432,7 +2209,7 @@ public class GradebookNgBusinessService {
 		if (role == GbRole.TA) {
 
 			// if no defs, implicitly allowed
-			final List<PermissionDefinition> defs = getPermissionsForUser(userUuid, gradebookUid, siteId);
+			final List<PermissionDefinition> defs = gradingService.getPermissionsForUser(userUuid, gradebookUid, siteId);
 			if (defs.isEmpty()) {
 				return true;
 			}
@@ -2496,46 +2273,6 @@ public class GradebookNgBusinessService {
 
 		final Optional<Site> site = getSite(siteId);
 		return site.isPresent() && !sectionManager.getSections(site.get().getId()).isEmpty();
-	}
-
-	/**
-	 * Build a list of group references to site membership (as uuids) for the groups that are viewable for the current user.
-	 *
-	 * @return
-	 */
-	public Map<String, List<String>> getGroupMemberships(final String gradebookUid, final String siteId) {
-
-		Site site;
-		try {
-			site = this.siteService.getSite(siteId);
-		} catch (final IdUnusedException e) {
-			log.error("Error looking up site: {}", siteId, e);
-			return null;
-		}
-
-		// filtered for the user
-		final List<GbGroup> viewableGroups = getSiteSectionsAndGroups(gradebookUid, siteId);
-
-		final Map<String, List<String>> rval = new HashMap<>();
-
-		for (final GbGroup gbGroup : viewableGroups) {
-			final String groupReference = gbGroup.getReference();
-			final List<String> memberUuids = new ArrayList<>();
-
-			final Group group = site.getGroup(groupReference);
-			if (group != null) {
-				final Set<Member> members = group.getMembers();
-
-				for (final Member m : members) {
-					memberUuids.add(m.getUserId());
-				}
-			}
-
-			rval.put(groupReference, memberUuids);
-
-		}
-
-		return rval;
 	}
 
 	/**
@@ -2697,7 +2434,7 @@ public class GradebookNgBusinessService {
 	 */
 	public List<Double> getCategoryAssignmentTotals(String gradebookUid, String siteId, CategoryDefinition category, String group){
 		final List<Double> allAssignmentGrades = new ArrayList<>();
-		final List<String> groupUsers = getGradeableUsers(gradebookUid, siteId, group);
+		final List<String> groupUsers = gradingService.getGradeableUsers(gradebookUid, siteId, group);
 		final List<String> studentUUIDs = new ArrayList<>();
 		studentUUIDs.addAll(groupUsers);
 		final List<Assignment> assignments = category.getAssignmentList();
@@ -2858,4 +2595,22 @@ public class GradebookNgBusinessService {
 		return gradeMap;
 	}
 
+	public List<PermissionDefinition> getPermissionsForUser(String userId, String gradebookId, String siteId) {
+		return gradingService.getPermissionsForUser(userId, gradebookId, siteId);
+	}
+
+	public Map<String, List<String>> getGroupMemberships(String gradebookId, String siteId) {
+		return gradingService.getGroupMemberships(gradebookId, siteId);
+	}
+
+	/**
+	 * Get a list of sections and groups in a site
+	 *
+	 * @param gradebookUid the gradebook to get sections/groups for
+	 * @param siteId the site id to get sections/groups for
+	 * @return a list of sections and groups in the site
+	 */
+	public List<GbGroup> getSiteSectionsAndGroups(String gradebookUid, String siteId) {
+		return gradingService.getSiteSectionsAndGroups(gradebookUid, siteId);
+	}
 }

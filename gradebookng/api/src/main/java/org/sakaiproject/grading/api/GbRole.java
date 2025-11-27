@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2003-2016 The Apereo Foundation
+ * Copyright (c) 2003-2017 The Apereo Foundation
  *
  * Licensed under the Educational Community License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,35 +13,32 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.sakaiproject.gradebookng.business;
+package org.sakaiproject.grading.api;
 
 /**
- * Represents the permissions used in the gradebook. The original String constants are not accessible so they are provided here for
- * convenience.
+ * Represents the roles used in the gradebook. Users are categorised to one of these.
  *
  * @author Steve Swinsburg (steve.swinsburg@gmail.com)
- *
  */
-public enum GbPortalPermission {
+public enum GbRole {
 
-	GRADE_ALL("gradebook.gradeAll"),
-	GRADE_SECTION("gradebook.gradeSection"),
-	EDIT_ASSIGNMENTS("gradebook.editAssignments"),
-	VIEW_OWN_GRADES("gradebook.viewOwnGrades");
+	STUDENT("section.role.student"),
+	TA("section.role.ta"),
+	INSTRUCTOR("section.role.instructor"),
+	NONE("section.role.none");
 
 	private String value;
 
-	GbPortalPermission(final String value) {
+	GbRole(final String value) {
 		this.value = value;
 	}
 
 	/**
-	 * Get the actual name of the permission
-	 * 
+	 * Get the actual name of the role
+	 *
 	 * @return
 	 */
 	public String getValue() {
 		return this.value;
 	}
-
 }

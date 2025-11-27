@@ -23,7 +23,7 @@ import org.apache.wicket.spring.injection.annot.SpringBean;
 import org.sakaiproject.authz.api.SecurityAdvisor;
 import org.sakaiproject.component.api.ServerConfigurationService;
 import org.sakaiproject.gradebookng.business.GradebookNgBusinessService;
-import org.sakaiproject.gradebookng.tool.model.GbChartData;
+import org.sakaiproject.grading.api.GbChartData;
 import org.sakaiproject.portal.util.PortalUtils;
 
 import com.google.gson.Gson;
@@ -32,7 +32,7 @@ import com.google.gson.GsonBuilder;
 import lombok.extern.slf4j.Slf4j;
 
 /**
- * Base panel for gradebook charts. See {@link CourseGradeChart} or {@link AssignmentGradeChart}.
+ * Base panel for gradebook charts. See {@link AssignmentGradeChart}.
  *
  * Immediately renders itself with the base data. Subclasses may provide a refresh option.
  */

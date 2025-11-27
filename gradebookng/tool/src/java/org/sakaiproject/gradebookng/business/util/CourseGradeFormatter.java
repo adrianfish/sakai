@@ -22,8 +22,8 @@ import java.util.Objects;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.wicket.model.StringResourceModel;
-import org.sakaiproject.gradebookng.business.GbRole;
 import org.sakaiproject.grading.api.CourseGradeTransferBean;
+import org.sakaiproject.grading.api.GbRole;
 import org.sakaiproject.grading.api.GradingConstants;
 import org.sakaiproject.grading.api.MessageHelper;
 import org.sakaiproject.grading.api.model.Gradebook;

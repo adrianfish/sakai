@@ -31,6 +31,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -51,6 +52,7 @@ import org.apache.commons.lang3.math.NumberUtils;
 import org.hibernate.StaleObjectStateException;
 
 import org.sakaiproject.authz.api.AuthzGroupService;
+import org.sakaiproject.authz.api.Member;
 import org.sakaiproject.authz.api.SecurityService;
 import org.sakaiproject.component.api.ServerConfigurationService;
 import org.sakaiproject.entity.api.EntityManager;
@@ -69,6 +71,11 @@ import org.sakaiproject.grading.api.ConflictingExternalIdException;
 import org.sakaiproject.grading.api.CourseGradeTransferBean;
 import org.sakaiproject.grading.api.ExternalAssignmentProvider;
 import org.sakaiproject.grading.api.ExternalAssignmentProviderCompat;
+import org.sakaiproject.grading.api.GbAccessDeniedException;
+import org.sakaiproject.grading.api.GbChartData;
+import org.sakaiproject.grading.api.GbGroup;
+import org.sakaiproject.grading.api.GbPortalPermission;
+import org.sakaiproject.grading.api.GbRole;
 import org.sakaiproject.grading.api.GradeDefinition;
 import org.sakaiproject.grading.api.GradeMappingDefinition;
 import org.sakaiproject.grading.api.GradebookHelper;
@@ -83,6 +90,7 @@ import org.sakaiproject.grading.api.GradingEventStatus;
 import org.sakaiproject.grading.api.InvalidCategoryException;
 import org.sakaiproject.grading.api.InvalidGradeException;
 import org.sakaiproject.grading.api.MessageHelper;
+import org.sakaiproject.grading.api.PermissionDefinition;
 import org.sakaiproject.grading.api.SortType;
 import org.sakaiproject.grading.api.StaleObjectModificationException;
 import org.sakaiproject.grading.api.UnmappableCourseGradeOverrideException;
@@ -107,6 +115,7 @@ import org.sakaiproject.grading.api.model.PassNotPassMapping;
 import org.sakaiproject.memory.api.Cache;
 import org.sakaiproject.memory.api.MemoryService;
 import org.sakaiproject.section.api.SectionAwareness;
+import org.sakaiproject.section.api.SectionManager;
 import org.sakaiproject.section.api.coursemanagement.CourseSection;
 import org.sakaiproject.section.api.coursemanagement.EnrollmentRecord;
 import org.sakaiproject.section.api.coursemanagement.User;
@@ -116,6 +125,7 @@ import org.sakaiproject.site.api.Site;
 import org.sakaiproject.site.api.SiteService;
 import org.sakaiproject.site.api.ToolConfiguration;
 import org.sakaiproject.tool.api.SessionManager;
+import org.sakaiproject.user.api.UserDirectoryService;
 import org.sakaiproject.plus.api.PlusService;
 import org.sakaiproject.grading.api.GradingAuthz;
 import org.sakaiproject.util.NumberUtil;
@@ -160,11 +170,11 @@ public class GradingServiceImpl implements GradingService {
     @Autowired private ResourceLoader resourceLoader;
     @Autowired private SiteService siteService;
     @Autowired private SectionAwareness sectionAwareness;
+    @Autowired private SectionManager sectionManager;
     @Autowired private SecurityService securityService;
     @Autowired private SessionManager sessionManager;
     @Autowired private ServerConfigurationService serverConfigurationService;
-
-    
+    @Autowired private UserDirectoryService userDirectoryService;
 
     // Local cache of static-between-deployment properties.
     private Map<String, String> propertiesMap = new HashMap<>();
@@ -286,8 +296,8 @@ public class GradingServiceImpl implements GradingService {
         }
 
         return optAsn.stream()
-			.map(a -> a.getGradebook().getUid())
-			.collect(Collectors.toList());
+            .map(a -> a.getGradebook().getUid())
+            .collect(Collectors.toList());
     }
 
     @Override
@@ -677,9 +687,9 @@ public class GradingServiceImpl implements GradingService {
                             // create category
                             Long categoryId = null;
                             try {
-				Double weight = Objects.equals(toCategoryType, GradingConstants.CATEGORY_TYPE_WEIGHTED_CATEGORY)
-					 ? (c.getWeight() != null ? c.getWeight() : Double.valueOf(0.0))
-					 : Double.valueOf(0.0);
+                Double weight = Objects.equals(toCategoryType, GradingConstants.CATEGORY_TYPE_WEIGHTED_CATEGORY)
+                     ? (c.getWeight() != null ? c.getWeight() : Double.valueOf(0.0))
+                     : Double.valueOf(0.0);
                                 categoryId = createCategory(gradebook.getId(), c.getName(), weight, c.getDropLowest(),
                                         c.getDropHighest(), c.getKeepHighest(), c.getExtraCredit(), c.getEqualWeight(), c.getCategoryOrder());
                             } catch (final ConflictingCategoryNameException e) {
@@ -697,22 +707,22 @@ public class GradingServiceImpl implements GradingService {
                             categoriesCreated.put(c.getName(), categoryId);
                         }
 
-			if (!copyOnlySettings) {
-				// create the assignment for the current category
-				try {
-					Long newId = createAssignmentForCategory(gradebook.getId(), categoriesCreated.get(c.getName()), taskName, a.getPoints(),
-										 a.getDueDate(), !a.getCounted(), a.getReleased(), a.getExtraCredit(), a.getCategorizedSortOrder(), null);
-					transversalMap.put("gb/"+a.getId(),"gb/"+newId);
-				} catch (final ConflictingAssignmentNameException e) {
-					// assignment already exists. Could be from a merge.
-					log.info("GradebookAssignment: {} already exists in target site. Skipping creation.", taskName);
-				} catch (final Exception ex) {
-					log.warn("GradebookAssignment: exception {} trying to create {} in target site. Skipping creation.", ex.getMessage(), taskName);
-				}
+            if (!copyOnlySettings) {
+                // create the assignment for the current category
+                try {
+                    Long newId = createAssignmentForCategory(gradebook.getId(), categoriesCreated.get(c.getName()), taskName, a.getPoints(),
+                                         a.getDueDate(), !a.getCounted(), a.getReleased(), a.getExtraCredit(), a.getCategorizedSortOrder(), null);
+                    transversalMap.put("gb/"+a.getId(),"gb/"+newId);
+                } catch (final ConflictingAssignmentNameException e) {
+                    // assignment already exists. Could be from a merge.
+                    log.info("GradebookAssignment: {} already exists in target site. Skipping creation.", taskName);
+                } catch (final Exception ex) {
+                    log.warn("GradebookAssignment: exception {} trying to create {} in target site. Skipping creation.", ex.getMessage(), taskName);
+                }
 
-				// record that we have created this assignment
-				assignmentsCreated.add(taskName);
-			}
+                // record that we have created this assignment
+                assignmentsCreated.add(taskName);
+            }
                     }
                 });
             });
@@ -722,9 +732,9 @@ public class GradingServiceImpl implements GradingService {
                 categories.removeIf(c -> categoriesCreated.containsKey(c.getName()));
                 categories.forEach(c -> {
                     try {
-			    Double weight = Objects.equals(toCategoryType, GradingConstants.CATEGORY_TYPE_WEIGHTED_CATEGORY)
-					 ? c.getWeight()
-					 : Double.valueOf(0.0);
+                Double weight = Objects.equals(toCategoryType, GradingConstants.CATEGORY_TYPE_WEIGHTED_CATEGORY)
+                     ? c.getWeight()
+                     : Double.valueOf(0.0);
                         createCategory(gradebook.getId(), c.getName(), weight, c.getDropLowest(), c.getDropHighest(), c.getKeepHighest(),
                                 c.getExtraCredit(), c.getEqualWeight(), c.getCategoryOrder());
                     } catch (final ConflictingCategoryNameException e) {
@@ -735,36 +745,36 @@ public class GradingServiceImpl implements GradingService {
             }
         }
 
-	if (!copyOnlySettings) {
-		// create any remaining assignments that have no categories
-		assignments.removeIf(a -> {
-				String taskName;
-				if (isGradebookGroupEnabled(fromContext)) {
-					final int dash = a.getName().lastIndexOf('-');
-					taskName = (dash >= 0) ? a.getName().substring(dash + 1) : a.getName();
-				} else {
-					taskName = a.getName();
-				}
+    if (!copyOnlySettings) {
+        // create any remaining assignments that have no categories
+        assignments.removeIf(a -> {
+                String taskName;
+                if (isGradebookGroupEnabled(fromContext)) {
+                    final int dash = a.getName().lastIndexOf('-');
+                    taskName = (dash >= 0) ? a.getName().substring(dash + 1) : a.getName();
+                } else {
+                    taskName = a.getName();
+                }
 
-				return assignmentsCreated.contains(taskName);
-			});
-		assignments.forEach(a -> {
-				int dash = a.getName().lastIndexOf('-');
-				String taskName = isGradebookGroupEnabled(fromContext) && dash >= 0
-					? a.getName().substring(dash + 1)
-					: a.getName();
+                return assignmentsCreated.contains(taskName);
+            });
+        assignments.forEach(a -> {
+                int dash = a.getName().lastIndexOf('-');
+                String taskName = isGradebookGroupEnabled(fromContext) && dash >= 0
+                    ? a.getName().substring(dash + 1)
+                    : a.getName();
 
-				try {
-					Long newId = createAssignment(gradebook.getId(), taskName, a.getPoints(), a.getDueDate(), !a.getCounted(), a.getReleased(), a.getExtraCredit(), a.getSortOrder(), null);
-					transversalMap.put("gb/"+a.getId(),"gb/"+newId);
-				} catch (final ConflictingAssignmentNameException e) {
-					// assignment already exists. Could be from a merge.
-					log.info("GradebookAssignment: {} already exists in target site. Skipping creation.", taskName);
-				} catch (final Exception ex) {
-					log.warn("GradebookAssignment: exception {} trying to create {} in target site. Skipping creation.", ex.getMessage(), taskName);
-				}
-			});
-	}
+                try {
+                    Long newId = createAssignment(gradebook.getId(), taskName, a.getPoints(), a.getDueDate(), !a.getCounted(), a.getReleased(), a.getExtraCredit(), a.getSortOrder(), null);
+                    transversalMap.put("gb/"+a.getId(),"gb/"+newId);
+                } catch (final ConflictingAssignmentNameException e) {
+                    // assignment already exists. Could be from a merge.
+                    log.info("GradebookAssignment: {} already exists in target site. Skipping creation.", taskName);
+                } catch (final Exception ex) {
+                    log.warn("GradebookAssignment: exception {} trying to create {} in target site. Skipping creation.", ex.getMessage(), taskName);
+                }
+            });
+    }
 
         if (copySettings) {
             // Carry over the old gradebook's selected grading scheme if possible.
@@ -3164,7 +3174,7 @@ public class GradingServiceImpl implements GradingService {
         // Calculate scores for each student
         for (String studentUuid : studentUuids) {
             List<AssignmentGradeRecord> studentGradeRecords = gradeRecMap.get(studentUuid);
-            
+
             if (studentGradeRecords == null || studentGradeRecords.isEmpty()) {
                 log.debug("No grade records found for student: {}", studentUuid);
                 allCategoryScores.put(studentUuid, new HashMap<>());
@@ -5873,5 +5883,333 @@ public class GradingServiceImpl implements GradingService {
         } catch (Exception e) {
             log.warn("Could not hard delete gradebook for context {}", siteId, e);
         }
+    }
+
+    /**
+     * Get a list of all users in the given site, filtered by the given group, that can have grades
+     *
+     * @param siteId the id of the site to lookup
+     * @param groupFilter Group to filter on
+     *
+     * @return a list of users as uuids or null if none
+     */
+    public List<String> getGradeableUsers(String gradebookId, String siteId, String groupFilter) {
+
+        try {
+
+            // note that this list MUST exclude TAs as it is checked in the
+            // GradingService and will throw a SecurityException if invalid
+            // users are provided
+            Site site = siteService.getSite(siteId);
+            Set<String> userIds = site.getUsersIsAllowed(GbRole.STUDENT.getValue());
+
+            // filter the allowed list based on membership
+            if (StringUtils.isNotBlank(groupFilter) || !gradebookId.equals(siteId)) {
+                String groupId = StringUtils.isNotBlank(groupFilter) ? groupFilter : gradebookId;
+                Set<String> groupMembers = new HashSet<>();
+
+                Set<Member> members = site.getGroup(groupId).getMembers();
+                for (Member m : members) {
+                    if (userIds.contains(m.getUserId())) {
+                        groupMembers.add(m.getUserId());
+                    }
+                }
+
+                // only keep the ones we identified in the group
+                userIds.retainAll(groupMembers);
+            }
+
+            GbRole role = getUserRole(siteId);
+
+            // if TA, pass it through the gradebook permissions (only if there
+            // are permissions)
+            if (role == GbRole.TA) {
+                org.sakaiproject.user.api.User user = userDirectoryService.getCurrentUser();
+
+                // if there are permissions, pass it through them
+                // don't need to test TA access if no permissions
+                 List<PermissionDefinition> perms = getPermissionsForUser(user.getId(), gradebookId, siteId);
+                if (!perms.isEmpty()) {
+
+                    // get list of sections and groups this TA has access to
+                     List<CourseSection> courseSections = getViewableSections(gradebookId, siteId);
+
+                    //for each section TA has access to, grab student Id's
+                    List<String> viewableStudents = new ArrayList<>();
+
+                    Map<String, List<String>> groupMembers = getGroupMemberships(gradebookId, siteId);
+
+                    //iterate through sections available to the TA and build a list of the student members of each section
+                    if(courseSections != null && !courseSections.isEmpty() && groupMembers!=null){
+                        for(CourseSection section:courseSections){
+                            if(groupMembers.containsKey(section.getUuid())) {
+                                List<String> members = groupMembers.get(section.getUuid());
+                                for (String member : members) {
+                                    if (siteId != null && member != null && securityService.unlock(member, GbPortalPermission.VIEW_OWN_GRADES.getValue(), siteService.siteReference(siteId))){
+                                        viewableStudents.add(member);
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    // If all group IDs in perms are null, this means TA has permission to view/grade All Sections/Groups.
+                    // In this situation, we should add non-provided site members to their viewable list
+                    List<String> nonProvidedMembers = site.getMembers().stream().filter(m -> !m.isProvided()).map(Member::getUserId).collect(Collectors.toList());
+                    if (perms.stream().allMatch(p -> p.getGroupReference() == null)) {
+                        viewableStudents.addAll(nonProvidedMembers);
+                    }
+
+                    if (!viewableStudents.isEmpty()) {
+                        userIds.retainAll(viewableStudents); // retain only those that are visible to this TA
+                    } else {
+                        userIds.removeAll(sectionManager.getSectionEnrollmentsForStudents(siteId, userIds).getStudentUuids()); // TA can view/grade students without section
+                        nonProvidedMembers.forEach(userIds::remove); // Filter out non-provided users
+                    }
+                }
+            }
+
+            return new ArrayList<>(userIds);
+        } catch ( IdUnusedException e) {
+            log.warn("IdUnusedException trying to getGradeableUsers", e);
+            return null;
+        } catch ( GbAccessDeniedException e) {
+            log.warn("GbAccessDeniedException trying to getGradeableUsers", e);
+            return null;
+        }
+    }
+
+    /**
+     * Get the role of the current user in the given site
+     *
+     * @param siteId the siteId to check
+     * @return GbRole for the current user
+     * @throws GbAccessDeniedException if something goes wrong checking the site or user permissions
+     */
+    public GbRole getUserRole(String siteId) throws GbAccessDeniedException {
+
+        String userId = userDirectoryService.getCurrentUser().getId();
+
+        String siteRef;
+        try {
+            siteRef = siteService.getSite(siteId).getReference();
+        } catch (IdUnusedException e) {
+            throw new GbAccessDeniedException(e);
+        }
+
+        GbRole rval;
+
+        if (securityService.unlock(userId, GbRole.INSTRUCTOR.getValue(), siteRef)) {
+            rval = GbRole.INSTRUCTOR;
+        } else if (securityService.unlock(userId, GbRole.TA.getValue(), siteRef)) {
+            rval = GbRole.TA;
+        } else if (securityService.unlock(userId, GbRole.STUDENT.getValue(), siteRef)) {
+            rval = GbRole.STUDENT;
+        } else {
+            throw new GbAccessDeniedException("Current user does not have a valid section.role.x permission");
+        }
+
+        return rval;
+    }
+
+    public List<PermissionDefinition> getPermissionsForUser(String userId, String gradebookId, String siteId) {
+
+        List<PermissionDefinition> permissions = gradingPermissionService.getPermissionsForUser(gradebookId, userId);
+
+        //if db permissions are null, check realms permissions.
+        if (permissions == null || permissions.isEmpty()) {
+            //This method should return empty arraylist if they have no realms perms
+            permissions = gradingPermissionService.getRealmsPermissionsForUser(userId, siteId, Role.TA);
+        }
+        return permissions;
+    }
+
+    /**
+     * Build a list of group references to site membership (as uuids) for the groups that are viewable for the current user.
+     *
+     * @return
+     */
+    public Map<String, List<String>> getGroupMemberships(String gradebookId, String siteId) {
+
+        Site site;
+        try {
+            site = siteService.getSite(siteId);
+        } catch (final IdUnusedException e) {
+            log.error("Error looking up site: {}", siteId, e);
+            return null;
+        }
+
+        // filtered for the user
+        List<GbGroup> viewableGroups = getSiteSectionsAndGroups(gradebookId, siteId);
+
+        Map<String, List<String>> rval = new HashMap<>();
+
+        for (GbGroup gbGroup : viewableGroups) {
+            String groupReference = gbGroup.getReference();
+            List<String> memberUuids = new ArrayList<>();
+
+            Group group = site.getGroup(groupReference);
+            if (group != null) {
+                Set<Member> members = group.getMembers();
+
+                for (Member m : members) {
+                    memberUuids.add(m.getUserId());
+                }
+            }
+
+            rval.put(groupReference, memberUuids);
+
+        }
+
+        return rval;
+    }
+
+    /**
+     * Get a list of sections and groups in a site
+     *
+     * @param gradebookUid the gradebook to get sections/groups for
+     * @param siteId the site id to get sections/groups for
+     * @return a list of sections and groups in the site
+     */
+    public List<GbGroup> getSiteSectionsAndGroups(String gradebookUid, String siteId) {
+
+        final List<GbGroup> rval = new ArrayList<>();
+
+        GbRole role;
+        try {
+            role = getUserRole(siteId);
+        } catch (final GbAccessDeniedException e) {
+            log.warn("Could not fetch the users role in site [{}], {}", siteId, e.toString());
+            return rval;
+        }
+
+        // get groups (handles both groups and sections)
+        try {
+            final Site site = this.siteService.getSite(siteId);
+            final Collection<Group> groups = securityService.isSuperUser() || role == GbRole.INSTRUCTOR ?
+                site.getGroups() :
+                site.getGroupsWithMember(userDirectoryService.getCurrentUser().getId());
+
+            for (final Group group : groups) {
+                if (gradebookUid.equals(siteId) || gradebookUid.equals(group.getId())) {
+                    rval.add(new GbGroup(group.getId(), group.getTitle(), group.getReference(), GbGroup.Type.GROUP));
+                }
+            }
+
+        } catch (final IdUnusedException e) {
+            // essentially ignore and use what we have
+            log.error("Error retrieving groups", e);
+        }
+
+        // if user is a TA, get the groups they can see and filter the GbGroup list
+        if (role == GbRole.TA) {
+            final Gradebook gradebook = this.getGradebook(gradebookUid, siteId);
+            final org.sakaiproject.user.api.User user = userDirectoryService.getCurrentUser();
+            boolean canGradeAll = false;
+
+            // need list of all groups as REFERENCES (not ids)
+            final List<String> allGroupIds = new ArrayList<>();
+            for (final GbGroup group : rval) {
+                allGroupIds.add(group.getReference());
+            }
+
+            // get the ones the TA can actually view
+            List<String> viewableGroupIds = this.gradingPermissionService
+                    .getViewableGroupsForUser(gradebook.getId(), user.getId(), allGroupIds);
+
+            if (viewableGroupIds == null) {
+                viewableGroupIds = new ArrayList<>();
+            }
+
+            //FIXME: Another realms hack. The above method only returns groups from gb_permission_t. If this list is empty,
+            //need to check realms to see if user has privilege to grade any groups.
+            if (CollectionUtils.isEmpty(viewableGroupIds)) {
+                List<PermissionDefinition> realmsPerms = getPermissionsForUser(user.getId(), gradebookUid, siteId);
+                if (CollectionUtils.isNotEmpty(realmsPerms)) {
+                    for (PermissionDefinition permDef : realmsPerms) {
+                        if (permDef.getGroupReference() != null) {
+                            viewableGroupIds.add(permDef.getGroupReference());
+                        } else {
+                            canGradeAll = true;
+                        }
+                    }
+                }
+            }
+
+            if (!canGradeAll) {
+                // remove the ones that the user can't view
+                final Iterator<GbGroup> iter = rval.iterator();
+                while (iter.hasNext()) {
+                    final GbGroup group = iter.next();
+                    if (!viewableGroupIds.contains(group.getReference())) {
+                        iter.remove();
+                    }
+                }
+            }
+
+        }
+
+        Collections.sort(rval);
+
+        return rval;
+    }
+
+    public GbChartData getCourseGrades(String siteId, String gradebookId, Map<String, Double> gradingSchema) {
+
+        // ensure schema is sorted so the grade mapping works correctly
+        Map<String, Double> schema = GradeMappingDefinition.sortGradeMapping(gradingSchema);
+
+        // get the course grades and re-map. Also sorts the data so it is ready for the consumer to use
+        //Map<String, CourseGradeTransferBean> courseGrades = gradingService.getCourseGrades(gradebookId, siteId, gradingService.getGradeableUsers(gradebookId, siteId, null), schema);
+        List<String> studentIds = getGradeableUsers(gradebookId, siteId, null);
+
+        Map<String, CourseGradeTransferBean> courseGrades = new HashMap<>();
+        if (gradebookId != null) {
+            if (schema != null) {
+                courseGrades = getCourseGradeForStudents(gradebookId, siteId, studentIds, schema);
+            } else {
+                courseGrades = getCourseGradeForStudents(gradebookId, siteId, studentIds);
+            }
+        }
+
+        GbChartData data = reMap(courseGrades, gradingSchema.keySet());
+
+        /*
+        if (this.studentGrade != null) {
+            data.setStudentGradeRange(this.studentGrade.getDisplayGrade());
+        }
+        */
+
+        return data;
+    }
+
+    /**
+     * Re-map the course grades returned from the business service into our {@link GbChartData} object for returning on the REST API.
+     *
+     * @param courseGrades map of student to course grade
+     * @param gradingSchema the grading schema that has the order
+     * @return
+     */
+    private GbChartData reMap(Map<String, CourseGradeTransferBean> courseGrades, Set<String> order) {
+
+        GbChartData data = new GbChartData();
+        courseGrades.forEach((k, v) -> {
+            data.add(v.getDisplayGrade());
+        });
+
+        // sort the map based on the ordered schema
+        final Map<String, Integer> originalData = data.getDataset();
+        final Map<String, Integer> sortedData = new LinkedHashMap<>();
+        order.forEach(o -> {
+            // data set must contain everything in the grading schema
+            Integer value = originalData.get(o);
+            if (value == null) {
+                value = 0;
+            }
+            sortedData.put(o, value);
+        });
+        data.setDataset(sortedData);
+
+        return data;
     }
 }

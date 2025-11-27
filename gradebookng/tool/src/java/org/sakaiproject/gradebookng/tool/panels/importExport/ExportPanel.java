@@ -48,7 +48,7 @@ import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 import org.sakaiproject.component.cover.ComponentManager;
 import org.sakaiproject.gradebookng.business.model.GbGradeInfo;
-import org.sakaiproject.gradebookng.business.model.GbGroup;
+import org.sakaiproject.grading.api.GbGroup;
 import org.sakaiproject.gradebookng.business.model.GbStudentGradeInfo;
 import org.sakaiproject.gradebookng.business.model.GbUser;
 import org.sakaiproject.gradebookng.business.util.EventHelper;
@@ -601,7 +601,7 @@ public class ExportPanel extends BasePanel {
 		Map<String, String> userEids = this.businessService.getGbUsers(currentSiteId, userIds).stream()
 				.collect(Collectors.toMap(GbUser::getUserUuid, GbUser::getDisplayId));
 
-		Map<String, CourseGradeTransferBean> courseGrades = this.businessService.getCourseGrades(currentGradebookUid, currentSiteId, userIds, null);
+		Map<String, CourseGradeTransferBean> courseGrades = gradingService.getCourseGradeForStudents(currentGradebookUid, currentSiteId, userIds);
 
 		try {
 			File tempFile = File.createTempFile("gradebookExport", TXT_EXTENSION);

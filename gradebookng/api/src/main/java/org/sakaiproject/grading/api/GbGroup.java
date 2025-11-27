@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.sakaiproject.gradebookng.business.model;
+package org.sakaiproject.grading.api;
 
 import java.io.Serializable;
 import java.util.Comparator;

@@ -24,9 +24,9 @@ import org.apache.wicket.request.mapper.parameter.PageParameters;
 import org.sakaiproject.gradebookng.business.util.FormatHelper;
 import org.sakaiproject.grading.api.GradingConstants;
 import org.sakaiproject.gradebookng.business.GradeSaveResponse;
-import org.sakaiproject.gradebookng.business.model.GbGroup;
 import org.sakaiproject.gradebookng.tool.panels.BulkGradePanel;
 import org.sakaiproject.grading.api.Assignment;
+import org.sakaiproject.grading.api.GbGroup;
 import org.sakaiproject.grading.api.SortType;
 
 import lombok.Getter;

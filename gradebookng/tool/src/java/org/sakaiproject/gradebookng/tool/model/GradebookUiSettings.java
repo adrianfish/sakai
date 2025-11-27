@@ -26,8 +26,8 @@ import org.apache.commons.lang3.builder.ToStringStyle;
 import org.sakaiproject.gradebookng.business.SortDirection;
 import org.sakaiproject.gradebookng.business.model.GbAssignmentGradeSortOrder;
 import org.sakaiproject.gradebookng.business.model.GbCategoryAverageSortOrder;
-import org.sakaiproject.gradebookng.business.model.GbGroup;
 import org.sakaiproject.gradebookng.business.model.GbStudentNameSortOrder;
+import org.sakaiproject.grading.api.GbGroup;
 
 import lombok.Getter;
 import lombok.Setter;

@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.sakaiproject.gradebookng.tool.model;
+package org.sakaiproject.grading.api;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -27,39 +27,29 @@ import lombok.Setter;
  * Class that wraps up the summary of grades for an assignment or course grade. Provides the dataset, config and labels to be used by the
  * chart
  */
+@Getter
+@Setter
 public class GbChartData {
 
 	/**
 	 * Key is the label, ie letter grade, value is the count of students that have that grade
 	 */
-	@Getter
-	@Setter
 	private Map<String, Integer> dataset;
 
-	@Getter
-	@Setter
 	private String chartTitle;
 
-	@Getter
-	@Setter
 	private String xAxisLabel;
 
-	@Getter
-	@Setter
 	private String yAxisLabel;
 
 	/**
 	 * 'horizontalBar' or 'bar' are currently supported options
 	 */
-	@Getter
-	@Setter
 	private String chartType;
 
 	/**
 	 * HTML ID of the chart
 	 */
-	@Getter
-	@Setter
 	private String chartId;
 
 	/**
@@ -67,8 +57,6 @@ public class GbChartData {
 	 * Providing this value is optional and sets that bar in the graph to a different 
 	 * colour so a student can see where their mark fits in comparison to others.
 	 */
-	@Getter
-	@Setter
 	private String studentGradeRange;
 
 	public GbChartData() {

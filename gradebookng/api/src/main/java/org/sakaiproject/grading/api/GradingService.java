@@ -30,6 +30,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
+import org.sakaiproject.grading.api.GbChartData;
 import org.sakaiproject.grading.api.model.Category;
 import org.sakaiproject.grading.api.model.CourseGrade;
 import org.sakaiproject.grading.api.model.Gradebook;
@@ -1005,4 +1006,10 @@ public interface GradingService extends EntityProducer {
     public void initializeGradebooksForSite(String siteId);
     public Double convertStringToDouble(final String doubleAsString);
     public void hardDeleteGradebook(String siteId);
+    public List<String> getGradeableUsers(String gradebookId, String siteId, String groupFilter);
+    public GbRole getUserRole(String siteId) throws GbAccessDeniedException;
+    public List<PermissionDefinition> getPermissionsForUser(String userId, String gradebookId, String siteId);
+    public Map<String, List<String>> getGroupMemberships(String gradebookId, String siteId);
+    public List<GbGroup> getSiteSectionsAndGroups(String gradebookUid, String siteId);
+    public GbChartData getCourseGrades(String siteId, String gradebookId, Map<String, Double> gradingSchema);
 }

@@ -19,6 +19,7 @@ import static org.mockito.Mockito.mock;
 
 import org.sakaiproject.plus.api.PlusService;
 import org.sakaiproject.section.api.SectionAwareness;
+import org.sakaiproject.section.api.SectionManager;
 import org.sakaiproject.springframework.orm.hibernate.AdditionalHibernateMappings;
 import org.sakaiproject.test.SakaiTestConfiguration;
 
@@ -46,6 +47,11 @@ public class GradingTestConfiguration extends SakaiTestConfiguration {
     @Bean(name = "org.sakaiproject.section.api.SectionAwareness")
     public SectionAwareness sectionAwareness() {
         return mock(SectionAwareness.class);
+    }
+
+    @Bean(name = "org.sakaiproject.section.api.SectionManager")
+    public SectionManager sectionManager() {
+        return mock(SectionManager.class);
     }
 
     @Bean(name = "org.sakaiproject.plus.api.PlusService")

@@ -25,7 +25,11 @@ import org.sakaiproject.entity.api.EntityManager;
 import org.sakaiproject.exception.IdUnusedException;
 import org.sakaiproject.grading.api.Assignment;
 import org.sakaiproject.grading.api.CategoryDefinition;
+import org.sakaiproject.grading.api.CourseGradeTransferBean;
+import org.sakaiproject.grading.api.GbChartData;
+import org.sakaiproject.grading.api.GradebookInformation;
 import org.sakaiproject.grading.api.GradeDefinition;
+import org.sakaiproject.grading.api.GradeMappingDefinition;
 import org.sakaiproject.grading.api.GradingAuthz;
 import org.sakaiproject.grading.api.GradingConstants;
 import org.sakaiproject.grading.api.SortType;
@@ -41,7 +45,9 @@ import org.sakaiproject.user.api.UserDirectoryService;
 import org.sakaiproject.webapi.beans.GradebookItemRestBean;
 import org.sakaiproject.webapi.beans.GradebookRestBean;
 import org.sakaiproject.webapi.beans.GradeRestBean;
+
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -333,6 +339,23 @@ public class GradesController extends AbstractSakaiApiController {
         return gbWithItems;
     }
 
+    @GetMapping(value = "/sites/{siteId}/grades/{gradebookId}/courseGrades", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<GbChartData> getCourseGrades(@PathVariable String siteId, @PathVariable String gradebookId) {
+
+        GradebookInformation info = gradingService.getGradebookInformation(gradebookId, siteId);
+        Map<String, Double> gradingSchema = info.getSelectedGradingScaleBottomPercents();
+
+        GbChartData data = gradingService.getCourseGrades(siteId, gradebookId, gradingSchema);
+
+        /*
+        if (this.studentGrade != null) {
+            data.setStudentGradeRange(this.studentGrade.getDisplayGrade());
+        }
+        */
+
+        return ResponseEntity.ok(data);
+    }
+
     private Map<String, String> returnFoundGradebooks(String siteId, String userId) {
 
         try {
@@ -364,5 +387,4 @@ public class GradesController extends AbstractSakaiApiController {
             return new HashMap<>();
         }
     }
-
 }

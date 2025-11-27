@@ -158,3 +158,7 @@ window.addEventListener("DOMContentLoaded", e => {
     expandedButtons.forEach(button => button.click());
   });
 });
+
+function setChartData(jsonData) {
+	document.querySelector("sakai-course-grades-chart").setData(jsonData);
+}

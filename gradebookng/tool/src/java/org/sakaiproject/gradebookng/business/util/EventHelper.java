@@ -18,11 +18,10 @@ package org.sakaiproject.gradebookng.business.util;
 import org.apache.commons.lang3.StringUtils;
 
 import org.sakaiproject.gradebookng.business.GbEvent;
-import org.sakaiproject.gradebookng.business.GbRole;
-
 import org.sakaiproject.gradebookng.business.GradeSaveResponse;
-import org.sakaiproject.grading.api.model.Gradebook;
 import org.sakaiproject.grading.api.Assignment;
+import org.sakaiproject.grading.api.GbRole;
+import org.sakaiproject.grading.api.model.Gradebook;
 import org.sakaiproject.event.cover.EventTrackingService;
 import org.sakaiproject.event.api.Event;
 

@@ -15,10 +15,11 @@
  */
 package org.sakaiproject.gradebookng.tool.panels;
 
+import org.apache.wicket.AttributeModifier;
 import org.apache.wicket.ajax.AjaxRequestTarget;
 import org.apache.wicket.extensions.ajax.markup.html.modal.ModalWindow;
+import org.apache.wicket.markup.html.WebMarkupContainer;
 import org.apache.wicket.model.ResourceModel;
-import org.sakaiproject.gradebookng.tool.chart.CourseGradeChart;
 import org.sakaiproject.gradebookng.tool.component.GbAjaxLink;
 import org.sakaiproject.grading.api.CourseGradeTransferBean;
 
@@ -46,8 +47,10 @@ public class StudentCourseGradeStatisticsPanel extends BasePanel {
 
 		StudentCourseGradeStatisticsPanel.this.window.setTitle(new ResourceModel("label.statistics.title.coursegrade"));
 
-		final CourseGradeChart chart = new CourseGradeChart("chart", studentGrade);
-		chart.setCurrentGradebookAndSite(currentGradebookUid, currentSiteId);
+		final WebMarkupContainer chart = new WebMarkupContainer("chart");
+		String siteId = getCurrentSiteId();
+		String dataUrl = "/api/sites/" + siteId + "/grades/" + siteId + "/courseGrades";
+		chart.add(AttributeModifier.append("data-url", dataUrl));
 		add(chart);
 
 		add(new GbAjaxLink<Void>("done") {

@@ -33,10 +33,12 @@
   },
   "exports": {
     ".": "./index.js",
-    "./sakai-grades.js": "./sakai-grades.js"
+    "./sakai-grades.js": "./sakai-grades.js",
+    "./sakai-course-grades-chart.js": "./sakai-course-grades-chart.js"
   },
   "dependencies": {
     "@sakai-ui/sakai-icon": "file:../sakai-icon",
-    "@sakai-ui/sakai-pageable-element": "file:../sakai-pageable-element"
+    "@sakai-ui/sakai-pageable-element": "file:../sakai-pageable-element",
+    "chart.js": "^4.5.1"
   }
 }

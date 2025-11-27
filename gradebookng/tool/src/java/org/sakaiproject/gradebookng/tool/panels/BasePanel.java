@@ -34,10 +34,11 @@ import org.apache.wicket.AttributeModifier;
 import org.sakaiproject.assignment.api.AssignmentService;
 import org.sakaiproject.authz.api.AuthzGroupService;
 import org.sakaiproject.component.api.ServerConfigurationService;
-import org.sakaiproject.gradebookng.business.GbRole;
 import org.sakaiproject.gradebookng.business.GradebookNgBusinessService;
-import org.sakaiproject.gradebookng.business.exception.GbAccessDeniedException;
 import org.sakaiproject.gradebookng.tool.pages.AccessDeniedPage;
+import org.sakaiproject.grading.api.GradingService;
+import org.sakaiproject.grading.api.GbAccessDeniedException;
+import org.sakaiproject.grading.api.GbRole;
 import org.sakaiproject.grading.api.GradebookInformation;
 import org.sakaiproject.grading.api.MessageHelper;
 import org.sakaiproject.grading.api.model.Gradebook;
@@ -54,6 +55,9 @@ import org.sakaiproject.util.ResourceLoader;
 public abstract class BasePanel extends Panel {
 
 	private static final long serialVersionUID = 1L;
+
+	@SpringBean(name = "org.sakaiproject.grading.api.GradingService")
+	protected GradingService gradingService;
 
 	@SpringBean(name = "org.sakaiproject.gradebookng.business.GradebookNgBusinessService")
 	protected GradebookNgBusinessService businessService;

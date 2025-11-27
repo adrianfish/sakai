@@ -37,3 +37,21 @@ export const grades = [
   { name: "Euler Series", ungraded: 8, score: "23.7", notGradedYet: false, url: "/grades/euler", siteTitle: "French 101", canGrade: true },
   { name: "Fast Fourier Transform", ungraded: 0, score: "85", notGradedYet: false, url: "/grades/fft", siteTitle: "Math 101" },
 ];
+
+export const gbId = "sports";
+
+export const dataset = {
+  "A+": 0,
+  "A": 0,
+};
+
+export const chartData = {
+  dataset,
+  chartTitle: "Grades",
+  chartType: "line",
+  xAxisLabel: "Students",
+  yAxisLabel: "Course Grade",
+};
+
+
+export const chartDataUrl= `/api/sites/xyz/grades/${gbId}/gpa`;
