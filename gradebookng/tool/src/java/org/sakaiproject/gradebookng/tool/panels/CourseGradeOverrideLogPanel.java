@@ -28,10 +28,10 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.ResourceModel;
 import org.apache.wicket.model.StringResourceModel;
 import org.sakaiproject.gradebookng.business.model.GbGradeLog;
-import org.sakaiproject.gradebookng.business.model.GbUser;
-import org.sakaiproject.gradebookng.business.util.FormatHelper;
 import org.sakaiproject.gradebookng.tool.component.GbAjaxLink;
 import org.sakaiproject.grading.api.CourseGradeTransferBean;
+import org.sakaiproject.grading.api.FormatHelper;
+import org.sakaiproject.grading.api.GbUser;
 
 /**
  * Panel for the course grade override log window

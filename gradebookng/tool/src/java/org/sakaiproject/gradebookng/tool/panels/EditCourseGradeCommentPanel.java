@@ -14,8 +14,8 @@ import org.apache.wicket.model.StringResourceModel;
 import org.apache.wicket.validation.validator.StringValidator;
 
 import org.sakaiproject.gradebookng.business.importExport.CommentValidator;
-import org.sakaiproject.gradebookng.business.model.GbUser;
 import org.sakaiproject.gradebookng.tool.component.GbAjaxButton;
+import org.sakaiproject.grading.api.GbUser;
 
 import lombok.Getter;
 import lombok.Setter;

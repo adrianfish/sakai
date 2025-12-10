@@ -36,14 +36,14 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.model.StringResourceModel;
 import org.sakaiproject.component.cover.ComponentManager;
-import org.sakaiproject.gradebookng.business.util.FormatHelper;
 import org.sakaiproject.gradebookng.tool.component.GbAjaxButton;
 import org.sakaiproject.gradebookng.tool.component.GbFeedbackPanel;
-import org.sakaiproject.gradebookng.tool.model.GradebookUiSettings;
 import org.sakaiproject.gradebookng.tool.pages.GradebookPage;
 import org.sakaiproject.grading.api.Assignment;
+import org.sakaiproject.grading.api.FormatHelper;
 import org.sakaiproject.grading.api.GbGroup;
 import org.sakaiproject.grading.api.GbRole;
+import org.sakaiproject.grading.api.GradebookUiSettings;
 import org.sakaiproject.grading.api.GraderPermission;
 import org.sakaiproject.grading.api.GradingConstants;
 import org.sakaiproject.grading.api.PermissionDefinition;
@@ -165,8 +165,8 @@ public class UpdateUngradedItemsPanel extends BasePanel {
 		groups.add(0, new GbGroup(null, getString("groups.all"), null, GbGroup.Type.ALL));
 
 		if (getUserRole() == GbRole.TA) {
-			final boolean categoriesEnabled = this.businessService.categoriesAreEnabled(currentGradebookUid, currentSiteId);
-			final List<PermissionDefinition> permissions = this.businessService.getPermissionsForUser(getCurrentUserId(), currentGradebookUid, currentSiteId);
+			final boolean categoriesEnabled = gradingService.categoriesAreEnabled(currentGradebookUid, currentSiteId);
+			final List<PermissionDefinition> permissions = gradingService.getPermissionsForUser(getCurrentUserId(), currentGradebookUid, currentSiteId);
 
 			final List<String> gradableGroupIds = new ArrayList<>();
 			boolean canGradeAllGroups = false;

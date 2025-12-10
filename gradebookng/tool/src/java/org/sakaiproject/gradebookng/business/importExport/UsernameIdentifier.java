@@ -24,9 +24,9 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
 import org.sakaiproject.gradebookng.business.model.GbUnidentifiedUser;
-import org.sakaiproject.gradebookng.business.model.GbUser;
-import org.sakaiproject.gradebookng.business.model.GbUserBase;
 import org.sakaiproject.gradebookng.business.model.ImportedRow;
+import org.sakaiproject.grading.api.GbUser;
+import org.sakaiproject.grading.api.GbUserBase;
 
 /**
  * Identifier utility for user EIDs.

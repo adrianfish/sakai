@@ -19,7 +19,7 @@ import java.text.Collator;
 import java.util.Comparator;
 
 import org.apache.commons.lang3.builder.CompareToBuilder;
-import org.sakaiproject.gradebookng.business.model.GbUser;
+import org.sakaiproject.grading.api.GbUser;
 
 /**
  * Comparator class for sorting a list of GbUser by first name.

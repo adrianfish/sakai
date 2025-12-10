@@ -77,7 +77,7 @@ public class AssignmentStatisticsPanel extends BasePanel {
 	 */
 	private IModel<Map<String, Object>> getData(final Assignment assignment) {
 		final Map<String, Object> data = new HashMap<>();
-		data.put("gradeInfo", this.businessService.buildGradeMatrix(currentGradebookUid, currentSiteId, 
+		data.put("gradeInfo", gradingService.buildGradeMatrix(currentGradebookUid, currentSiteId, 
 				Arrays.asList(assignment),
 				businessService.getGradeableUsers(currentGradebookUid, currentSiteId, null),
 				null));

@@ -46,8 +46,10 @@ import org.sakaiproject.exception.InUseException;
 import org.sakaiproject.exception.PermissionException;
 import org.sakaiproject.gradebookng.business.GradebookNgBusinessService;
 import org.sakaiproject.gradebookng.tool.component.GbFeedbackPanel;
+import org.sakaiproject.grading.api.FormatHelper;
 import org.sakaiproject.grading.api.GbAccessDeniedException;
 import org.sakaiproject.grading.api.GbRole;
+import org.sakaiproject.grading.api.GradingService;
 import org.sakaiproject.portal.util.PortalUtils;
 import org.sakaiproject.rubrics.api.RubricsService;
 import org.sakaiproject.tool.api.Placement;
@@ -72,6 +74,12 @@ public class BasePage extends WebPage {
 
 	@SpringBean(name = "org.sakaiproject.gradebookng.business.GradebookNgBusinessService")
 	protected GradebookNgBusinessService businessService;
+
+	@SpringBean(name = "org.sakaiproject.grading.api.FormatHelper")
+	protected FormatHelper formatHelper;
+
+	@SpringBean(name = "org.sakaiproject.grading.api.GradingService")
+	protected GradingService gradingService;
 
 	@SpringBean(name = "org.sakaiproject.rubrics.api.RubricsService")
 	protected RubricsService rubricsService;

@@ -15,6 +15,8 @@
  */
 package org.sakaiproject.gradebookng.business.model;
 
+import org.sakaiproject.grading.api.GbUserBase;
+
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;

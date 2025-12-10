@@ -25,12 +25,12 @@ import org.apache.wicket.markup.html.panel.FeedbackPanel;
 import org.apache.wicket.spring.injection.annot.SpringBean;
 import org.sakaiproject.gradebookng.business.GradeSaveResponse;
 import org.sakaiproject.gradebookng.business.GradebookNgBusinessService;
-import org.sakaiproject.gradebookng.business.util.CourseGradeFormatter;
-import org.sakaiproject.gradebookng.business.util.FormatHelper;
-import org.sakaiproject.gradebookng.tool.model.GradebookUiSettings;
+import org.sakaiproject.grading.api.FormatHelper;
 import org.sakaiproject.gradebookng.tool.pages.GradebookPage;
+import org.sakaiproject.grading.api.CourseGradeFormatter;
 import org.sakaiproject.grading.api.CategoryScoreData;
 import org.sakaiproject.grading.api.CourseGradeTransferBean;
+import org.sakaiproject.grading.api.GradebookUiSettings;
 import org.sakaiproject.grading.api.model.Gradebook;
 
 import java.io.Serializable;
@@ -41,8 +41,12 @@ import java.util.Optional;
 public class ExcuseGradeAction extends InjectableAction implements Serializable {
 
     private static final long serialVersionUID = 1L;
+
     @SpringBean(name = "org.sakaiproject.gradebookng.business.GradebookNgBusinessService")
     private GradebookNgBusinessService businessService;
+
+    @SpringBean(name = "org.sakaiproject.grading.api.FormatHelper")
+    private FormatHelper formatHelper;
 
     private class ExcuseGradeResponse implements ActionResponse {
         private String courseGrade;
@@ -123,7 +127,7 @@ public class ExcuseGradeAction extends InjectableAction implements Serializable 
 
         if (studentCourseGrade != null) {
             if (studentCourseGrade.getPointsEarned() != null) {
-                points = FormatHelper.formatDoubleToDecimal(studentCourseGrade.getPointsEarned());
+                points = formatHelper.formatDoubleToDecimal(studentCourseGrade.getPointsEarned());
             }
             if (studentCourseGrade.getEnteredGrade() != null) {
                 isOverride = true;
@@ -164,7 +168,7 @@ public class ExcuseGradeAction extends InjectableAction implements Serializable 
             final Optional<CategoryScoreData> averageData = businessService.getCategoryScoreForStudent(currentGradebookUid, currentSiteId, Long.valueOf(categoryId), studentId, true);
             if (averageData.isPresent()) {
                 double average = averageData.get().score;
-                return FormatHelper.formatDoubleToDecimal(average);
+                return formatHelper.formatDoubleToDecimal(average);
             }
         }
         return "-";

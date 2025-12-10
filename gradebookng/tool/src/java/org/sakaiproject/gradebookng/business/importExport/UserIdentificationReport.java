@@ -23,7 +23,7 @@ import java.util.concurrent.ConcurrentSkipListSet;
 import lombok.Getter;
 import org.sakaiproject.gradebookng.business.model.GbUnidentifiedUser;
 
-import org.sakaiproject.gradebookng.business.model.GbUser;
+import org.sakaiproject.grading.api.GbUser;
 
 /**
  * Contains the data relevant to user identification: identified users, missing users, unknown users and duplicate users.

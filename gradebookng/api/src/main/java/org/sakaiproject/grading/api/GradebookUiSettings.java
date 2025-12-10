@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.sakaiproject.gradebookng.tool.model;
+package org.sakaiproject.grading.api;
 
 import java.io.Serializable;
 import java.util.HashMap;
@@ -23,11 +23,6 @@ import java.util.Random;
 
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
-import org.sakaiproject.gradebookng.business.SortDirection;
-import org.sakaiproject.gradebookng.business.model.GbAssignmentGradeSortOrder;
-import org.sakaiproject.gradebookng.business.model.GbCategoryAverageSortOrder;
-import org.sakaiproject.gradebookng.business.model.GbStudentNameSortOrder;
-import org.sakaiproject.grading.api.GbGroup;
 
 import lombok.Getter;
 import lombok.Setter;

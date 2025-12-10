@@ -20,8 +20,8 @@ import java.util.Map;
 
 import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import org.apache.wicket.model.IModel;
-import org.sakaiproject.gradebookng.business.model.GbGradeInfo;
-import org.sakaiproject.gradebookng.business.model.GbStudentGradeInfo;
+import org.sakaiproject.grading.api.GbGradeInfo;
+import org.sakaiproject.grading.api.GbStudentGradeInfo;
 
 /**
  * Implementation of {@link BaseStatistics} to render assignment stats

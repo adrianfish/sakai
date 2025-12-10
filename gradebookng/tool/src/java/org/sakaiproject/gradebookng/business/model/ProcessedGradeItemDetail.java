@@ -15,6 +15,8 @@
  */
 package org.sakaiproject.gradebookng.business.model;
 
+import org.sakaiproject.grading.api.GbUser;
+
 import java.io.Serializable;
 
 import lombok.Getter;

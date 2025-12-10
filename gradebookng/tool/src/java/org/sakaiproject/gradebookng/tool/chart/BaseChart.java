@@ -24,6 +24,7 @@ import org.sakaiproject.authz.api.SecurityAdvisor;
 import org.sakaiproject.component.api.ServerConfigurationService;
 import org.sakaiproject.gradebookng.business.GradebookNgBusinessService;
 import org.sakaiproject.grading.api.GbChartData;
+import org.sakaiproject.grading.api.GradingService;
 import org.sakaiproject.portal.util.PortalUtils;
 
 import com.google.gson.Gson;
@@ -46,6 +47,9 @@ public abstract class BaseChart extends WebComponent {
 
 	@SpringBean(name = "org.sakaiproject.gradebookng.business.GradebookNgBusinessService")
 	protected transient GradebookNgBusinessService businessService;
+
+	@SpringBean(name = "org.sakaiproject.grading.api.GradingService")
+	protected transient GradingService gradingService;
 
 	private transient SecurityAdvisor advisor;
 

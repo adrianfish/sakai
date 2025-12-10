@@ -22,11 +22,11 @@ import org.apache.wicket.model.Model;
 import org.apache.wicket.model.StringResourceModel;
 import org.apache.wicket.spring.injection.annot.SpringBean;
 import org.sakaiproject.gradebookng.business.GradebookNgBusinessService;
-import org.sakaiproject.gradebookng.business.model.GbUser;
 import org.sakaiproject.gradebookng.tool.model.GbModalWindow;
-import org.sakaiproject.gradebookng.tool.model.GradebookUiSettings;
 import org.sakaiproject.gradebookng.tool.pages.GradebookPage;
 import org.sakaiproject.gradebookng.tool.panels.StudentGradeSummaryPanel;
+import org.sakaiproject.grading.api.GbUser;
+import org.sakaiproject.grading.api.GradebookUiSettings;
 
 import java.io.Serializable;
 import java.util.HashMap;

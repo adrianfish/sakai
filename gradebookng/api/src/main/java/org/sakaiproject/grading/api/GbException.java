@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.sakaiproject.gradebookng.business.exception;
+package org.sakaiproject.grading.api;
 
 /**
  * An exception that methods can throw to indicate something went wrong. The message will give more detail. TODO clean this up, make it

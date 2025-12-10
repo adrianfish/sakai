@@ -33,10 +33,10 @@ import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.model.StringResourceModel;
-import org.sakaiproject.gradebookng.business.util.FormatHelper;
-import org.sakaiproject.gradebookng.tool.model.GradebookUiSettings;
+import org.apache.wicket.spring.injection.annot.SpringBean;
 import org.sakaiproject.gradebookng.tool.pages.GradebookPage;
 import org.sakaiproject.grading.api.Assignment;
+import org.sakaiproject.grading.api.GradebookUiSettings;
 
 /**
  * Panel that renders the list of assignments and categories and allows the user to toggle each one on and off from the display.
@@ -115,7 +115,7 @@ public class ToggleGradeItemsToolbarPanel extends BasePanel {
 
 						final GradebookUiSettings settings = gradebookPage.getUiSettings();
 
-						assignmentItem.add(new Label("assignmentTitle", FormatHelper.abbreviateMiddle(assignment.getName())));
+						assignmentItem.add(new Label("assignmentTitle", formatHelper.abbreviateMiddle(assignment.getName())));
 
 						final WebMarkupContainer assignmentSignal = new WebMarkupContainer("assignmentSignal");
 						if (settings.isCategoriesEnabled()) {

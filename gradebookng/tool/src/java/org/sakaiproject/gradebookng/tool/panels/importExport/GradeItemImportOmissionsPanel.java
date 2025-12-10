@@ -33,8 +33,8 @@ import org.apache.wicket.model.StringResourceModel;
 
 import org.sakaiproject.gradebookng.business.importExport.UserIdentificationReport;
 import org.sakaiproject.gradebookng.business.model.GbUnidentifiedUser;
-import org.sakaiproject.gradebookng.business.model.GbUser;
 import org.sakaiproject.gradebookng.tool.model.ImportWizardModel;
+import org.sakaiproject.grading.api.GbUser;
 
 /**
  * This panel provides two tables displaying students in the Gradebook that were not found in the imported file, and students found in the imported file

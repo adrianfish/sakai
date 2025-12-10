@@ -25,6 +25,7 @@ import lombok.Setter;
 
 import org.sakaiproject.gradebookng.business.importExport.HeadingValidationReport;
 import org.sakaiproject.gradebookng.business.importExport.UsernameIdentifier;
+import org.sakaiproject.grading.api.GbUser;
 
 /**
  * Wraps an imported file

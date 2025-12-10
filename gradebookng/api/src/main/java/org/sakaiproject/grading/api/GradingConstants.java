@@ -25,6 +25,7 @@ import java.math.MathContext;
 import java.math.RoundingMode;
 
 public interface GradingConstants {
+
     Integer GRADE_TYPE_POINTS = 1;
     Integer GRADE_TYPE_PERCENTAGE = 2;
     Integer GRADE_TYPE_LETTER = 3;
@@ -52,4 +53,6 @@ public interface GradingConstants {
      * Array of chars that are not allowed at the beginning of a gb item title
      */
     String[] INVALID_CHARS_AT_START_OF_GB_ITEM_NAME = { "#", "*", "[" };
+
+	String ALL = "all";
 }

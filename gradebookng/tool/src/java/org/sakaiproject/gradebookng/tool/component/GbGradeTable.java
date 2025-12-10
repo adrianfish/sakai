@@ -44,12 +44,16 @@ import org.sakaiproject.gradebookng.tool.actions.Action;
 import org.sakaiproject.gradebookng.tool.actions.ActionResponse;
 import org.sakaiproject.gradebookng.tool.model.GbGradeTableData;
 import org.sakaiproject.gradebookng.tool.model.GbGradebookData;
+import org.sakaiproject.grading.api.FormatHelper;
 import org.sakaiproject.portal.util.PortalUtils;
 
 public class GbGradeTable extends Panel implements IHeaderContributor {
 
 	@SpringBean(name = "org.sakaiproject.component.api.ServerConfigurationService")
 	protected ServerConfigurationService serverConfigService;
+
+	@SpringBean(name = "org.sakaiproject.grading.api.FormatHelper")
+	protected FormatHelper formatHelper;
 
 	private Component component;
 

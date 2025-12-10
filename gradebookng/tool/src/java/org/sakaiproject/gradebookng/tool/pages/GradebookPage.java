@@ -71,7 +71,6 @@ import org.sakaiproject.gradebookng.tool.component.GbAjaxLink;
 import org.sakaiproject.gradebookng.tool.component.GbGradeTable;
 import org.sakaiproject.gradebookng.tool.model.GbGradeTableData;
 import org.sakaiproject.gradebookng.tool.model.GbModalWindow;
-import org.sakaiproject.gradebookng.tool.model.GradebookUiSettings;
 import org.sakaiproject.gradebookng.tool.panels.AddOrEditGradeItemPanel;
 import org.sakaiproject.gradebookng.tool.panels.BulkEditItemsPanel;
 import org.sakaiproject.gradebookng.tool.panels.SortGradeItemsPanel;
@@ -80,6 +79,7 @@ import org.sakaiproject.portal.util.PortalUtils;
 import org.sakaiproject.grading.api.Assignment;
 import org.sakaiproject.grading.api.GbGroup;
 import org.sakaiproject.grading.api.GbRole;
+import org.sakaiproject.grading.api.GradebookUiSettings;
 import org.sakaiproject.grading.api.GraderPermission;
 import org.sakaiproject.grading.api.PermissionDefinition;
 import org.sakaiproject.grading.api.SortType;
@@ -284,7 +284,7 @@ public class GradebookPage extends BasePage {
 		this.hasGradebookItems = !assignments.isEmpty();
 		this.hasStudents = !students.isEmpty();
 		// categories enabled?
-		final boolean categoriesEnabled = this.businessService.categoriesAreEnabled(gradebookUid, siteId);
+		final boolean categoriesEnabled = gradingService.categoriesAreEnabled(gradebookUid, siteId);
 
 		this.tableArea = new WebMarkupContainer("gradeTableArea");
 		if (!this.hasGradebookItems) {
@@ -329,7 +329,7 @@ public class GradebookPage extends BasePage {
 				new LoadableDetachableModel() {
 					@Override
 					public GbGradeTableData load() {
-						return new GbGradeTableData(gradebookUid, siteId, businessService, settings, toolManager, rubricsService);
+						return new GbGradeTableData(gradebookUid, siteId, businessService, settings, toolManager, rubricsService, gradingService);
 					}
 				});
 		GradeUpdateAction setScore = new GradeUpdateAction();
@@ -624,7 +624,7 @@ public class GradebookPage extends BasePage {
 
 		if (settings == null) {
 			settings = new GradebookUiSettings();
-			settings.setCategoriesEnabled(this.businessService.categoriesAreEnabled(gradebookUid, siteId));
+			settings.setCategoriesEnabled(gradingService.categoriesAreEnabled(gradebookUid, siteId));
 			settings.initializeCategoryColors(this.businessService.getGradebookCategories(gradebookUid, siteId));
 			settings.setCategoryColor(getString(GradebookPage.UNCATEGORISED), GradebookUiSettings.generateRandomRGBColorString(null));
 			setUiSettings(settings);

@@ -23,10 +23,10 @@ import java.util.Map;
 import java.util.Objects;
 
 import org.apache.wicket.model.StringResourceModel;
-import org.sakaiproject.gradebookng.business.model.GbGradeInfo;
-import org.sakaiproject.gradebookng.business.model.GbStudentGradeInfo;
 import org.sakaiproject.grading.api.Assignment;
 import org.sakaiproject.grading.api.GbChartData;
+import org.sakaiproject.grading.api.GbGradeInfo;
+import org.sakaiproject.grading.api.GbStudentGradeInfo;
 import org.sakaiproject.grading.api.GradingConstants;
 import org.sakaiproject.grading.api.MessageHelper;
 import org.sakaiproject.util.ResourceLoader;
@@ -65,7 +65,7 @@ public class AssignmentGradeChart extends BaseChart {
 
 			final Integer gradingType = this.businessService.getGradebook(currentGradebookUid, currentSiteId).getGradeType();
 			final Assignment assignment = this.businessService.getAssignment(currentGradebookUid, currentSiteId, this.assignmentId);
-			final List<GbStudentGradeInfo> gradeInfo = this.businessService.buildGradeMatrix(currentGradebookUid, currentSiteId, Arrays.asList(assignment), this.businessService.getGradeableUsers(currentGradebookUid, currentSiteId, null), null);
+			final List<GbStudentGradeInfo> gradeInfo = gradingService.buildGradeMatrix(currentGradebookUid, currentSiteId, Arrays.asList(assignment), this.businessService.getGradeableUsers(currentGradebookUid, currentSiteId, null), null);
 
 			// get all grades for this assignment
 			final List<Double> allGrades = new ArrayList<>();

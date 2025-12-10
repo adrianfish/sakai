@@ -38,6 +38,8 @@ import org.sakaiproject.grading.api.model.GradebookAssignment;
 import org.sakaiproject.grading.api.model.GradingEvent;
 import org.sakaiproject.grading.api.model.GradingScale;
 import org.sakaiproject.section.api.coursemanagement.CourseSection;
+import org.sakaiproject.site.api.Site;
+import org.sakaiproject.user.api.User;
 
 import org.hibernate.HibernateException;
 import org.sakaiproject.entity.api.EntityProducer;
@@ -1012,4 +1014,69 @@ public interface GradingService extends EntityProducer {
     public Map<String, List<String>> getGroupMemberships(String gradebookId, String siteId);
     public List<GbGroup> getSiteSectionsAndGroups(String gradebookUid, String siteId);
     public GbChartData getCourseGrades(String siteId, String gradebookId, Map<String, Double> gradingSchema);
+    public GbChartData getAssignmentGrades(String siteId, String gradebookId, Long assignmentId);
+	public Map<String, List<String>> getUserSections(String siteId);
+	public boolean isCourseGradeVisible(String gradebookId, String siteId, String userId);
+
+	/**
+	 * Adds course grade info into the matrix specified in the first param
+	 * @param matrix mapping of student uids to GbStudentGradeInfo in which to store course grades
+	 * @param gbStudents list of student for whom to retrieve course grades
+	 * @param studentUuids list of student UUIDs so we don't have to parse the list of GbUsers to extract the values if we already have them
+	 * @param gradebook current gradebook
+	 * @param siteId current site
+	 * @param role current user's GbRole in the site
+	 * @param isCourseGradeVisible whether the current user can see course grades in this site
+	 * @param settings GradebookUiSettings instance
+	 */
+	public void putCourseGradesInMatrix(Map<String, GbStudentGradeInfo> matrix, List<GbUser> gbStudents, List<String> studentUuids, Gradebook gradebook, String siteId, GbRole role,
+											boolean isCourseGradeVisible, GradebookUiSettings settings);
+
+	/**
+	 * Builds up the matrix (a map<userUid, GbStudentGradeInfo>) for the specified students / assignments.a
+	 * @param matrix output parameter; a map of studentUuids to GbStudentGradeInfo objects which will contain grade data for the specified assignments
+	 * @param gbStudents list of GbUsers for whom to retrieve grading data
+	 * @param studentUuids list of student UUIDs, so we don't have to extract out of gbStudents
+	 * @param assignments the list of assignments for which to retrieve grading data. Computes category scores associated with these assignments as appropriate
+	 * @param gradebook the gradebook containing the assignments, etc.
+	 * @param siteId current site
+	 * @param currentUserUuid
+	 * @param role the current user's role
+	 * @param settings the GradebookUiSettings instance associated with the user's session; used to determine whether the context is anonymous. If null, all grading data will be retrieved without any anonymous aware filtering
+	 */
+	public void putAssignmentsAndCategoryItemsInMatrix(Map<String, GbStudentGradeInfo> matrix, List<GbUser> gbStudents, List<String> studentUuids, List<Assignment> assignments,
+														Gradebook gradebook, String siteId, String currentUserUuid, GbRole role, GradebookUiSettings settings);
+
+
+	/**
+	 * Takes the value set of the matrix (a map<studentUuid, GbStudentGradeInfo>), and sorts the value set appropriately wrt the GradebookUiSettings
+	 * @param gradebookUid
+	 * @param siteId
+	 * @param matrix
+	 * @param settings
+	 * @return the valueSet of the matrix as an appropriately sorted List
+	 */
+	public List<GbStudentGradeInfo> sortGradeMatrix(String gradebookUid, String siteId, Map<String, GbStudentGradeInfo> matrix, GradebookUiSettings settings);
+
+	public String getStudentNumber(User u, Site site);
+
+	/**
+	 * Have categories been enabled for the gradebook?
+	 *
+	 * @return if the gradebook is setup for either "Categories Only" or "Categories & Weighting"
+	 */
+	public boolean categoriesAreEnabled(String gradebookUid, String siteId);
+
+	/**
+	 * Build the matrix of assignments and grades for the given users with the specified sort order
+	 *
+	 * @param assignments list of assignments
+	 * @param studentUuids student uuids
+	 * @param uiSettings the settings from the UI that wraps up preferences
+	 * @return
+	 *
+	 *		TODO refactor this into a hierarchical method structure
+	 */
+	public List<GbStudentGradeInfo> buildGradeMatrix(final String gradebookUid, final String siteId, final List<Assignment> assignments,
+			final List<String> studentUuids, final GradebookUiSettings uiSettings) throws GbException;
 }

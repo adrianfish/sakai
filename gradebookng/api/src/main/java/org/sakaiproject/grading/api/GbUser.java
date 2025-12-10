@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.sakaiproject.gradebookng.business.model;
+package org.sakaiproject.grading.api;
 
 import java.io.Serializable;
 
@@ -22,9 +22,9 @@ import lombok.Getter;
 import lombok.Setter;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.text.StringEscapeUtils;
 
 import org.sakaiproject.user.api.User;
-import org.sakaiproject.gradebookng.business.util.FormatHelper;
 
 import java.util.Collections;
 import java.util.List;
@@ -71,10 +71,10 @@ public class GbUser implements GbUserBase, Serializable, Comparable<GbUser> {
 	public GbUser(final User u, String studentNumber) {
 		this.userUuid = u.getId();
 		this.displayId = u.getDisplayId();
-		this.displayName = FormatHelper.htmlEscape(u.getDisplayName());
-		this.firstName = FormatHelper.htmlEscape(u.getFirstName());
-		this.lastName = FormatHelper.htmlEscape(u.getLastName());
-		this.studentNumber = FormatHelper.htmlEscape(studentNumber);
+		this.displayName = StringEscapeUtils.escapeHtml4(u.getDisplayName());
+		this.firstName = StringEscapeUtils.escapeHtml4(u.getFirstName());
+		this.lastName = StringEscapeUtils.escapeHtml4(u.getLastName());
+		this.studentNumber = StringEscapeUtils.escapeHtml4(studentNumber);
 		this.sections = Collections.emptyList();
 		this.sortName = u.getSortName();
 	}

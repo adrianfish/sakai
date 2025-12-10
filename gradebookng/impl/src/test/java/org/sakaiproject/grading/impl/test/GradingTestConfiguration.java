@@ -17,6 +17,8 @@ package org.sakaiproject.grading.impl.test;
 
 import static org.mockito.Mockito.mock;
 
+import org.sakaiproject.authz.api.GroupProvider;
+import org.sakaiproject.coursemanagement.api.CourseManagementService;
 import org.sakaiproject.plus.api.PlusService;
 import org.sakaiproject.section.api.SectionAwareness;
 import org.sakaiproject.section.api.SectionManager;
@@ -43,6 +45,16 @@ public class GradingTestConfiguration extends SakaiTestConfiguration {
     @Qualifier("org.sakaiproject.springframework.orm.hibernate.impl.AdditionalHibernateMappings.grading")
     @Getter
     protected AdditionalHibernateMappings additionalHibernateMappings;
+
+    @Bean(name = "org.sakaiproject.coursemanagement.api.CourseManagementService")
+    public CourseManagementService courseManagementService() {
+        return mock(CourseManagementService.class);
+    }
+
+    @Bean(name = "org.sakaiproject.authz.api.GroupProvider")
+    public GroupProvider groupProvider() {
+        return mock(GroupProvider.class);
+    }
 
     @Bean(name = "org.sakaiproject.section.api.SectionAwareness")
     public SectionAwareness sectionAwareness() {

@@ -23,14 +23,17 @@ import org.apache.commons.lang3.StringUtils;
 import org.sakaiproject.assignment.api.AssignmentConstants;
 import org.sakaiproject.assignment.api.AssignmentReferenceReckoner;
 import org.sakaiproject.gradebookng.business.GradebookNgBusinessService;
-import org.sakaiproject.gradebookng.business.model.GbStudentGradeInfo;
 import org.sakaiproject.gradebookng.business.util.GbStopWatch;
 import org.sakaiproject.grading.api.Assignment;
 import org.sakaiproject.grading.api.CategoryDefinition;
 import org.sakaiproject.grading.api.GbAccessDeniedException;
+import org.sakaiproject.grading.api.FormatHelper;
 import org.sakaiproject.grading.api.GbGroup;
 import org.sakaiproject.grading.api.GbRole;
+import org.sakaiproject.grading.api.GbStudentGradeInfo;
 import org.sakaiproject.grading.api.GradebookInformation;
+import org.sakaiproject.grading.api.GradebookUiSettings;
+import org.sakaiproject.grading.api.GradingService;
 import org.sakaiproject.grading.api.SortType;
 import org.sakaiproject.rubrics.api.RubricsConstants;
 import org.sakaiproject.rubrics.api.RubricsService;
@@ -58,11 +61,14 @@ public class GbGradeTableData {
 	private boolean isStudentNumberVisible;
 	private boolean isSectionsVisible;
 	private String gradebookUid;
+    private FormatHelper formatHelper;
 
 	public GbGradeTableData(final String currentGradebookUid, final String currentSiteId, final GradebookNgBusinessService businessService,
-			final GradebookUiSettings settings, final ToolManager toolManager, final RubricsService rubricsService) {
+			final GradebookUiSettings settings, final ToolManager toolManager, final RubricsService rubricsService, GradingService gradingService, FormatHelper formatHelper) {
 		final GbStopWatch stopwatch = new GbStopWatch();
 		stopwatch.time("GbGradeTableData init", stopwatch.getTime());
+
+        this.formatHelper = formatHelper;
 
 		this.gradebookUid = currentGradebookUid;
 		uiSettings = settings;
@@ -88,7 +94,7 @@ public class GbGradeTableData {
 		stopwatch.time("getGradebookAssignments", stopwatch.getTime());
 
 		String groupFilter = (uiSettings.getGroupFilter() != null && !GbGroup.Type.ALL.equals(uiSettings.getGroupFilter().getType())) ? uiSettings.getGroupFilter().getId() : null;
-		grades = businessService.buildGradeMatrix(currentGradebookUid, currentSiteId, 
+		grades = gradingService.buildGradeMatrix(currentGradebookUid, currentSiteId, 
 				assignments,
 				businessService.getGradeableUsers(currentGradebookUid, currentSiteId, groupFilter),
 				settings);

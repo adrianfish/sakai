@@ -9,8 +9,8 @@ import com.google.gson.annotations.Expose;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.sakaiproject.gradebookng.business.model.GbGradeInfo;
-import org.sakaiproject.gradebookng.business.model.GbStudentGradeInfo;
+import org.sakaiproject.grading.api.GbGradeInfo;
+import org.sakaiproject.grading.api.GbStudentGradeInfo;
 import org.sakaiproject.grading.api.GradeDefinition;
 
 import java.io.Serializable;

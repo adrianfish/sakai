@@ -31,13 +31,12 @@ import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.model.ResourceModel;
 import org.apache.wicket.model.StringResourceModel;
-import org.sakaiproject.gradebookng.business.model.GbUser;
-import org.sakaiproject.gradebookng.business.util.CourseGradeFormatter;
-import org.sakaiproject.gradebookng.business.util.FormatHelper;
 import org.sakaiproject.gradebookng.tool.component.GbAjaxButton;
 import org.sakaiproject.gradebookng.tool.component.GbFeedbackPanel;
+import org.sakaiproject.grading.api.CourseGradeFormatter;
 import org.sakaiproject.grading.api.CourseGradeTransferBean;
 import org.sakaiproject.grading.api.GbRole;
+import org.sakaiproject.grading.api.GbUser;
 import org.sakaiproject.grading.api.GradebookInformation;
 import org.sakaiproject.grading.api.GradingConstants;
 import org.sakaiproject.grading.api.model.Gradebook;
@@ -125,8 +124,8 @@ public class CourseGradeOverridePanel extends BasePanel {
 					
 					if (!schema.containsKey(newGrade)) {
 						try {
-							gradeScale = FormatHelper.getGradeFromNumber(newGrade, schema, currentUserLocale);
-							newGrade = FormatHelper.transformNewGrade(newGrade, currentUserLocale);
+							gradeScale = formatHelper.getGradeFromNumber(newGrade, schema, currentUserLocale);
+							newGrade = formatHelper.transformNewGrade(newGrade, currentUserLocale);
 						}
 						catch (NumberFormatException e)	{
 							error(new ResourceModel("message.addcoursegradeoverride.invalid").getObject());
@@ -135,7 +134,7 @@ public class CourseGradeOverridePanel extends BasePanel {
 						}
 					} else {
 						gradeScale = newGrade;
-						newGrade = FormatHelper.getNumberFromGrade(gradeScale, schema, currentUserLocale);
+						newGrade = formatHelper.getNumberFromGrade(gradeScale, schema, currentUserLocale);
 					}
 				}
 

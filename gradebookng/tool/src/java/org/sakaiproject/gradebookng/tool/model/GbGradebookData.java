@@ -35,16 +35,17 @@ import org.apache.wicket.model.StringResourceModel;
 
 import org.sakaiproject.assignment.api.AssignmentReferenceReckoner;
 import org.sakaiproject.component.cover.ServerConfigurationService;
-import org.sakaiproject.gradebookng.business.model.GbGradeInfo;
-import org.sakaiproject.gradebookng.business.model.GbStudentGradeInfo;
-import org.sakaiproject.gradebookng.business.model.GbStudentNameSortOrder;
-import org.sakaiproject.gradebookng.business.util.FormatHelper;
+import org.sakaiproject.grading.api.FormatHelper;
 import org.sakaiproject.gradebookng.tool.pages.GradebookPage;
 import org.sakaiproject.grading.api.Assignment;
 import org.sakaiproject.grading.api.CategoryDefinition;
 import org.sakaiproject.grading.api.CourseGradeTransferBean;
+import org.sakaiproject.grading.api.GbGradeInfo;
+import org.sakaiproject.grading.api.GbStudentGradeInfo;
+import org.sakaiproject.grading.api.GbStudentNameSortOrder;
 import org.sakaiproject.grading.api.GbRole;
 import org.sakaiproject.grading.api.GradebookInformation;
+import org.sakaiproject.grading.api.GradebookUiSettings;
 import org.sakaiproject.grading.api.GradingConstants;
 import org.sakaiproject.util.ResourceLoader;
 
@@ -84,6 +85,7 @@ public class GbGradebookData {
 	private final boolean isSectionsVisible;
 	private final String gUid;
 	private final Map<Long, CategoryDefinition> categoryMap = new HashMap<>();
+    private FormatHelper formatHelper;
 
 	private final Component parent;
 
@@ -194,7 +196,7 @@ public class GbGradebookData {
 			if (average == null) {
 				return new ReadOnlyScore(null);
 			} else {
-				return new ReadOnlyScore(FormatHelper.formatDoubleToDecimal(average));
+				return new ReadOnlyScore(formatHelper.formatDoubleToDecimal(average));
 			}
 		}
 	}
@@ -239,6 +241,7 @@ public class GbGradebookData {
 		buildCategoryMap();
 
 		this.settings = gbGradeTableData.getGradebookInformation();
+        this.formatHelper = gbGradeTableData.getFormatHelper();
 		this.uiSettings = gbGradeTableData.getUiSettings();
 		this.role = gbGradeTableData.getRole();
 		this.isUserAbleToEditAssessments = gbGradeTableData.isUserAbleToEditAssessments();
@@ -474,11 +477,11 @@ public class GbGradebookData {
 		} else if (StringUtils.isNotBlank(courseGrade.getEnteredGrade())) {
 			Double mappedGrade = courseGradeMap.get(courseGrade.getEnteredGrade());
 			gradeData[0] = courseGrade.getDisplayString();
-			gradeData[1] = FormatHelper.formatGradeForDisplay(mappedGrade);
+			gradeData[1] = formatHelper.formatGradeForDisplay(mappedGrade);
 			gradeData[2] = "1";
 		} else {
 			gradeData[0] = courseGrade.getDisplayString();
-			gradeData[1] = FormatHelper.formatGradeForDisplay(courseGrade.getCalculatedGrade());
+			gradeData[1] = formatHelper.formatGradeForDisplay(courseGrade.getCalculatedGrade());
 			gradeData[2] = "0";
 		}
 
@@ -554,7 +557,7 @@ public class GbGradebookData {
 
 			String categoryWeight = null;
 			if (a1.getWeight() != null) {
-				categoryWeight = FormatHelper.formatDoubleAsPercentage(a1.getWeight() * 100);
+				categoryWeight = formatHelper.formatDoubleAsPercentage(a1.getWeight() * 100);
 			}
 
 			boolean counted = a1.getCounted();
@@ -564,10 +567,10 @@ public class GbGradebookData {
 			}
             result.add(new AssignmentDefinition(
                     a1.getId(),
-                    FormatHelper.stripLineBreaks(a1.getName()),
+                    formatHelper.stripLineBreaks(a1.getName()),
                     a1.getName(),
-                    FormatHelper.formatDoubleToDecimal(a1.getPoints()),
-                    FormatHelper.formatDate(a1.getDueDate(), getString("label.studentsummary.noduedate")),
+                    formatHelper.formatDoubleToDecimal(a1.getPoints()),
+                    formatHelper.formatDate(a1.getDueDate(), getString("label.studentsummary.noduedate")),
                     BooleanUtils.toBoolean(a1.getReleased()),
                     counted,
                     BooleanUtils.toBoolean(a1.getExtraCredit()),
@@ -601,7 +604,7 @@ public class GbGradebookData {
 						BooleanUtils.toBoolean(a1.getCategoryEqualWeight()),
 						userSettings.getCategoryColor(a1.getCategoryName()),
 						!this.uiSettings.isCategoryScoreVisible(a1.getCategoryName()),
-						FormatHelper.formatCategoryDropInfo(this.categories.stream()
+						formatHelper.formatCategoryDropInfo(this.categories.stream()
 								.filter(c -> c.getId().equals(a1.getCategoryId()))
 								.findAny().orElse(null))));
 			}
@@ -614,7 +617,7 @@ public class GbGradebookData {
 				if (!category.getAssignmentList().isEmpty()) {
 					String categoryWeight = null;
 					if (category.getWeight() != null) {
-						categoryWeight = FormatHelper.formatDoubleAsPercentage(category.getWeight() * 100);
+						categoryWeight = formatHelper.formatDoubleAsPercentage(category.getWeight() * 100);
 					}
 					result.add(new CategoryAverageDefinition(
 							category.getId(),
@@ -627,7 +630,7 @@ public class GbGradebookData {
 							BooleanUtils.toBoolean(category.getEqualWeight()),
 							userSettings.getCategoryColor(category.getName()),
 							!this.uiSettings.isCategoryScoreVisible(category.getName()),
-							FormatHelper.formatCategoryDropInfo(category)));
+							formatHelper.formatCategoryDropInfo(category)));
 				}
 			}
 		}

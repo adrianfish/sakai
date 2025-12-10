@@ -36,6 +36,17 @@
         init-method="init">
     </bean>
 
+    <bean id="org.sakaiproject.grading.api.FormatHelper"
+        class="org.sakaiproject.grading.impl.FormatHelperImpl">
+  </bean>
+
+    <bean id="org.sakaiproject.grading.api.CourseGradeFormatter"
+        class="org.sakaiproject.grading.api.CourseGradeFormatter"
+        scope="prototype">
+        <property name="formatHelper" ref="org.sakaiproject.grading.api.FormatHelper" />
+        <property name="resourceLoader" ref="org.sakaiproject.util.ResourceLoader.grading" />
+    </bean>
+
     <bean id="org.sakaiproject.grading.api.repository.AssignmentGradeRecordRepository"
         class="org.sakaiproject.grading.impl.repository.AssignmentGradeRecordRepositoryImpl">
         <property name="sessionFactory" ref="org.sakaiproject.springframework.orm.hibernate.GlobalSessionFactory"/>

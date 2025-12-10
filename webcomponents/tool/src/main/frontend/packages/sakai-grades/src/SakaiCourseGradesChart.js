@@ -2,10 +2,6 @@ import { SakaiGradesChart } from "./SakaiGradesChart.js";
 
 export class SakaiCourseGradesChart extends SakaiGradesChart {
 
-  constructor() {
-    super();
-  }
-
   _getIndexAxis() {
     return "y";
   }

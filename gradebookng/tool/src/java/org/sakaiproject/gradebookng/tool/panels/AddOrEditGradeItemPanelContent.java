@@ -45,9 +45,9 @@ import org.apache.wicket.model.Model;
 import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.model.ResourceModel;
 import org.apache.wicket.validation.IValidationError;
-import org.sakaiproject.gradebookng.business.util.FormatHelper;
 import org.sakaiproject.gradebookng.tool.model.UiMode;
 import org.sakaiproject.grading.api.Assignment;
+import org.sakaiproject.grading.api.FormatHelper;
 import org.sakaiproject.grading.api.CategoryDefinition;
 import org.sakaiproject.grading.api.GradingConstants;
 import org.sakaiproject.grading.api.model.Gradebook;
@@ -309,7 +309,7 @@ public class AddOrEditGradeItemPanelContent extends BasePanel {
 		// counted
 		this.counted = new CheckBox("counted", new PropertyModel<Boolean>(assignmentModel, "counted"));
 		this.counted.setOutputMarkupId(true);
-		if (this.businessService.categoriesAreEnabled(currentGradebookUid, currentSiteId)) {
+		if (gradingService.categoriesAreEnabled(currentGradebookUid, currentSiteId)) {
 			this.counted.setEnabled(assignment.getCategoryId() != null);
 			if (assignment.getCategoryId() == null) {
 				this.counted.setModelObject(false);
@@ -339,7 +339,7 @@ public class AddOrEditGradeItemPanelContent extends BasePanel {
 				}
 				target.add(extraCredit);
 
-				if (AddOrEditGradeItemPanelContent.this.businessService.categoriesAreEnabled(currentGradebookUid, currentSiteId)) {
+				if (AddOrEditGradeItemPanelContent.this.gradingService.categoriesAreEnabled(currentGradebookUid, currentSiteId)) {
 					if (category == null) {
 						AddOrEditGradeItemPanelContent.this.counted.setEnabled(false);
 						AddOrEditGradeItemPanelContent.this.counted.setModelObject(false);

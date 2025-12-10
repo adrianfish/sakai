@@ -28,13 +28,13 @@ import org.apache.wicket.AttributeModifier;
 import org.apache.wicket.markup.html.basic.Label;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.LoadableDetachableModel;
-import org.sakaiproject.gradebookng.business.model.GbGradeInfo;
-import org.sakaiproject.gradebookng.business.model.GbStudentGradeInfo;
-import org.sakaiproject.gradebookng.business.util.CourseGradeFormatter;
 import org.sakaiproject.gradebookng.tool.pages.GradebookPage;
 import org.sakaiproject.grading.api.Assignment;
 import org.sakaiproject.grading.api.CategoryDefinition;
+import org.sakaiproject.grading.api.CourseGradeFormatter;
 import org.sakaiproject.grading.api.CourseGradeTransferBean;
+import org.sakaiproject.grading.api.GbGradeInfo;
+import org.sakaiproject.grading.api.GbStudentGradeInfo;
 import org.sakaiproject.grading.api.GbRole;
 import org.sakaiproject.grading.api.GradingConstants;
 import org.sakaiproject.grading.api.SortType;
@@ -97,7 +97,7 @@ public class InstructorGradeSummaryGradesPanel extends BasePanel {
 
 		// TODO catch if this is null, the get(0) will throw an exception
 		// TODO also catch the GbException
-		final GbStudentGradeInfo studentGradeInfo = this.businessService
+		final GbStudentGradeInfo studentGradeInfo = gradingService
 				.buildGradeMatrix(currentGradebookUid, currentSiteId, 
 						assignments,
 						new ArrayList<>(Arrays.asList(userId)), // needs to support #remove

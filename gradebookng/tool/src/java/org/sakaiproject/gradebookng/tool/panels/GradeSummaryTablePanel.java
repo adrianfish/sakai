@@ -39,14 +39,15 @@ import org.apache.wicket.markup.html.list.ListView;
 import org.apache.wicket.model.IModel;
 import org.apache.wicket.model.Model;
 import org.apache.wicket.model.StringResourceModel;
+import org.apache.wicket.spring.injection.annot.SpringBean;
 
 import org.sakaiproject.assignment.api.AssignmentConstants;
 import org.sakaiproject.authz.api.AuthzGroup;
 import org.sakaiproject.authz.api.GroupNotDefinedException;
-import org.sakaiproject.gradebookng.business.model.GbGradeInfo;
-import org.sakaiproject.gradebookng.business.util.FormatHelper;
 import org.sakaiproject.gradebookng.tool.component.GbAjaxLink;
-import org.sakaiproject.gradebookng.tool.model.GradebookUiSettings;
+import org.sakaiproject.grading.api.FormatHelper;
+import org.sakaiproject.grading.api.GbGradeInfo;
+import org.sakaiproject.grading.api.GradebookUiSettings;
 import org.sakaiproject.gradebookng.tool.pages.BasePage;
 import org.sakaiproject.gradebookng.tool.pages.GradebookPage;
 import org.sakaiproject.grading.api.GbRole;
@@ -215,7 +216,7 @@ public class GradeSummaryTablePanel extends BasePanel implements IAjaxIndicatorA
 					if (categoryAverage == null) {
 						categoryRow.add(new Label("categoryGrade", getString("label.nocategoryscore")));
 					} else {
-						categoryRow.add(new Label("categoryGrade", FormatHelper.formatDoubleAsPercentage(categoryAverage)));
+						categoryRow.add(new Label("categoryGrade", formatHelper.formatDoubleAsPercentage(categoryAverage)));
 					}
 				} else {
 					categoryRow.add(new Label("categoryGrade", getString("label.nocategoryscore")));
@@ -225,7 +226,7 @@ public class GradeSummaryTablePanel extends BasePanel implements IAjaxIndicatorA
 				if (!categoryAssignments.isEmpty()) {
 					final Double weight = categoryAssignments.get(0).getWeight();
 					if (weight != null) {
-						categoryWeight = FormatHelper.formatDoubleAsPercentage(weight * 100);
+						categoryWeight = formatHelper.formatDoubleAsPercentage(weight * 100);
 					}
 				}
 				categoryRow.add(new Label("categoryWeight", categoryWeight)
@@ -355,7 +356,7 @@ public class GradeSummaryTablePanel extends BasePanel implements IAjaxIndicatorA
 							gradeScore.add(new Label("grade",
 									new StringResourceModel("label.percentage.valued")
 											.setParameters(StringUtils.isNotBlank(rawGrade) ? 
-												FormatHelper.formatDoubleToDecimal(Double.valueOf(rawGrade)) : "")) {
+												formatHelper.formatDoubleToDecimal(Double.valueOf(rawGrade)) : "")) {
 								@Override
 								public boolean isVisible() {
 									return StringUtils.isNotBlank(rawGrade);
@@ -392,7 +393,7 @@ public class GradeSummaryTablePanel extends BasePanel implements IAjaxIndicatorA
 							log.debug("POINTS PATH: gradeType={}, rawGrade={}, assignment.getPoints()={}", 
 								gradeType, rawGrade, assignment.getPoints());
 							gradeScore.add(
-									new Label("grade", FormatHelper.convertEmptyGradeToDash(FormatHelper.formatGradeForDisplay(rawGrade))));
+									new Label("grade", formatHelper.convertEmptyGradeToDash(formatHelper.formatGradeForDisplay(rawGrade))));
 							gradeScore.add(new Label("outOf",
 									new StringResourceModel("label.studentsummary.outof").setParameters(assignment.getPoints())));
 
@@ -527,7 +528,7 @@ public class GradeSummaryTablePanel extends BasePanel implements IAjaxIndicatorA
 	private DropInfoPair getDropInfo(final String categoryName, final Map<String, CategoryDefinition> categoriesMap) {
 		final DropInfoPair pair = new DropInfoPair();
 		if (categoryName != null && !categoryName.equals(getString(GradebookPage.UNCATEGORISED))) {
-			final List<String> info = FormatHelper.formatCategoryDropInfo(categoriesMap.get(categoryName));
+			final List<String> info = formatHelper.formatCategoryDropInfo(categoriesMap.get(categoryName));
 			if (info.size() > 0) {
 				pair.first = info.get(0);
 			}

@@ -79,22 +79,22 @@ export class SakaiGradesChart extends SakaiShadowElement {
           title: {
             display: true,
             text: this._getTitle(),
-            font: { size: 18, weight: 'bold' },
+            font: { size: 18, weight: "bold" },
           },
           legend: { display: false },
         },
         scales: {
           x: {
-            type: 'linear',
+            type: "linear",
             display: true,
             title: {
               display: true,
               text: this._getXLabel(),
-              font: { size: 14, family: 'Monospace', weight: 'bold' },
+              font: { size: 14, family: "Monospace", weight: "bold" },
             },
             ticks: {
-              font: { weight: 'bold' },
-              callback: function (value) {
+              font: { weight: "bold" },
+              callback (value) {
                 // Display student values only as integers
                 if (Math.floor(value) === value) {
                   return value;
@@ -107,13 +107,13 @@ export class SakaiGradesChart extends SakaiShadowElement {
             title: {
               display: true,
               text: this._getYLabel(),
-						  font: { size: 14, weight: 'bold' },
+              font: { size: 14, weight: "bold" },
             },
             ticks: {
-              font: { weight: 'bold', family: 'Monospace' },
-              callback: function (value, index, ticks) {
+              font: { weight: "bold", family: "Monospace" },
+              callback (value) {
                 const label = this.getLabelForValue(value);
-                return label + (label.length < 2 ? ' ' : '');
+                return label + (label.length < 2 ? " " : "");
               }
             },
           },
@@ -127,22 +127,22 @@ export class SakaiGradesChart extends SakaiShadowElement {
     const data = Object.values(chartData.dataset);
     const labels = Object.keys(chartData.dataset);
 
-    const backgroundColour = labels.map(l => '#15597e');
+    const backgroundColour = labels.map(() => "#15597e");
 
     //If this chart is being viewed by a student, display the bar that
     //includes their mark in a different colour
     if (chartData.studentGradeRange) {
-      const index = labels.indexOf(studentGradeRange);
-      index != -1 && (backgroundColour[index] = '#5bc0de');
+      const index = labels.indexOf(chartData.studentGradeRange);
+      index != -1 && (backgroundColour[index] = "#5bc0de");
     }
 
     this.chart.data = {
-      labels: labels,
-      datasets: [{
-        data: data,
+      labels,
+      datasets: [ {
+        data,
         backgroundColor: backgroundColour,
         borderWidth: 0
-      }]
+      } ]
     };
     this.chart.update();
 
@@ -160,7 +160,7 @@ export class SakaiGradesChart extends SakaiShadowElement {
         <div>${this._i18n.loading}</div>
       ` : nothing}
       <div>
-      <canvas id="chart-block" width="400" height="400"></chart>
+      <canvas id="chart-block" width="400" height="400"></canvas>
       </div>
     `;
   }

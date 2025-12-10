@@ -356,6 +356,24 @@ public class GradesController extends AbstractSakaiApiController {
         return ResponseEntity.ok(data);
     }
 
+    @GetMapping(value = "/sites/{siteId}/grades/{gradebookId}/items/{itemId}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<GbChartData> getItemGrades(@PathVariable String siteId, @PathVariable String gradebookId, @PathVariable String itemId) {
+
+        GradebookInformation info = gradingService.getGradebookInformation(gradebookId, siteId);
+        Map<String, Double> gradingSchema = info.getSelectedGradingScaleBottomPercents();
+
+        GbChartData data = gradingService.getAssignmentGrades(siteId, gradebookId, itemId);
+
+        /*
+        if (this.studentGrade != null) {
+            data.setStudentGradeRange(this.studentGrade.getDisplayGrade());
+        }
+        */
+
+        return ResponseEntity.ok(data);
+    }
+
+
     private Map<String, String> returnFoundGradebooks(String siteId, String userId) {
 
         try {

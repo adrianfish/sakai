@@ -1,5 +1,7 @@
 package org.sakaiproject.gradebookng.business.model;
 
+import org.sakaiproject.grading.api.GbUserBase;
+
 import java.io.Serializable;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;

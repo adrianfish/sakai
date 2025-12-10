@@ -19,7 +19,7 @@ import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.sakaiproject.gradebookng.business.model.GbGradeInfo;
+import org.sakaiproject.grading.api.GbGradeInfo;
 
 import lombok.Getter;
 import lombok.Setter;

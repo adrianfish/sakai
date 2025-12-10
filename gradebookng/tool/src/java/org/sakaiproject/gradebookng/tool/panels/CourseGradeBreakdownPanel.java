@@ -30,16 +30,16 @@ import org.apache.wicket.model.StringResourceModel;
 import org.apache.wicket.spring.injection.annot.SpringBean;
 import org.sakaiproject.component.api.ServerConfigurationService;
 import org.sakaiproject.gradebookng.business.GradebookNgBusinessService;
-import org.sakaiproject.gradebookng.business.util.FormatHelper;
 import org.sakaiproject.gradebookng.tool.component.GbAjaxLink;
 import org.sakaiproject.gradebookng.tool.component.GbFeedbackPanel;
 import org.sakaiproject.gradebookng.tool.model.GbBreakdownItem;
-import org.sakaiproject.gradebookng.tool.model.GradebookUiSettings;
 import org.sakaiproject.gradebookng.tool.pages.GradebookPage;
-import org.sakaiproject.gradebookng.business.model.GbStudentGradeInfo;
-import org.sakaiproject.gradebookng.business.model.GbGradeInfo;
 import org.sakaiproject.grading.api.Assignment;
 import org.sakaiproject.grading.api.CategoryDefinition;
+import org.sakaiproject.grading.api.FormatHelper;
+import org.sakaiproject.grading.api.GradebookUiSettings;
+import org.sakaiproject.grading.api.GbGradeInfo;
+import org.sakaiproject.grading.api.GbStudentGradeInfo;
 import org.sakaiproject.grading.api.GradingConstants;
 import org.sakaiproject.grading.api.SortType;
 
@@ -194,7 +194,7 @@ public class CourseGradeBreakdownPanel extends BasePanel {
     private List<GbBreakdownItem> getItemsList() {
         SortType sortBy = SortType.SORT_BY_SORTING;
         final List<GbBreakdownItem> itemList = new ArrayList<>();
-        if (this.businessService.categoriesAreEnabled(currentGradebookUid, currentSiteId)) {
+        if (gradingService.categoriesAreEnabled(currentGradebookUid, currentSiteId)) {
             sortBy = SortType.SORT_BY_CATEGORY;
             // Returns a sorted list of all categories in the Gradebook
             final List<CategoryDefinition> categories = this.businessService.getGradebookCategories(currentGradebookUid, currentSiteId);
@@ -202,7 +202,7 @@ public class CourseGradeBreakdownPanel extends BasePanel {
                 Double totalCategoryPoints = 0D;
                 // Get sorted list of assignments for the category.
                 final List<Assignment> assignmentList = this.businessService.getGradebookAssignmentsForCategory(currentGradebookUid, currentSiteId, categoryDefinition.getId(), sortBy);
-                final List<GbStudentGradeInfo> grades = this.businessService.buildGradeMatrix(currentGradebookUid, currentSiteId,
+                final List<GbStudentGradeInfo> grades = gradingService.buildGradeMatrix(currentGradebookUid, currentSiteId,
                         assignmentList,
                         businessService.getGradeableUsers(currentGradebookUid, currentSiteId, null),
                         null);
@@ -237,7 +237,7 @@ public class CourseGradeBreakdownPanel extends BasePanel {
             final List<Assignment> uncategorizedAssignments = this.businessService.getGradebookAssignmentsForCategory(currentGradebookUid, currentSiteId, null, sortBy);
             if (uncategorizedAssignments != null && !uncategorizedAssignments.isEmpty()) {
                 final List<GbBreakdownItem> uncategorizedGbItems = new ArrayList<>();
-                final List<GbStudentGradeInfo> grades = this.businessService.buildGradeMatrix(currentGradebookUid, currentSiteId,
+                final List<GbStudentGradeInfo> grades = gradingService.buildGradeMatrix(currentGradebookUid, currentSiteId,
                         uncategorizedAssignments,
                         businessService.getGradeableUsers(currentGradebookUid, currentSiteId, null),
                         null);
@@ -255,7 +255,7 @@ public class CourseGradeBreakdownPanel extends BasePanel {
         } else {
             // Categories are not enabled so just add all assignments to the list.
             final List<Assignment> allAssignments = this.businessService.getGradebookAssignments(currentGradebookUid, currentSiteId, sortBy);
-            final List<GbStudentGradeInfo> grades = this.businessService.buildGradeMatrix(currentGradebookUid, currentSiteId,
+            final List<GbStudentGradeInfo> grades = gradingService.buildGradeMatrix(currentGradebookUid, currentSiteId,
                         allAssignments,
                         businessService.getGradeableUsers(currentGradebookUid, currentSiteId, null),
                         null);

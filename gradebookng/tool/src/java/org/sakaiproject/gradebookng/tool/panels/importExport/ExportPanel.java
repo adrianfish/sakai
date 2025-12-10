@@ -47,17 +47,17 @@ import org.apache.wicket.markup.html.link.DownloadLink;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.model.Model;
 import org.sakaiproject.component.cover.ComponentManager;
-import org.sakaiproject.gradebookng.business.model.GbGradeInfo;
-import org.sakaiproject.grading.api.GbGroup;
-import org.sakaiproject.gradebookng.business.model.GbStudentGradeInfo;
-import org.sakaiproject.gradebookng.business.model.GbUser;
 import org.sakaiproject.gradebookng.business.util.EventHelper;
-import org.sakaiproject.gradebookng.business.util.FormatHelper;
-import org.sakaiproject.gradebookng.tool.model.GradebookUiSettings;
 import org.sakaiproject.gradebookng.tool.panels.BasePanel;
 import org.sakaiproject.grading.api.Assignment;
 import org.sakaiproject.grading.api.CategoryDefinition;
 import org.sakaiproject.grading.api.CourseGradeTransferBean;
+import org.sakaiproject.grading.api.FormatHelper;
+import org.sakaiproject.grading.api.GbGradeInfo;
+import org.sakaiproject.grading.api.GbGroup;
+import org.sakaiproject.grading.api.GbStudentGradeInfo;
+import org.sakaiproject.grading.api.GbUser;
+import org.sakaiproject.grading.api.GradebookUiSettings;
 import org.sakaiproject.grading.api.GradingConstants;
 import org.sakaiproject.grading.api.SortType;
 import org.sakaiproject.util.Validator;
@@ -219,7 +219,7 @@ public class ExportPanel extends BasePanel {
 
 			@Override
 			public boolean isVisible() {
-				return ExportPanel.this.businessService.categoriesAreEnabled(currentGradebookUid, currentSiteId);
+				return ExportPanel.this.gradingService.categoriesAreEnabled(currentGradebookUid, currentSiteId);
 			}
 		});
 		add(new AjaxCheckBox("includeCourseGrade", Model.of(this.includeCourseGrade)) {
@@ -378,7 +378,7 @@ public class ExportPanel extends BasePanel {
 
 				// get list of assignments. this allows us to build the columns and then fetch the grades for each student for each assignment from the map
 				SortType sortBy = SortType.SORT_BY_SORTING;
-				if (this.businessService.categoriesAreEnabled(currentGradebookUid, currentSiteId)) {
+				if (gradingService.categoriesAreEnabled(currentGradebookUid, currentSiteId)) {
 					sortBy = SortType.SORT_BY_CATEGORY;
 				}
 				final List<Assignment> assignments = this.businessService.getGradebookAssignments(currentGradebookUid, currentSiteId, sortBy);

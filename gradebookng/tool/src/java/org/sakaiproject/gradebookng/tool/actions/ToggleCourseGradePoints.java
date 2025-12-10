@@ -17,8 +17,8 @@ package org.sakaiproject.gradebookng.tool.actions;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import org.apache.wicket.ajax.AjaxRequestTarget;
-import org.sakaiproject.gradebookng.tool.model.GradebookUiSettings;
 import org.sakaiproject.gradebookng.tool.pages.GradebookPage;
+import org.sakaiproject.grading.api.GradebookUiSettings;
 
 import java.io.Serializable;
 

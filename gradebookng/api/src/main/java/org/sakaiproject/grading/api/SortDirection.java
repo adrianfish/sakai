@@ -13,34 +13,31 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.sakaiproject.gradebookng.business.model;
+package org.sakaiproject.grading.api;
 
 /**
- * Types of sort order
- *
- * @author Steve Swinsburg (steve.swinsburg@gmail.com)
- *
+ * Tracks a directional sort and provides convenience methods to get the default and allow a quick toggle to the opposite direction.
  */
-public enum GbStudentNameSortOrder {
+public enum SortDirection {
 
-	LAST_NAME,
-	FIRST_NAME;
+	ASCENDING,
+	DESCENDING;
 
 	/**
-	 * Get the default sort type
-	 * 
-	 * @return
+	 * Get the default sort direction
+	 *
+	 * @return the default SortDirection, which is SortDirection.ASCENDING
 	 */
-	public GbStudentNameSortOrder getDefault() {
-		return GbStudentNameSortOrder.LAST_NAME;
+	public static SortDirection getDefault() {
+		return ASCENDING;
 	}
 
 	/**
-	 * Get the next sort type
-	 * 
-	 * @return
+	 * Get the next sort direction
+	 *
+	 * @return the next SortDirection
 	 */
-	public GbStudentNameSortOrder toggle() {
+	public SortDirection toggle() {
 		return values()[(ordinal() + 1) % values().length];
 	}
 

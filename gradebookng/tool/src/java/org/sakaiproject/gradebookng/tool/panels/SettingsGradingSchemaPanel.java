@@ -43,7 +43,6 @@ import org.apache.wicket.model.Model;
 import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.model.ResourceModel;
 import org.sakaiproject.gradebookng.business.FirstNameComparatorGbUser;
-import org.sakaiproject.gradebookng.business.model.GbUser;
 import org.sakaiproject.gradebookng.business.util.SettingsHelper;
 import org.sakaiproject.gradebookng.tool.component.GbAjaxButton;
 import org.sakaiproject.gradebookng.tool.model.GbGradingSchemaEntry;
@@ -51,6 +50,7 @@ import org.sakaiproject.gradebookng.tool.model.GbSettings;
 import org.sakaiproject.gradebookng.tool.stats.CourseGradeStatistics;
 import org.sakaiproject.grading.api.CourseGradeTransferBean;
 import org.sakaiproject.grading.api.GbChartData;
+import org.sakaiproject.grading.api.GbUser;
 import org.sakaiproject.grading.api.GradeMappingDefinition;
 
 import com.google.gson.Gson;

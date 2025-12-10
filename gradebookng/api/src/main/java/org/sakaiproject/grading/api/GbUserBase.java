@@ -1,4 +1,4 @@
-package org.sakaiproject.gradebookng.business.model;
+package org.sakaiproject.grading.api;
 
 /**
  *

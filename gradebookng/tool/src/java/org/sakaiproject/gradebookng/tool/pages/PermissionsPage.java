@@ -41,10 +41,10 @@ import org.apache.wicket.model.PropertyModel;
 import org.apache.wicket.model.ResourceModel;
 import org.apache.wicket.model.StringResourceModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
-import org.sakaiproject.gradebookng.business.model.GbUser;
 import org.sakaiproject.gradebookng.tool.component.GbAjaxButton;
 import org.sakaiproject.grading.api.CategoryDefinition;
 import org.sakaiproject.grading.api.GbGroup;
+import org.sakaiproject.grading.api.GbUser;
 import org.sakaiproject.grading.api.GraderPermission;
 import org.sakaiproject.grading.api.PermissionDefinition;
 
@@ -107,7 +107,7 @@ public class PermissionsPage extends BasePage {
 		// get list of categories
 		final List<CategoryDefinition> categories = this.businessService.getGradebookCategories(gradebookUid, siteId);
 
-		final boolean categoriesEnabled = this.businessService.categoriesAreEnabled(gradebookUid, siteId);
+		final boolean categoriesEnabled = gradingService.categoriesAreEnabled(gradebookUid, siteId);
 
 		// add the default 'all' category
 		categories.add(0, new CategoryDefinition(this.ALL_CATEGORIES, getString("categories.all")));

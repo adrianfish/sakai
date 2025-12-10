@@ -15,6 +15,8 @@
  */
 package org.sakaiproject.gradebookng.business.exception;
 
+import org.sakaiproject.grading.api.GbException;
+
 /**
  * An exception that indicates that the file type was invalid
  */

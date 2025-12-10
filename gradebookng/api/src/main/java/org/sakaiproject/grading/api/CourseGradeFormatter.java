@@ -14,37 +14,40 @@
  * limitations under the License.
  */
 
-package org.sakaiproject.gradebookng.business.util;
+package org.sakaiproject.grading.api;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.wicket.model.StringResourceModel;
-import org.sakaiproject.grading.api.CourseGradeTransferBean;
-import org.sakaiproject.grading.api.GbRole;
-import org.sakaiproject.grading.api.GradingConstants;
-import org.sakaiproject.grading.api.MessageHelper;
 import org.sakaiproject.grading.api.model.Gradebook;
 import org.sakaiproject.util.ResourceLoader;
+
+import lombok.Builder;
+import lombok.Setter;
 
 /**
  * Helper class to handle the formatting of the course grade display string
  *
  * @author Steve Seinsburg (steve.swinsburg@gmail.com)
  */
+@Setter
+@Builder(toBuilder = true)
 public class CourseGradeFormatter {
 
-	private final Gradebook gradebook;
-	private final GbRole currentUserRole;
-	private final boolean isCourseGradeVisible;
-	private final boolean showPoints;
-	private final boolean showOverride;
-	private final boolean showCalculatedGrade;
+	private Gradebook gradebook;
+	private GbRole role;
+	private boolean courseGradeVisible;
+	private boolean showPoints;
+	private boolean showOverride;
+	private boolean showCalculatedGrade;
 
-	@SuppressWarnings("unchecked")
-	private static ResourceLoader RL = new ResourceLoader();
+	//@SuppressWarnings("unchecked")
+	//private static ResourceLoader RL = new ResourceLoader("gradebookng");
+
+  private FormatHelper formatHelper;
+  private ResourceLoader resourceLoader;
 
 	/**
 	 * Constructor to initialise the data
@@ -52,25 +55,29 @@ public class CourseGradeFormatter {
 	 * All of this gets passed in ONCE, then reused for every format call
 	 *
 	 * @param gradebook the gradebook settings
-	 * @param currentUserRole role of the current user
-	 * @param isCourseGradeVisible if the course grade is visible to the user
+	 * @param role role of the current user
+	 * @param courseGradeVisible if the course grade is visible to the user
 	 * @param showPoints if we are to show points
 	 * @param showOverride if we are to show the override
 	 * @return
 	 */
-	public CourseGradeFormatter(final Gradebook gradebook, final GbRole currentUserRole,
-			final boolean isCourseGradeVisible,
-			final boolean showPoints,
-			final boolean showOverride,
-			final boolean showCalculatedGrade) {
+  /*
+	public CourseGradeFormatter(Gradebook gradebook,
+      GbRole currentUserRole,
+			boolean courseGradeVisible,
+			boolean showPoints,
+			boolean showOverride,
+			boolean showCalculatedGrade) {
+
 
 		this.gradebook = gradebook;
 		this.currentUserRole = currentUserRole;
-		this.isCourseGradeVisible = isCourseGradeVisible;
+		this.courseGradeVisible = courseGradeVisible;
 		this.showPoints = showPoints;
 		this.showOverride = showOverride;
 		this.showCalculatedGrade = showCalculatedGrade;
 	}
+  */
 
 	/**
 	 * Format the passed in course grade
@@ -85,27 +92,27 @@ public class CourseGradeFormatter {
 
 		// something has gone wrong and there's no course grade!
 		if (courseGrade == null) {
-			rval = MessageHelper.getString("coursegrade.display.none", RL.getLocale());
+			rval = MessageHelper.getString("coursegrade.display.none", resourceLoader.getLocale());
 			// instructor, can view
-		} else if (this.currentUserRole == GbRole.INSTRUCTOR) {
+		} else if (role == GbRole.INSTRUCTOR) {
 			rval = build(courseGrade);
 			// TA, permission check
-		} else if (this.currentUserRole == GbRole.TA) {
-			if (!this.isCourseGradeVisible) {
-				rval = MessageHelper.getString("label.coursegrade.nopermission", RL.getLocale());
+		} else if (role == GbRole.TA) {
+			if (!courseGradeVisible) {
+				rval = MessageHelper.getString("label.coursegrade.nopermission", resourceLoader.getLocale());
 			} else {
 				rval = build(courseGrade);
 			}
 			// student, check if course grade released, and permission check
 		} else {
 			if (this.gradebook.getCourseGradeDisplayed()) {
-				if (!this.isCourseGradeVisible) {
-					rval = MessageHelper.getString("label.coursegrade.nopermission", RL.getLocale());
+				if (!courseGradeVisible) {
+					rval = MessageHelper.getString("label.coursegrade.nopermission", resourceLoader.getLocale());
 				} else {
 					rval = build(courseGrade);
 				}
 			} else {
-				rval = MessageHelper.getString("label.coursegrade.studentnotreleased", RL.getLocale());
+				rval = MessageHelper.getString("label.coursegrade.studentnotreleased", resourceLoader.getLocale());
 			}
 		}
 
@@ -141,14 +148,14 @@ public class CourseGradeFormatter {
 
 		// percentage
 		// not shown in final grade mode
-		final String calculatedGrade = FormatHelper.formatStringAsPercentage(courseGrade.getCalculatedGrade());
+		final String calculatedGrade = formatHelper.formatStringAsPercentage(courseGrade.getCalculatedGrade());
 
 		if (StringUtils.isNotBlank(calculatedGrade)
 				&& (this.gradebook.getCourseAverageDisplayed() || shouldDisplayFullCourseGrade())) {
 			if (parts.isEmpty()) {
-				parts.add(new StringResourceModel("coursegrade.display.percentage-first").setParameters(calculatedGrade).getString());
+				parts.add(resourceLoader.getFormattedMessage("coursegrade.display.percentage-first", calculatedGrade));
 			} else {
-				parts.add(new StringResourceModel("coursegrade.display.percentage-second").setParameters(calculatedGrade).getString());
+				parts.add(resourceLoader.getFormattedMessage("coursegrade.display.percentage-second", calculatedGrade));
 			}
 		}
 
@@ -172,13 +179,13 @@ public class CourseGradeFormatter {
 				// otherwise check the settings
 				if (shouldDisplayFullCourseGrade() || this.gradebook.getCoursePointsDisplayed()) {
 					if (pointsEarned != null && totalPointsPossible != null) {
-						final String pointsEarnedDisplayString = FormatHelper.formatGradeForDisplay(pointsEarned);
-						final String totalPointsPossibleDisplayString = FormatHelper.formatGradeForDisplay(totalPointsPossible);
+						final String pointsEarnedDisplayString = formatHelper.formatGradeForDisplay(pointsEarned);
+						final String totalPointsPossibleDisplayString = formatHelper.formatGradeForDisplay(totalPointsPossible);
 						if (parts.isEmpty()) {
-							parts.add(MessageHelper.getString("coursegrade.display.points-first", RL.getLocale(), pointsEarnedDisplayString,
+							parts.add(MessageHelper.getString("coursegrade.display.points-first", resourceLoader.getLocale(), pointsEarnedDisplayString,
 									totalPointsPossibleDisplayString));
 						} else {
-							parts.add(MessageHelper.getString("coursegrade.display.points-second", RL.getLocale(), pointsEarnedDisplayString,
+							parts.add(MessageHelper.getString("coursegrade.display.points-second", resourceLoader.getLocale(), pointsEarnedDisplayString,
 									totalPointsPossibleDisplayString));
 						}
 					}
@@ -188,13 +195,13 @@ public class CourseGradeFormatter {
 
 		// if parts is empty, there are no grades, display a -
 		if (parts.isEmpty()) {
-			parts.add(MessageHelper.getString("coursegrade.display.none", RL.getLocale()));
+			parts.add(MessageHelper.getString("coursegrade.display.none", resourceLoader.getLocale()));
 		}
 
 		return String.join(" ", parts);
 	}
 
 	private boolean shouldDisplayFullCourseGrade() {
-		return GbRole.INSTRUCTOR.equals(this.currentUserRole) || GbRole.TA.equals(this.currentUserRole);
+		return GbRole.INSTRUCTOR.equals(role) || GbRole.TA.equals(role);
 	}
 }
