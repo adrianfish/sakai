@@ -47,6 +47,7 @@ import org.sakaiproject.site.api.Group;
 import org.sakaiproject.site.api.Site;
 import org.sakaiproject.site.api.SitePage;
 import org.sakaiproject.site.api.ToolConfiguration;
+import org.sakaiproject.site.api.repository.SiteRepository;
 import org.sakaiproject.util.BaseDbFlatStorage;
 import org.sakaiproject.util.BaseResourcePropertiesEdit;
 
@@ -90,6 +91,8 @@ public abstract class DbSiteService extends BaseSiteService
 	 * @return the MemoryService collaborator.
 	 */
 	protected abstract SqlService sqlService();
+
+	protected abstract SiteRepository siteRepository();
 
 	/*************************************************************************************************************************************************
 	 * Configuration
@@ -329,7 +332,7 @@ public abstract class DbSiteService extends BaseSiteService
 				fields[1] = caseId(edit.getId());
 				fields[2] = StringUtils.abbreviate(StringUtils.trimToEmpty(page.getTitle()), SiteServiceSqlDefault.TITLE_MAX_LENGTH);
 				fields[3] = Integer.toString(page.getLayout());
-				fields[4] = ((((BaseSitePage) page).m_popup) ? "1" : "0");
+				fields[4] = ((((BaseSitePage) page).m_popup) ? 1 : 0);
 				fields[5] = Integer.valueOf(pageOrder++);
 				m_sql.dbWrite(statement, fields);
 
@@ -2571,17 +2574,17 @@ public abstract class DbSiteService extends BaseSiteService
 				rv[6] = "";
 				rv[7] = "";
 				rv[8] = Integer.valueOf(0);
-				rv[9] = "0";
-				rv[10] = "0";
+				rv[9] = 0;
+				rv[10] = 0;
 				rv[11] = "";
-				rv[12] = isSpecialSite(id) ? "1" : "0";
-				rv[13] = isUserSite(id) ? "1" : "0";
+				rv[12] = isSpecialSite(id) ? 1 : 0;
+				rv[13] = isUserSite(id) ? 1 : 0;
 				rv[14] = current;
 				rv[15] = current;
 				rv[16] = now;
 				rv[17] = now;
-				rv[18] = "0";
-				rv[19] = "0";
+				rv[18] = 0;
+				rv[19] = 0;
 				rv[20] = null;
 			}
 
@@ -2595,17 +2598,17 @@ public abstract class DbSiteService extends BaseSiteService
 				rv[6] = StringUtils.trimToEmpty(((BaseSite) edit).m_info);
 				rv[7] = StringUtils.trimToEmpty(((BaseSite) edit).m_skin);
 				rv[8] = Integer.valueOf((((BaseSite) edit).m_published) ? 1 : 0);
-				rv[9] = ((((BaseSite) edit).m_joinable) ? "1" : "0");
-				rv[10] = ((((BaseSite) edit).m_pubView) ? "1" : "0");
+				rv[9] = ((((BaseSite) edit).m_joinable) ? 1 : 0);
+				rv[10] = ((((BaseSite) edit).m_pubView) ? 1 : 0);
 				rv[11] = StringUtils.trimToEmpty(((BaseSite) edit).m_joinerRole);
-				rv[12] = isSpecialSite(id) ? "1" : "0";
-				rv[13] = isUserSite(id) ? "1" : "0";
+				rv[12] = isSpecialSite(id) ? 1 : 0;
+				rv[13] = isUserSite(id) ? 1 : 0;
 				rv[14] = StringUtils.trimToEmpty(((BaseSite) edit).m_createdUserId);
 				rv[15] = StringUtils.trimToEmpty(((BaseSite) edit).m_lastModifiedUserId);
 				rv[16] = edit.getCreatedDate();
 				rv[17] = edit.getModifiedDate();
-				rv[18] = edit.isCustomPageOrdered() ? "1" : "0";
-				rv[19] = edit.isSoftlyDeleted() ? "1" : "0";
+				rv[18] = edit.isCustomPageOrdered() ? 1 : 0;
+				rv[19] = edit.isSoftlyDeleted() ? 1 : 0;
 				rv[20] = edit.getSoftlyDeletedDate();
 			}
 
