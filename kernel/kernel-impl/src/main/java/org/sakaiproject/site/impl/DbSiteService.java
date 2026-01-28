@@ -47,7 +47,6 @@ import org.sakaiproject.site.api.Group;
 import org.sakaiproject.site.api.Site;
 import org.sakaiproject.site.api.SitePage;
 import org.sakaiproject.site.api.ToolConfiguration;
-import org.sakaiproject.site.api.repository.SiteRepository;
 import org.sakaiproject.util.BaseDbFlatStorage;
 import org.sakaiproject.util.BaseResourcePropertiesEdit;
 
@@ -91,8 +90,6 @@ public abstract class DbSiteService extends BaseSiteService
 	 * @return the MemoryService collaborator.
 	 */
 	protected abstract SqlService sqlService();
-
-	protected abstract SiteRepository siteRepository();
 
 	/*************************************************************************************************************************************************
 	 * Configuration

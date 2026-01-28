@@ -100,6 +100,7 @@ import org.sakaiproject.site.api.SiteRemovalAdvisor;
 import org.sakaiproject.site.api.SiteService;
 import org.sakaiproject.site.api.SiteTitleAdvisor;
 import org.sakaiproject.site.api.ToolConfiguration;
+import org.sakaiproject.site.api.repository.SiteRepository;
 import org.sakaiproject.thread_local.api.ThreadLocalManager;
 import org.sakaiproject.time.api.TimeService;
 import org.sakaiproject.tool.api.ActiveToolManager;
@@ -183,6 +184,8 @@ public abstract class BaseSiteService implements SiteService, Observer
 
 	/** SAK-29138 - a site title advisor **/
 	protected SiteTitleAdvisor m_siteTitleAdvisor;
+
+	protected abstract SiteRepository siteRepository();
 
 	/**********************************************************************************************************************************************************************************************************************************************************
 	 * Abstractions, etc.
@@ -656,8 +659,12 @@ public abstract class BaseSiteService implements SiteService, Observer
 	 */
 	protected Site getDefinedSite(String id) throws IdUnusedException
 	{
+
 		if (id == null) throw new IdUnusedException("<null>");
 
+		return siteRepository().findById(id).map(BaseSite::new).orElseThrow(() -> new IdUnusedException("<null>"));
+
+		/*
 		Site rv = getCachedSite(id);
 
 		// Return the site from cache only if it is a BaseSite and is fully loaded.
@@ -684,6 +691,7 @@ public abstract class BaseSiteService implements SiteService, Observer
 		cacheSite(rv);
 
 		return rv;
+		*/
 	}
 
 	/**
@@ -748,9 +756,7 @@ public abstract class BaseSiteService implements SiteService, Observer
 		return Optional.empty();
 	}
 
-	/**
-	 * @inheritDoc
-	 */
+	@Override
 	public Site getSite(String id) throws IdUnusedException
 	{
 		if (StringUtils.isBlank(id))

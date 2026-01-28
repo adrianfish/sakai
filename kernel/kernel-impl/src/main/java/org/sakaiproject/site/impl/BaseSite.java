@@ -34,6 +34,7 @@ import java.util.Set;
 import java.util.Stack;
 import java.util.Vector;
 
+import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.sakaiproject.authz.api.AuthzGroup;
 import org.sakaiproject.authz.api.AuthzGroupService;
@@ -54,6 +55,7 @@ import org.sakaiproject.site.api.Site;
 import org.sakaiproject.site.api.SitePage;
 import org.sakaiproject.site.api.SiteService;
 import org.sakaiproject.site.api.ToolConfiguration;
+import org.sakaiproject.site.api.model.SiteEntity;
 import org.sakaiproject.time.api.TimeService;
 import org.sakaiproject.tool.api.Session;
 import org.sakaiproject.tool.api.SessionManager;
@@ -562,6 +564,60 @@ public class BaseSite implements Site
 		m_isSoftlyDeleted = isSoftlyDeleted;
 		m_softlyDeletedDate = softlyDeletedDate;
 		
+	}
+
+	public BaseSite(SiteEntity siteEntity) {
+
+		m_id = siteEntity.getId();
+		m_title = siteEntity.getTitle();
+		m_shortDescription = siteEntity.getShortDescription();
+		//m_htmlShortDescription = other.m_htmlShortDescription;
+		m_description = siteEntity.getDescription();
+		//m_htmlDescription = other.m_htmlDescription;
+		//m_descriptionLoaded = other.m_descriptionLoaded;
+		m_joinable = BooleanUtils.toBoolean(siteEntity.getJoinable());
+		m_joinerRole = siteEntity.getJoinRole();
+		m_published = BooleanUtils.toBoolean(siteEntity.getPublished());
+		m_icon = siteEntity.getIconUrl();
+		m_info = siteEntity.getInfoUrl();
+		m_skin = siteEntity.getSkin();
+		m_type = siteEntity.getType();
+		m_pubView = BooleanUtils.toBoolean(siteEntity.getPubView());
+		m_customPageOrdered = BooleanUtils.toBoolean(siteEntity.getCustomPageOrdered());
+
+		//site copies keep soft site deletion flags
+		m_isSoftlyDeleted = BooleanUtils.toBoolean(siteEntity.getSoftlyDeleted());
+		m_softlyDeletedDate = siteEntity.getSoftlyDeletedDate();
+		m_createdUserId = siteEntity.getCreatedBy();
+		m_lastModifiedUserId = siteEntity.getModifiedBy();
+		m_createdTime = siteEntity.getCreatedOn().toInstant();
+		m_lastModifiedTime = siteEntity.getModifiedOn().toInstant();
+
+		// We make sure to avoid triggering fetching by passing false to getProperties
+		m_properties = new BaseResourcePropertiesEdit();
+		siteEntity.getProperties().entrySet().forEach(e -> m_properties.addProperty(e.getKey(), e.getValue()));
+
+		/*
+		// deep copy the pages, but avoid triggering fetching by passing false to getPages
+		List<BaseSitePage> otherPages = new ArrayList<BaseSitePage>(other.getPages(false));
+		List<BaseSitePage> copiedPages = new ArrayList<BaseSitePage>(otherPages.size());
+		for (BaseSitePage page : otherPages) {
+		    copiedPages.add(new BaseSitePage(siteService, page, this, exact));
+		}
+		m_pages = new ResourceVector(copiedPages);
+		m_pagesLazy = other.m_pagesLazy;
+
+		// deep copy the groups, but avoid triggering fetching by passing false to getGroups
+		m_groups = new ResourceVector();
+		for (Iterator iGroups = other.getGroups(false).iterator(); iGroups.hasNext();)
+		{
+			Group group = (Group) iGroups.next();
+			m_groups.add(new BaseGroup(siteService, group, this, exact));
+		}
+		m_groupsLazy = other.m_groupsLazy;
+
+		m_fullyLoaded = other.m_fullyLoaded;
+		*/
 	}
 
 	/**
@@ -1459,7 +1515,6 @@ public class BaseSite implements Site
 			Xml.encodeAttribute(site, "description-enc", m_description);
 
 		site.setAttribute("joinable", Boolean.valueOf(m_joinable).toString());
-		//site.setAttribute("joinable", m_joinable);
 		if (m_joinerRole != null) site.setAttribute("joiner-role", m_joinerRole);
 		site.setAttribute("published", Boolean.valueOf(m_published).toString());
 		if (m_icon != null) site.setAttribute("icon", m_icon);
